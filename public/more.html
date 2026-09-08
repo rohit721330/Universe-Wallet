@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Mᴏʀᴇ Oᴘᴛɪᴏɴꜱ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --p1: #a855f7;
+      --p2: #6d28d9;
+      --card-light: rgba(241, 239, 255, 0.9);
+      --input-light: #ebe9ff;
+      --border-soft: #555555;
+      --red: #dc2626;
+      --green: #16a34a;
+      --neon-blue: #00f0ff;
+      --dark-bg-start: #0a0a1a;
+      --dark-bg-mid: #0c1022;
+      --glass-dark: rgba(8, 12, 25, 0.85);
+      --orange: #f97316;
+      --yellow: #eab308;
+      --blue: #3b82f6;
+      --pink: #ec4899;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background-attachment: fixed;
+      transition: background 0.4s ease, color 0.3s ease;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.dark::before {
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px);
+    }
+
+    body.light {
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede7fe 100%);
+      background-attachment: fixed;
+      color: #1a1a2e;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
+      background-attachment: fixed;
+      color: #e0f0ff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      min-height: 100vh;
+      z-index: 1;
+    }
+
+    .wrapper {
+      width: 100%;
+      padding: 100px 20px 80px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Header */
+    .header-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+    }
+    body.light .header-fixed { 
+      background: rgba(245, 240, 255, 0.92); 
+      border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    body.dark .header-fixed { 
+      background: rgba(8, 12, 28, 0.92); 
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      font-size: 20px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 30px;
+      transition: all 0.2s;
+    }
+    body.light .back-btn { color: #6d28d9; background: rgba(139, 92, 246, 0.1); }
+    body.dark .back-btn { color: #00f0ff; background: rgba(0, 240, 255, 0.1); }
+    .back-btn:active { transform: scale(0.92); }
+
+    .prime-word {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      transition: color 0.3s ease;
+    }
+    body.light .prime-word { color: #000000; }
+    body.dark .prime-word { color: #ffffff; }
+
+    .wallet-word {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      transition: color 0.3s ease;
+    }
+    body.light .wallet-word { color: #8b5cf6; }
+    body.dark .wallet-word { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.5); }
+
+    .pay-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      background: #8b5cf6;
+      color: white;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
+    body.dark .pay-badge {
+      background: #00f0ff;
+      color: #0a0a1a;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: none;
+    }
+    body.light .icon-circle { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+    body.dark .icon-circle { background: rgba(0, 240, 255, 0.12); color: #00f0ff; }
+    .icon-circle:active { transform: scale(0.92); }
+
+    .theme-toggle-header {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    body.light .theme-toggle-header { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+    body.dark .theme-toggle-header { color: #00f0ff; background: rgba(0, 240, 255, 0.12); }
+    .theme-toggle-header:active { transform: scale(0.92); }
+
+    .avatar-p {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8b5cf6, #a855f7);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    body.dark .avatar-p {
+      background: linear-gradient(135deg, #00e0ff, #0088ff);
+      color: #0a0a1a;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+    .avatar-p:active { transform: scale(0.95); }
+
+    /* Page Title */
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    body.light .page-title {
+      background: linear-gradient(135deg, #6d28d9, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    body.dark .page-title {
+      background: linear-gradient(135deg, #00f0ff, #60a5fa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 20px 0 12px 0;
+    }
+    body.light .section-title { color: #6d28d9; }
+    body.dark .section-title { color: #00f0ff; }
+
+    /* Options Grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-card {
+      border-radius: 24px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, all 0.2s;
+    }
+    body.light .option-card { background: rgba(255, 255, 255, 0.8); border: 1px solid #c4b5fd; }
+    body.dark .option-card { background: rgba(10, 16, 48, 0.7); border: 1px solid rgba(0, 240, 255, 0.3); }
+    .option-card:active { transform: scale(0.97); }
+
+    .option-card i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .option-card span {
+      font-size: 12px;
+      font-weight: 700;
+      display: block;
+    }
+
+    /* Icon colors for light mode */
+    body.light .option-card i { color: #6d28d9; }
+    body.light .option-card span { color: #3a3a5a; }
+
+    /* Icon colors for dark mode */
+    body.dark .option-card i { color: #00f0ff; }
+    body.dark .option-card span { color: #c0d0e8; }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border-soft);
+      margin: 20px 0;
+      opacity: 0.2;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 20px;
+      z-index: 50;
+    }
+    body.light .bottom-nav { background: rgba(241, 239, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #c4b5fd; }
+    body.dark .bottom-nav { background: rgba(8, 12, 28, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      flex: 1;
+    }
+    .nav-item i { font-size: 20px; }
+    body.light .nav-item { color: #94a3b8; }
+    body.dark .nav-item { color: #6a7a9a; }
+    body.light .nav-item.active { color: #8b5cf6; }
+    body.dark .nav-item.active { color: #00f0ff; }
+
+    .toast-message {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10000;
+      backdrop-filter: blur(8px);
+      animation: fadeInUp 0.3s ease;
+    }
+    body.light .toast-message { background: #1e293b; color: white; }
+    body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .wrapper { padding: 100px 16px 80px; }
+      .prime-word, .wallet-word { font-size: 20px; }
+      .pay-badge { font-size: 12px; padding: 3px 12px; }
+      .avatar-p { width: 38px; height: 38px; font-size: 18px; }
+      .icon-circle, .theme-toggle-header { width: 36px; height: 36px; font-size: 16px; }
+      .header-right { gap: 8px; }
+      .page-title { font-size: 24px; }
+      .option-card i { font-size: 28px; }
+      .option-card span { font-size: 11px; }
+    }
+  </style>
+ </head>
+ <body class="light">
+  <div class="header-fixed">
+   <div class="header-left">
+    <button class="back-btn" onclick="goBack()"> <i class="fa-solid fa-arrow-left"></i> </button> 
+    <span class="prime-word">Pʀɪᴍᴇ</span> 
+    <span class="wallet-word">Wᴀʟʟᴇᴛ</span>
+    <div class="pay-badge">Pᴀʏ</div>
+   </div>
+   <div class="header-right">
+    <button class="icon-circle" id="telegramBtn" onclick="window.open('https://t.me/JarvisWalletNotify_Bot', '_blank')"> <i class="fa-brands fa-telegram"></i> </button>
+    <button class="theme-toggle-header" id="headerThemeBtn" onclick="toggleTheme()"> <i id="headerThemeIcon" class="fas fa-moon"></i> </button>
+    <div class="avatar-p" id="avatarP" onclick="goToProfile()">P</div>
+   </div>
+  </div>
+
+  <div class="container">
+   <div class="wrapper">
+    <h1 class="page-title">Mᴏʀᴇ Oᴘᴛɪᴏɴꜱ 🧧</h1>
+
+    <!-- Game Section -->
+    <div class="section-title">Gᴀᴍᴇ &amp; Eɴᴛᴇʀᴛᴀɪɴᴍᴇɴᴛ</div>
+    <div class="options-grid">
+     <div class="option-card" onclick="navigateTo('game')"><i class="fa-solid fa-gamepad"></i> <span>Gᴀᴍᴇ</span></div>
+     <div class="option-card" onclick="navigateTo('gift')"><i class="fa-solid fa-gift"></i> <span>Gɪꜰᴛ Cᴏᴅᴇ</span></div>
+     <div class="option-card" onclick="navigateTo('lifafa')"><i class="fa-solid fa-envelope"></i> <span>Lɪꜰᴀꜰᴀ</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Account & Security -->
+    <div class="section-title">Aᴄᴄᴏᴜɴᴛ &amp; Sᴇᴄᴜʀɪᴛʏ</div>
+    <div class="options-grid">
+     <div class="option-card" onclick="goToProfile()"><i class="fa-solid fa-user-circle"></i> <span>Pʀᴏꜰɪʟᴇ</span></div>
+     <div class="option-card" onclick="navigateTo('set-pin')"><i class="fa-solid fa-key"></i> <span>Sᴇᴛ Pɪɴ</span></div>
+     <div class="option-card" onclick="navigateTo('forgot-password')"><i class="fa-solid fa-lock"></i> <span>Fᴏʀɢᴏᴛ Pᴀꜱꜱᴡᴏʀᴅ</span></div>
+     <div class="option-card" onclick="showSecurityTips()"><i class="fa-solid fa-shield-alt"></i> <span>Sᴇᴄᴜʀɪᴛʏ Tɪᴘꜱ</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Support & Legal -->
+    <div class="section-title">Sᴜᴘᴘᴏʀᴛ &amp; Lᴇɢᴀʟ</div>
+    <div class="options-grid">
+     <div class="option-card" onclick="navigateTo('support')"><i class="fa-solid fa-headset"></i> <span>Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ</span></div>
+     <div class="option-card" onclick="window.open('https://t.me/JarvisWalletNotify_Bot', '_blank')"><i class="fa-brands fa-telegram"></i> <span>Jᴏɪɴ Tᴇʟᴇɢʀᴀᴍ</span></div>
+     <div class="option-card" onclick="navigateTo('terms')"><i class="fa-solid fa-file-contract"></i> <span>Tᴇʀᴍꜱ &amp; Cᴏɴᴅɪᴛɪᴏɴꜱ</span></div>
+     <div class="option-card" onclick="showPrivacyPolicy()"><i class="fa-solid fa-lock"></i> <span>Pʀɪᴠᴀᴄʏ Pᴏʟɪᴄʏ</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Feedback & Social -->
+    <div class="section-title">Fᴇᴇᴅʙᴀᴄᴋ &amp; Sᴏᴄɪᴀʟ</div>
+    <div class="options-grid">
+     <div class="option-card" onclick="sendFeedback()"><i class="fa-solid fa-comment-dots"></i> <span>Fᴇᴇᴅʙᴀᴄᴋ</span></div>
+     <div class="option-card" onclick="rateApp()"><i class="fa-solid fa-star"></i> <span>Rᴀᴛᴇ Uꜱ</span></div>
+     <div class="option-card" onclick="shareApp()"><i class="fa-solid fa-share-alt"></i> <span>Sʜᴀʀᴇ Aᴘᴘ</span></div>
+     <div class="option-card" onclick="showAbout()"><i class="fa-solid fa-info-circle"></i> <span>Aʙᴏᴜᴛ</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- App Version -->
+    <div style="text-align: center; padding: 20px 0 40px;">
+     <p style="font-size: 12px; opacity: 0.6;">Pʀɪᴍᴇ Wᴀʟʟᴇᴛ v𝟷.𝟶.𝟶<br />© 2024 Pʀɪᴍᴇ Wᴀʟʟᴇᴛ. Aʟʟ ʀɪɢʜᴛꜱ ʀᴇꜱᴇʀᴠᴇᴅ.</p>
+    </div>
+   </div>
+  </div>
+
+  <div class="bottom-nav">
+   <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i><span>Hᴏᴍᴇ</span></a>
+   <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
+   <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i><span>Hɪꜱᴛᴏʀʏ</span></a>
+   <a href="/lifafa" class="nav-item"><i class="fa-solid fa-envelope-open-text"></i><span>Lɪꜰᴀ</span></a>
+   <a href="/more" class="nav-item active"><i class="fa-solid fa-bars"></i><span>Mᴏʀᴇ</span></a>
+  </div>
+
+  <script>
+    // Navigation
+    function navigateTo(page) {
+      window.location.href = `/${page}`;
+    }
+
+    function goBack() {
+      window.location.href = '/dashboard';
+    }
+
+    function goToProfile() {
+      window.location.href = '/profile';
+    }
+
+    // Toast
+    function showToast(message, type = '') {
+      const toast = document.createElement('div');
+      toast.className = 'toast-message';
+      toast.innerHTML = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Security Tips
+    function showSecurityTips() {
+      const tips = [
+        '🔐 Nᴇᴠᴇʀ sʜᴀʀᴇ ʏᴏᴜʀ pɪɴ wɪᴛʜ ᴀɴʏᴏɴᴇ',
+        '🔒 Uꜱᴇ ᴀ sᴛʀᴏɴɢ pᴀꜱꜱᴡᴏʀᴅ',
+        '📱 Eɴᴀʙʟᴇ tᴡᴏ-fᴀᴄᴛᴏʀ ᴀᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ',
+        '⚠️ Bᴇ cᴀʀᴇꜰᴜʟ ᴏꜰ pʜɪꜱʜɪɴɢ ᴀᴛᴛᴇᴍᴘᴛꜱ',
+        '🔄 Cʜᴀɴɢᴇ ʏᴏᴜʀ pᴀꜱꜱᴡᴏʀᴅ ʀᴇɢᴜʟᴀʀʟʏ',
+        '📞 Cᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪꜰ ʏᴏᴜ sᴜꜱᴘᴇᴄᴛ ᴀɴʏ ɪꜱꜱᴜᴇ'
+      ];
+      const randomTip = tips[Math.floor(Math.random() * tips.length)];
+      showToast(randomTip, 'warning');
+    }
+
+    // Privacy Policy
+    function showPrivacyPolicy() {
+      const privacyText = `Pʀɪᴍᴇ Wᴀʟʟᴇᴛ Pʀɪᴠᴀᴄʏ Pᴏʟɪᴄʏ\n\n`
+        + `📌 Wᴇ cᴏʟʟᴇᴄᴛ:\n`
+        + `• Mᴏʙɪʟᴇ nᴜᴍʙᴇʀ fᴏʀ ʀᴇɢɪꜱᴛʀᴀᴛɪᴏɴ\n`
+        + `• Tʀᴀɴꜱᴀᴄᴛɪᴏɴ ʜɪꜱᴛᴏʀʏ\n`
+        + `• Tᴇʟᴇɢʀᴀᴍ Iᴅ fᴏʀ nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴꜱ\n\n`
+        + `🔒 Yᴏᴜʀ dᴀᴛᴀ ɪꜱ sᴇᴄᴜʀᴇʟʏ sᴛᴏʀᴇᴅ ɪɴ ᴇɴᴄʀʏᴘᴛᴇᴅ fᴏʀᴍᴀᴛ\n`
+        + `🤝 Wᴇ dᴏ nᴏᴛ sʜᴀʀᴇ ʏᴏᴜʀ pᴇʀꜱᴏɴᴀʟ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ\n\n`
+        + `📧 Fᴏʀ Qᴜᴇʀɪᴇꜱ: sᴜᴘᴘᴏʀᴛ@ᴘʀɪᴍᴇᴡᴀʟʟᴇᴛ.ᴄᴏᴍ`;
+      alert(privacyText);
+    }
+
+    // Feedback
+    function sendFeedback() {
+      const feedback = prompt('Eɴᴛᴇʀ ʏᴏᴜʀ fᴇᴇᴅʙᴀᴄᴋ ᴏʀ sᴜɢɢᴇꜱᴛɪᴏɴ:');
+      if (feedback && feedback.trim()) {
+        showToast('✅ Tʜᴀɴᴋ ʏᴏᴜ fᴏʀ ʏᴏᴜʀ fᴇᴇᴅʙᴀᴄᴋ!', 'success');
+        console.log('Feedback:', feedback);
+      } else if (feedback === '') {
+        showToast('⚠️ Pʟᴇᴀꜱᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ fᴇᴇᴅʙᴀᴄᴋ', 'warning');
+      }
+    }
+
+    // Rate
+    function rateApp() {
+      showToast('⭐ Tʜᴀɴᴋ ʏᴏᴜ fᴏʀ ʀᴀᴛɪɴɢ uꜱ!', 'success');
+    }
+
+    // Share
+    function shareApp() {
+      const url = window.location.origin;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Pʀɪᴍᴇ Wᴀʟʟᴇᴛ',
+          text: 'Cʜᴇᴄᴋ ᴏᴜᴛ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ - Yᴏᴜʀ sᴇᴄᴜʀᴇ dɪɢɪᴛᴀʟ wᴀʟʟᴇᴛ!',
+          url: url
+        }).catch(() => {
+          copyShareLink(url);
+        });
+      } else {
+        copyShareLink(url);
+      }
+    }
+
+    function copyShareLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('🔗 Lɪɴᴋ cᴏᴘɪᴇᴅ! sʜᴀʀᴇ ɪᴛ wɪᴛʜ fʀɪᴇɴᴅꜱ', 'success');
+      }).catch(() => {
+        showToast('⚠️ Cᴏᴜʟᴅ nᴏᴛ cᴏᴘʏ lɪɴᴋ', 'error');
+      });
+    }
+
+    // About
+    function showAbout() {
+      const aboutText = `✨ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ ✨\n\n`
+        + `Vᴇʀꜱɪᴏɴ: 𝟷.𝟶.𝟶\n`
+        + `Bᴜɪʟᴅ: 𝟸𝟶𝟸𝟺\n\n`
+        + `Pʀɪᴍᴇ Wᴀʟʟᴇᴛ ɪꜱ a sᴇᴄᴜʀᴇ, fᴀꜱᴛ, ᴀɴᴅ ᴇᴀꜱʏ-tᴏ-uꜱᴇ dɪɢɪᴛᴀʟ wᴀʟʟᴇᴛ.\n\n`
+        + `💫 Fᴇᴀᴛᴜʀᴇꜱ:\n`
+        + `• Iɴꜱᴛᴀɴᴛ mᴏɴᴇʏ tʀᴀɴꜱꜰᴇʀ\n`
+        + `• Lɪꜰᴀꜰᴀ (ᴇɴᴠᴇʟᴏᴘᴇ) fᴇᴀᴛᴜʀᴇ\n`
+        + `• Gɪꜰᴛ cᴏᴅᴇꜱ\n`
+        + `• 𝟸𝟺/𝟽 cᴜꜱᴛᴏᴍᴇʀ sᴜᴘᴘᴏʀᴛ\n\n`
+        + `🐦 Fᴏʟʟᴏᴡ uꜱ ᴏɴ tᴇʟᴇɢʀᴀᴍ: @PʀɪᴍᴇWᴀʟʟᴇᴛNᴏᴛɪꜰʏ_Bᴏᴛ\n\n`
+        + `© 𝟸𝟶𝟸𝟺 Pʀɪᴍᴇ Wᴀʟʟᴇᴛ. Aʟʟ ʀɪɢʜᴛꜱ ʀᴇꜱᴇʀᴠᴇᴅ.`;
+      alert(aboutText);
+    }
+
+    // Theme
+    function updateHeaderThemeIcon() {
+      const icon = document.getElementById('headerThemeIcon');
+      if (icon) {
+        icon.className = document.body.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+      }
+    }
+
+    function updateAvatar() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user) {
+            const avatarEl = document.getElementById('avatarP');
+            if (avatarEl && data.user.fullName) {
+              avatarEl.innerHTML = data.user.fullName.charAt(0).toUpperCase();
+            }
+          }
+        })
+        .catch(err => console.error('Error fetching user:', err));
+      }
+    }
+
+    window.toggleTheme = function() {
+      const body = document.body;
+      if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        body.classList.add('light');
+      } else {
+        body.classList.remove('light');
+        body.classList.add('dark');
+      }
+      updateHeaderThemeIcon();
+      localStorage.setItem('primeTheme', body.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('primeTheme');
+      if (saved === 'dark') { 
+        document.body.classList.add('dark'); 
+        document.body.classList.remove('light'); 
+      } else { 
+        document.body.classList.add('light'); 
+        document.body.classList.remove('dark'); 
+      }
+      updateHeaderThemeIcon();
+    }
+
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/';
+        return false;
+      }
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      if (!checkAuth()) return;
+      updateAvatar();
+    });
+  </script>
+ </body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>W𝙸ᴛʜᴅʀᴀᴡ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+
+<!-- Page Icon (Favicon) -->
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/prime_wallet_logo.png">
+<link rel="shortcut icon" type="image/png" href="https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/prime_wallet_logo.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --p1: #a855f7;
+    --p2: #6d28d9;
+    --card-light: rgba(241, 239, 255, 0.9);
+    --input-light: #ebe9ff;
+    --border-soft: #555555;
+    --red: #dc2626;
+    --green: #16a34a;
+    --neon-blue: #00f0ff;
+    --dark-bg-start: #0a0a1a;
+    --dark-bg-mid: #0c1022;
+    --glass-dark: rgba(8, 12, 25, 0.85);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background-attachment: fixed;
+    transition: background 0.4s ease, color 0.3s ease;
+    padding-bottom: 85px;
+    overflow-x: hidden;
+}
+
+body.light {
+    background: linear-gradient(135deg, #f5f0ff 0%, #ede7fe 100%);
+    background-attachment: fixed;
+    color: #1a1a2e;
+}
+
+body.dark {
+    background: linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
+    background-attachment: fixed;
+    color: #e0f0ff;
+}
+
+.container { max-width: 500px; margin: 0 auto; position: relative; min-height: 100vh; z-index: 1; }
+.wrapper { width: 100%; padding: 40px 20px 80px 20px; position: relative; z-index: 2; }
+
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-align: center;
+    margin-top: 10px;
+}
+body.light .page-title { background: linear-gradient(135deg, #6d28d9, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.dark .page-title { background: linear-gradient(135deg, #00f0ff, #60a5fa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.card {
+    border-radius: 34px;
+    overflow: hidden;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+body.light .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid #c4b5fd; }
+body.dark .card { background: var(--glass-dark); backdrop-filter: blur(20px); border: 1px solid rgba(0, 240, 255, 0.3); }
+
+.card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+body.light .card-title { color: #6d28d9; }
+body.dark .card-title { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.3); }
+
+.balance-display {
+    text-align: center;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+body.light .balance-display { background: rgba(139, 92, 246, 0.08); }
+body.dark .balance-display { background: rgba(0, 240, 255, 0.08); }
+.balance-display .label { font-size: 11px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+.balance-display .amount { font-size: 28px; font-weight: 800; }
+body.light .balance-display .amount { color: #6d28d9; }
+body.dark .balance-display .amount { color: #00f0ff; }
+
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+body.light .input-group label { color: #6b7280; }
+body.dark .input-group label { color: #8aa0bb; }
+
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+}
+body.light .input-group input, body.light .input-group select {
+    background: #f9fafb;
+    border: 2px solid #f0f0f0;
+    color: #1a1a2e;
+}
+body.dark .input-group input, body.dark .input-group select {
+    background: rgba(8, 12, 28, 0.9);
+    border: 2px solid rgba(0, 200, 230, 0.5);
+    color: #e0f0ff;
+}
+.input-group input:focus, .input-group select:focus { outline: none; }
+body.light .input-group input:focus, body.light .input-group select:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+body.dark .input-group input:focus, body.dark .input-group select:focus {
+    border-color: #00f0ff;
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+}
+
+.method-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.method-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+body.light .method-tab {
+    background: #f9fafb;
+    border: 2px solid #f0f0f0;
+    color: #6b7280;
+}
+body.dark .method-tab {
+    background: rgba(8, 12, 28, 0.9);
+    border: 2px solid rgba(0, 200, 230, 0.5);
+    color: #8aa0bb;
+}
+.method-tab.active {
+    border-color: #8b5cf6;
+    color: #6d28d9;
+}
+body.dark .method-tab.active {
+    border-color: #00f0ff;
+    color: #00f0ff;
+}
+.method-tab:active { transform: scale(0.97); }
+.method-tab i { margin-right: 6px; }
+
+/* ✅ Fee Display Styles - Always Visible */
+.fee-display {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+}
+body.dark .fee-display {
+    background: rgba(0, 240, 255, 0.06);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+}
+.fee-display .label {
+    font-weight: 600;
+    opacity: 0.7;
+}
+.fee-display .value {
+    font-weight: 700;
+}
+body.light .fee-display .value { color: #6d28d9; }
+body.dark .fee-display .value { color: #00f0ff; }
+
+/* ✅ Total Deduction Display - Always Visible */
+.total-display {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.15);
+}
+body.dark .total-display {
+    background: rgba(0, 240, 255, 0.06);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+}
+.total-display .label {
+    font-weight: 600;
+    opacity: 0.7;
+}
+.total-display .value {
+    font-weight: 700;
+}
+body.light .total-display .value { color: #16a34a; }
+body.dark .total-display .value { color: #00f0ff; }
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-primary {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+body.dark .btn-primary {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    color: #0a0a1a;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+.toast-message {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 60px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+    animation: fadeInUp 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+}
+body.light .toast-message { background: #1e293b; color: white; }
+body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
+.toast-message.error { background: #dc2626 !important; color: white !important; }
+.toast-message.success { background: #16a34a !important; color: white !important; }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+}
+body.dark .spinner {
+    border: 2px solid rgba(10, 10, 26, 0.3);
+    border-top-color: #0a0a1a;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-around; padding: 10px 0 20px;
+    z-index: 50;
+}
+body.light .bottom-nav { background: rgba(241, 239, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #c4b5fd; }
+body.dark .bottom-nav { background: rgba(8, 12, 28, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
+
+.nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    cursor: pointer; text-decoration: none; flex: 1;
+}
+.nav-item i { font-size: 20px; }
+body.light .nav-item { color: #94a3b8; }
+body.dark .nav-item { color: #6a7a9a; }
+body.light .nav-item.active { color: #8b5cf6; }
+body.dark .nav-item.active { color: #00f0ff; }
+
+.limit-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: 0.6;
+}
+body.light .limit-info { color: #6b7280; }
+body.dark .limit-info { color: #8aa0bb; }
+
+.settings-status {
+    text-align: center;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+.settings-status.enabled {
+    color: #16a34a;
+    background: rgba(22, 163, 74, 0.1);
+}
+.settings-status.disabled {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+}
+.settings-status i {
+    margin-right: 6px;
+}
+
+/* ✅ Fee Info Badge */
+.fee-info {
+    font-size: 10px;
+    opacity: 0.5;
+    margin-top: 2px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .wrapper { padding: 30px 16px 80px; }
+    .page-title { font-size: 24px; }
+    .card { padding: 18px; }
+}
+</style>
+</head>
+<body class="light">
+
+<div class="container">
+    <div class="wrapper">
+        
+        <h1 class="page-title"><i class="fa-solid fa-arrow-up"></i> W𝙸ᴛʜᴅʀᴀᴡ</h1>
+        
+        <div class="card">
+            <div class="balance-display">
+                <div class="label"><i class="fa-solid fa-wallet"></i> Aᴠᴀ𝙸ʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+                <div class="amount">₹<span id="balance">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fa-solid fa-circle-info"></i> W𝙸ᴛʜᴅʀᴀᴡ Dᴇᴛᴀ𝙸ʟꜱ</div>
+            
+            <!-- Settings Status -->
+            <div id="settingsStatus" class="settings-status enabled">
+                <i class="fa-solid fa-circle-check"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Eɴᴀʙʟᴇᴅ
+            </div>
+            
+            <div class="method-tabs">
+                <button class="method-tab active" onclick="switchMethod('upi')">
+                    <i class="fa-solid fa-mobile-screen-button"></i> Uᴘ𝙸
+                </button>
+                <button class="method-tab" onclick="switchMethod('bank')">
+                    <i class="fa-solid fa-building-columns"></i> Bᴀɴᴋ
+                </button>
+            </div>
+
+            <!-- UPI Method -->
+            <div id="upiMethod">
+                <div class="input-group">
+                    <label><i class="fa-solid fa-mobile-screen-button"></i> Uᴘ𝙸 Iᴅ *</label>
+                    <input type="text" id="upiId" placeholder="Eɴᴛᴇʀ Uᴘ𝙸 Iᴅ (ᴇ.ɢ. ɴᴀᴍᴇ@ᴜᴘ𝙸)">
+                </div>
+            </div>
+
+            <!-- Bank Method -->
+            <div id="bankMethod" style="display: none;">
+                <div class="input-group">
+                    <label><i class="fa-solid fa-building"></i> Bᴀɴᴋ Nᴀᴍᴇ *</label>
+                    <input type="text" id="bankName" placeholder="Eɴᴛᴇʀ Bᴀɴᴋ Nᴀᴍᴇ">
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fa-solid fa-user"></i> Aᴄᴄᴏᴜɴᴛ Hᴏʟᴅᴇʀ Nᴀᴍᴇ *</label>
+                    <input type="text" id="accountHolderName" placeholder="Eɴᴛᴇʀ Hᴏʟᴅᴇʀ Nᴀᴍᴇ">
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fa-solid fa-credit-card"></i> Aᴄᴄᴏᴜɴᴛ Nᴜᴍʙᴇʀ *</label>
+                    <input type="text" id="accountNumber" placeholder="Eɴᴛᴇʀ Aᴄᴄᴏᴜɴᴛ Nᴜᴍʙᴇʀ">
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fa-solid fa-code"></i> Iꜰꜱᴄ Cᴏᴅᴇ *</label>
+                    <input type="text" id="ifscCode" placeholder="Eɴᴛᴇʀ IFSC Cᴏᴅᴇ">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ (₹) *</label>
+                <input type="number" id="amount" placeholder="Eɴᴛᴇʀ ᴀᴍᴏᴜɴᴛ ᴛᴏ ᴡ𝙸ᴛʜᴅʀᴀᴡ" step="1" min="1">
+                <div class="limit-info">
+                    <span>M𝙸ɴ: ₹<span id="minLimit">0</span></span>
+                    <span>Mᴀx: ₹<span id="maxLimit">0</span></span>
+                </div>
+            </div>
+
+            <!-- ✅ Fee Display - Always Visible -->
+            <div class="fee-display" id="feeDisplay">
+                <span class="label"><i class="fa-solid fa-percent"></i> Wɪᴛʜᴅʀᴀᴡ Fᴇᴇ</span>
+                <span class="value" id="feeValue">₹0.00 (Nᴏ Fᴇᴇ)</span>
+            </div>
+
+            <!-- ✅ Total Deduction Display - Always Visible -->
+            <div class="total-display" id="totalDisplay">
+                <span class="label"><i class="fa-solid fa-hand-holding-dollar"></i> Yᴏᴜ Wɪʟʟ Rᴇᴄᴇɪᴠᴇ</span>
+                <span class="value" id="totalValue">₹0.00</span>
+            </div>
+
+            <button class="btn btn-primary" id="withdrawBtn" onclick="submitWithdraw()">
+                <i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Hᴏᴍᴇ</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Sᴇɴᴅ</a>
+    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i>Qʀ</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Aᴅᴅ</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>Lᴏɢꜱ</a>
+</div>
+
+<script>
+// ============================================
+// Cᴏɴꜰ𝙸ɢᴜʀᴀᴛ𝙸ᴏɴ
+// ============================================
+let currentMethod = 'upi';
+let settings = {
+    minAmount: 1,
+    maxAmount: 5000,
+    enabled: true,
+    fee: 0,
+    feeType: 'percentage',
+    maxDailyWithdrawals: 10,
+    maxMonthlyWithdrawals: 50,
+    requireBankDetails: true,
+    requireUpiDetails: true,
+    autoApproveBelow: 0,
+    approvalRequired: true
+};
+
+// ============================================
+// Tʜᴇᴍᴇ Fᴜɴᴄᴛ𝙸ᴏɴꜱ
+// ============================================
+function loadTheme() {
+    const saved = localStorage.getItem('primeTheme');
+    const body = document.body;
+    if (saved === 'dark') {
+        body.classList.add('dark');
+        body.classList.remove('light');
+    } else {
+        body.classList.add('light');
+        body.classList.remove('dark');
+    }
+}
+loadTheme();
+
+// ============================================
+// Tᴏᴀꜱᴛ
+// ============================================
+function showToast(message, type = '') {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    if (type) toast.classList.add(type);
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============================================
+// Mᴇᴛʜᴏᴅ Sᴡ𝙸ᴛᴄʜ𝙸ɴɢ
+// ============================================
+function switchMethod(method) {
+    currentMethod = method;
+    const tabs = document.querySelectorAll('.method-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    if (method === 'upi') {
+        tabs[0].classList.add('active');
+        document.getElementById('upiMethod').style.display = 'block';
+        document.getElementById('bankMethod').style.display = 'none';
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('upiMethod').style.display = 'none';
+        document.getElementById('bankMethod').style.display = 'block';
+    }
+}
+
+// ============================================
+// ✅ Update Fee and Total Display - Always Updates
+// ============================================
+function updateFeeDisplay() {
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value) || 0;
+    
+    const feeRate = settings.fee || 0;
+    const feeType = settings.feeType || 'percentage';
+    
+    let feeAmount = 0;
+    let feeText = '';
+    
+    if (feeRate > 0) {
+        if (feeType === 'percentage') {
+            feeAmount = (amount * feeRate) / 100;
+            feeText = `${feeRate}% (₹${feeAmount.toFixed(2)})`;
+        } else if (feeType === 'fixed') {
+            feeAmount = feeRate;
+            feeText = `₹${feeRate.toFixed(2)} (Fɪxᴇᴅ)`;
+        }
+    } else {
+        feeText = '₹0.00 (Nᴏ Fᴇᴇ)';
+    }
+    
+    // Calculate what user will receive
+    const userReceives = Math.round((amount - feeAmount) * 100) / 100;
+    
+    // Update fee display
+    document.getElementById('feeValue').textContent = feeText;
+    
+    // Update total display
+    const totalEl = document.getElementById('totalValue');
+    if (amount > 0) {
+        totalEl.textContent = `₹${userReceives.toFixed(2)}`;
+        if (userReceives > 0) {
+            totalEl.style.color = '#16a34a';
+        } else if (userReceives === 0) {
+            totalEl.style.color = '#f59e0b';
+        } else {
+            totalEl.style.color = '#dc2626';
+        }
+    } else {
+        totalEl.textContent = '₹0.00';
+        totalEl.style.color = '';
+    }
+}
+
+// ============================================
+// Lᴏᴀᴅ Sᴇᴛᴛ𝙸ɴɢꜱ
+// ============================================
+async function loadSettings() {
+    try {
+        const response = await fetch('/api/withdraw-settings/');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.settings) {
+            settings = {
+                minAmount: data.settings.minAmount || 1,
+                maxAmount: data.settings.maxAmount || 5000,
+                enabled: data.settings.enabled !== undefined ? data.settings.enabled : true,
+                fee: data.settings.fee || 0,
+                feeType: data.settings.feeType || 'percentage',
+                maxDailyWithdrawals: data.settings.maxDailyWithdrawals || 10,
+                maxMonthlyWithdrawals: data.settings.maxMonthlyWithdrawals || 50,
+                requireBankDetails: data.settings.requireBankDetails !== undefined ? data.settings.requireBankDetails : true,
+                requireUpiDetails: data.settings.requireUpiDetails !== undefined ? data.settings.requireUpiDetails : true,
+                autoApproveBelow: data.settings.autoApproveBelow || 0,
+                approvalRequired: data.settings.approvalRequired !== undefined ? data.settings.approvalRequired : true
+            };
+            
+            updateSettingsUI();
+            updateFeeDisplay();
+        } else {
+            useDefaultSettings();
+            showToast('⚠️ Uꜱɪɴɢ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Lᴏᴀᴅ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
+        useDefaultSettings();
+        showToast('⚠️ Cᴏɴɴᴇᴄᴛɪᴏɴ Eʀʀᴏʀ - Uꜱɪɴɢ Dᴇꜰᴀᴜʟᴛꜱ', 'error');
+    }
+}
+
+// ============================================
+// Uꜱᴇ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ
+// ============================================
+function useDefaultSettings() {
+    settings = {
+        minAmount: 1,
+        maxAmount: 5000,
+        enabled: true,
+        fee: 0,
+        feeType: 'percentage',
+        maxDailyWithdrawals: 10,
+        maxMonthlyWithdrawals: 50,
+        requireBankDetails: true,
+        requireUpiDetails: true,
+        autoApproveBelow: 0,
+        approvalRequired: true
+    };
+    updateSettingsUI();
+    updateFeeDisplay();
+}
+
+// ============================================
+// Uᴘᴅᴀᴛᴇ Sᴇᴛᴛɪɴɢꜱ UI
+// ============================================
+function updateSettingsUI() {
+    const minLimit = document.getElementById('minLimit');
+    const maxLimit = document.getElementById('maxLimit');
+    const amountInput = document.getElementById('amount');
+    const statusEl = document.getElementById('settingsStatus');
+    const btn = document.getElementById('withdrawBtn');
+    
+    if (minLimit) minLimit.textContent = settings.minAmount || 0;
+    if (maxLimit) maxLimit.textContent = settings.maxAmount || 0;
+    
+    if (amountInput) {
+        amountInput.min = settings.minAmount || 0;
+        amountInput.max = settings.maxAmount || 0;
+    }
+    
+    if (statusEl && btn) {
+        const isEnabled = settings.enabled !== undefined ? settings.enabled : true;
+        
+        if (isEnabled) {
+            statusEl.className = 'settings-status enabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Eɴᴀʙʟᴇᴅ';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+        } else {
+            statusEl.className = 'settings-status disabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Cᴜʀʀᴇɴᴛʟʏ D𝙸ꜱᴀʙʟᴇᴅ';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ D𝙸ꜱᴀʙʟᴇᴅ';
+        }
+    }
+}
+
+// ============================================
+// Lᴏᴀᴅ Uꜱᴇʀ Dᴀᴛᴀ
+// ============================================
+async function loadUserData() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/';
+            return;
+        }
+
+        const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+                return;
+            }
+            throw new Error('Fᴀ𝙸ʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Uꜱᴇʀ Dᴀᴛᴀ');
+        }
+        
+        const data = await response.json();
+        if (data.success && data.user) {
+            document.getElementById('balance').textContent = data.user.balance.toFixed(2);
+        }
+    } catch (error) {
+        console.error('❌ Lᴏᴀᴅ Eʀʀᴏʀ:', error);
+        showToast('<i class="fa-solid fa-circle-xmark"></i> ' + error.message, 'error');
+    }
+}
+
+// ============================================
+// Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ
+// ============================================
+async function submitWithdraw() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('<i class="fa-solid fa-circle-xmark"></i> Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ F𝙸ʀꜱᴛ', 'error');
+        return;
+    }
+
+    if (!settings.enabled) {
+        showToast('<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Cᴜʀʀᴇɴᴛʟʏ D𝙸ꜱᴀʙʟᴇᴅ', 'error');
+        return;
+    }
+
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Aᴍᴏᴜɴᴛ', 'error');
+        return;
+    }
+
+    const currentBalance = parseFloat(document.getElementById('balance').textContent);
+
+    if (amount < settings.minAmount) {
+        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> M𝙸ɴ𝙸ᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.minAmount}`, 'error');
+        return;
+    }
+
+    if (amount > settings.maxAmount) {
+        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> Mᴀx𝙸ᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.maxAmount}`, 'error');
+        return;
+    }
+
+    // Calculate fee
+    const feeAmount = settings.fee > 0 ? 
+        (settings.feeType === 'percentage' ? (amount * settings.fee) / 100 : settings.fee) : 0;
+    const userReceives = Math.round((amount - feeAmount) * 100) / 100;
+
+    if (amount > currentBalance) {
+        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> Iɴꜱᴜꜰꜰ𝙸ᴄ𝙸ᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Rᴇǫᴜɪʀᴇᴅ: ₹${amount.toFixed(2)}. Aᴠᴀ𝙸ʟᴀʙʟᴇ: ₹${currentBalance.toFixed(2)}`, 'error');
+        return;
+    }
+
+    const btn = document.getElementById('withdrawBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Pʀᴏᴄᴇꜱꜱ𝙸ɴɢ...';
+
+    try {
+        let endpoint = '';
+        let requestBody = { amount: amount };
+
+        if (currentMethod === 'upi') {
+            const upiId = document.getElementById('upiId').value.trim();
+            if (!upiId) {
+                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ Uᴘ𝙸 Iᴅ', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                return;
+            }
+            if (!upiId.includes('@')) {
+                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Uᴘ𝙸 Iᴅ', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                return;
+            }
+            
+            endpoint = '/api/withdraw/upi';
+            requestBody.upiId = upiId;
+            requestBody.note = 'UPI Withdrawal';
+        } else {
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountHolderName = document.getElementById('accountHolderName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const ifscCode = document.getElementById('ifscCode').value.trim().toUpperCase();
+
+            if (!bankName || !accountHolderName || !accountNumber || !ifscCode) {
+                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ F𝙸ʟʟ Aʟʟ Bᴀɴᴋ Dᴇᴛᴀ𝙸ʟꜱ', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                return;
+            }
+
+            if (ifscCode.length < 7) {
+                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ IFSC Cᴏᴅᴇ', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                return;
+            }
+
+            endpoint = '/api/withdraw/bank';
+            requestBody.bankName = bankName;
+            requestBody.accountHolderName = accountHolderName;
+            requestBody.accountNumber = accountNumber;
+            requestBody.ifscCode = ifscCode;
+            requestBody.note = 'Bank Withdrawal';
+        }
+
+        console.log('📤 Sᴜʙᴍ𝙸ᴛᴛ𝙸ɴɢ W𝙸ᴛʜᴅʀᴀᴡᴀʟ:', { endpoint, requestBody });
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+        console.log('📥 Rᴇꜱᴘᴏɴꜱᴇ Dᴀᴛᴀ:', data);
+
+        if (data.success) {
+            const methodText = currentMethod === 'upi' ? 'UPI' : 'Bank';
+            const feeText = data.fee > 0 ? ` (Fᴇᴇ: ₹${data.fee.toFixed(2)})` : '';
+            showToast(`<i class="fa-solid fa-circle-check"></i> ${methodText} W𝙸ᴛʜᴅʀᴀᴡᴀʟ Sᴜʙᴍ𝙸ᴛᴛᴇᴅ!${feeText}`, 'success');
+            
+            if (data.newBalance !== undefined) {
+                document.getElementById('balance').textContent = data.newBalance.toFixed(2);
+            } else {
+                loadUserData();
+            }
+            
+            amountInput.value = '';
+            updateFeeDisplay();
+            
+            if (currentMethod === 'upi') {
+                document.getElementById('upiId').value = '';
+            } else {
+                document.getElementById('bankName').value = '';
+                document.getElementById('accountHolderName').value = '';
+                document.getElementById('accountNumber').value = '';
+                document.getElementById('ifscCode').value = '';
+            }
+        } else {
+            showToast('<i class="fa-solid fa-circle-xmark"></i> ' + (data.message || 'W𝙸ᴛʜᴅʀᴀᴡ Fᴀ𝙸ʟᴇᴅ'), 'error');
+        }
+    } catch (error) {
+        console.error('❌ W𝙸ᴛʜᴅʀᴀᴡ Eʀʀᴏʀ:', error);
+        showToast('<i class="fa-solid fa-globe"></i> ' + (error.message || 'Nᴇᴛᴡᴏʀᴋ Eʀʀᴏʀ'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+        
+        if (!settings.enabled) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ D𝙸ꜱᴀʙʟᴇᴅ';
+        }
+    }
+}
+
+// ============================================
+// Iɴ𝙸ᴛ𝙸ᴀʟ𝙸ᴢᴇ
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('⚡ W𝙸ᴛʜᴅʀᴀᴡ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
+    
+    loadSettings();
+    loadUserData();
+    
+    const amountInput = document.getElementById('amount');
+    
+    amountInput.addEventListener('input', updateFeeDisplay);
+    
+    amountInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') submitWithdraw();
+    });
+    
+    document.getElementById('upiId').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') amountInput.focus();
+    });
+    
+    ['bankName', 'accountHolderName', 'accountNumber', 'ifscCode'].forEach(id => {
+        document.getElementById(id).addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const fields = ['bankName', 'accountHolderName', 'accountNumber', 'ifscCode'];
+                const currentIndex = fields.indexOf(id);
+                if (currentIndex < fields.length - 1) {
+                    document.getElementById(fields[currentIndex + 1]).focus();
+                } else {
+                    amountInput.focus();
+                }
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

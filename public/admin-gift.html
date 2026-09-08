@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aᴅᴍ𝙸ɴ Gɪꜰᴛ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 150, 255, 0.15);
+            --border-soft: rgba(0, 150, 255, 0.06);
+            --accent: #4a9eff;
+            --accent-gradient: linear-gradient(135deg, #4a9eff, #0066cc);
+            --accent-glow: rgba(74, 158, 255, 0.3);
+            --accent-light: rgba(74, 158, 255, 0.1);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(74, 158, 255, 0.05);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --anodized-glow: 0 0 30px rgba(74, 158, 255, 0.15);
+            --anodized-border: 1px solid rgba(74, 158, 255, 0.2);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        .electron-particle {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseElectron linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 20px rgba(74,158,255,0.3), 0 0 60px rgba(74,158,255,0.1);
+        }
+        .electron-particle.big { box-shadow: 0 0 30px rgba(74,158,255,0.5), 0 0 80px rgba(74,158,255,0.1); background: radial-gradient(circle, #4a9eff, #0066cc); }
+        .electron-particle.small { box-shadow: 0 0 15px rgba(74,158,255,0.2); background: radial-gradient(circle, #4a9eff, transparent); }
+        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0 1.5rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .back-btn {
+            background: var(--bg-secondary);
+            border: var(--anodized-border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(74,158,255,0.05);
+        }
+        .back-btn:active { transform: scale(0.95); }
+        .back-btn:hover { border-color: var(--accent); box-shadow: 0 0 30px rgba(74,158,255,0.2); }
+        .header-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(74,158,255,0.2);
+        }
+        .header-logo i { color: var(--accent); margin-right: 0.3rem; }
+        .header-right {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .admin-badge {
+            background: rgba(74,158,255,0.15);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(74,158,255,0.3);
+            box-shadow: 0 0 20px rgba(74,158,255,0.1);
+        }
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(74,158,255,0.3);
+        }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .page-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(74,158,255,0.15);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(74,158,255,0.05);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(74,158,255,0.1);
+        }
+        .stat-card .stat-number {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .stat-card .stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .section-card {
+            background: var(--bg-secondary);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: var(--anodized-border);
+            box-shadow: var(--anodized-glow);
+        }
+        .section-card:hover { border-color: rgba(74,158,255,0.3); }
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title i { color: var(--accent); text-shadow: 0 0 20px rgba(74,158,255,0.3); }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: var(--anodized-border);
+            border-radius: 0.75rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(74,158,255,0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(74,158,255,0.4);
+        }
+        .btn-primary:hover { box-shadow: 0 4px 30px rgba(74,158,255,0.6); }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(34,197,94,0.3);
+        }
+        .btn-sm {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-sm:active { transform: scale(0.95); }
+        .btn-sm.delete {
+            background: rgba(239,68,68,0.2);
+            color: var(--danger);
+        }
+        .btn-sm.delete:hover { background: rgba(239,68,68,0.3); }
+        .btn-sm.copy {
+            background: rgba(34,197,94,0.2);
+            color: var(--success);
+        }
+        .btn-sm.copy:hover { background: rgba(34,197,94,0.3); }
+
+        .gift-item {
+            background: var(--bg-card);
+            border: 1px solid rgba(74,158,255,0.1);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .gift-item:hover {
+            border-color: rgba(74,158,255,0.3);
+            box-shadow: 0 0 30px rgba(74,158,255,0.05);
+        }
+        .gift-item .gift-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .gift-item .gift-code {
+            font-weight: 700;
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        .gift-item .gift-amount {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .gift-item .gift-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.3rem;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .gift-item .gift-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .gift-item .gift-status {
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.15rem 0.6rem;
+            border-radius: 2rem;
+        }
+        .gift-item .gift-status.active {
+            background: rgba(34,197,94,0.15);
+            color: var(--success);
+        }
+        .gift-item .gift-status.used {
+            background: rgba(239,68,68,0.15);
+            color: var(--danger);
+        }
+        .gift-item .gift-time {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+        }
+        .gift-item .gift-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        .empty-state i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+            color: var(--accent);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+            border: var(--anodized-border);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(74,158,255,0.2); }
+
+        .loading-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        .loading-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            animation: spin 1s linear infinite;
+            color: var(--accent);
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .gift-item .gift-bottom { flex-direction: column; align-items: flex-start; }
+            .gift-item .gift-actions { width: 100%; }
+            .gift-item .gift-actions .btn-sm { flex: 1; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles"></div>
+    <div class="toast" id="toast"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/rohit" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <span class="header-logo"><i class="fas fa-gift"></i> Gɪꜰᴛ</span>
+        </div>
+        <div class="header-right">
+            <span class="admin-badge"><i class="fas fa-bolt"></i> Aᴅᴍ𝙸ɴ</span>
+            <div class="admin-avatar"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">🎁 Gɪꜰᴛ Mᴀɴᴀɢᴇᴍᴇɴᴛ</h1>
+        <p class="page-subtitle">Cʀᴇᴀᴛᴇ & Mᴀɴᴀɢᴇ Gɪꜰᴛ Cᴏᴅᴇꜱ</p>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalGifts">0</div>
+                <div class="stat-label">Tᴏᴛᴀʟ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeGifts">0</div>
+                <div class="stat-label">Aᴄᴛɪᴠᴇ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="usedGifts">0</div>
+                <div class="stat-label">Uꜱᴇᴅ</div>
+            </div>
+        </div>
+
+        <!-- Create Gift -->
+        <div class="section-card">
+            <div class="section-title"><i class="fas fa-plus-circle"></i> Cʀᴇᴀᴛᴇ Nᴇᴡ Gɪꜰᴛ</div>
+            <form id="createGiftForm">
+                <div class="form-group">
+                    <label><i class="fas fa-rupee-sign"></i> Aᴍᴏᴜɴᴛ (₹)</label>
+                    <input type="number" id="giftAmount" placeholder="Eɴᴛᴇʀ Gɪꜰᴛ Aᴍᴏᴜɴᴛ" min="1" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Nᴏᴛᴇ</label>
+                    <textarea id="giftNote" placeholder="Eɴᴛᴇʀ Nᴏᴛᴇ (Oᴘᴛɪᴏɴᴀʟ)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> Qᴜᴀɴᴛɪᴛʏ</label>
+                    <input type="number" id="giftQuantity" placeholder="Nᴜᴍʙᴇʀ ᴏꜰ Gɪꜰᴛꜱ" min="1" value="1" required>
+                </div>
+                <div class="info-text" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.75rem;">
+                    <i class="fas fa-info-circle" style="color:var(--accent);"></i> 
+                    Gɪꜰᴛꜱ ᴡɪʟʟ ʙᴇ ᴄʀᴇᴀᴛᴇᴅ ᴜꜱɪɴɢ ᴀᴅᴍɪɴ ᴡᴀʟʟᴇᴛ: <span id="adminWalletDisplay" style="color:var(--accent);font-weight:600;">ADMIN001</span>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-gift"></i> Cʀᴇᴀᴛᴇ Gɪꜰᴛꜱ</button>
+            </form>
+        </div>
+
+        <!-- Gift List -->
+        <div class="section-card">
+            <div class="section-title"><i class="fas fa-list"></i> Aʟʟ Gɪꜰᴛꜱ</div>
+            <div id="giftList">
+                <div class="loading-state"><i class="fas fa-gift"></i><p>Lᴏᴀᴅɪɴɢ...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ADMIN WALLET ID (from .env)
+        // ============================================
+        const ADMIN_WALLET_ID = 'ADMIN001'; // This should match .env
+
+        // Display admin wallet ID
+        document.addEventListener('DOMContentLoaded', function() {
+            const display = document.getElementById('adminWalletDisplay');
+            if (display) {
+                display.textContent = ADMIN_WALLET_ID;
+            }
+        });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ============================================
+        // PARTICLES
+        // ============================================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'electron-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                const size = 2 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.classList.add(size > 5 ? 'big' : 'small');
+                container.appendChild(p);
+            }
+        }
+
+        // ============================================
+        // GET TOKEN
+        // ============================================
+        function getToken() {
+            return localStorage.getItem('adminToken');
+        }
+
+        // ============================================
+        // CHECK SESSION
+        // ============================================
+        function checkSession() {
+            const token = getToken();
+            if (!token) {
+                showToast('❌ Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Fɪʀꜱᴛ', 'error');
+                setTimeout(() => { window.location.href = '/rohit'; }, 1500);
+                return false;
+            }
+            return true;
+        }
+
+        // ============================================
+        // LOAD GIFT STATS
+        // ============================================
+        async function loadStats() {
+            try {
+                const token = getToken();
+                if (!token) return;
+                const response = await fetch('/api/gift-mgmt/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.status === 401) {
+                    showToast('❌ Sᴇꜱꜱɪᴏɴ Exᴘɪʀᴇᴅ', 'error');
+                    localStorage.removeItem('adminToken');
+                    setTimeout(() => { window.location.href = '/rohit'; }, 1500);
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('totalGifts').textContent = data.total || 0;
+                    document.getElementById('activeGifts').textContent = data.active || 0;
+                    document.getElementById('usedGifts').textContent = data.used || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // ============================================
+        // LOAD GIFT LIST
+        // ============================================
+        async function loadGifts() {
+            try {
+                const token = getToken();
+                if (!token) return;
+                const response = await fetch('/api/gift-mgmt', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.status === 401) {
+                    showToast('❌ Sᴇꜱꜱɪᴏɴ Exᴘɪʀᴇᴅ', 'error');
+                    localStorage.removeItem('adminToken');
+                    setTimeout(() => { window.location.href = '/rohit'; }, 1500);
+                    return;
+                }
+                const data = await response.json();
+                renderGifts(data.gifts || []);
+            } catch (error) {
+                console.error('Error loading gifts:', error);
+                document.getElementById('giftList').innerHTML = `
+                    <div class="empty-state"><i class="fas fa-gift"></i><p>Eʀʀᴏʀ Lᴏᴀᴅɪɴɢ Gɪꜰᴛꜱ</p></div>
+                `;
+            }
+        }
+
+        // ============================================
+        // RENDER GIFTS
+        // ============================================
+        function renderGifts(gifts) {
+            const container = document.getElementById('giftList');
+            if (!gifts || gifts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state"><i class="fas fa-gift"></i><p>Nᴏ Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ Yᴇᴛ</p></div>
+                `;
+                return;
+            }
+
+            let html = '';
+            gifts.forEach(gift => {
+                const status = gift.isUsed ? 'used' : 'active';
+                const statusClass = status === 'active' ? 'active' : 'used';
+                const time = new Date(gift.createdAt).toLocaleString('en-IN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                const redeemedBy = gift.redeemedBy ? gift.redeemedBy.fullName : 'N/A';
+
+                html += `
+                    <div class="gift-item">
+                        <div class="gift-top">
+                            <span class="gift-code">${gift.code || 'N/A'}</span>
+                            <span class="gift-amount">₹${(gift.amount || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="gift-bottom">
+                            <span class="gift-desc"><i class="fas fa-sticky-note"></i> ${gift.note || 'No note'}</span>
+                            <span class="gift-desc"><i class="fas fa-user"></i> ${gift.createdBy ? gift.createdBy.fullName : 'Unknown'}</span>
+                            <span class="gift-status ${statusClass}">${status}</span>
+                        </div>
+                        <div class="gift-bottom">
+                            <span class="gift-time"><i class="fas fa-calendar"></i> ${time}</span>
+                            ${gift.isUsed ? `<span class="gift-desc"><i class="fas fa-user-check"></i> Rᴇᴅᴇᴇᴍᴇᴅ Bʏ: ${redeemedBy}</span>` : ''}
+                        </div>
+                        <div class="gift-actions">
+                            ${!gift.isUsed ? `
+                                <button class="btn-sm copy" onclick="copyGiftCode('${gift.code}')">
+                                    <i class="fas fa-copy"></i> Cᴏᴘʏ
+                                </button>
+                                <button class="btn-sm delete" onclick="deleteGift('${gift._id}')">
+                                    <i class="fas fa-trash"></i> Dᴇʟᴇᴛᴇ
+                                </button>
+                            ` : `
+                                <span style="font-size:0.7rem;color:var(--text-muted);">
+                                    <i class="fas fa-check-circle" style="color:var(--success);"></i> Rᴇᴅᴇᴇᴍᴇᴅ
+                                </span>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // COPY GIFT CODE
+        // ============================================
+        function copyGiftCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('✅ Cᴏᴅᴇ Cᴏᴘɪᴇᴅ!', 'success');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('✅ Cᴏᴅᴇ Cᴏᴘɪᴇᴅ!', 'success');
+            });
+        }
+
+        // ============================================
+        // CREATE GIFT
+        // ============================================
+        document.getElementById('createGiftForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!checkSession()) return;
+
+            const amount = parseFloat(document.getElementById('giftAmount').value);
+            const note = document.getElementById('giftNote').value.trim();
+            const quantity = parseInt(document.getElementById('giftQuantity').value);
+
+            if (!amount || amount <= 0) {
+                showToast('❌ Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ', 'error');
+                return;
+            }
+
+            if (!quantity || quantity < 1) {
+                showToast('❌ Qᴜᴀɴᴛɪᴛʏ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 1', 'error');
+                return;
+            }
+
+            if (quantity > 100) {
+                showToast('❌ Mᴀxɪᴍᴜᴍ 100 Gɪꜰᴛꜱ Aᴛ Oɴᴄᴇ', 'error');
+                return;
+            }
+
+            const btn = document.querySelector('.btn-primary');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cʀᴇᴀᴛɪɴɢ...';
+
+            try {
+                const token = getToken();
+                const response = await fetch('/api/gift-mgmt/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        amount,
+                        note,
+                        quantity
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`✅ ${data.giftsCreated} Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!`, 'success');
+                    document.getElementById('createGiftForm').reset();
+                    document.getElementById('giftQuantity').value = '1';
+                    await loadStats();
+                    await loadGifts();
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Sᴇʀᴠᴇʀ Eʀʀᴏʀ', 'error');
+                console.error('Error creating gift:', error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-gift"></i> Cʀᴇᴀᴛᴇ Gɪꜰᴛꜱ';
+            }
+        });
+
+        // ============================================
+        // DELETE GIFT
+        // ============================================
+        async function deleteGift(id) {
+            if (!checkSession()) return;
+            if (!confirm('Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Dᴇʟᴇᴛᴇ Tʜɪꜱ Gɪꜰᴛ?')) return;
+
+            try {
+                const token = getToken();
+                const response = await fetch(`/api/gift-mgmt/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('✅ ' + data.message, 'success');
+                    await loadStats();
+                    await loadGifts();
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Sᴇʀᴠᴇʀ Eʀʀᴏʀ', 'error');
+                console.error('Error deleting gift:', error);
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkSession()) {
+                createParticles();
+                loadStats();
+                loadGifts();
+            }
+        });
+
+        setInterval(() => {
+            if (getToken()) {
+                loadStats();
+                loadGifts();
+            }
+        }, 30000);
+
+        console.log('🎁 Aᴅᴍ𝙸ɴ Gɪꜰᴛ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
+        console.log('🔙 Bᴀᴄᴋ Bᴜᴛᴛᴏɴ → /rohit');
+        console.log('👤 Aᴅᴍɪɴ Wᴀʟʟᴇᴛ ID:', ADMIN_WALLET_ID);
+    </script>
+</body>
+</html>

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Sᴄʀᴀᴛᴄʜ Lɪꜰᴀꜰᴀ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}:root{--g1:linear-gradient(135deg,#667eea 0%,#764ba2 100%);--g2:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);--g3:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);--g4:linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);--g5:linear-gradient(135deg,#fa709a 0%,#fee140 100%)}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0c0e1a 0%,#1a1a2e 50%,#16213e 100%);background-attachment:fixed;color:#fff;overflow-y:auto;overflow-x:hidden;position:relative}
+    body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(circle at 20% 80%,rgba(102,126,234,.15) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(118,75,162,.15) 0%,transparent 50%);pointer-events:none;z-index:0}
+    .container{max-width:480px;margin:0 auto;position:relative;min-height:100vh;z-index:1;padding:30px 16px}
+    .claim-card{border-radius:28px;padding:28px 20px;text-align:center;margin-bottom:16px;background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+    .claim-card::before{content:"";position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(102,126,234,.1) 0%,transparent 70%);pointer-events:none}
+    .scratch-container{margin:20px auto;display:flex;justify-content:center;align-items:center}
+    .scratch-card{width:200px;height:200px;border-radius:20px;position:relative;cursor:pointer;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3);transition:transform .3s ease;background:linear-gradient(145deg,#667eea,#764ba2)}
+    .scratch-card:hover{transform:scale(1.02)}.scratch-card.disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+    .scratch-card .scratch-cover{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(145deg,#c0c0c0,#a0a0a0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:rgba(255,255,255,.3);transition:opacity .5s ease;border-radius:20px;letter-spacing:2px;user-select:none}
+    .scratch-card .scratch-cover i{font-size:48px;color:rgba(255,255,255,.2);margin-right:10px}.scratch-card .scratch-cover.revealed{opacity:0;pointer-events:none}
+    .scratch-card .scratch-result{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.3);border-radius:20px}
+    .scratch-card .scratch-result.win{background:linear-gradient(145deg,#43e97b,#38f9d7)}.scratch-card .scratch-result.lose{background:linear-gradient(145deg,#f5576c,#f093fb)}
+    .scratch-card .scratch-result .sub-text{font-size:14px;opacity:.8;margin-top:5px}
+    .claim-icon{font-size:48px;margin-bottom:12px;display:inline-block}.claim-icon i{background:var(--g3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .claim-title{font-size:20px;font-weight:700;margin-bottom:6px;font-variant:small-caps;color:#fff}.claim-sub{font-size:13px;opacity:.6;margin-bottom:20px;font-variant:small-caps;color:#a0aec0}
+    @keyframes cf{0%{transform:translateY(-100px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}.cf-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:cf linear forwards;pointer-events:none}
+    @keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-10px)}20%,40%,60%,80%{transform:translateX(10px)}}.shake{animation:shake .6s ease-in-out}
+    @keyframes sr{0%{transform:scale(.8) rotate(-5deg);opacity:0}50%{transform:scale(1.1) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}.sr{animation:sr .5s ease-out}
+    .verify-container{text-align:center;padding:10px 0}.verify-icon{font-size:48px;margin-bottom:12px}.verify-icon i{background:var(--g5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .verify-title{font-size:18px;font-weight:700;margin-bottom:4px;font-variant:small-caps;color:#fff}.verify-desc{font-size:13px;opacity:.6;margin-bottom:16px;font-variant:small-caps;line-height:1.6;color:#a0aec0}
+    .verify-desc a{color:#667eea;text-decoration:none;font-weight:600}.verify-btn{background:var(--g2);color:#fff;padding:14px 40px;border-radius:40px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-variant:small-caps;transition:.15s;box-shadow:0 4px 20px rgba(245,87,108,.3)}.verify-btn:active{transform:scale(.97)}
+    .channel-container{text-align:left;padding:10px 0}.channel-header{font-size:15px;font-weight:600;margin-bottom:14px;text-align:center;font-variant:small-caps;color:#fff}.channel-header .red-dot{color:#f5576c;margin-right:4px}
+    .channel-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);flex-wrap:wrap;gap:8px}
+    .channel-item .channel-name{font-weight:600;font-size:13px;font-variant:small-caps;color:#fff;flex:1;min-width:100px;word-break:break-all}
+    .channel-item .channel-status{font-size:11px;font-weight:600;padding:3px 12px;border-radius:40px;font-variant:small-caps}
+    .channel-item .channel-status.not-joined{background:rgba(245,87,108,.2);color:#f5576c}.channel-item .channel-status.joined{background:rgba(67,233,123,.2);color:#43e97b}
+    .channel-item .channel-join-btn{background:var(--g3);color:#fff;border:none;padding:5px 16px;border-radius:40px;font-size:11px;font-weight:600;cursor:pointer;font-variant:small-caps;transition:.15s}
+    .channel-item .channel-join-btn:active{transform:scale(.95)}.channel-item .channel-join-btn.joined-btn{background:var(--g4)}.channel-item .channel-join-btn:disabled{opacity:.5;cursor:not-allowed}
+    .refresh-status-btn{display:block;width:100%;padding:10px;background:var(--g3);color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;font-variant:small-caps;transition:.15s}
+    .refresh-status-btn:active{transform:scale(.97)}.refresh-status-btn:disabled{opacity:.5;cursor:not-allowed}
+    .click-here-btn{display:block;width:100%;padding:12px;background:var(--g1);color:#fff;border:none;border-radius:40px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;font-variant:small-caps;transition:.15s;box-shadow:0 4px 20px rgba(102,126,234,.3)}
+    .click-here-btn:active{transform:scale(.97)}.click-here-btn:disabled{opacity:.5;cursor:not-allowed}
+    .simple-claim-container{text-align:center;padding:10px 0}.hi-text{font-size:20px;font-weight:600;margin-bottom:4px;font-variant:small-caps;color:#fff}
+    .prime-label{font-size:13px;opacity:.6;margin-bottom:10px;font-variant:small-caps;color:#a0aec0}
+    .prime-id{font-size:26px;font-weight:700;letter-spacing:2px;margin-bottom:14px;font-variant:small-caps;background:var(--g3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .access-code-input{width:100%;max-width:260px;padding:10px 18px;border-radius:40px;border:2px solid rgba(255,255,255,.15);font-size:14px;text-align:center;margin:0 auto 14px;display:block;background:rgba(255,255,255,.06);color:#fff;transition:.3s}
+    .access-code-input:focus{outline:none;border-color:#667eea;background:rgba(255,255,255,.1)}.access-code-input::placeholder{color:rgba(255,255,255,.3)}
+    .scratch-btn{display:inline-block;background:var(--g4);color:#0a0a1a;padding:14px 50px;border-radius:40px;font-size:18px;font-weight:700;border:none;cursor:pointer;transition:.15s;font-variant:small-caps;box-shadow:0 4px 20px rgba(67,233,123,.3);margin-bottom:16px}
+    .scratch-btn:active{transform:scale(.97)}.scratch-btn:disabled{opacity:.5;cursor:not-allowed}.scratch-btn.loading{background:var(--g1);cursor:not-allowed}
+    .scratch-btn .spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .simple-stats{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid rgba(255,255,255,.06);margin-top:6px}
+    .stat-item{text-align:center;flex:1}.stat-item .stat-label{font-size:10px;opacity:.5;font-variant:small-caps;color:#a0aec0}.stat-item .stat-value{font-size:15px;font-weight:700;font-variant:small-caps;color:#fff}
+    .status-message{margin-top:10px;font-size:14px;font-weight:700;font-variant:small-caps;color:#43e97b}
+    .success-container{text-align:center;padding:20px 0}.success-icon{font-size:52px;margin-bottom:10px}.success-icon i{background:var(--g4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .success-title{font-size:18px;font-weight:700;margin-bottom:4px;font-variant:small-caps;color:#fff}.success-sub{font-size:13px;opacity:.6;margin-bottom:14px;font-variant:small-caps;color:#a0aec0}
+    .success-amount{font-size:34px;font-weight:800;margin-bottom:4px;background:var(--g4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .success-wallet{font-size:13px;opacity:.6;font-variant:small-caps;color:#a0aec0}.success-wallet span{font-weight:600;color:#fff}
+    .progress-bar{width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:10px;margin:14px 0;overflow:hidden}.progress-bar .progress-fill{height:100%;border-radius:10px;width:100%;background:var(--g4);transition:width .5s ease}
+    .progress-label{font-size:12px;font-weight:600;font-variant:small-caps;color:#a0aec0}
+    .refer-earn-box{margin-top:16px;padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);backdrop-filter:blur(10px);display:none;animation:fs .5s ease}
+    .refer-earn-box.visible{display:block}@keyframes fs{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .refer-earn-box .refer-title{font-weight:700;font-size:15px;margin-bottom:4px;font-variant:small-caps;display:flex;align-items:center;gap:8px;color:#fff}
+    .refer-earn-box .refer-title i{color:#fccb90}.refer-earn-box .refer-sub{font-size:12px;opacity:.6;margin-bottom:12px;font-variant:small-caps;color:#a0aec0}
+    .refer-link-box{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.05);border-radius:12px;padding:8px 12px;border:1px solid rgba(255,255,255,.06)}
+    .refer-link-box .link-text{flex:1;font-size:11px;font-weight:500;word-break:break-all;font-variant:small-caps;color:#a0aec0}
+    .refer-link-box .copy-ref-btn{background:var(--g1);border:none;border-radius:10px;padding:6px 14px;color:#fff;font-weight:700;font-size:11px;cursor:pointer;font-variant:small-caps;white-space:nowrap;transition:.15s}
+    .refer-link-box .copy-ref-btn:active{transform:scale(.95)}
+    .refer-earn-amount{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
+    .refer-earn-amount span{font-weight:600;font-variant:small-caps;font-size:13px;color:#a0aec0}
+    .refer-earn-amount .amount-badge{background:var(--g2);color:#fff;padding:3px 14px;border-radius:40px;font-size:13px;font-weight:700}
+    .toast-message{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:60px;font-size:12px;font-weight:600;z-index:10000;backdrop-filter:blur(8px);animation:fiu .3s ease;font-variant:small-caps;letter-spacing:.04em;background:rgba(0,0,0,.8);color:#fff}
+    @keyframes fiu{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .error-page{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px}
+    .error-page .error-icon{font-size:64px;margin-bottom:16px}.error-page .error-icon i{background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .error-page .error-title{font-size:22px;font-weight:700;font-variant:small-caps;margin-bottom:6px;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .error-page .error-sub{font-size:14px;opacity:.6;font-variant:small-caps;color:#a0aec0}.error-page .error-detail{font-size:12px;opacity:.4;margin-top:8px;font-variant:small-caps;color:#a0aec0}
+    .status-page{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;padding:30px 20px}
+    .status-page .status-icon{font-size:56px;margin-bottom:12px;color:#fccb90}
+    .status-page .status-title{font-size:20px;font-weight:700;font-variant:small-caps;margin-bottom:4px;color:#fff}
+    .status-page .status-sub{font-size:13px;opacity:.6;font-variant:small-caps;color:#a0aec0}
+    .status-page .status-stats{display:flex;justify-content:center;gap:30px;margin-top:16px}.status-page .status-stats .stat{text-align:center}
+    .status-page .status-stats .stat .num{font-size:20px;font-weight:700;color:#fff}.status-page .status-stats .stat .label{font-size:10px;opacity:.5;font-variant:small-caps;color:#a0aec0}
+    .scratch-status{font-size:14px;font-weight:600;margin:10px 0;color:#a0aec0}
+    @media(max-width:480px){.container{padding:20px 12px}.claim-card{padding:20px 16px}.prime-id{font-size:22px}.scratch-card{width:160px;height:160px}.scratch-card .scratch-result{font-size:26px}.scratch-btn{padding:12px 30px;font-size:15px}.success-amount{font-size:28px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="mainContent">
+      <div id="errorPage" class="error-page">
+        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="error-title">Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ</div>
+        <div class="error-sub">Tʜᴇ Lɪꜰᴀꜰᴀ Yᴏᴜ Aʀᴇ Lᴏᴏᴋɪɴɢ Fᴏʀ Dᴏᴇꜱ Nᴏᴛ Exɪꜱᴛ</div>
+        <div class="error-detail" id="errorDetail"></div>
+      </div>
+      <div id="statusPage" class="status-page">
+        <div class="claim-card" style="width:100%;">
+          <div class="status-icon" id="statusIcon"><i class="fas fa-check-circle"></i></div>
+          <div class="status-title" id="statusTitle">Lɪꜰᴀꜰᴀ Cᴏᴍᴘʟᴇᴛᴇᴅ</div>
+          <div class="status-sub" id="statusSub">Aʟʟ Uꜱᴇʀꜱ Hᴀᴠᴇ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ</div>
+          <div class="status-stats">
+            <div class="stat"><div class="num" id="statusClaimed">0</div><div class="label">Cʟᴀɪᴍᴇᴅ</div></div>
+            <div class="stat"><div class="num" id="statusTotal">0</div><div class="label">Tᴏᴛᴀʟ</div></div>
+            <div class="stat"><div class="num" id="statusAmount">₹0</div><div class="label">Aᴍᴏᴜɴᴛ</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="claim-card" id="claimCard" style="display:none;">
+        <div class="claim-icon"><i class="fa-solid fa-hand"></i></div>
+        <div id="verifyUI" style="display:none;">
+          <div class="verify-container">
+            <div class="verify-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="verify-title" id="verifyTitle"></div>
+            <div class="verify-desc" id="verifyDesc">Vᴇʀɪꜰʏ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ Fɪʀꜱᴛ<br>Cʟɪᴄᴋ Vᴇʀɪꜰʏ Bᴇʟᴏᴡ Aɴᴅ Sᴛᴀʀᴛ Tʜᴇ Tᴇʟᴇɢʀᴀᴍ Bᴏᴛ.<br>Oɴᴄᴇ Sᴛᴀʀᴛᴇᴅ, <a href="#" id="refreshLink">ʀᴇꜰʀᴇꜱʜ</a> Tʜɪꜱ Pᴀɢᴇ Tᴏ Cᴏɴᴛɪɴᴜᴇ.</div>
+            <button class="verify-btn" id="verifyBtn"><i class="fab fa-telegram"></i> Vᴇʀɪꜰʏ</button>
+            <div class="simple-stats" style="margin-top:16px;">
+              <div class="stat-item"><div class="stat-label">Cʟᴀɪᴍᴇᴅ</div><div class="stat-value" id="verifyClaimed">₹0</div></div>
+              <div class="stat-item"><div class="stat-label">Tᴏᴛᴀʟ</div><div class="stat-value" id="verifyTotal"></div></div>
+            </div>
+          </div>
+        </div>
+        <div id="channelUI" style="display:none;">
+          <div class="channel-container">
+            <div class="channel-header"><span class="red-dot"><i class="fas fa-circle"></i></span> Jᴏɪɴ Aʟʟ Cʜᴀɴɴᴇʟꜱ Tᴏ Cʟᴀɪᴍ Lɪꜰᴀꜰᴀ</div>
+            <div id="channelList"></div>
+            <button class="refresh-status-btn" id="refreshStatusBtn"><i class="fas fa-sync"></i> Rᴇꜰʀᴇꜱʜ Sᴛᴀᴛᴜꜱ</button>
+            <button class="click-here-btn" id="clickHereBtn" disabled><i class="fas fa-lock"></i> Cʟɪᴄᴋ Hᴇʀᴇ Aꜰᴛᴇʀ Jᴏɪɴɪɴɢ</button>
+            <div class="simple-stats" style="margin-top:14px;">
+              <div class="stat-item"><div class="stat-label">Cʟᴀɪᴍᴇᴅ</div><div class="stat-value" id="channelClaimed">₹0</div></div>
+              <div class="stat-item"><div class="stat-label">Tᴏᴛᴀʟ</div><div class="stat-value" id="channelTotal"></div></div>
+            </div>
+          </div>
+        </div>
+        <div id="simpleClaimUI" style="display:none;">
+          <div class="simple-claim-container">
+            <div class="hi-text" id="hiText"></div>
+            <div class="prime-label">Eɴᴛᴇʀ Yᴏᴜʀ Pʀɪᴍᴇ Iᴅ</div>
+            <div class="prime-id" id="primeId">--</div>
+            <div class="scratch-container">
+              <div class="scratch-card" id="scratchCard">
+                <div class="scratch-cover" id="scratchCover"><i class="fas fa-hand-pointer"></i> Sᴄʀᴀᴛᴄʜ</div>
+                <div class="scratch-result" id="scratchResult" style="display:none;">
+                  <span id="resultIcon"><i class="fas fa-trophy"></i></span>
+                  <span id="resultText">Wɪɴ!</span>
+                  <span class="sub-text" id="resultSub">₹0</span>
+                </div>
+              </div>
+            </div>
+            <div class="scratch-status" id="scratchStatus"><i class="fas fa-hand-pointer"></i> Sᴄʀᴀᴛᴄʜ ᴛʜᴇ ᴄᴀʀᴅ ᴛᴏ ʀᴇᴠᴇᴀʟ ʏᴏᴜʀ ʀᴇꜱᴜʟᴛ</div>
+            <input type="text" class="access-code-input" id="accessCodeInput" placeholder="Eɴᴛᴇʀ Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ (Rᴇǫᴜɪʀᴇᴅ)" style="display:none;">
+            <button class="scratch-btn" id="scratchBtn"><i class="fas fa-hand"></i> Sᴄʀᴀᴛᴄʜ &amp; Cʟᴀɪᴍ</button>
+            <div class="simple-stats">
+              <div class="stat-item"><div class="stat-label">Cʟᴀɪᴍᴇᴅ</div><div class="stat-value" id="claimedCount">₹0</div></div>
+              <div class="stat-item"><div class="stat-label">Tᴏᴛᴀʟ</div><div class="stat-value" id="totalAmount"></div></div>
+            </div>
+            <div class="status-message" id="statusMessage"></div>
+          </div>
+        </div>
+        <div id="successUI" style="display:none;">
+          <div class="success-container">
+            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="success-title"></div>
+            <div class="success-sub">Cᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ!<br>Yᴏᴜ Hᴀᴠᴇ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ</div>
+            <div class="success-amount" id="successAmount"></div>
+            <div class="success-wallet">Pʀɪᴍᴇ Wᴀʟʟᴇᴛ <i class="fas fa-wallet"></i> <span id="successWallet">--</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressLabel"></div>
+            <div class="simple-stats" style="margin-top:14px;">
+              <div class="stat-item"><div class="stat-label">Cʟᴀɪᴍᴇᴅ</div><div class="stat-value" id="successClaimed"></div></div>
+              <div class="stat-item"><div class="stat-label">Tᴏᴛᴀʟ</div><div class="stat-value" id="successTotal"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="refer-earn-box" id="referBox" style="display:none;">
+        <div class="refer-title"><i class="fas fa-gift"></i> Rᴇꜰᴇʀ & Eᴀʀɴ</div>
+        <div class="refer-sub">Sʜᴀʀᴇ Tʜɪꜱ Lɪɴᴋ Wɪᴛʜ Fʀɪᴇɴᴅꜱ Aɴᴅ Eᴀʀɴ Rᴇᴡᴀʀᴅꜱ!</div>
+        <div class="refer-link-box">
+          <span class="link-text" id="referLinkText">Lᴏᴀᴅɪɴɢ...</span>
+          <button class="copy-ref-btn" onclick="copyReferLink()"><i class="fas fa-copy"></i> Cᴏᴩʏ</button>
+        </div>
+        <div class="refer-earn-amount">
+          <span><i class="fas fa-coins" style="color:#fccb90;"></i> Yᴏᴜʀ Eᴀʀɴɪɴɢꜱ</span>
+          <span class="amount-badge" id="referEarnings">₹0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      "use strict";
+      const API_BASE = '/api';
+      const LIFAFA_TYPE = 'scratch';
+      const BOT_USERNAME = 'Prime_Alerts_Ibot';
+
+      function getDeviceFingerprint() {
+        let cached = localStorage.getItem('device_fingerprint');
+        if (cached) return cached;
+        const components = [
+          navigator.userAgent, navigator.language, navigator.platform,
+          screen.width + 'x' + screen.height, screen.colorDepth,
+          new Date().getTimezoneOffset(),
+          navigator.hardwareConcurrency || 'unknown',
+          navigator.deviceMemory || 'unknown'
+        ];
+        const str = components.join('|||');
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        const fingerprint = 'FP_' + Math.abs(hash).toString(36).toUpperCase();
+        localStorage.setItem('device_fingerprint', fingerprint);
+        return fingerprint;
+      }
+
+      function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return { id: params.get('id'), tgid: params.get('tgid'), ref: params.get('ref') };
+      }
+
+      function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      function showSuccessAnimation() {
+        const colors = ['#43e97b', '#f5576c', '#fccb90', '#4facfe', '#667eea', '#f093fb', '#fee140', '#38f9d7'];
+        for (let i = 0; i < 60; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'cf-piece';
+          piece.style.left = Math.random() * 100 + '%';
+          piece.style.width = (Math.random() * 6 + 4) + 'px';
+          piece.style.height = (Math.random() * 6 + 4) + 'px';
+          piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+          piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          piece.style.animationDelay = (Math.random() * 2) + 's';
+          document.body.appendChild(piece);
+          setTimeout(() => piece.remove(), 5000);
+        }
+      }
+
+      function showErrorAnimation(element) {
+        element.classList.add('shake');
+        setTimeout(() => element.classList.remove('shake'), 600);
+      }
+
+      function revealScratchCard(isWinner, amount) {
+        const cover = document.getElementById('scratchCover');
+        const result = document.getElementById('scratchResult');
+        const icon = document.getElementById('resultIcon');
+        const text = document.getElementById('resultText');
+        const sub = document.getElementById('resultSub');
+        
+        cover.classList.add('revealed');
+        result.style.display = 'flex';
+        result.className = 'scratch-result ' + (isWinner ? 'win' : 'lose');
+        result.classList.add('sr');
+        
+        if (isWinner) {
+          icon.innerHTML = '<i class="fas fa-trophy"></i>';
+          text.textContent = 'Yᴏᴜ Wɪɴ!';
+          sub.textContent = '₹' + amount;
+        } else {
+          icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+          text.textContent = 'Sᴏʀʀʏ!';
+          sub.textContent = 'Lᴏꜱᴛ';
+        }
+      }
+
+      let lifafaData = null;
+      let isClaimed = false;
+      let isProcessing = false;
+      let userMobile = null;
+      const fingerprint = getDeviceFingerprint();
+
+      const elements = {
+        errorPage: document.getElementById('errorPage'),
+        statusPage: document.getElementById('statusPage'),
+        statusIcon: document.getElementById('statusIcon'),
+        statusTitle: document.getElementById('statusTitle'),
+        statusSub: document.getElementById('statusSub'),
+        statusClaimed: document.getElementById('statusClaimed'),
+        statusTotal: document.getElementById('statusTotal'),
+        statusAmount: document.getElementById('statusAmount'),
+        errorDetail: document.getElementById('errorDetail'),
+        mainContent: document.getElementById('mainContent'),
+        claimCard: document.getElementById('claimCard'),
+        verifyUI: document.getElementById('verifyUI'),
+        channelUI: document.getElementById('channelUI'),
+        simpleClaimUI: document.getElementById('simpleClaimUI'),
+        successUI: document.getElementById('successUI'),
+        verifyTitle: document.getElementById('verifyTitle'),
+        verifyDesc: document.getElementById('verifyDesc'),
+        verifyBtn: document.getElementById('verifyBtn'),
+        verifyClaimed: document.getElementById('verifyClaimed'),
+        verifyTotal: document.getElementById('verifyTotal'),
+        refreshLink: document.getElementById('refreshLink'),
+        channelList: document.getElementById('channelList'),
+        refreshStatusBtn: document.getElementById('refreshStatusBtn'),
+        clickHereBtn: document.getElementById('clickHereBtn'),
+        channelClaimed: document.getElementById('channelClaimed'),
+        channelTotal: document.getElementById('channelTotal'),
+        hiText: document.getElementById('hiText'),
+        primeId: document.getElementById('primeId'),
+        scratchBtn: document.getElementById('scratchBtn'),
+        accessCodeInput: document.getElementById('accessCodeInput'),
+        claimedCount: document.getElementById('claimedCount'),
+        totalAmount: document.getElementById('totalAmount'),
+        statusMessage: document.getElementById('statusMessage'),
+        successAmount: document.getElementById('successAmount'),
+        successWallet: document.getElementById('successWallet'),
+        successClaimed: document.getElementById('successClaimed'),
+        successTotal: document.getElementById('successTotal'),
+        progressFill: document.getElementById('progressFill'),
+        progressLabel: document.getElementById('progressLabel'),
+        referBox: document.getElementById('referBox'),
+        referLinkText: document.getElementById('referLinkText'),
+        referEarnings: document.getElementById('referEarnings'),
+        scratchStatus: document.getElementById('scratchStatus'),
+        scratchCard: document.getElementById('scratchCard')
+      };
+
+      function calculateClaimedStats() {
+        let totalClaimed = 0;
+        let claimedCount = 0;
+        if (lifafaData && lifafaData.claimedUsers && lifafaData.claimedUsers.length > 0) {
+          claimedCount = lifafaData.claimedUsers.length;
+          lifafaData.claimedUsers.forEach(claim => {
+            if (claim.winAmount) {
+              totalClaimed += claim.winAmount;
+            }
+          });
+        }
+        return { totalClaimed, claimedCount };
+      }
+
+      function showStatusPage(type, title, sub) {
+        elements.claimCard.style.display = 'none';
+        elements.referBox.style.display = 'none';
+        elements.errorPage.style.display = 'none';
+        elements.statusPage.style.display = 'flex';
+        
+        const { totalClaimed, claimedCount } = calculateClaimedStats();
+        const totalUsers = (lifafaData && lifafaData.totalUsers) ? lifafaData.totalUsers : 0;
+        const perUser = (lifafaData && lifafaData.perUser) ? lifafaData.perUser : 0;
+
+        if (type === 'completed') {
+          elements.statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+          elements.statusTitle.textContent = title || 'Lɪꜰᴀꜰᴀ Cᴏᴍᴘʟᴇᴛᴇᴅ';
+          elements.statusSub.textContent = sub || 'Aʟʟ Uꜱᴇʀꜱ Hᴀᴠᴇ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ';
+        } else if (type === 'claimed') {
+          elements.statusIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+          elements.statusTitle.textContent = title || 'Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ';
+          elements.statusSub.textContent = sub || 'Yᴏᴜ Hᴀᴠᴇ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Fʀᴏᴍ Tʜɪꜱ Dᴇᴠɪᴄᴇ';
+        } else if (type === 'expired') {
+          elements.statusIcon.innerHTML = '<i class="fas fa-clock"></i>';
+          elements.statusTitle.textContent = title || 'Lɪꜰᴀꜰᴀ Exᴘɪʀᴇᴅ';
+          elements.statusSub.textContent = sub || 'Tʜɪꜱ Lɪꜰᴀꜰᴀ Hᴀꜱ Exᴘɪʀᴇᴅ';
+        }
+
+        elements.statusClaimed.textContent = claimedCount;
+        elements.statusTotal.textContent = totalUsers;
+        elements.statusAmount.textContent = '₹' + (claimedCount * perUser);
+      }
+
+      function showErrorPage(message) {
+        elements.claimCard.style.display = 'none';
+        elements.referBox.style.display = 'none';
+        elements.statusPage.style.display = 'none';
+        elements.errorPage.style.display = 'flex';
+        if (message) {
+          elements.errorDetail.textContent = message;
+        }
+      }
+
+      async function checkChannelStatus(channels) {
+        try {
+          const params = getUrlParams();
+          const userId = userMobile || params.tgid;
+          
+          if (!userId) {
+            return { results: [], allJoined: false };
+          }
+          
+          const response = await fetch(`${API_BASE}/check-channels`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId,
+              channels: channels
+            })
+          });
+          const result = await response.json();
+          return result.data || { results: [], allJoined: false };
+        } catch (error) {
+          console.error('Channel check error:', error);
+          return { results: [], allJoined: false };
+        }
+      }
+
+      async function refreshChannelStatus() {
+        if (!lifafaData || !lifafaData.channels || lifafaData.channels.length === 0) {
+          return;
+        }
+
+        elements.refreshStatusBtn.disabled = true;
+        elements.refreshStatusBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cʜᴇᴄᴋɪɴɢ...';
+
+        try {
+          const result = await checkChannelStatus(lifafaData.channels);
+          
+          if (result.results && result.results.length > 0) {
+            result.results.forEach((item, index) => {
+              const statusEl = document.getElementById('channel_status_' + index);
+              const btnEl = document.getElementById('channel_btn_' + index);
+              
+              if (statusEl) {
+                if (item.isJoined) {
+                  statusEl.className = 'channel-status joined';
+                  statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Jᴏɪɴᴇᴅ';
+                } else {
+                  statusEl.className = 'channel-status not-joined';
+                  statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Nᴏᴛ Jᴏɪɴᴇᴅ';
+                }
+              }
+              
+              if (btnEl) {
+                if (item.isJoined) {
+                  btnEl.className = 'channel-join-btn joined-btn';
+                  btnEl.innerHTML = '<i class="fas fa-check"></i> Jᴏɪɴᴇᴅ';
+                  btnEl.disabled = true;
+                } else {
+                  btnEl.className = 'channel-join-btn';
+                  btnEl.innerHTML = '<i class="fas fa-link"></i> Jᴏɪɴ';
+                  btnEl.disabled = false;
+                }
+              }
+            });
+            
+            if (result.allJoined) {
+              elements.clickHereBtn.disabled = false;
+              elements.clickHereBtn.innerHTML = '<i class="fas fa-check-circle"></i> Cʟɪᴄᴋ Hᴇʀᴇ Tᴏ Cʟᴀɪᴍ';
+              elements.clickHereBtn.style.opacity = '1';
+              showToast('Aʟʟ Cʜᴀɴɴᴇʟꜱ Jᴏɪɴᴇᴅ!');
+            } else {
+              elements.clickHereBtn.disabled = true;
+              elements.clickHereBtn.innerHTML = '<i class="fas fa-lock"></i> Cʟɪᴄᴋ Hᴇʀᴇ Aꜰᴛᴇʀ Jᴏɪɴɪɴɢ';
+              elements.clickHereBtn.style.opacity = '0.5';
+            }
+          }
+        } catch (error) {
+          console.error('Error refreshing channel status:', error);
+          showToast('Fᴀɪʟᴇᴅ ᴛᴏ ᴄʜᴇᴄᴋ ᴄʜᴀɴɴᴇʟ sᴛᴀᴛᴜs');
+        } finally {
+          elements.refreshStatusBtn.disabled = false;
+          elements.refreshStatusBtn.innerHTML = '<i class="fas fa-sync"></i> Rᴇꜰʀᴇꜱʜ Sᴛᴀᴛᴜꜱ';
+        }
+      }
+
+      async function getMobileFromTelegram(tgid) {
+        try {
+          const response = await fetch(`${API_BASE}/auth/user-by-telegram/${tgid}`);
+          if (!response.ok) throw new Error('Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ');
+          const data = await response.json();
+          return data.mobile;
+        } catch (error) {
+          console.error('Error fetching mobile:', error);
+          return null;
+        }
+      }
+
+      async function loadLifafa() {
+        const params = getUrlParams();
+        if (!params.id) {
+          showErrorPage('No Lifafa ID provided');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/lifafa/${LIFAFA_TYPE}?id=${params.id}`);
+          
+          if (!response.ok) {
+            if (response.status === 404) {
+              showErrorPage('Lifafa not found');
+            } else {
+              showErrorPage('Failed to load lifafa');
+            }
+            return;
+          }
+          
+          const result = await response.json();
+          lifafaData = result.data;
+          
+          if (!lifafaData) {
+            showErrorPage('Invalid lifafa data');
+            return;
+          }
+          
+          const refLink = window.location.href;
+          elements.referLinkText.textContent = refLink;
+          if (lifafaData.referAmount) {
+            elements.referEarnings.textContent = '₹' + lifafaData.referAmount;
+            elements.referBox.style.display = 'block';
+          }
+
+          const isVerified = !!params.tgid;
+          const alreadyClaimed = lifafaData.claimedUsers && lifafaData.claimedUsers.some(c => c.fingerprint === fingerprint);
+          const isCompleted = lifafaData.remainingUsers <= 0 || lifafaData.status === 'completed';
+          const isExpired = lifafaData.status === 'expired' || lifafaData.isExpired;
+
+          if (isCompleted) {
+            showStatusPage('completed', 'Lɪꜰᴀꜰᴀ Cᴏᴍᴘʟᴇᴛᴇᴅ', 'Aʟʟ Uꜱᴇʀꜱ Hᴀᴠᴇ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ');
+            return;
+          }
+
+          if (isExpired) {
+            showStatusPage('expired', 'Lɪꜰᴀꜰᴀ Exᴘɪʀᴇᴅ', 'Tʜɪꜱ Lɪꜰᴀꜰᴀ Hᴀꜱ Exᴘɪʀᴇᴅ');
+            return;
+          }
+
+          if (alreadyClaimed) {
+            showStatusPage('claimed', 'Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ', 'Yᴏᴜ Hᴀᴠᴇ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Fʀᴏᴍ Tʜɪꜱ Dᴇᴠɪᴄᴇ');
+            return;
+          }
+
+          if (!isVerified) {
+            showVerifyUI();
+            return;
+          }
+
+          userMobile = await getMobileFromTelegram(params.tgid);
+
+          if (!userMobile) {
+            showErrorPage('User not found. Please verify your account.');
+            return;
+          }
+
+          if (lifafaData.requireChannel && lifafaData.channels && lifafaData.channels.length > 0) {
+            showChannelUI();
+            return;
+          }
+
+          if (lifafaData.requireYoutube && lifafaData.youtubeVideo) {
+            showChannelUI({ youtube: true, youtubeLink: lifafaData.youtubeVideo });
+            return;
+          }
+
+          const hasAccessCode = lifafaData.accessCode && lifafaData.accessCode.trim() !== '';
+          if (hasAccessCode) {
+            elements.accessCodeInput.style.display = 'block';
+            elements.accessCodeInput.placeholder = 'Eɴᴛᴇʀ Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ (Rᴇǫᴜɪʀᴇᴅ)';
+            elements.accessCodeInput.value = '';
+          } else {
+            elements.accessCodeInput.style.display = 'none';
+            elements.accessCodeInput.value = '';
+          }
+
+          showSimpleClaimUI();
+
+        } catch (error) {
+          console.error('Eʀʀᴏʀ Lᴏᴀᴅɪɴɢ Lɪꜰᴀꜰᴀ:', error);
+          showErrorPage('Error loading lifafa');
+        }
+      }
+
+      function showVerifyUI() {
+        elements.errorPage.style.display = 'none';
+        elements.statusPage.style.display = 'none';
+        elements.claimCard.style.display = 'block';
+        elements.referBox.style.display = lifafaData.referAmount ? 'block' : 'none';
+        elements.verifyUI.style.display = 'block';
+        elements.channelUI.style.display = 'none';
+        elements.simpleClaimUI.style.display = 'none';
+        elements.successUI.style.display = 'none';
+
+        const { totalClaimed } = calculateClaimedStats();
+        elements.verifyTitle.textContent = lifafaData.title || '';
+        elements.verifyClaimed.textContent = '₹' + totalClaimed;
+        elements.verifyTotal.textContent = '₹' + (lifafaData.perUser || '');
+
+        elements.refreshLink.onclick = function(e) {
+          e.preventDefault();
+          window.location.reload();
+        };
+
+        elements.verifyBtn.onclick = function() {
+          const params = getUrlParams();
+          const lifafaId = params.id || '';
+          const refCode = params.ref || '';
+          
+          let telegramUrl;
+          if (refCode) {
+            telegramUrl = `https://t.me/${BOT_USERNAME}?start=${lifafaId}_${LIFAFA_TYPE}_ref_${refCode}`;
+          } else {
+            telegramUrl = `https://t.me/${BOT_USERNAME}?start=${lifafaId}_${LIFAFA_TYPE}`;
+          }
+          
+          window.open(telegramUrl, '_blank');
+          showToast('Oᴩᴇɴ Tᴇʟᴇɢʀᴀᴍ Aɴᴅ Sᴛᴀʀᴛ Tʜᴇ Bᴏᴛ');
+        };
+      }
+
+      function showChannelUI(req) {
+        elements.errorPage.style.display = 'none';
+        elements.statusPage.style.display = 'none';
+        elements.claimCard.style.display = 'block';
+        elements.referBox.style.display = lifafaData.referAmount ? 'block' : 'none';
+        elements.verifyUI.style.display = 'none';
+        elements.channelUI.style.display = 'block';
+        elements.simpleClaimUI.style.display = 'none';
+        elements.successUI.style.display = 'none';
+
+        const { totalClaimed } = calculateClaimedStats();
+        elements.channelClaimed.textContent = '₹' + totalClaimed;
+        elements.channelTotal.textContent = '₹' + (lifafaData.perUser || '');
+
+        const channels = [];
+        if (lifafaData.channels && lifafaData.channels.length > 0) {
+          lifafaData.channels.forEach(ch => {
+            channels.push({
+              name: ch || '',
+              joined: false,
+              link: ch || ''
+            });
+          });
+        }
+
+        const list = elements.channelList;
+        list.innerHTML = '';
+
+        channels.forEach((ch, index) => {
+          const div = document.createElement('div');
+          div.className = 'channel-item';
+          div.innerHTML = `
+            <span class="channel-name">${ch.name}</span>
+            <span class="channel-status not-joined" id="channel_status_${index}">
+              <i class="fas fa-spinner fa-spin"></i> Cʜᴇᴄᴋɪɴɢ...
+            </span>
+            <button class="channel-join-btn" id="channel_btn_${index}" data-index="${index}">
+              <i class="fas fa-link"></i> Jᴏɪɴ
+            </button>
+          `;
+          list.appendChild(div);
+
+          const btn = document.getElementById('channel_btn_' + index);
+          
+          btn.onclick = function() {
+            if (this.disabled) return;
+            window.open(ch.link, '_blank');
+            showToast('Pʟᴇᴀꜱᴇ Jᴏɪɴ Tʜᴇ Cʜᴀɴɴᴇʟ');
+            showToast('Cʟɪᴄᴋ Rᴇꜰʀᴇꜱʜ Sᴛᴀᴛᴜꜱ ᴛᴏ ᴄʜᴇᴄᴋ');
+          };
+        });
+
+        elements.refreshStatusBtn.onclick = function() {
+          refreshChannelStatus();
+        };
+
+        elements.clickHereBtn.disabled = true;
+        elements.clickHereBtn.innerHTML = '<i class="fas fa-lock"></i> Cʟɪᴄᴋ Hᴇʀᴇ Aꜰᴛᴇʀ Jᴏɪɴɪɴɢ';
+        elements.clickHereBtn.style.opacity = '0.5';
+        
+        elements.clickHereBtn.onclick = function() {
+          refreshChannelStatus().then(() => {
+            if (!elements.clickHereBtn.disabled) {
+              showSimpleClaimUI();
+            } else {
+              showToast('Pʟᴇᴀꜱᴇ Jᴏɪɴ Aʟʟ Cʜᴀɴɴᴇʟꜱ Fɪʀꜱᴛ!');
+            }
+          });
+        };
+
+        setTimeout(() => {
+          refreshChannelStatus();
+        }, 1000);
+      }
+
+      async function showSimpleClaimUI() {
+        elements.errorPage.style.display = 'none';
+        elements.statusPage.style.display = 'none';
+        elements.claimCard.style.display = 'block';
+        elements.referBox.style.display = lifafaData.referAmount ? 'block' : 'none';
+        elements.verifyUI.style.display = 'none';
+        elements.channelUI.style.display = 'none';
+        elements.simpleClaimUI.style.display = 'block';
+        elements.successUI.style.display = 'none';
+
+        const displayId = userMobile || 'Mᴏʙɪʟᴇ Nᴏᴛ Fᴏᴜɴᴅ';
+        const { totalClaimed, claimedCount } = calculateClaimedStats();
+        const totalUsers = lifafaData.totalUsers || 0;
+        const perUser = lifafaData.perUser || '';
+
+        elements.hiText.textContent = lifafaData.title || '';
+        elements.primeId.textContent = displayId;
+        elements.totalAmount.textContent = '₹' + perUser;
+        elements.claimedCount.textContent = '₹' + totalClaimed;
+
+        document.getElementById('scratchCover').classList.remove('revealed');
+        document.getElementById('scratchResult').style.display = 'none';
+        elements.scratchStatus.innerHTML = '<i class="fas fa-hand-pointer"></i> Sᴄʀᴀᴛᴄʜ ᴛʜᴇ ᴄᴀʀᴅ ᴛᴏ ʀᴇᴠᴇᴀʟ ʏᴏᴜʀ ʀᴇꜱᴜʟᴛ';
+
+        elements.scratchCard.classList.remove('disabled');
+
+        const winChance = lifafaData.winChance || 0;
+        elements.statusMessage.innerHTML = '<i class="fas fa-hand"></i> ₹' + perUser + ' (Wɪɴ: ' + winChance + '%) | <i class="fas fa-users"></i> ' + claimedCount + '/' + totalUsers + ' Cʟᴀɪᴍᴇᴅ | ₹' + totalClaimed + ' Cʟᴀɪᴍᴇᴅ';
+        elements.statusMessage.style.color = '#43e97b';
+        elements.scratchBtn.disabled = false;
+        elements.scratchBtn.innerHTML = '<i class="fas fa-hand"></i> Sᴄʀᴀᴛᴄʜ &amp; Cʟᴀɪᴍ';
+        elements.scratchBtn.style.opacity = '1';
+
+        elements.scratchCard.onclick = function() {
+          if (!elements.scratchBtn.disabled) {
+            claimWithScratch();
+          }
+        };
+
+        elements.scratchBtn.onclick = function() {
+          claimWithScratch();
+        };
+      }
+
+      async function claimWithScratch() {
+        if (isProcessing || isClaimed || !lifafaData) return;
+        const params = getUrlParams();
+        const btn = elements.scratchBtn;
+        const originalText = btn.innerHTML;
+
+        if (!userMobile) {
+          showToast('Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ. Pʟᴇᴀꜱᴇ Vᴇʀɪꜰʏ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ.');
+          return;
+        }
+
+        if (lifafaData.claimedUsers && lifafaData.claimedUsers.some(c => c.fingerprint === fingerprint)) {
+          showToast('Tʜɪꜱ Dᴇᴠɪᴄᴇ Hᴀꜱ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ');
+          showErrorAnimation(btn);
+          return;
+        }
+
+        if (lifafaData.remainingUsers <= 0) {
+          showToast('Aʟʟ Uꜱᴇʀꜱ Hᴀᴠᴇ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ');
+          showErrorAnimation(btn);
+          return;
+        }
+
+        if (lifafaData.accessCode && lifafaData.accessCode.trim() !== '') {
+          const inputCode = elements.accessCodeInput.value.trim();
+          if (inputCode !== lifafaData.accessCode) {
+            showToast('Iɴᴠᴀʟɪᴅ Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.');
+            showErrorAnimation(btn);
+            return;
+          }
+        }
+
+        isProcessing = true;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Sᴄʀᴀᴛᴄʜɪɴɢ...';
+        btn.classList.add('loading');
+
+        const winChance = lifafaData.winChance || 0;
+        const random = Math.random() * 100;
+        const isWinner = random <= winChance;
+        const winAmount = isWinner ? lifafaData.perUser : 0;
+
+        revealScratchCard(isWinner, winAmount);
+        elements.scratchStatus.innerHTML = isWinner ? 
+          '<i class="fas fa-trophy" style="color:#43e97b;"></i> Cᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ! Yᴏᴜ Wɪɴ!' : 
+          '<i class="fas fa-times-circle" style="color:#f5576c;"></i> Sᴏʀʀʏ, Bᴇᴛᴛᴇʀ Lᴜᴄᴋ Nᴇxᴛ Tɪᴍᴇ!';
+
+        try {
+          const response = await fetch(`${API_BASE}/lifafa/${LIFAFA_TYPE}/claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: params.id, 
+              mobile: userMobile,
+              tgid: params.tgid,
+              ref: params.ref, 
+              accessCode: elements.accessCodeInput.value.trim() || null,
+              fingerprint: fingerprint,
+              winAmount: winAmount,
+              isWinner: isWinner
+            })
+          });
+          const resultData = await response.json();
+          
+          if (resultData.status === 'success') {
+            isClaimed = true;
+            
+            setTimeout(() => {
+              elements.simpleClaimUI.style.display = 'none';
+              elements.successUI.style.display = 'block';
+              
+              showSuccessAnimation();
+              
+              const amount = winAmount || 0;
+              const isWinnerResult = resultData.data?.isWinner === true;
+              const perUser = lifafaData.perUser || '';
+              
+              elements.successAmount.textContent = '₹' + amount;
+              elements.successWallet.textContent = userMobile || 'Mᴏʙɪʟᴇ Nᴏᴛ Fᴏᴜɴᴅ';
+              elements.successClaimed.textContent = '₹' + amount;
+              elements.successTotal.textContent = '₹' + perUser;
+              elements.progressFill.style.width = '100%';
+              
+              if (isWinnerResult && amount > 0) {
+                elements.progressLabel.innerHTML = '<i class="fas fa-trophy" style="color:#43e97b;"></i> Yᴏᴜ Wᴏɴ ₹' + amount + '!';
+                elements.progressLabel.style.color = '#43e97b';
+                elements.successTitle.textContent = 'Cᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ!';
+                showToast('Lɪꜰᴀꜰᴀ Cʟᴀɪᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ! Yᴏᴜ Wᴏɴ ₹' + amount);
+              } else {
+                elements.progressLabel.innerHTML = '<i class="fas fa-times-circle" style="color:#f5576c;"></i> Sᴏʀʀʏ, Yᴏᴜ Lᴏꜱᴛ!';
+                elements.progressLabel.style.color = '#f5576c';
+                elements.successTitle.textContent = 'Bᴇᴛᴛᴇʀ Lᴜᴄᴋ Nᴇxᴛ Tɪᴍᴇ!';
+                elements.successAmount.textContent = '₹0';
+                showToast('Sᴏʀʀʏ, Yᴏᴜ Lᴏꜱᴛ Tʜɪꜱ Tɪᴍᴇ!');
+              }
+            }, 1500);
+          } else {
+            showToast('Fᴀɪʟᴇᴅ Tᴏ Cʟᴀɪᴍ: ' + (resultData.message || 'Unknown error'));
+            showErrorAnimation(btn);
+            btn.disabled = false;
+          }
+        } catch (error) {
+          console.error('Cʟᴀɪᴍ Eʀʀᴏʀ:', error);
+          showToast('Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.');
+          showErrorAnimation(btn);
+          btn.disabled = false;
+        } finally {
+          isProcessing = false;
+          btn.innerHTML = originalText;
+          btn.classList.remove('loading');
+        }
+      }
+
+      window.copyReferLink = function() {
+        const linkText = elements.referLinkText;
+        navigator.clipboard.writeText(linkText.textContent).then(() => showToast('Rᴇꜰᴇʀʀᴀʟ Lɪɴᴋ Cᴏᴩɪᴇᴅ!'))
+          .catch(() => { const range = document.createRange(); range.selectNode(linkText); window.getSelection().removeAllRanges(); window.getSelection().addRange(range); document.execCommand('copy'); showToast('Rᴇꜰᴇʀʀᴀʟ Lɪɴᴋ Cᴏᴩɪᴇᴅ!'); });
+      };
+
+      loadLifafa();
+    })();
+  </script>
+</body>
+</html>

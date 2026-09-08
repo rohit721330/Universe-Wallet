@@ -1,0 +1,1531 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dᴇᴘᴏꜱɪᴛ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --balance-gradient: linear-gradient(135deg, #00e0ff, #0088ff);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --manual-color: #8b5cf6;
+            --cancelled: #6b7280;
+            --pending-approval: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .star-dot {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseStar linear infinite;
+            opacity: 0;
+            background-color: #00f0ff;
+            color: #00f0ff;
+        }
+
+        .star-dot.big { box-shadow: 0 0 12px currentColor; }
+        .star-dot.small { box-shadow: 0 0 4px currentColor; }
+
+        @keyframes riseStar {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0 1.5rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active { transform: scale(0.95); }
+
+        .header-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-right { width: 40px; }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-card {
+            background: var(--balance-gradient);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .balance-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.9);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(4px);
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .amount-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            outline: none;
+            font-family: monospace;
+            transition: border-color 0.3s ease;
+        }
+
+        .amount-input:focus { border-color: var(--accent); }
+
+        .amount-sublabel {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .quick-amounts {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-amount {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .quick-amount:active {
+            transform: scale(0.96);
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+
+        .method-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .method-row:last-child { border-bottom: none; }
+
+        .method-label {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .method-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .proceed-btn {
+            width: 100%;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .proceed-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .proceed-btn.manual {
+            background: var(--manual-color);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .pending-deposit-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .pending-deposit-item .deposit-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .pending-deposit-item .deposit-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .pending-deposit-item .deposit-id {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .pending-deposit-item .deposit-expiry {
+            font-size: 0.65rem;
+            color: var(--warning);
+        }
+
+        .pending-deposit-item .deposit-status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pending-deposit-item .deposit-status-badge.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .pending-deposit-item .deposit-status-badge.approval {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--manual-color);
+        }
+
+        .pending-deposit-item .deposit-status-badge.completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .pending-deposit-item .deposit-status-badge.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .pending-deposit-item .deposit-type-badge-mini {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 1rem;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pending-deposit-item .deposit-type-badge-mini.manual {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--manual-color);
+        }
+
+        .pending-deposit-item .deposit-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .pending-deposit-item .deposit-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pending-deposit-item .deposit-actions .continue-btn {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .pending-deposit-item .deposit-actions .cancel-btn {
+            background: var(--danger);
+            color: #ffffff;
+            opacity: 0.8;
+        }
+
+        .pending-deposit-item .deposit-actions button:active {
+            transform: scale(0.95);
+        }
+
+        .pending-deposit-item .deposit-actions .disabled-btn {
+            background: var(--text-muted);
+            color: #ffffff;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-deposits {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-deposits i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            opacity: 0.5;
+        }
+
+        .empty-deposits p {
+            font-size: 0.85rem;
+        }
+
+        #statePayment {
+            display: none;
+        }
+
+        .payment-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pay-exactly {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pay-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .timer-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .timer-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: all 0.3s ease;
+        }
+
+        .timer-circle.success {
+            border-color: var(--success);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .timer-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--accent);
+        }
+
+        .timer-number.success { color: var(--success); }
+
+        .timer-label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .qr-box {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 0.5rem auto;
+            position: relative;
+        }
+
+        .qr-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .qr-overlay.show { opacity: 1; }
+
+        .qr-overlay i {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-overlay span {
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .qr-caption {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.7rem;
+            color: var(--warning);
+        }
+
+        .warning-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .warning-box li {
+            padding: 0.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning-box li i { font-size: 0.6rem; }
+
+        .auto-detect-status {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .auto-detect-status .status-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .auto-detect-status .status-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .auto-detect-status .status-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .auto-detect-status.manual .status-icon { color: var(--manual-color); }
+        .auto-detect-status.approval .status-icon { color: var(--pending-approval); }
+        .auto-detect-status.success .status-icon { color: var(--success); }
+        .auto-detect-status.error .status-icon { color: var(--danger); }
+
+        .utr-section {
+            margin-top: 0.5rem;
+        }
+
+        .utr-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .utr-input-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .utr-input-row input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.8rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .utr-input-row input:focus { border-color: var(--accent); }
+
+        .utr-input-row i {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .manual-confirm-btn {
+            width: 100%;
+            background: var(--manual-color);
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.8rem;
+            color: #ffffff;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transition: all 0.2s;
+        }
+
+        .manual-confirm-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .manual-confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .amount-auto {
+            background: var(--input-bg);
+            border: 1px solid var(--accent);
+            border-radius: 0.75rem;
+            padding: 0.8rem 1rem;
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .amount-auto i { color: var(--accent); }
+        .amount-auto span { font-weight: 700; color: var(--text-primary); }
+
+        .deposit-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .deposit-type-badge.manual {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--manual-color);
+        }
+
+        .utr-confirmation {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid var(--success);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .utr-confirmation .label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .utr-confirmation .value {
+            font-weight: 700;
+            color: var(--success);
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .utr-confirmation .status {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--danger); color: white; }
+        .toast.info { background: var(--accent); color: white; }
+        .toast.warning { background: var(--warning); color: white; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0 1rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            transition: color 0.2s;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item:active { transform: scale(0.95); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+    
+    <header class="header">
+        <button class="back-btn" onclick="goBack()"> <i class="fas fa-arrow-left"></i> </button> 
+        <span class="header-logo">Dᴇᴩᴏꜱɪᴛ</span>
+        <div class="header-right"></div>
+    </header>
+    
+    <div class="container">
+        <!-- ===== Bᴀʟᴀɴᴄᴇ Cᴀʀᴅ ===== -->
+        <div class="balance-card">
+            <div class="balance-label">Aᴠᴀɪʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+            <div class="balance-amount" id="balance">₹0.00</div>
+            <div class="wallet-badge"><i class="fas fa-shield-alt"></i> Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</div>
+        </div>
+
+        <!-- ===== Sᴛᴀᴛᴇ 1: Dᴇᴘᴏꜱɪᴛ Iɴᴘᴜᴛ ===== -->
+        <div id="stateDeposit">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-arrow-down"></i> Eɴᴛᴇʀ Dᴇᴘᴏꜱɪᴛ Aᴍᴏᴜɴᴛ</div>
+                <input type="number" id="amount" class="amount-input" placeholder="0" min="1" max="5000" value="50">
+                <div class="amount-sublabel">Mɪɴ ₹𝟷 | Mᴀx ₹𝟻,𝟶𝟶𝟶</div>
+                <div class="quick-amounts">
+                    <button class="quick-amount" onclick="setAmount(50)">₹𝟻𝟶</button>
+                    <button class="quick-amount" onclick="setAmount(100)">₹𝟷𝟶𝟶</button>
+                    <button class="quick-amount" onclick="setAmount(500)">₹𝟻𝟶𝟶</button>
+                    <button class="quick-amount" onclick="setAmount(1000)">₹𝟷ᴋ</button>
+                    <button class="quick-amount" onclick="setAmount(2000)">₹𝟸ᴋ</button>
+                    <button class="quick-amount" onclick="setAmount(5000)">₹𝟻ᴋ</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-credit-card"></i> Pᴀʏᴍᴇɴᴛ Dᴇᴛᴀɪʟꜱ</div>
+                <div class="method-row">
+                    <span class="method-label">Pᴀʏᴍᴇɴᴛ Mᴇᴛʜᴏᴅ</span>
+                    <span class="method-value"><i class="fas fa-qrcode"></i> Qʀ Cᴏᴅᴇ</span>
+                </div>
+                <div class="method-row">
+                    <span class="method-label">Pʀᴏᴄᴇꜱꜱɪɴɢ Tɪᴍᴇ</span>
+                    <span class="method-value"><i class="fas fa-bolt"></i> Mᴀɴᴜᴀʟ</span>
+                </div>
+                <div class="method-row">
+                    <span class="method-label">Dᴇᴘᴏꜱɪᴛ Fᴇᴇ</span>
+                    <span class="method-value"><i class="fas fa-gift"></i> Fʀᴇᴇ</span>
+                </div>
+            </div>
+
+            <button class="proceed-btn manual" id="proceedBtn" onclick="proceedToPay()">
+                <i class="fas fa-hand-holding-usd"></i> Pʀᴏᴄᴇᴇᴅ Tᴏ Pᴀʏ
+            </button>
+
+            <!-- ===== Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ Sᴇᴄᴛɪᴏɴ ===== -->
+            <div style="margin-top: 1.5rem;">
+                <div class="card-title" style="margin-bottom: 0.75rem;">
+                    <i class="fas fa-clock"></i> Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ
+                </div>
+                <div id="pendingDepositsContainer">
+                    <div class="empty-deposits">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nᴏ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Sᴛᴀᴛᴇ 2: Pᴀʏᴍᴇɴᴛ Sᴄʀᴇᴇɴ ===== -->
+        <div id="statePayment">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <span class="deposit-type-badge manual">📝 Mᴀɴᴜᴀʟ</span>
+            </div>
+
+            <div class="payment-top">
+                <div>
+                    <div class="pay-exactly">Pᴀʏ Exᴀᴄᴛʟʏ</div>
+                    <div class="pay-amount" id="paymentAmount">₹0</div>
+                </div>
+                <div>
+                    <div class="pay-exactly">Tɪᴍᴇ Lᴇꜰᴛ</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--accent);" id="timerDisplay">29:56</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    Sᴄᴀɴ Qʀ Cᴏᴅᴇ Tᴏ Pᴀʏ
+                </div>
+                <div class="qr-box" id="qrCodeContainer">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=rohit.1474@superyes&am=100" alt="QR">
+                    <div class="qr-overlay" id="qrOverlay">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Uᴛʀ Sᴜʙᴍɪᴛᴛᴇᴅ!</span>
+                    </div>
+                </div>
+                <div class="qr-caption">Sᴄᴀɴ Qʀ Wɪᴛʜ Yᴏᴜʀ Uᴘɪ Aᴘᴘ</div>
+            </div>
+
+            <div class="warning-box">
+                <ul>
+                    <li><i class="fas fa-circle"></i> Cᴏᴍᴘʟᴇᴛᴇ Pᴀʏᴍᴇɴᴛ Wɪᴛʜɪɴ <strong>30 Mɪɴᴜᴛᴇꜱ</strong></li>
+                    <li><i class="fas fa-circle"></i> Sᴇɴᴅ Exᴀᴄᴛ Aᴍᴏᴜɴᴛ Sʜᴏᴡɴ</li>
+                    <li><i class="fas fa-circle"></i> Eɴᴛᴇʀ Uᴛʀ Aꜰᴛᴇʀ Pᴀʏɪɴɢ</li>
+                </ul>
+            </div>
+
+            <!-- ===== Sᴛᴀᴛᴜꜱ ===== -->
+            <div class="auto-detect-status manual" id="manualStatus">
+                <span class="status-icon"><i class="fas fa-hand-holding-usd"></i></span>
+                <div class="status-text" id="statusText">Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ</div>
+                <div class="status-sub" id="statusSub">Pᴀʏ Aɴᴅ Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ</div>
+            </div>
+
+            <!-- ===== Mᴀɴᴜᴀʟ Uᴛʀ Sᴇᴄᴛɪᴏɴ ===== -->
+            <div class="utr-section" id="utrSection">
+                <div class="utr-section-title"><i class="fas fa-pen"></i> Eɴᴛᴇʀ Uᴛʀ Aꜰᴛᴇʀ Pᴀʏᴍᴇɴᴛ</div>
+                <div class="utr-input-row">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="utrInput" placeholder="Uᴛʀ (205507856806)">
+                </div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Eɴᴛᴇʀ Uᴛʀ Fʀᴏᴍ Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴘᴛ
+                </div>
+                <button class="manual-confirm-btn" id="manualConfirmBtn" onclick="manualConfirm()">
+                    <i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ
+                </button>
+                <div style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: center;">
+                    <i class="fas fa-info-circle"></i> Aᴅᴍɪɴ Wɪʟʟ Vᴇʀɪꜰʏ Aɴᴅ Aᴘᴘʀᴏᴠᴇ
+                </div>
+            </div>
+
+            <!-- ===== Aᴜᴛᴏ-ꜰɪʟʟᴇᴅ Aᴍᴏᴜɴᴛ ===== -->
+            <div class="amount-auto">
+                <i class="fas fa-lock"></i>
+                <div>
+                    <div style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase;">
+                        Aᴍᴏᴜɴᴛ (₹) — Aᴜᴛᴏ Fɪʟʟᴇᴅ
+                    </div>
+                    <span id="autoAmountDisplay">₹0</span>
+                </div>
+            </div>
+
+            <div style="font-size: 0.6rem; color: var(--text-secondary); margin-top: -0.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-circle" style="font-size: 0.4rem;"></i> <span id="autoVerifyText">Aᴅᴍɪɴ Wɪʟʟ Vᴇʀɪꜰʏ Aɴᴅ Aᴘᴘʀᴏᴠᴇ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Bᴏᴛᴛᴏᴍ Nᴀᴠ ===== -->
+    <div class="bottom-nav">
+        <a href="/dashboard" class="nav-item"> <i class="fas fa-home"></i> <span>Hᴏᴍᴇ</span> </a>
+        <a href="/transfer" class="nav-item"> <i class="fas fa-paper-plane"></i> <span>Sᴇɴᴅ</span> </a>
+        <a href="/deposit" class="nav-item active"> <i class="fas fa-qrcode"></i> <span>Qʀ</span> </a>
+        <a href="/withdraw" class="nav-item"> <i class="fas fa-arrow-up"></i> <span>Wɪᴛʜᴅʀᴀᴡ</span> </a>
+        <a href="/profile" class="nav-item"> <i class="fas fa-user"></i> <span>Pʀᴏꜰɪʟᴇ</span> </a>
+    </div>
+
+    <script>
+        console.log('🟢 Dᴇᴘᴏꜱɪᴛ Pᴀɢᴇ Sᴛᴀʀᴛᴇᴅ (Mᴀɴᴜᴀʟ Oɴʟʏ)');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('❌ Nᴏ Tᴏᴋᴇɴ');
+            window.location.href = '/index';
+        }
+
+        let qrTimerInterval = null;
+        let paymentAmount = 0;
+        let isVerified = false;
+        let currentDepositId = null;
+        const adminUpi = 'rohit.1474@superyes';
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===== Sᴛᴀʀ ᴘᴀʀᴛɪᴄʟᴇꜱ =====
+        function createStarDots() {
+            document.querySelectorAll('.star-dot').forEach(star => star.remove());
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'star-dot';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.animationDuration = (6 + Math.random() * 12) + 's';
+                dot.style.animationDelay = Math.random() * 12 + 's';
+                const size = 2 + Math.random() * 6;
+                dot.style.width = size + 'px';
+                dot.style.height = size + 'px';
+                dot.classList.add(size > 4 ? 'big' : 'small');
+                document.body.appendChild(dot);
+            }
+        }
+
+        // ===== Lᴏᴀᴅ Bᴀʟᴀɴᴄᴇ =====
+        async function loadBalance() {
+            try {
+                console.log('🔄 Lᴏᴀᴅɪɴɢ Bᴀʟᴀɴᴄᴇ...');
+                const response = await fetch('/api/deposit/profile/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                if (data.success && data.user) {
+                    document.getElementById('balance').textContent = '₹' + data.user.balance.toFixed(2);
+                    console.log('✅ Bᴀʟᴀɴᴄᴇ Lᴏᴀᴅᴇᴅ: ₹' + data.user.balance.toFixed(2));
+                }
+            } catch(e) {
+                console.error('❌ Lᴏᴀᴅ Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', e.message);
+            }
+        }
+
+        // ===== Lᴏᴀᴅ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ =====
+        async function loadPendingDeposits() {
+            try {
+                console.log('📋 Lᴏᴀᴅɪɴɢ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ...');
+                const response = await fetch('/api/deposit/pending', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                
+                const container = document.getElementById('pendingDepositsContainer');
+                
+                if (!data.success || !data.deposits || data.deposits.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-deposits">
+                            <i class="fas fa-inbox"></i>
+                            <p>Nᴏ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                data.deposits.forEach(deposit => {
+                    const expiryTime = new Date(deposit.expiresAt);
+                    const now = new Date();
+                    const timeLeft = Math.floor((expiryTime - now) / 1000 / 60);
+                    const minutesLeft = Math.max(0, timeLeft);
+                    const expiryText = minutesLeft > 0 ? `${minutesLeft} Mɪɴ Lᴇꜰᴛ` : 'Exᴘɪʀɪɴɢ Sᴏᴏɴ';
+                    
+                    let statusBadge = '';
+                    
+                    if (deposit.status === 'pending') {
+                        statusBadge = '<span class="deposit-status-badge pending">⏳ Pᴇɴᴅɪɴɢ</span>';
+                    } else if (deposit.status === 'pending_approval') {
+                        statusBadge = '<span class="deposit-status-badge approval">⏳ Aᴘᴘʀᴏᴠᴀʟ</span>';
+                    } else if (deposit.status === 'completed' || deposit.status === 'approved') {
+                        statusBadge = '<span class="deposit-status-badge completed">✅ Cᴏᴍᴘʟᴇᴛᴇᴅ</span>';
+                    } else if (deposit.status === 'rejected') {
+                        statusBadge = '<span class="deposit-status-badge rejected">❌ Rᴇᴊᴇᴄᴛᴇᴅ</span>';
+                    } else if (deposit.status === 'expired' || deposit.status === 'cancelled') {
+                        statusBadge = '<span class="deposit-status-badge rejected">⏰ Exᴘɪʀᴇᴅ</span>';
+                    }
+                    
+                    let depositTypeMini = '<span class="deposit-type-badge-mini manual">📝 Mᴀɴᴜᴀʟ</span>';
+                    
+                    let actionsHtml = '';
+                    if (deposit.status === 'pending') {
+                        actionsHtml = `
+                            <div class="deposit-actions">
+                                <button class="continue-btn" onclick="continueDeposit('${deposit.depositId}')">
+                                    <i class="fas fa-qrcode"></i> Cᴏɴᴛɪɴᴜᴇ
+                                </button>
+                                <button class="cancel-btn" onclick="cancelDeposit('${deposit.depositId}')">
+                                    <i class="fas fa-times"></i> Cᴀɴᴄᴇʟ
+                                </button>
+                            </div>
+                        `;
+                    } else if (deposit.status === 'pending_approval') {
+                        actionsHtml = `
+                            <div class="deposit-actions">
+                                <button class="disabled-btn" disabled>
+                                    <i class="fas fa-clock"></i> Wᴀɪᴛɪɴɢ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ
+                                </button>
+                            </div>
+                        `;
+                    } else if (deposit.status === 'completed' || deposit.status === 'approved') {
+                        actionsHtml = `
+                            <div class="deposit-actions">
+                                <button class="disabled-btn" disabled>
+                                    <i class="fas fa-check-circle"></i> Cᴏᴍᴘʟᴇᴛᴇᴅ
+                                </button>
+                            </div>
+                        `;
+                    } else if (deposit.status === 'rejected' || deposit.status === 'expired' || deposit.status === 'cancelled') {
+                        actionsHtml = `
+                            <div class="deposit-actions">
+                                <button class="cancel-btn" onclick="removeDeposit('${deposit.depositId}')">
+                                    <i class="fas fa-trash"></i> Rᴇᴍᴏᴠᴇ
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `
+                        <div class="pending-deposit-item">
+                            <div class="deposit-row">
+                                <div>
+                                    <div class="deposit-amount">₹${deposit.amount.toFixed(2)}</div>
+                                    <div class="deposit-id">${deposit.depositId}</div>
+                                    <div style="margin-top: 0.25rem;">${depositTypeMini}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="deposit-expiry"><i class="fas fa-clock"></i> ${expiryText}</div>
+                                    <div style="margin-top: 0.25rem;">${statusBadge}</div>
+                                </div>
+                            </div>
+                            ${actionsHtml}
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                console.log('✅ Lᴏᴀᴅᴇᴅ', data.deposits.length, 'Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ');
+                
+            } catch(e) {
+                console.error('❌ Lᴏᴀᴅ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛꜱ Eʀʀᴏʀ:', e.message);
+            }
+        }
+
+        // ===== Rᴇᴍᴏᴠᴇ Dᴇᴘᴏꜱɪᴛ =====
+        async function removeDeposit(depositId) {
+            if (!confirm('Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Rᴇᴍᴏᴠᴇ Tʜɪꜱ Dᴇᴘᴏꜱɪᴛ?')) {
+                return;
+            }
+            await cancelDeposit(depositId);
+        }
+
+        // ===== Cᴏɴᴛɪɴᴜᴇ Dᴇᴘᴏꜱɪᴛ =====
+        async function continueDeposit(depositId) {
+            try {
+                console.log('🔄 Cᴏɴᴛɪɴᴜɪɴɢ Dᴇᴘᴏꜱɪᴛ:', depositId);
+                
+                const response = await fetch(`/api/deposit/${depositId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                
+                if (!data.success || !data.deposit) {
+                    showToast('❌ Dᴇᴘᴏꜱɪᴛ Nᴏᴛ Fᴏᴜɴᴅ', 'error');
+                    return;
+                }
+                
+                const deposit = data.deposit;
+                currentDepositId = deposit.depositId;
+                paymentAmount = deposit.amount;
+                isVerified = false;
+                
+                if (new Date(deposit.expiresAt) < new Date()) {
+                    showToast('⏰ Dᴇᴘᴏꜱɪᴛ Exᴘɪʀᴇᴅ', 'error');
+                    loadPendingDeposits();
+                    return;
+                }
+                
+                // Update UI
+                document.getElementById('paymentAmount').textContent = '₹' + deposit.amount;
+                document.getElementById('autoAmountDisplay').textContent = '₹' + deposit.amount;
+                
+                // Reset status
+                const statusEl = document.getElementById('manualStatus');
+                statusEl.className = 'auto-detect-status manual';
+                statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-hand-holding-usd"></i>';
+                document.getElementById('statusText').textContent = 'Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                document.getElementById('statusSub').textContent = 'Pᴀʏ Aɴᴅ Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                
+                // Reset QR overlay
+                document.getElementById('qrOverlay').classList.remove('show');
+                
+                // Update QR
+                const qrData = `upi://pay?pa=${adminUpi}&am=${deposit.amount}`;
+                document.getElementById('qrCodeContainer').innerHTML = `
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}" alt="QR">
+                    <div class="qr-overlay" id="qrOverlay">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Uᴛʀ Sᴜʙᴍɪᴛᴛᴇᴅ!</span>
+                    </div>
+                `;
+                
+                document.getElementById('utrInput').value = '';
+                document.getElementById('utrInput').disabled = false;
+                
+                const confirmBtn = document.getElementById('manualConfirmBtn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                
+                const existingDisplay = document.getElementById('utrConfirmationDisplay');
+                if (existingDisplay) {
+                    existingDisplay.remove();
+                }
+                
+                document.getElementById('stateDeposit').style.display = 'none';
+                document.getElementById('statePayment').style.display = 'block';
+                
+                const expiryTime = new Date(deposit.expiresAt);
+                const now = new Date();
+                const remainingSeconds = Math.floor((expiryTime - now) / 1000);
+                const remainingMinutes = Math.floor(remainingSeconds / 60);
+                
+                startQRTimer(remainingMinutes > 0 ? remainingMinutes : 1);
+                
+                showToast('✅ Cᴏɴᴛɪɴᴜɪɴɢ Dᴇᴘᴏꜱɪᴛ', 'success');
+                
+            } catch(e) {
+                console.error('❌ Cᴏɴᴛɪɴᴜᴇ Dᴇᴘᴏꜱɪᴛ Eʀʀᴏʀ:', e.message);
+                showToast('❌ ' + e.message, 'error');
+            }
+        }
+
+        // ===== Cᴀɴᴄᴇʟ Dᴇᴘᴏꜱɪᴛ =====
+        async function cancelDeposit(depositId) {
+            if (!confirm('Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Cᴀɴᴄᴇʟ Tʜɪꜱ Dᴇᴘᴏꜱɪᴛ?')) {
+                return;
+            }
+            
+            try {
+                console.log('🗑️ Cᴀɴᴄᴇʟʟɪɴɢ Dᴇᴘᴏꜱɪᴛ:', depositId);
+                
+                const response = await fetch(`/api/deposit/cancel/${depositId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('✅ Dᴇᴘᴏꜱɪᴛ Cᴀɴᴄᴇʟʟᴇᴅ', 'success');
+                    loadPendingDeposits();
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                }
+                
+            } catch(e) {
+                console.error('❌ Cᴀɴᴄᴇʟ Dᴇᴘᴏꜱɪᴛ Eʀʀᴏʀ:', e.message);
+                showToast('❌ ' + e.message, 'error');
+            }
+        }
+
+        // ===== Sᴇᴛ Aᴍᴏᴜɴᴛ =====
+        function setAmount(amount) {
+            document.getElementById('amount').value = amount;
+        }
+
+        // ===== Pʀᴏᴄᴇᴇᴅ Tᴏ Pᴀʏ (MANUAL ONLY) =====
+        async function proceedToPay() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!amount || amount < 1) {
+                showToast('❌ Mɪɴɪᴍᴜᴍ Dᴇᴘᴏꜱɪᴛ Iꜱ ₹𝟷', 'error');
+                return;
+            }
+            if (amount > 5000) {
+                showToast('❌ Mᴀxɪᴍᴜᴍ Dᴇᴘᴏꜱɪᴛ Iꜱ ₹𝟻,𝟶𝟶𝟶', 'error');
+                return;
+            }
+            
+            paymentAmount = amount;
+            isVerified = false;
+            console.log('💰 Pʀᴏᴄᴇᴇᴅɪɴɢ Wɪᴛʜ: ₹' + amount);
+
+            try {
+                showToast('🔄 Cʀᴇᴀᴛɪɴɢ Dᴇᴘᴏꜱɪᴛ...', 'info');
+                
+                const response = await fetch('/api/deposit/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ amount: amount })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    if (data.pendingDeposit) {
+                        showToast('⚠️ Pᴇɴᴅɪɴɢ Dᴇᴘᴏꜱɪᴛ: ₹' + data.pendingDeposit.amount, 'error');
+                        loadPendingDeposits();
+                    } else {
+                        showToast('❌ ' + data.message, 'error');
+                    }
+                    return;
+                }
+                
+                currentDepositId = data.deposit.depositId;
+                
+                // Update UI
+                document.getElementById('paymentAmount').textContent = '₹' + amount;
+                document.getElementById('autoAmountDisplay').textContent = '₹' + amount;
+                document.getElementById('qrOverlay').classList.remove('show');
+                
+                // Update QR
+                const qrData = `upi://pay?pa=${adminUpi}&am=${amount}`;
+                document.getElementById('qrCodeContainer').innerHTML = `
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}" alt="QR">
+                    <div class="qr-overlay" id="qrOverlay">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Uᴛʀ Sᴜʙᴍɪᴛᴛᴇᴅ!</span>
+                    </div>
+                `;
+                
+                // Reset UTR section
+                document.getElementById('utrInput').value = '';
+                document.getElementById('utrInput').disabled = false;
+                const confirmBtn = document.getElementById('manualConfirmBtn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                
+                const existingDisplay = document.getElementById('utrConfirmationDisplay');
+                if (existingDisplay) {
+                    existingDisplay.remove();
+                }
+                
+                // Reset status
+                const statusEl = document.getElementById('manualStatus');
+                statusEl.className = 'auto-detect-status manual';
+                statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-hand-holding-usd"></i>';
+                document.getElementById('statusText').textContent = 'Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                document.getElementById('statusSub').textContent = 'Pᴀʏ Aɴᴅ Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                
+                document.getElementById('stateDeposit').style.display = 'none';
+                document.getElementById('statePayment').style.display = 'block';
+                
+                startQRTimer(30);
+                showToast('📝 Pᴀʏ Aɴᴅ Sᴜʙᴍɪᴛ Uᴛʀ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ', 'info');
+                
+                loadPendingDeposits();
+                
+            } catch(e) {
+                console.error('❌ Pʀᴏᴄᴇᴇᴅ Eʀʀᴏʀ:', e.message);
+                showToast('❌ ' + e.message, 'error');
+            }
+        }
+
+        // ===== Tɪᴍᴇʀ =====
+        function startQRTimer(minutes) {
+            let time = minutes * 60;
+            const timerDisplay = document.getElementById('timerDisplay');
+            
+            if (qrTimerInterval) clearInterval(qrTimerInterval);
+            
+            qrTimerInterval = setInterval(() => {
+                const mins = Math.floor(time / 60);
+                const secs = time % 60;
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (time <= 0) {
+                    clearInterval(qrTimerInterval);
+                    timerDisplay.textContent = '00:00';
+                    showToast('⏰ Tɪᴍᴇ Exᴘɪʀᴇᴅ!', 'error');
+                    goBackToDeposit();
+                }
+                time--;
+            }, 1000);
+        }
+
+        // ===== Mᴀɴᴜᴀʟ Cᴏɴꜰɪʀᴍ (User submits UTR for admin approval) =====
+        async function manualConfirm() {
+            const utr = document.getElementById('utrInput').value.trim();
+            
+            if (!utr) {
+                showToast('❌ Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ Uᴛʀ', 'error');
+                return;
+            }
+            
+            if (utr.length < 12) {
+                showToast('❌ Uᴛʀ Mɪɴɪᴍᴜᴍ 12 Cʜᴀʀᴀᴄᴛᴇʀꜱ', 'error');
+                return;
+            }
+            
+            if (!currentDepositId) {
+                showToast('❌ Nᴏ Aᴄᴛɪᴠᴇ Dᴇᴘᴏꜱɪᴛ', 'error');
+                return;
+            }
+            
+            const confirmBtn = document.getElementById('manualConfirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sᴜʙᴍɪᴛᴛɪɴɢ...';
+            
+            try {
+                showToast('🔄 Sᴜʙᴍɪᴛᴛɪɴɢ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ...', 'info');
+                
+                const response = await fetch('/api/deposit/manual-confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        depositId: currentDepositId,
+                        transactionRef: utr
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('✅ Uᴛʀ Sᴜʙᴍɪᴛᴛᴇᴅ! Wᴀɪᴛɪɴɢ Fᴏʀ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ', 'success');
+                    
+                    // Update status
+                    const statusEl = document.getElementById('manualStatus');
+                    statusEl.className = 'auto-detect-status approval';
+                    statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-clock"></i>';
+                    
+                    const statusText = document.getElementById('statusText');
+                    statusText.innerHTML = `
+                        ⏳ Pᴇɴᴅɪɴɢ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ
+                        <div style="font-size: 0.7rem; margin-top: 0.3rem; color: var(--text-secondary);">
+                            💰 ₹${data.amount || paymentAmount} • 🆔 ${data.depositId}
+                        </div>
+                        <div style="font-size: 0.65rem; margin-top: 0.2rem; color: var(--warning); font-family: monospace;">
+                            UTR: ${utr}
+                        </div>
+                    `;
+                    
+                    document.getElementById('statusSub').textContent = 'Yᴏᴜ Wɪʟʟ Bᴇ Nᴏᴛɪꜰɪᴇᴅ Wʜᴇɴ Aᴘᴘʀᴏᴠᴇᴅ';
+                    
+                    // Disable UTR input and button
+                    document.getElementById('utrInput').disabled = true;
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<i class="fas fa-clock"></i> Pᴇɴᴅɪɴɢ Aᴘᴘʀᴏᴠᴀʟ';
+                    
+                    // Show confirmation
+                    const overlay = document.getElementById('qrOverlay');
+                    if (overlay) {
+                        overlay.innerHTML = `
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <span style="color: white; font-size: 0.7rem;">Uᴛʀ Sᴜʙᴍɪᴛᴛᴇᴅ</span>
+                            <span style="color: var(--warning); font-size: 0.6rem; margin-top: 0.2rem;">ID: ${data.depositId}</span>
+                            <span style="color: var(--warning); font-size: 0.6rem;">UTR: ${utr}</span>
+                        `;
+                        overlay.classList.add('show');
+                    }
+                    
+                    // Show confirmation details
+                    const utrSection = document.getElementById('utrSection');
+                    if (utrSection) {
+                        const existingDisplay = document.getElementById('utrConfirmationDisplay');
+                        if (existingDisplay) {
+                            existingDisplay.remove();
+                        }
+                        
+                        const displayDiv = document.createElement('div');
+                        displayDiv.id = 'utrConfirmationDisplay';
+                        displayDiv.style.cssText = `
+                            background: rgba(34, 197, 94, 0.1);
+                            border: 1px solid var(--success);
+                            border-radius: 0.75rem;
+                            padding: 0.75rem;
+                            margin-top: 0.5rem;
+                            text-align: left;
+                        `;
+                        displayDiv.innerHTML = `
+                            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                                ✅ Sᴜʙᴍɪᴛᴛᴇᴅ Dᴇᴛᴀɪʟꜱ
+                            </div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; margin-top: 0.25rem;">
+                                🆔 ${data.depositId}
+                            </div>
+                            <div style="font-weight: 700; color: var(--success); font-family: monospace; font-size: 0.9rem; margin-top: 0.1rem;">
+                                UTR: ${utr}
+                            </div>
+                            <div style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                                ⏳ Pᴇɴᴅɪɴɢ Aᴅᴍɪɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ
+                            </div>
+                        `;
+                        utrSection.appendChild(displayDiv);
+                    }
+                    
+                    loadPendingDeposits();
+                    
+                    setTimeout(() => {
+                        goBackToDeposit();
+                    }, 5000);
+                    
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+                }
+            } catch(e) {
+                console.error('❌ Mᴀɴᴜᴀʟ Cᴏɴꜰɪʀᴍ Eʀʀᴏʀ:', e.message);
+                showToast('❌ ' + e.message, 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+            }
+        }
+
+        // ===== Gᴏ Bᴀᴄᴋ =====
+        function goBackToDeposit() {
+            document.getElementById('statePayment').style.display = 'none';
+            document.getElementById('stateDeposit').style.display = 'block';
+            if (qrTimerInterval) clearInterval(qrTimerInterval);
+            isVerified = false;
+            currentDepositId = null;
+            
+            const confirmBtn = document.getElementById('manualConfirmBtn');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Sᴜʙᴍɪᴛ Fᴏʀ Aᴘᴘʀᴏᴠᴀʟ';
+            document.getElementById('utrInput').disabled = false;
+            document.getElementById('utrInput').value = '';
+            
+            const existingDisplay = document.getElementById('utrConfirmationDisplay');
+            if (existingDisplay) {
+                existingDisplay.remove();
+            }
+            
+            loadPendingDeposits();
+        }
+
+        function goBack() {
+            if (document.getElementById('statePayment').style.display === 'block') {
+                goBackToDeposit();
+            } else {
+                window.location.href = '/dashboard';
+            }
+        }
+
+        // ===== Iɴɪᴛ =====
+        createStarDots();
+        loadBalance();
+        loadPendingDeposits();
+
+        // Refresh pending deposits every 30 seconds
+        setInterval(loadPendingDeposits, 30000);
+    </script>
+</body>
+</html>

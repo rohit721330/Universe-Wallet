@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Uꜱᴇʀ Mᴀɴᴀɢᴇᴍᴇɴᴛ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --pending-color: #f59e0b;
+            --completed-color: #22c55e;
+            --cancelled-color: #ef4444;
+            --anodized-glow: 0 0 30px rgba(0, 240, 255, 0.15);
+            --anodized-border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        
+        .electron-particle {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseElectron linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 60px rgba(0,240,255,0.1);
+        }
+        .electron-particle.big { box-shadow: 0 0 30px rgba(0,240,255,0.6), 0 0 80px rgba(0,240,255,0.15); background: radial-gradient(circle, #00f0ff, #0088ff); }
+        .electron-particle.small { box-shadow: 0 0 15px rgba(0,240,255,0.3); background: radial-gradient(circle, #00f0ff, transparent); }
+        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--bg-secondary); z-index: 1000; transition: all 0.3s ease; padding: 1.5rem 0; overflow-y: auto; border-right: var(--anodized-border); box-shadow: var(--anodized-glow); }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-header .sidebar-logo { font-size: 1.2rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-header .sidebar-close { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: var(--anodized-border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-header .sidebar-close:active { transform: scale(0.9); }
+        .sidebar-user { padding: 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-user .user-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-user .user-info { flex: 1; min-width: 0; }
+        .sidebar-user .user-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-user .user-role { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu { padding: 0.5rem 0; }
+        .sidebar-menu .menu-label { padding: 0.5rem 1.5rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .sidebar-menu .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; }
+        .sidebar-menu .menu-item i { width: 20px; font-size: 1rem; color: var(--text-muted); }
+        .sidebar-menu .menu-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .sidebar-menu .menu-item.active { background: var(--bg-card); color: var(--accent); border-left: 3px solid var(--accent); }
+        .sidebar-menu .menu-item.active i { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .sidebar-menu .menu-item.logout { margin-top: 0.5rem; border-top: var(--anodized-border); padding-top: 1rem; color: var(--danger); }
+        .sidebar-menu .menu-item.logout i { color: var(--danger); }
+        .sidebar-menu .menu-item.logout:hover { background: rgba(239,68,68,0.1); }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .menu-btn { background: var(--bg-secondary); border: var(--anodized-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,240,255,0.05); }
+        .menu-btn:active { transform: scale(0.95); }
+        .header-logo { font-size: 1.3rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .header-right { display: flex; gap: 0.5rem; align-items: center; }
+        .header-right .admin-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .admin-badge { background: rgba(0,240,255,0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: var(--anodized-border); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--bg-card); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.75rem; text-align: center; box-shadow: var(--anodized-glow); }
+        .stat-card .stat-number { font-size: 1.2rem; font-weight: 800; }
+        .stat-card .stat-number.total { color: var(--accent); text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .stat-card .stat-number.active { color: var(--success); }
+        .stat-card .stat-number.blocked { color: var(--danger); }
+        .stat-card .stat-number.balance { color: var(--warning); }
+        .stat-card .stat-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); margin-top: 2px; }
+
+        .search-section { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: var(--anodized-glow); }
+        .search-box { display: flex; gap: 0.5rem; }
+        .search-box input { flex: 1; background: var(--input-bg); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.7rem 1rem; color: var(--text-primary); outline: none; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 30px rgba(0,240,255,0.1); }
+        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box button { background: var(--accent-gradient); border: none; color: #fff; padding: 0.7rem 1.2rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .search-box button:active { transform: scale(0.95); }
+        .filter-tabs { display: flex; gap: 0.4rem; margin-top: 0.75rem; flex-wrap: wrap; }
+        .filter-tabs button { background: var(--input-bg); border: var(--anodized-border); color: var(--text-secondary); padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .filter-tabs button.active { background: rgba(0,240,255,0.15); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .filter-tabs button:active { transform: scale(0.95); }
+
+        .user-item { background: var(--bg-card); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 0.5rem; transition: all 0.2s; box-shadow: var(--anodized-glow); cursor: pointer; }
+        .user-item:hover { border-color: rgba(0,240,255,0.3); transform: translateX(2px); }
+        .user-item .user-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .user-item .user-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+        .user-item .user-details { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.2rem; }
+        .user-item .user-details span { font-size: 0.65rem; color: var(--text-secondary); }
+        .user-item .user-details i { margin-right: 0.2rem; color: var(--accent); opacity: 0.6; }
+        .user-item .user-balance { font-weight: 700; font-size: 0.95rem; color: var(--accent); }
+        .user-item .status-badge { padding: 0.15rem 0.6rem; border-radius: 2rem; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+        .user-item .status-badge.active { background: rgba(34,197,94,0.15); color: var(--success); }
+        .user-item .status-badge.blocked { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .user-item .user-actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap; }
+        .user-item .user-actions button { padding: 0.25rem 0.6rem; border-radius: 0.5rem; font-size: 0.6rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .user-item .user-actions button:active { transform: scale(0.95); }
+        .user-item .user-actions .btn-view { background: rgba(0,240,255,0.1); color: var(--accent); }
+        .user-item .user-actions .btn-block { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .user-item .user-actions .btn-unblock { background: rgba(34,197,94,0.1); color: var(--success); }
+        .user-item .user-actions .btn-adjust { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .user-item .user-actions .btn-delete { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.5rem 0; }
+        .pagination button { background: var(--bg-card); border: var(--anodized-border); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; font-family: 'Inter', sans-serif; }
+        .pagination button.active { background: rgba(0,240,255,0.15); border-color: var(--accent); color: var(--accent); }
+        .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination button:active:not(:disabled) { transform: scale(0.95); }
+        .pagination .page-info { font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; }
+
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: var(--anodized-border); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.2); }
+
+        .loading-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
+        .loading-state i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 1s linear infinite; color: var(--accent); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.3; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: var(--anodized-border); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; padding: 0.25rem 0.5rem; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .nav-item:active { transform: scale(0.95); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-secondary); border: var(--anodized-border); border-radius: 1.5rem; padding: 1.5rem; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5), var(--anodized-glow); animation: modalIn 0.3s ease; }
+        @keyframes modalIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: var(--anodized-border); }
+        .modal-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+        .modal-header h3 i { color: var(--accent); margin-right: 0.5rem; }
+        .modal-close { background: var(--bg-card); border: var(--anodized-border); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .modal-close:active { transform: scale(0.9); }
+        .modal-body .detail-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-soft); }
+        .modal-body .detail-row:last-child { border-bottom: none; }
+        .modal-body .detail-row .label { color: var(--text-secondary); font-size: 0.75rem; }
+        .modal-body .detail-row .value { color: var(--text-primary); font-weight: 600; font-size: 0.85rem; text-align: right; }
+        .modal-body .detail-row .value.balance { color: var(--accent); font-size: 1rem; }
+        .modal-footer { display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 0.75rem; border-top: var(--anodized-border); justify-content: flex-end; }
+        .modal-footer button { padding: 0.5rem 1.2rem; border-radius: 0.75rem; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .modal-footer button:active { transform: scale(0.95); }
+        .modal-footer .btn-cancel { background: var(--bg-card); color: var(--text-secondary); border: var(--anodized-border); }
+        .modal-footer .btn-confirm { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 20px rgba(0,240,255,0.3); }
+        .modal-footer .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .user-item .user-header { flex-direction: column; }
+            .user-item .user-status { width: 100%; display: flex; justify-content: space-between; margin-top: 0.3rem; }
+            .sidebar { width: 260px; }
+            .modal { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles"></div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Aᴅᴍ𝙸ɴ</span>
+            <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarName">Aᴅᴍ𝙸ɴ</div>
+                <div class="user-role"><i class="fas fa-bolt"></i> Sᴜᴘᴇʀ Aᴅᴍ𝙸ɴ</div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Mᴀ𝙸ɴ Mᴇɴᴜ</div>
+            <a href="/rohit" class="menu-item"><i class="fas fa-chart-pie"></i><span>Dᴀꜱʜʙᴏᴀʀᴅ</span></a>
+            <a href="/admin-deposit" class="menu-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱ𝙸ᴛꜱ</span></a>
+            <a href="/admin-withdraw" class="menu-item"><i class="fas fa-arrow-up"></i><span>W𝙸ᴛʜᴅʀᴀᴡᴀʟꜱ</span></a>
+            <a href="/admin-users" class="menu-item active"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Lᴏɢᴏᴜᴛ</span></button>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bolt"></i></button>
+                <span class="header-logo">Uꜱᴇʀ Mɢᴍᴛ</span>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge"><i class="fas fa-bolt"></i> Aᴅᴍ𝙸ɴ</span>
+                <div class="admin-avatar" onclick="toggleSidebar()" title="Menu"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-number total" id="totalUsers">0</div>
+                    <div class="stat-label">Tᴏᴛᴀʟ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number active" id="activeUsers">0</div>
+                    <div class="stat-label">Aᴄᴛ𝙸ᴠᴇ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number blocked" id="blockedUsers">0</div>
+                    <div class="stat-label">Bʟᴏᴄᴋᴇᴅ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number balance" id="totalBalance">₹0</div>
+                    <div class="stat-label">Bᴀʟᴀɴᴄᴇ</div>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Sᴇᴀʀᴄʜ Bʏ Nᴀᴍᴇ, Mᴏʙɪʟᴇ, Wᴀʟʟᴇᴛ..." onkeyup="handleSearch(event)">
+                    <button onclick="searchUsers()"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="filter-tabs">
+                    <button class="active" data-filter="all" onclick="filterUsers('all')">Aʟʟ</button>
+                    <button data-filter="active" onclick="filterUsers('active')">Aᴄᴛ𝙸ᴠᴇ</button>
+                    <button data-filter="blocked" onclick="filterUsers('blocked')">Bʟᴏᴄᴋᴇᴅ</button>
+                </div>
+            </div>
+
+            <div id="userList">
+                <div class="loading-state">
+                    <i class="fas fa-bolt"></i>
+                    <p>Lᴏᴀᴅ𝙸ɴɢ ᴜꜱᴇʀꜱ...</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <button onclick="changePage('prev')" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+                <span class="page-info" id="pageInfo">Pᴀɢᴇ 1 ᴏꜰ 1</span>
+                <button onclick="changePage('next')" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="/rohit" class="nav-item"><i class="fas fa-bolt"></i><span>Dᴀꜱʜ</span></a>
+            <a href="/admin-deposit" class="nav-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱ𝙸ᴛ</span></a>
+            <a href="/admin-withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>W𝙸ᴛʜᴅʀᴀᴡ</span></a>
+            <a href="/admin-users" class="nav-item active"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <a href="#" class="nav-item"><i class="fas fa-user-cog"></i><span>Sᴇᴛᴛ𝙸ɴɢꜱ</span></a>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-user"></i> <span id="modalTitle">Uꜱᴇʀ Dᴇᴛᴀ𝙸ʟꜱ</span></h3>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cʟᴏꜱᴇ</button>
+                <button class="btn-confirm" id="modalActionBtn" style="display:none;">Aᴄᴛ𝙸ᴏɴ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let state = {
+            users: [],
+            currentPage: 1,
+            limit: 20,
+            totalPages: 1,
+            totalUsers: 0,
+            filter: 'all',
+            search: '',
+            selectedUser: null
+        };
+
+        function createElectronParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'electron-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                const size = 2 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.classList.add(size > 5 ? 'big' : 'small');
+                container.appendChild(p);
+            }
+        }
+
+        function getToken() { return localStorage.getItem('adminToken'); }
+
+        function checkAuth() {
+            const token = getToken();
+            if (!token) { window.location.href = '/rohit'; return false; }
+            return true;
+        }
+
+        function handleLogout() {
+            if (confirm('Aʀᴇ ʏᴏᴜ ꜱᴜʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʟᴏɢᴏᴜᴛ?')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                window.location.href = '/rohit';
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const s = document.getElementById('sidebar');
+            const btn = document.querySelector('.menu-btn');
+            if (s.classList.contains('open') && !s.contains(e.target) && !btn.contains(e.target)) {
+                closeSidebar();
+            }
+        });
+
+        async function apiCall(endpoint, options = {}) {
+            const token = getToken();
+            if (!token) { window.location.href = '/rohit'; throw new Error('Nᴏᴛ ᴀᴜᴛʜᴇɴᴛ𝙸ᴄᴀᴛᴇᴅ'); }
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            try {
+                const response = await fetch(endpoint, { ...defaultOptions, ...options });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('adminData');
+                        window.location.href = '/rohit';
+                        throw new Error('Sᴇꜱꜱ𝙸ᴏɴ ᴇxᴘ𝙸ʀᴇᴅ');
+                    }
+                    throw new Error(data.message || 'Sᴏᴍᴇᴛʜ𝙸ɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ');
+                }
+                return data;
+            } catch (error) {
+                console.error('API Eʀʀᴏʀ:', error);
+                showToast(error.message, 'error');
+                throw error;
+            }
+        }
+
+        async function fetchUsers() {
+            if (!checkAuth()) return;
+
+            const listEl = document.getElementById('userList');
+            listEl.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-bolt"></i>
+                    <p>Lᴏᴀᴅ𝙸ɴɢ ᴜꜱᴇʀꜱ...</p>
+                </div>
+            `;
+
+            try {
+                let url = `/api/admin/users?page=${state.currentPage}&limit=${state.limit}`;
+                if (state.search) {
+                    url += `&search=${encodeURIComponent(state.search)}`;
+                }
+
+                const data = await apiCall(url);
+                state.users = data.users || [];
+                state.totalUsers = data.pagination?.total || 0;
+                state.totalPages = data.pagination?.totalPages || 1;
+
+                renderUsers();
+                renderPagination();
+                fetchStats();
+
+            } catch (error) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Fᴀ𝙸ʟᴇᴅ ᴛᴏ ʟᴏᴀᴅ ᴜꜱᴇʀꜱ</p>
+                        <button onclick="fetchUsers()" style="margin-top:0.75rem;padding:0.5rem 1.5rem;background:var(--bg-card);border:var(--anodized-border);border-radius:0.75rem;color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">
+                            <i class="fas fa-redo"></i> Rᴇᴛʀʏ
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const data = await apiCall('/api/admin/stats');
+                const stats = data.stats || {};
+                
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                
+                const active = state.users.filter(u => !u.isBlocked).length;
+                const blocked = state.users.filter(u => u.isBlocked).length;
+                document.getElementById('activeUsers').textContent = active;
+                document.getElementById('blockedUsers').textContent = blocked;
+                
+                let totalBal = 0;
+                state.users.forEach(u => totalBal += (u.balance || 0));
+                document.getElementById('totalBalance').textContent = '₹' + totalBal.toFixed(2);
+
+            } catch (error) {
+                console.error('Fᴀ𝙸ʟᴇᴅ ᴛᴏ ꜰᴇᴛᴄʜ ꜱᴛᴀᴛꜱ:', error);
+            }
+        }
+
+        function renderUsers() {
+            const listEl = document.getElementById('userList');
+
+            if (!state.users || state.users.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <p>Nᴏ ᴜꜱᴇʀꜱ ꜰᴏᴜɴᴅ</p>
+                        <p style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Tʀʏ ᴀᴅᴊᴜꜱᴛ𝙸ɴɢ ʏᴏᴜʀ ꜱᴇᴀʀᴄʜ</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            state.users.forEach(user => {
+                const statusClass = user.isBlocked ? 'blocked' : 'active';
+                const statusText = user.isBlocked ? '🔒 Bʟᴏᴄᴋᴇᴅ' : '✅ Aᴄᴛ𝙸ᴠᴇ';
+
+                html += `
+                    <div class="user-item" onclick="viewUser('${user._id}')">
+                        <div class="user-header">
+                            <div>
+                                <div class="user-name">${user.fullName || 'Uɴᴋɴᴏᴡɴ'}</div>
+                                <div class="user-details">
+                                    <span><i class="fas fa-phone"></i> ${user.mobile || 'N/A'}</span>
+                                    <span><i class="fas fa-id-card"></i> ${user.walletId || 'N/A'}</span>
+                                    ${user.telegramId ? `<span><i class="fab fa-telegram"></i> ${user.telegramId}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="user-status">
+                                <span class="user-balance">₹${(user.balance || 0).toFixed(2)}</span>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="user-actions" onclick="event.stopPropagation();">
+                            <button class="btn-view" onclick="viewUser('${user._id}')"><i class="fas fa-eye"></i> V𝙸ᴇᴡ</button>
+                            <button class="btn-adjust" onclick="adjustBalance('${user._id}')"><i class="fas fa-coins"></i> Bᴀʟᴀɴᴄᴇ</button>
+                            ${user.isBlocked ? 
+                                `<button class="btn-unblock" onclick="toggleBlock('${user._id}', false)"><i class="fas fa-unlock"></i> Uɴʙʟᴏᴄᴋ</button>` :
+                                `<button class="btn-block" onclick="toggleBlock('${user._id}', true)"><i class="fas fa-lock"></i> Bʟᴏᴄᴋ</button>`
+                            }
+                            <button class="btn-delete" onclick="deleteUser('${user._id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        function renderPagination() {
+            document.getElementById('pageInfo').textContent = `Pᴀɢᴇ ${state.currentPage} ᴏꜰ ${state.totalPages || 1}`;
+            document.getElementById('prevPage').disabled = state.currentPage <= 1;
+            document.getElementById('nextPage').disabled = state.currentPage >= state.totalPages;
+        }
+
+        function changePage(direction) {
+            if (direction === 'prev' && state.currentPage > 1) {
+                state.currentPage--;
+            } else if (direction === 'next' && state.currentPage < state.totalPages) {
+                state.currentPage++;
+            } else {
+                return;
+            }
+            fetchUsers();
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                searchUsers();
+            }
+        }
+
+        function searchUsers() {
+            state.search = document.getElementById('searchInput').value.trim();
+            state.currentPage = 1;
+            fetchUsers();
+        }
+
+        function filterUsers(filter) {
+            state.filter = filter;
+            state.currentPage = 1;
+
+            document.querySelectorAll('.filter-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.filter-tabs button[data-filter="${filter}"]`).classList.add('active');
+
+            if (filter === 'all') {
+                state.search = '';
+                document.getElementById('searchInput').value = '';
+            } else {
+                state.search = '';
+                document.getElementById('searchInput').value = '';
+            }
+            
+            fetchUsers();
+        }
+
+        async function viewUser(userId) {
+            try {
+                const data = await apiCall(`/api/admin/user/${userId}`);
+                const user = data.user;
+
+                const modalBody = document.getElementById('modalBody');
+                const modalTitle = document.getElementById('modalTitle');
+
+                modalTitle.textContent = `${user.fullName || 'Uɴᴋɴᴏᴡɴ'}`;
+
+                modalBody.innerHTML = `
+                    <div class="detail-row"><span class="label">Fᴜʟʟ Nᴀᴍᴇ</span><span class="value">${user.fullName || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">Uꜱᴇʀɴᴀᴍᴇ</span><span class="value">@${user.username || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">Mᴏʙ𝙸ʟᴇ</span><span class="value">${user.mobile || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">Wᴀʟʟᴇᴛ Iᴅ</span><span class="value">${user.walletId || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">Tᴇʟᴇɢʀᴀᴍ</span><span class="value">${user.telegramId || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">Bᴀʟᴀɴᴄᴇ</span><span class="value balance">₹${(user.balance || 0).toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Sᴛᴀᴛᴜꜱ</span><span class="value">${user.isBlocked ? '🔒 Bʟᴏᴄᴋᴇᴅ' : '✅ Aᴄᴛ𝙸ᴠᴇ'}</span></div>
+                    <div class="detail-row"><span class="label">Jᴏ𝙸ɴᴇᴅ</span><span class="value">${new Date(user.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                    ${user.isAdmin ? '<div class="detail-row"><span class="label">Rᴏʟᴇ</span><span class="value" style="color:var(--warning);">👑 Aᴅᴍ𝙸ɴ</span></div>' : ''}
+                    <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:var(--anodized-border);">
+                        <p style="color:var(--text-secondary);font-size:0.7rem;"><i class="fas fa-clock"></i> Rᴇᴄᴇɴᴛ Aᴄᴛ𝙸ᴠ𝙸ᴛʏ</p>
+                        <p style="color:var(--text-muted);font-size:0.65rem;">${data.transactions && data.transactions.length > 0 ? `${data.transactions.length} ᴛʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ ꜰᴏᴜɴᴅ` : 'Nᴏ ʀᴇᴄᴇɴᴛ ᴛʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ'}</p>
+                    </div>
+                `;
+
+                document.getElementById('userModal').classList.add('active');
+
+            } catch (error) {
+                showToast('Fᴀ𝙸ʟᴇᴅ ᴛᴏ ʟᴏᴀᴅ ᴜꜱᴇʀ ᴅᴇᴛᴀ𝙸ʟꜱ', 'error');
+            }
+        }
+
+        async function toggleBlock(userId, shouldBlock) {
+            if (!confirm(`Aʀᴇ ʏᴏᴜ ꜱᴜʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ${shouldBlock ? 'ʙʟᴏᴄᴋ' : 'ᴜɴʙʟᴏᴄᴋ'} ᴛʜ𝙸ꜱ ᴜꜱᴇʀ?`)) return;
+
+            try {
+                const data = await apiCall('/api/admin/toggle-block', {
+                    method: 'POST',
+                    body: JSON.stringify({ userId })
+                });
+
+                showToast(data.message, 'success');
+                fetchUsers();
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        function adjustBalance(userId) {
+            const user = state.users.find(u => u._id === userId);
+            if (!user) {
+                showToast('Uꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ', 'error');
+                return;
+            }
+
+            const modalBody = document.getElementById('modalBody');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalActionBtn = document.getElementById('modalActionBtn');
+
+            modalTitle.textContent = `💰 ${user.fullName || 'Uꜱᴇʀ'}`;
+            modalActionBtn.style.display = 'block';
+            modalActionBtn.textContent = 'Uᴘᴅᴀᴛᴇ Bᴀʟᴀɴᴄᴇ';
+            modalActionBtn.className = 'btn-confirm';
+            modalActionBtn.onclick = () => submitBalanceAdjust(userId);
+
+            modalBody.innerHTML = `
+                <div style="background:rgba(0,240,255,0.05);border-radius:0.75rem;padding:0.75rem;margin-bottom:1rem;text-align:center;">
+                    <p style="color:var(--text-secondary);font-size:0.7rem;">Cᴜʀʀᴇɴᴛ Bᴀʟᴀɴᴄᴇ</p>
+                    <p style="color:var(--accent);font-size:1.5rem;font-weight:800;">₹${(user.balance || 0).toFixed(2)}</p>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block;color:var(--text-secondary);font-size:0.7rem;margin-bottom:0.3rem;">Oᴘᴇʀᴀᴛ𝙸ᴏɴ</label>
+                    <select id="balanceOperation" style="width:100%;background:var(--input-bg);border:var(--anodized-border);border-radius:0.75rem;padding:0.7rem 1rem;color:var(--text-primary);outline:none;font-family:'Inter',sans-serif;font-size:0.9rem;">
+                        <option value="add">➕ Aᴅᴅ Bᴀʟᴀɴᴄᴇ</option>
+                        <option value="deduct">➖ Dᴇᴅᴜᴄᴛ Bᴀʟᴀɴᴄᴇ</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block;color:var(--text-secondary);font-size:0.7rem;margin-bottom:0.3rem;">Aᴍᴏᴜɴᴛ (₹)</label>
+                    <input type="number" id="balanceAmount" placeholder="Eɴᴛᴇʀ ᴀᴍᴏᴜɴᴛ" style="width:100%;background:var(--input-bg);border:var(--anodized-border);border-radius:0.75rem;padding:0.7rem 1rem;color:var(--text-primary);outline:none;font-family:'Inter',sans-serif;font-size:0.9rem;" min="1" step="1">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--text-secondary);font-size:0.7rem;margin-bottom:0.3rem;">Rᴇᴀꜱᴏɴ (Oᴘᴛ𝙸ᴏɴᴀʟ)</label>
+                    <input type="text" id="balanceReason" placeholder="Eɴᴛᴇʀ ʀᴇᴀꜱᴏɴ..." style="width:100%;background:var(--input-bg);border:var(--anodized-border);border-radius:0.75rem;padding:0.7rem 1rem;color:var(--text-primary);outline:none;font-family:'Inter',sans-serif;font-size:0.9rem;">
+                </div>
+            `;
+
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        async function submitBalanceAdjust(userId) {
+            const operation = document.getElementById('balanceOperation').value;
+            const amount = parseFloat(document.getElementById('balanceAmount').value);
+            const reason = document.getElementById('balanceReason').value || 'Aᴅᴍ𝙸ɴ ᴀᴅᴊᴜꜱᴛᴍᴇɴᴛ';
+
+            if (!amount || amount <= 0) {
+                showToast('Pʟᴇᴀꜱᴇ ᴇɴᴛᴇʀ ᴀ ᴠᴀʟ𝙸ᴅ ᴀᴍᴏᴜɴᴛ', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('modalActionBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pʀᴏᴄᴇꜱꜱ𝙸ɴɢ...';
+
+            try {
+                const data = await apiCall('/api/admin/adjust-balance', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userId,
+                        amount,
+                        type: operation,
+                        reason
+                    })
+                });
+
+                showToast(data.message, 'success');
+                closeModal();
+                fetchUsers();
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Uᴘᴅᴀᴛᴇ Bᴀʟᴀɴᴄᴇ';
+            }
+        }
+
+        async function deleteUser(userId) {
+            const user = state.users.find(u => u._id === userId);
+            if (!user) return;
+
+            if (!confirm(`⚠️ Dᴇʟᴇᴛᴇ "${user.fullName || 'Uꜱᴇʀ'}"?\n\nTʜ𝙸ꜱ ᴀᴄᴛ𝙸ᴏɴ 𝙸ꜱ Iʀʀᴇᴠᴇʀꜱ𝙸ʙʟᴇ!`)) return;
+            if (!confirm('🔴 F𝙸ɴᴀʟ ᴄᴏɴꜰ𝙸ʀᴍᴀᴛ𝙸ᴏɴ?')) return;
+
+            try {
+                const data = await apiCall(`/api/admin/delete-user/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                showToast(data.message, 'success');
+                fetchUsers();
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').classList.remove('active');
+            document.getElementById('modalActionBtn').style.display = 'none';
+        }
+
+        document.getElementById('userModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.className = 'toast';
+            }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createElectronParticles();
+            if (checkAuth()) {
+                fetchUsers();
+            }
+        });
+
+        console.log('⚡ Uꜱᴇʀ Mᴀɴᴀɢᴇᴍᴇɴᴛ Lᴏᴀᴅᴇᴅ');
+    </script>
+</body>
+</html>

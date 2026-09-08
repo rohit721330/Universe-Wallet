@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sᴇᴛᴛ𝙸ɴɢꜱ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --anodized-glow: 0 0 30px rgba(0, 240, 255, 0.15);
+            --anodized-border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        
+        .electron-particle {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseElectron linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 60px rgba(0,240,255,0.1);
+        }
+        .electron-particle.big { box-shadow: 0 0 30px rgba(0,240,255,0.6), 0 0 80px rgba(0,240,255,0.15); background: radial-gradient(circle, #00f0ff, #0088ff); }
+        .electron-particle.small { box-shadow: 0 0 15px rgba(0,240,255,0.3); background: radial-gradient(circle, #00f0ff, transparent); }
+        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+
+        /* Sidebar */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--bg-secondary); z-index: 1000; transition: all 0.3s ease; padding: 1.5rem 0; overflow-y: auto; border-right: var(--anodized-border); box-shadow: var(--anodized-glow); }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-header .sidebar-logo { font-size: 1.2rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-header .sidebar-close { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: var(--anodized-border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-header .sidebar-close:active { transform: scale(0.9); }
+        .sidebar-user { padding: 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-user .user-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-user .user-info { flex: 1; min-width: 0; }
+        .sidebar-user .user-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-user .user-role { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu { padding: 0.5rem 0; }
+        .sidebar-menu .menu-label { padding: 0.5rem 1.5rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .sidebar-menu .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; }
+        .sidebar-menu .menu-item i { width: 20px; font-size: 1rem; color: var(--text-muted); }
+        .sidebar-menu .menu-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .sidebar-menu .menu-item.active { background: var(--bg-card); color: var(--accent); border-left: 3px solid var(--accent); }
+        .sidebar-menu .menu-item.active i { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .sidebar-menu .menu-item.logout { margin-top: 0.5rem; border-top: var(--anodized-border); padding-top: 1rem; color: var(--danger); }
+        .sidebar-menu .menu-item.logout i { color: var(--danger); }
+        .sidebar-menu .menu-item.logout:hover { background: rgba(239,68,68,0.1); }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .menu-btn { background: var(--bg-secondary); border: var(--anodized-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,240,255,0.05); }
+        .menu-btn:active { transform: scale(0.95); }
+        .header-logo { font-size: 1.3rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .header-right { display: flex; gap: 0.5rem; align-items: center; }
+        .header-right .admin-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .admin-badge { background: rgba(0,240,255,0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: var(--anodized-border); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* Settings Card */
+        .settings-card { background: var(--bg-secondary); border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; border: var(--anodized-border); box-shadow: var(--anodized-glow); }
+        .settings-card:hover { border-color: rgba(0,240,255,0.3); }
+        .settings-card .card-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .settings-card .card-title i { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .settings-card .form-group { margin-bottom: 0.75rem; }
+        .settings-card .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .settings-card .form-group input { width: 100%; background: var(--input-bg); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.8rem 1rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; font-size: 1rem; font-family: 'Inter', sans-serif; }
+        .settings-card .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 30px rgba(0,240,255,0.1); }
+        .settings-card .form-group input::placeholder { color: var(--text-muted); }
+        .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 0.75rem; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; width: 100%; }
+        .btn:active { transform: scale(0.98); }
+        .btn-warning { background: var(--warning); color: #fff; box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
+        .btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 20px rgba(34,197,94,0.3); }
+        .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
+
+        /* Info Box */
+        .info-box { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: var(--anodized-glow); }
+        .info-box .info-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-soft); }
+        .info-box .info-row:last-child { border-bottom: none; }
+        .info-box .info-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-box .info-value { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+        .info-box .info-value.accent { color: var(--accent); }
+
+        /* Toast */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: var(--anodized-border); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.2); }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: var(--anodized-border); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; padding: 0.25rem 0.5rem; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .nav-item:active { transform: scale(0.95); }
+
+        @media (max-width: 480px) {
+            .sidebar { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Aᴅᴍ𝙸ɴ</span>
+            <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarName">Aᴅᴍ𝙸ɴ</div>
+                <div class="user-role"><i class="fas fa-bolt"></i> Sᴜᴘᴇʀ Aᴅᴍ𝙸ɴ</div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Mᴀ𝙸ɴ Mᴇɴᴜ</div>
+            <a href="/rohit" class="menu-item"><i class="fas fa-chart-pie"></i><span>Dᴀꜱʜʙᴏᴀʀᴅ</span></a>
+            <a href="/admin-deposit" class="menu-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱ𝙸ᴛꜱ</span></a>
+            <a href="/admin-withdraw" class="menu-item"><i class="fas fa-arrow-up"></i><span>W𝙸ᴛʜᴅʀᴀᴡᴀʟꜱ</span></a>
+            <a href="/admin-users" class="menu-item"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <a href="/admin-adjust" class="menu-item"><i class="fas fa-coins"></i><span>Aᴅᴊᴜꜱᴛ Bᴀʟᴀɴᴄᴇ</span></a>
+            <a href="/admin-settings" class="menu-item active"><i class="fas fa-cog"></i><span>Sᴇᴛᴛ𝙸ɴɢꜱ</span></a>
+            <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Lᴏɢᴏᴜᴛ</span></button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bolt"></i></button>
+                <span class="header-logo">Sᴇᴛᴛ𝙸ɴɢꜱ</span>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge"><i class="fas fa-bolt"></i> Aᴅᴍ𝙸ɴ</span>
+                <div class="admin-avatar" onclick="toggleSidebar()" title="Menu"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Admin Info -->
+            <div class="settings-card">
+                <div class="card-title"><i class="fas fa-shield-alt"></i> Aᴅᴍ𝙸ɴ Iɴꜰᴏ</div>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">Rᴏʟᴇ</span>
+                        <span class="info-value accent">Sᴜᴘᴇʀ Aᴅᴍ𝙸ɴ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Aᴄᴄᴇꜱꜱ</span>
+                        <span class="info-value accent"><i class="fas fa-check-circle" style="color:var(--success);"></i> Fᴜʟʟ Aᴄᴄᴇꜱꜱ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Sᴇꜱꜱ𝙸ᴏɴ</span>
+                        <span class="info-value" id="sessionStatus">Aᴄᴛ𝙸ᴠᴇ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Pattern -->
+            <div class="settings-card">
+                <div class="card-title"><i class="fas fa-lock"></i> Cʜᴀɴɢᴇ Pᴀᴛᴛᴇʀɴ Lᴏᴄᴋ</div>
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Cᴜʀʀᴇɴᴛ Pᴀᴛᴛᴇʀɴ</label>
+                    <input type="password" id="currentPattern" placeholder="Eɴᴛᴇʀ ᴄᴜʀʀᴇɴᴛ ᴘᴀᴛᴛᴇʀɴ (6 ᴅɪɢɪᴛꜱ)" maxlength="6" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Nᴇᴡ Pᴀᴛᴛᴇʀɴ</label>
+                    <input type="password" id="newPattern" placeholder="Eɴᴛᴇʀ ɴᴇᴡ ᴘᴀᴛᴛᴇʀɴ (6 ᴅɪɢɪᴛꜱ)" maxlength="6" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Cᴏɴꜰ𝙸ʀᴍ Nᴇᴡ Pᴀᴛᴛᴇʀɴ</label>
+                    <input type="password" id="confirmPattern" placeholder="Cᴏɴꜰ𝙸ʀᴍ ɴᴇᴡ ᴘᴀᴛᴛᴇʀɴ (6 ᴅɪɢɪᴛꜱ)" maxlength="6" inputmode="numeric">
+                </div>
+                <button class="btn btn-warning" onclick="changeAdminPattern()">
+                    <i class="fas fa-sync-alt"></i> Cʜᴀɴɢᴇ Pᴀᴛᴛᴇʀɴ
+                </button>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-card" style="border-color: rgba(239,68,68,0.3);">
+                <div class="card-title" style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Dᴀɴɢᴇʀ Zᴏɴᴇ</div>
+                <button class="btn btn-danger" onclick="logoutAllSessions()">
+                    <i class="fas fa-sign-out-alt"></i> Lᴏɢᴏᴜᴛ Aʟʟ Sᴇꜱꜱ𝙸ᴏɴꜱ
+                </button>
+                <div style="margin-top: 0.5rem; text-align: center;">
+                    <button class="btn btn-danger" onclick="clearAllData()" style="background: rgba(239,68,68,0.2); color: var(--danger); box-shadow: none;">
+                        <i class="fas fa-trash-alt"></i> Cʟᴇᴀʀ Cᴀᴄʜᴇ & Dᴀᴛᴀ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <a href="/rohit" class="nav-item"><i class="fas fa-bolt"></i><span>Dᴀꜱʜ</span></a>
+            <a href="/admin-deposit" class="nav-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱ𝙸ᴛ</span></a>
+            <a href="/admin-withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>W𝙸ᴛʜᴅʀᴀᴡ</span></a>
+            <a href="/admin-users" class="nav-item"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <a href="/admin-settings" class="nav-item active"><i class="fas fa-cog"></i><span>Sᴇᴛᴛ𝙸ɴɢꜱ</span></a>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // PARTICLES
+        // ============================================
+        function createElectronParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'electron-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                const size = 2 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.classList.add(size > 5 ? 'big' : 'small');
+                container.appendChild(p);
+            }
+        }
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        function getToken() { return localStorage.getItem('adminToken'); }
+
+        function checkAuth() {
+            const token = getToken();
+            if (!token) { window.location.href = '/rohit'; return false; }
+            return true;
+        }
+
+        function handleLogout() {
+            if (confirm('Aʀᴇ ʏᴏᴜ ꜱᴜʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʟᴏɢᴏᴜᴛ?')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                window.location.href = '/rohit';
+            }
+        }
+
+        // ============================================
+        // SIDEBAR
+        // ============================================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const s = document.getElementById('sidebar');
+            const btn = document.querySelector('.menu-btn');
+            if (s.classList.contains('open') && !s.contains(e.target) && !btn.contains(e.target)) {
+                closeSidebar();
+            }
+        });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.className = 'toast', 3500);
+        }
+
+        // ============================================
+        // CHANGE PATTERN
+        // ============================================
+        async function changeAdminPattern() {
+            const currentPattern = document.getElementById('currentPattern').value.trim();
+            const newPattern = document.getElementById('newPattern').value.trim();
+            const confirmPattern = document.getElementById('confirmPattern').value.trim();
+
+            if (!currentPattern || !newPattern || !confirmPattern) {
+                showToast('❌ F𝙸ʟʟ Aʟʟ F𝙸ᴇʟᴅꜱ', 'error');
+                return;
+            }
+
+            if (!/^[0-9]{6}$/.test(currentPattern)) {
+                showToast('❌ Cᴜʀʀᴇɴᴛ Pᴀᴛᴛᴇʀɴ Mᴜꜱᴛ Bᴇ 6 D𝙸ɢ𝙸ᴛꜱ', 'error');
+                return;
+            }
+
+            if (!/^[0-9]{6}$/.test(newPattern)) {
+                showToast('❌ Nᴇᴡ Pᴀᴛᴛᴇʀɴ Mᴜꜱᴛ Bᴇ 6 D𝙸ɢ𝙸ᴛꜱ', 'error');
+                return;
+            }
+
+            if (newPattern !== confirmPattern) {
+                showToast('❌ Nᴇᴡ Pᴀᴛᴛᴇʀɴ Dᴏᴇꜱ Nᴏᴛ Mᴀᴛᴄʜ', 'error');
+                return;
+            }
+
+            try {
+                const token = getToken();
+                if (!token) {
+                    showToast('❌ Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ F𝙸ʀꜱᴛ', 'error');
+                    return;
+                }
+
+                const response = await fetch('/api/admin/change-pattern', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ currentPattern, newPattern })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('✅ Pᴀᴛᴛᴇʀɴ Cʜᴀɴɢᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ', 'success');
+                    document.getElementById('currentPattern').value = '';
+                    document.getElementById('newPattern').value = '';
+                    document.getElementById('confirmPattern').value = '';
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                }
+            } catch (err) {
+                showToast('❌ Eʀʀᴏʀ Cʜᴀɴɢ𝙸ɴɢ Pᴀᴛᴛᴇʀɴ', 'error');
+            }
+        }
+
+        // ============================================
+        // DANGER ZONE
+        // ============================================
+        function logoutAllSessions() {
+            if (confirm('⚠️ Tʜɪꜱ ᴡɪʟʟ ʟᴏɢ ᴏᴜᴛ ᴀʟʟ ᴀᴄᴛɪᴠᴇ ꜱᴇꜱꜱɪᴏɴꜱ. Cᴏɴᴛɪɴᴜᴇ?')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                showToast('🔒 Aʟʟ ꜱᴇꜱꜱɪᴏɴꜱ ᴄʟᴏꜱᴇᴅ', 'info');
+                setTimeout(() => {
+                    window.location.href = '/rohit';
+                }, 1000);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Tʜɪꜱ ᴡɪʟʟ ᴄʟᴇᴀʀ ᴀʟʟ ʟᴏᴄᴀʟ ᴅᴀᴛᴀ ᴀɴᴅ ᴄᴀᴄʜᴇ. Cᴏɴᴛɪɴᴜᴇ?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                        for (let name of names) caches.delete(name);
+                    });
+                }
+                showToast('🗑️ Dᴀᴛᴀ ᴄʟᴇᴀʀᴇᴅ', 'success');
+                setTimeout(() => {
+                    window.location.href = '/rohit';
+                }, 1500);
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            createElectronParticles();
+            if (checkAuth()) {
+                // Update session status
+                const token = getToken();
+                if (token) {
+                    document.getElementById('sessionStatus').innerHTML = '<i class="fas fa-circle" style="color:var(--success);font-size:0.6rem;"></i> Aᴄᴛ𝙸ᴠᴇ';
+                }
+            }
+        });
+
+        console.log('⚡ Sᴇᴛᴛ𝙸ɴɢꜱ Lᴏᴀᴅᴇᴅ');
+    </script>
+</body>
+</html>

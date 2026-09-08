@@ -1,0 +1,25 @@
+{
+  "name": "Pʀɪᴍᴇ Wᴀʟʟᴇᴛ",
+  "short_name": "Pʀɪᴍᴇ",
+  "description": "Dɪɢɪᴛᴀʟ • Fᴀꜱᴛ • Sᴇᴄᴜʀᴇ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/prime_wallet_logo_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/prime_wallet_logo_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

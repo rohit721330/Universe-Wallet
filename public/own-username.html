@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Buttons</title>
+
+<style>
+body{
+    background: radial-gradient(circle at top left, #0f0f3f, #000);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family: system-ui;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.btn{
+    padding:14px 22px;
+    font-size:18px;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    background:#22c55e;
+    box-shadow:0 0 12px currentColor;
+    transition:0.4s;
+    position:relative;
+    overflow:hidden;
+}
+
+/* Text style */
+.btn span{
+    font-variant: small-caps;
+    letter-spacing:1px;
+    animation: textGlow 2s infinite alternate;
+    text-transform: capitalize;
+}
+
+@keyframes textGlow{
+    0%{ text-shadow:0 0 6px currentColor; }
+    100%{ text-shadow:0 0 16px currentColor; }
+}
+
+/* Emoji animation */
+.emoji{
+    margin-right:8px;
+    display:inline-block;
+}
+
+.e1{ animation: emojiFloat 1.2s infinite ease-in-out; }
+.e2{ animation: emojiFloat 1.6s infinite ease-in-out; }
+.e3{ animation: emojiFloat 2s infinite ease-in-out; }
+
+@keyframes emojiFloat{
+    0%{ transform:translateY(0); }
+    50%{ transform:translateY(-6px); }
+    100%{ transform:translateY(0); }
+}
+
+.counter{
+    margin-top:18px;
+    font-size:14px;
+    opacity:.85;
+    color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <button class="btn" id="b1">
+        <span><span class="emoji e1">📞</span>Contact Now</span>
+    </button>
+
+    <button class="btn" id="b2">
+        <span><span class="emoji e2">💼</span>Open Your Own Wallet</span>
+    </button>
+
+    <button class="btn" id="b3">
+        <span><span class="emoji e3">📢</span>Join Our Official Channel</span>
+    </button>
+
+    <div id="views" class="counter">👀 Views: …</div>
+</div>
+
+<script>
+/* ============================
+   BUTTON LINKS
+============================ */
+const links = {
+  b1: "tg://openmessage?user_id=8514407577",
+  b2: "https://prime-wallet-lifafa.vercel.app",
+  b3: "https://t.me/Prime_Wallet_OFC"
+};
+
+/* ============================
+   Glow colors rotation
+============================ */
+const colors = [
+    ["#ff4d4d","#4dd2ff","#7dff4d"],
+    ["#ff9f1a","#a66cff","#2bff88"],
+    ["#ff66cc","#00ffaa","#ffcc00"]
+];
+
+let index = 0;
+const buttons = [
+    document.getElementById("b1"),
+    document.getElementById("b2"),
+    document.getElementById("b3")
+];
+
+function rotateColors(){
+    buttons.forEach((btn,i)=>{
+        btn.style.color = colors[index][i];
+        btn.style.boxShadow = `0 0 18px ${colors[index][i]}`;
+    });
+    index = (index + 1) % colors.length;
+}
+
+rotateColors();
+setInterval(rotateColors,2000);
+
+/* ============================
+   Click action + vibration
+============================ */
+buttons.forEach(btn=>{
+    btn.onclick = ()=>{
+        if(navigator.vibrate){ navigator.vibrate(25); }
+        window.open(links[btn.id], "_blank");
+    };
+});
+
+/* ============================
+   Emoji rotation
+============================ */
+const e1=["📞","🔥","⚡","💬","🚀"];
+const e2=["💼","👛","💰","🏦","💎"];
+const e3=["📢","📣","🌐","🔥","🚀"];
+let i1=0,i2=0,i3=0;
+
+setInterval(()=>buttons[0].innerHTML=`<span><span class="emoji e1">${e1[i1++%e1.length]}</span>Contact Now</span>`,1200);
+setInterval(()=>buttons[1].innerHTML=`<span><span class="emoji e2">${e2[i2++%e2.length]}</span>Open Your Own Wallet</span>`,1600);
+setInterval(()=>buttons[2].innerHTML=`<span><span class="emoji e3">${e3[i3++%e3.length]}</span>Join Our Official Channel</span>`,2000);
+
+/* ============================
+   Views Counter (JSONBin)
+============================ */
+const BIN_ID = "6975baf2ae596e708ff40a27";
+const API_KEY = "$2a$10$FzuPqc1Mzi7uqTGrRFAbvu.Mv8fjn8iQ2eipl9nMlevsjRwppaqWO";
+const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+async function updateViews(){
+    try{
+        const r = await fetch(API_URL,{headers:{'X-Master-Key':API_KEY}});
+        const d = await r.json();
+        const v = (d.record.views || 0) + 1;
+
+        await fetch(API_URL,{
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json",
+                "X-Master-Key":API_KEY
+            },
+            body:JSON.stringify({views:v})
+        });
+
+        document.getElementById("views").innerText = "👀 Views: " + v;
+    }catch{
+        document.getElementById("views").innerText = "👀 Views: Error";
+    }
+}
+updateViews();
+</script>
+
+</body>
+</html>

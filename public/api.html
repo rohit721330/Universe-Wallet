@@ -1,0 +1,1349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Aᴩ𝙸 Iɴᴛᴇɢʀᴀᴛ𝙸ᴏɴ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --p1: #f97316;
+      --p2: #ea580c;
+      --card-light: rgba(255, 247, 237, 0.9);
+      --input-light: #fff0e5;
+      --border-soft: #555555;
+      --red: #dc2626;
+      --green: #16a34a;
+      --neon-blue: #00f0ff;
+      --dark-bg-start: #0a0a0a;
+      --dark-bg-mid: #121212;
+      --glass-dark: rgba(10, 10, 10, 0.85);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background-attachment: fixed;
+      transition: background 0.4s ease, color 0.3s ease;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      padding-bottom: 85px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(249, 115, 22, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.dark::before {
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px);
+    }
+
+    .star-dot {
+      position: fixed;
+      bottom: -20px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: riseStar linear infinite;
+      opacity: 0;
+    }
+    .star-dot.big { box-shadow: 0 0 12px currentColor; }
+    .star-dot.small { box-shadow: 0 0 4px currentColor; }
+
+    @keyframes riseStar {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      5% { opacity: 0.8; }
+      95% { opacity: 0.8; }
+      100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.dark::after {
+      background: radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%);
+    }
+
+    body.light {
+      background: linear-gradient(135deg, #fef6ed 0%, #fde8d4 100%);
+      background-attachment: fixed;
+      color: #1a1a2e;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #0a0a0a, #121212, #1a0e08);
+      background-attachment: fixed;
+      color: #e0f0ff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      min-height: 100vh;
+      z-index: 1;
+    }
+
+    .wrapper {
+      width: 100%;
+      padding: 100px 20px 80px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+    }
+    body.light .header-fixed {
+      background: rgba(255, 247, 237, 0.92);
+      border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+    }
+    body.dark .header-fixed {
+      background: rgba(10, 10, 10, 0.92);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      font-size: 20px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 30px;
+      transition: all 0.2s;
+    }
+    body.light .back-btn { color: #ea580c; background: rgba(249, 115, 22, 0.1); }
+    body.dark .back-btn { color: #00f0ff; background: rgba(0, 240, 255, 0.1); }
+    .back-btn:active { transform: scale(0.92); }
+
+    .prime-word {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      transition: color 0.3s ease;
+    }
+    body.light .prime-word { color: #000000; }
+    body.dark .prime-word { color: #ffffff; }
+
+    .wallet-word {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      transition: color 0.3s ease;
+    }
+    body.light .wallet-word { color: #f97316; }
+    body.dark .wallet-word { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.5); }
+
+    .pay-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      background: #f97316;
+      color: white;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    }
+    body.dark .pay-badge {
+      background: #00f0ff;
+      color: #0a0a1a;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-placeholder { width: 44px; }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    body.light .page-title {
+      background: linear-gradient(135deg, #ea580c, #f97316);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    body.dark .page-title {
+      background: linear-gradient(135deg, #00f0ff, #60a5fa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card {
+      border-radius: 34px;
+      overflow: hidden;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    body.light .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid #fbd38d; }
+    body.dark .card { background: var(--glass-dark); backdrop-filter: blur(20px); border: 1px solid rgba(0, 240, 255, 0.3); }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    body.light .card-title { color: #ea580c; }
+    body.dark .card-title { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.3); }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #cbd5e1;
+      transition: 0.3s;
+      border-radius: 34px;
+    }
+    body.dark .toggle-slider {
+      background: #334155;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #16a34a;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(22px);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status-badge.active {
+      background: #16a34a;
+      color: white;
+    }
+    body.dark .status-badge.active {
+      background: #4ade80;
+      color: #0a0a1a;
+    }
+    .status-badge.inactive {
+      background: #dc2626;
+      color: white;
+    }
+    body.dark .status-badge.inactive {
+      background: #f87171;
+      color: #0a0a1a;
+    }
+    .status-badge i { font-size: 10px; }
+
+    .credentials-box {
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    body.light .credentials-box {
+      background: rgba(249, 115, 22, 0.06);
+      border: 1px solid rgba(249, 115, 22, 0.1);
+    }
+    body.dark .credentials-box {
+      background: rgba(0, 240, 255, 0.06);
+      border: 1px solid rgba(0, 240, 255, 0.1);
+    }
+    .credentials-box .label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.6;
+    }
+
+    .copy-btn-sm {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      opacity: 0.5;
+    }
+    body.light .copy-btn-sm { color: #6b7280; }
+    body.dark .copy-btn-sm { color: #8aa0bb; }
+    .copy-btn-sm:hover { opacity: 1; }
+
+    .api-url-box {
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      word-break: break-all;
+      font-family: monospace;
+    }
+    body.light .api-url-box {
+      background: rgba(249, 115, 22, 0.06);
+      border: 1px solid rgba(249, 115, 22, 0.1);
+      color: #4a4a6a;
+    }
+    body.dark .api-url-box {
+      background: rgba(0, 240, 255, 0.06);
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      color: #b0c0e0;
+    }
+
+    .code-block {
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-x: auto;
+      line-height: 1.8;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    body.light .code-block {
+      background: #f1f1f1;
+      border: 1px solid #e0e0e0;
+      color: #1a1a2e;
+    }
+    body.dark .code-block {
+      background: #0a0a0a;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: #b0c0e0;
+    }
+
+    .code-block .keyword { color: #8b5cf6; }
+    .code-block .string { color: #059669; }
+    .code-block .comment { color: #6b7280; font-style: italic; }
+    .code-block .function { color: #d97706; }
+    .code-block .variable { color: #dc2626; }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    body.light .input-group label { color: #6b7280; }
+    body.dark .input-group label { color: #8aa0bb; }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+    body.light .input-group input {
+      background: #f9fafb;
+      border: 2px solid #f0f0f0;
+      color: #1a1a2e;
+    }
+    body.dark .input-group input {
+      background: rgba(8, 12, 28, 0.9);
+      border: 2px solid rgba(0, 200, 230, 0.5);
+      color: #e0f0ff;
+    }
+    .input-group input:focus {
+      outline: none;
+    }
+    body.light .input-group input:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+    body.dark .input-group input:focus {
+      border-color: #00f0ff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+    body.dark .btn-primary {
+      background: linear-gradient(135deg, #00e0ff, #0088ff);
+      color: #0a0a1a;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid #f97316;
+      color: #ea580c;
+    }
+    body.dark .btn-secondary {
+      border-color: #00f0ff;
+      color: #00f0ff;
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 11px;
+      width: auto;
+      border-radius: 16px;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .flex-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mt-10 { margin-top: 10px; }
+    .mt-12 { margin-top: 12px; }
+    .mb-10 { margin-bottom: 10px; }
+    .mb-12 { margin-bottom: 12px; }
+    .text-center { text-align: center; }
+    .gap-8 { gap: 8px; }
+
+    .security-notice {
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    body.light .security-notice {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+    }
+    body.dark .security-notice {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      color: #fbbf24;
+    }
+    .security-notice i { font-size: 16px; margin-top: 2px; }
+
+    .response-box {
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    body.light .response-box {
+      background: #f9fafb;
+      border: 1px solid #e2e2f0;
+      color: #1a1a2e;
+    }
+    body.dark .response-box {
+      background: rgba(8, 12, 28, 0.9);
+      border: 1px solid rgba(0, 200, 230, 0.3);
+      color: #b0c0e0;
+    }
+
+    .response-box .success { color: #16a34a; }
+    body.dark .response-box .success { color: #4ade80; }
+    .response-box .error { color: #dc2626; }
+    body.dark .response-box .error { color: #f87171; }
+    .response-box .key { color: #8b5cf6; }
+    body.dark .response-box .key { color: #a78bfa; }
+    .response-box .string { color: #059669; }
+    body.dark .response-box .string { color: #34d399; }
+    .response-box .number { color: #d97706; }
+    body.dark .response-box .number { color: #fbbf24; }
+
+    .toast-message {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10000;
+      backdrop-filter: blur(8px);
+      animation: fadeInUp 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+    }
+    body.light .toast-message { background: #1e293b; color: white; }
+    body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-around; padding: 10px 0 20px;
+      z-index: 50;
+    }
+    body.light .bottom-nav { background: rgba(255, 247, 237, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #fbd38d; }
+    body.dark .bottom-nav { background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
+
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      cursor: pointer; text-decoration: none; flex: 1;
+    }
+    .nav-item i { font-size: 20px; }
+    body.light .nav-item { color: #94a3b8; }
+    body.dark .nav-item { color: #6a7a9a; }
+    body.light .nav-item.active { color: #f97316; }
+    body.dark .nav-item.active { color: #00f0ff; }
+
+    .payment-response {
+      margin-top: 12px;
+      display: none;
+    }
+    .payment-response.show { display: block; }
+
+    .api-disabled .credentials-box {
+      opacity: 0.5;
+    }
+    .api-disabled .api-url-box {
+      opacity: 0.5;
+    }
+    .api-disabled .btn {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .api-disabled .input-group input {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 480px) {
+      .wrapper { padding: 80px 16px 80px; }
+      .prime-word, .wallet-word { font-size: 20px; }
+      .pay-badge { font-size: 12px; padding: 3px 12px; }
+      .header-placeholder { width: 0px; }
+      .page-title { font-size: 24px; }
+      .card { padding: 18px; }
+      .code-block { font-size: 10px; }
+    }
+  </style>
+</head>
+<body class="light">
+  <div class="header-fixed">
+    <div class="header-left">
+      <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+      <span class="prime-word">Pʀ𝙸ᴍᴇ</span>
+      <span class="wallet-word">Wᴀʟʟᴇᴛ</span>
+      <div class="pay-badge"><i class="fa-regular fa-credit-card"></i> Pᴀʏ</div>
+    </div>
+    <div class="header-right">
+      <div class="header-placeholder"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="wrapper">
+      <h1 class="page-title"><i class="fa-solid fa-code"></i> Aᴩ𝙸 Iɴᴛᴇɢʀᴀᴛ𝙸ᴏɴ</h1>
+
+      <!-- Aᴘ𝙸 Sᴛᴀᴛᴜꜱ -->
+      <div class="card" id="apiStatusCard">
+        <div class="card-title"><i class="fa-solid fa-circle-info"></i> Aᴘ𝙸 Sᴛᴀᴛᴜꜱ</div>
+        
+        <div class="flex-between">
+          <div class="flex-center">
+            <span class="status-badge active" id="statusBadge">
+              <i class="fa-solid fa-circle"></i> <span id="statusText">Aᴄᴛ𝙸ᴠᴇ</span>
+            </span>
+            <span style="font-size: 12px; opacity: 0.7;" id="statusDesc">Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Aʀᴇ Eɴᴀʙʟᴇᴅ</span>
+          </div>
+          <div class="toggle-container">
+            <span style="font-size: 11px; font-weight: 600; opacity: 0.7;">Oꜰꜰ</span>
+            <label class="toggle">
+              <input type="checkbox" id="apiToggle" checked onchange="toggleApiStatus()" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size: 11px; font-weight: 600; opacity: 0.7;">Oɴ</span>
+          </div>
+        </div>
+
+        <div class="flex-between mt-10" style="font-size: 13px;">
+          <span><i class="fa-regular fa-clock"></i> Lᴀꜱᴛ Uꜱᴇᴅ: <span id="lastUsed">Nᴏᴡ</span></span>
+          <span><i class="fa-regular fa-circle-check"></i> Tᴏᴛᴀʟ Cᴀʟʟꜱ: <span id="totalCalls">0</span></span>
+        </div>
+
+        <div class="flex-between mt-10" style="gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="regenerateApiKey()">
+            <i class="fa-solid fa-rotate"></i> Rᴇɢᴇɴᴇʀᴀᴛᴇ Kᴇʏ
+          </button>
+        </div>
+      </div>
+
+      <!-- Aᴘ𝙸 Cʀᴇᴅᴇɴᴛ𝙸ᴀʟꜱ -->
+      <div class="card" id="apiCredentialsCard">
+        <div class="card-title"><i class="fa-solid fa-lock"></i> Aᴘ𝙸 Cʀᴇᴅᴇɴᴛ𝙸ᴀʟꜱ</div>
+        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 12px;">
+          Kᴇᴇᴘ Tʜᴇꜱᴇ Cʀᴇᴅᴇɴᴛ𝙸ᴀʟꜱ Sᴇᴄᴜʀᴇ. Dᴏ Nᴏᴛ Sʜᴀʀᴇ Tʜᴇᴍ Pᴜʙʟ𝙸ᴄʟʏ.
+        </p>
+
+        <div class="credentials-box">
+          <span><span class="label">Aᴘ𝙸 Kᴇʏ</span><br /><span id="apiKey" style="font-size: 14px;">—</span></span>
+          <button class="copy-btn-sm" onclick="copyText('apiKey', 'Kᴇʏ')"><i class="fa-regular fa-copy"></i></button>
+        </div>
+
+        <div class="security-notice mt-10">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Yᴏᴜʀ Aᴘ𝙸 Cʀᴇᴅᴇɴᴛ𝙸ᴀʟꜱ Pʀᴏᴠ𝙸ᴅᴇ Fᴜʟʟ Aᴄᴄᴇꜱꜱ Tᴏ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ. Kᴇᴇᴘ Tʜᴇᴍ Sᴇᴄᴜʀᴇ Aɴᴅ Nᴇᴠᴇʀ Exᴘᴏꜱᴇ Tʜᴇᴍ Iɴ Cʟ𝙸ᴇɴᴛ-S𝙸ᴅᴇ Cᴏᴅᴇ Oʀ Pᴜʙʟ𝙸ᴄ Rᴇᴘᴏꜱ𝙸ᴛᴏʀ𝙸ᴇꜱ.</span>
+        </div>
+      </div>
+
+      <!-- Aᴘ𝙸 Eɴᴅᴘᴏ𝙸ɴᴛ -->
+      <div class="card" id="apiEndpointCard">
+        <div class="card-title"><i class="fa-solid fa-link"></i> Aᴘ𝙸 Eɴᴅᴘᴏ𝙸ɴᴛ</div>
+        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 8px;">
+          Uꜱᴇ Tʜ𝙸ꜱ Uʀʟ Tᴏ Mᴀᴋᴇ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛꜱ
+        </p>
+        <div class="api-url-box" id="apiUrlDisplay">
+          https://prime-wallet-lifafa.vercel.app/api/payment?key=<span id="urlKey">—</span>&number={number}&amount={amount}&comment={comment}
+        </div>
+        <button class="btn btn-secondary btn-sm mt-10" onclick="copyApiUrl()" style="width: auto;">
+          <i class="fa-regular fa-copy"></i> Cᴏᴘʏ Aᴘ𝙸 Uʀʟ
+        </button>
+      </div>
+
+      <!-- Tᴇꜱᴛ Aᴘ𝙸 Rᴇǫᴜᴇꜱᴛ -->
+      <div class="card" id="testApiCard">
+        <div class="card-title"><i class="fa-solid fa-flask"></i> Tᴇꜱᴛ Aᴘ𝙸 Rᴇǫᴜᴇꜱᴛ</div>
+        
+        <div class="input-group">
+          <label><i class="fa-solid fa-phone"></i> Nᴜᴍʙᴇʀ *</label>
+          <input type="text" id="payNumber" placeholder="E.g. 9876543210" />
+        </div>
+
+        <div class="input-group">
+          <label><i class="fa-solid fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ (₹) *</label>
+          <input type="number" id="testAmount" placeholder="E.g. 100" step="0.1" min="0.1" />
+        </div>
+
+        <div class="input-group">
+          <label><i class="fa-regular fa-message"></i> Cᴏᴍᴍᴇɴᴛ</label>
+          <input type="text" id="testComment" placeholder="E.g. Monthly Payment" />
+        </div>
+
+        <button class="btn btn-primary" id="testPaymentBtn" onclick="makeTestPayment()">
+          <i class="fa-solid fa-play"></i> Tᴇꜱᴛ Pᴀʏᴍᴇɴᴛ
+        </button>
+
+        <div class="payment-response" id="testResponse">
+          <div style="font-size: 12px; font-weight: 700; margin-top: 12px; margin-bottom: 6px;">
+            <span class="url-highlight"><i class="fa-regular fa-rectangle-list"></i> Rᴇꜱᴘᴏɴꜱᴇ</span>
+          </div>
+          <div class="response-box" id="testResponseContent"></div>
+        </div>
+      </div>
+
+      <!-- Jᴀᴠᴀꜱᴄʀ𝙸ᴘᴛ Exᴀᴍᴘʟᴇ -->
+      <div class="card">
+        <div class="card-title"><i class="fa-brands fa-js"></i> Jᴀᴠᴀꜱᴄʀ𝙸ᴘᴛ Exᴀᴍᴘʟᴇ</div>
+        <div class="code-block" id="jsExample">
+<span class="comment">// Mᴀᴋᴇ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ</span>
+<span class="keyword">async function</span> <span class="function">makePayment</span>() {
+    <span class="keyword">const</span> apiUrl = <span class="string">'https://prime-wallet-lifafa.vercel.app/api/payment'</span>;
+    <span class="keyword">const</span> params = <span class="keyword">new</span> URLSearchParams({
+        key: <span class="string">'<span id="jsKey">YOUR_KEY</span>'</span>,
+        number: <span class="string">'9876543210'</span>,
+        amount: <span class="number">500</span>,
+        comment: <span class="string">'Monthly Payment'</span>
+    });
+
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`<span id="jsUrlBase">${apiUrl}</span>?<span id="jsParams">${params}</span>`</span>);
+        <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+        <span class="keyword">if</span> (data.status === <span class="string">'success'</span>) {
+            <span class="function">console</span>.<span class="function">log</span>(<span class="string">'Payment Successful:'</span>, data);
+        } <span class="keyword">else</span> {
+            <span class="function">console</span>.<span class="function">error</span>(<span class="string">'Payment Failed:'</span>, data.message);
+        }
+    } <span class="keyword">catch</span> (error) {
+        <span class="function">console</span>.<span class="function">error</span>(<span class="string">'API Error:'</span>, error);
+    }
+}
+        </div>
+        <button class="btn btn-secondary btn-sm mt-10" onclick="copyCode('jsExample', 'Javascript')" style="width: auto;">
+          <i class="fa-regular fa-copy"></i> Cᴏᴘʏ Cᴏᴅᴇ
+        </button>
+      </div>
+
+      <!-- Pʏᴛʜᴏɴ Exᴀᴍᴘʟᴇ -->
+      <div class="card">
+        <div class="card-title"><i class="fa-brands fa-python"></i> Pʏᴛʜᴏɴ Exᴀᴍᴘʟᴇ</div>
+        <div class="code-block" id="pythonExample">
+<span class="comment"># Mᴀᴋᴇ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ</span>
+<span class="keyword">import</span> requests
+
+<span class="keyword">def</span> <span class="function">make_payment</span>():
+    url = <span class="string">'https://prime-wallet-lifafa.vercel.app/api/payment'</span>
+    params = {
+        <span class="string">'key'</span>: <span class="string">'<span id="pyKey">YOUR_KEY</span>'</span>,
+        <span class="string">'number'</span>: <span class="string">'9876543210'</span>,
+        <span class="string">'amount'</span>: <span class="number">500</span>,
+        <span class="string">'comment'</span>: <span class="string">'Monthly Payment'</span>
+    }
+
+    <span class="keyword">try</span>:
+        response = requests.<span class="function">get</span>(url, params=params)
+        data = response.<span class="function">json</span>()
+
+        <span class="keyword">if</span> data.<span class="function">get</span>(<span class="string">'status'</span>) == <span class="string">'success'</span>:
+            <span class="function">print</span>(<span class="string">f'Payment Successful! TXN ID: {data.get("transaction_id")}'</span>)
+        <span class="keyword">else</span>:
+            <span class="function">print</span>(<span class="string">f'Payment Failed: {data.get("message")}'</span>)
+
+    <span class="keyword">except</span> requests.exceptions.RequestException <span class="keyword">as</span> e:
+        <span class="function">print</span>(<span class="string">f'Request Failed: {e}'</span>)
+        </div>
+        <button class="btn btn-secondary btn-sm mt-10" onclick="copyCode('pythonExample', 'Python')" style="width: auto;">
+          <i class="fa-regular fa-copy"></i> Cᴏᴘʏ Cᴏᴅᴇ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bᴏᴛᴛᴏᴍ Nᴀᴠ𝙸ɢᴀᴛ𝙸ᴏɴ -->
+  <div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Hᴏᴍᴇ</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Sᴇɴᴅ</a>
+    <a href="/qr" class="nav-item active"><i class="fa-solid fa-qrcode"></i>Qʀ</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Aᴅᴅ</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>H𝙸ꜱᴛᴏʀʏ</a>
+  </div>
+
+  <script>
+    // ============================================
+    // Aᴘ𝙸 Cᴏɴꜰ𝙸ɢᴜʀᴀᴛ𝙸ᴏɴ
+    // ============================================
+    const API_BASE = '/api';
+    let apiKey = '';
+    let isApiActive = true;
+
+    // ============================================
+    // Tʜᴇᴍᴇ Fᴜɴᴄᴛ𝙸ᴏɴꜱ
+    // ============================================
+    function updateStarColors() {
+      const stars = document.querySelectorAll('.star-dot');
+      const isDark = document.body.classList.contains('dark');
+      const color = isDark ? '#00f0ff' : '#f97316';
+      stars.forEach(star => {
+        star.style.color = color;
+        star.style.backgroundColor = color;
+      });
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('primeTheme');
+      const body = document.body;
+      if (saved === 'dark') {
+        body.classList.add('dark');
+        body.classList.remove('light');
+      } else {
+        body.classList.add('light');
+        body.classList.remove('dark');
+      }
+      updateStarColors();
+    }
+
+    // ============================================
+    // Sᴛᴀʀ Dᴏᴛꜱ
+    // ============================================
+    function createStarDots() {
+      const existingStars = document.querySelectorAll('.star-dot');
+      existingStars.forEach(star => star.remove());
+
+      for (let i = 0; i < 25; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'star-dot';
+        dot.style.left = Math.random() * 100 + '%';
+        dot.style.animationDuration = (6 + Math.random() * 12) + 's';
+        dot.style.animationDelay = Math.random() * 12 + 's';
+        const size = 2 + Math.random() * 6;
+        dot.style.width = size + 'px';
+        dot.style.height = size + 'px';
+        dot.classList.add(size > 4 ? 'big' : 'small');
+        document.body.appendChild(dot);
+      }
+      updateStarColors();
+    }
+
+    // ============================================
+    // Nᴀᴠ𝙸ɢᴀᴛ𝙸ᴏɴ
+    // ============================================
+    function goBack() {
+      window.location.href = '/more';
+    }
+
+    // ============================================
+    // Tᴏᴀꜱᴛ
+    // ============================================
+    function showToast(message, type = '') {
+      const toast = document.createElement('div');
+      toast.className = 'toast-message';
+      toast.innerHTML = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ============================================
+    // Gᴇɴᴇʀᴀᴛᴇ Rᴀɴᴅᴏᴍ Aᴘ𝙸 Kᴇʏ
+    // ============================================
+    function generateRandomApiKey() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let key = '';
+      for (let i = 0; i < 18; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return key;
+    }
+
+    // ============================================
+    // Uᴘᴅᴀᴛᴇ Dɪꜱᴘʟᴀʏ
+    // ============================================
+    function updateApiDisplay(key) {
+      apiKey = key;
+      
+      document.getElementById('apiKey').textContent = key || '—';
+      document.getElementById('urlKey').textContent = key || '—';
+      document.getElementById('jsKey').textContent = key || 'YOUR_KEY';
+      document.getElementById('pyKey').textContent = key || 'YOUR_KEY';
+    }
+
+    // ============================================
+    // Cᴏᴘʏ Fᴜɴᴄᴛ𝙸ᴏɴꜱ
+    // ============================================
+    function copyText(elementId, label) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      if (text && text !== '—') {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`✅ ${label} Cᴏᴘ𝙸ᴇᴅ Tᴏ Cʟ𝙸ᴘʙᴏᴀʀᴅ!`, 'success');
+        }).catch(() => {
+          showToast(`📋 ${label}: ${text}`, 'warning');
+        });
+      } else {
+        showToast('⚠️ Nᴏ ' + label + ' Tᴏ Cᴏᴘʏ', 'error');
+      }
+    }
+
+    function copyApiUrl() {
+      const urlElement = document.getElementById('apiUrlDisplay');
+      const url = urlElement.textContent.trim();
+      if (url) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('✅ Aᴘ𝙸 Uʀʟ Cᴏᴘ𝙸ᴇᴅ Tᴏ Cʟ𝙸ᴘʙᴏᴀʀᴅ!', 'success');
+        }).catch(() => {
+          showToast('📋 Aᴘ𝙸 Uʀʟ: ' + url, 'warning');
+        });
+      }
+    }
+
+    function copyCode(elementId, label) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent.trim();
+      if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`✅ ${label} Cᴏᴅᴇ Cᴏᴘ𝙸ᴇᴅ Tᴏ Cʟ𝙸ᴘʙᴏᴀʀᴅ!`, 'success');
+        }).catch(() => {
+          showToast('📋 Cᴏᴅᴇ Cᴏᴘ𝙸ᴇᴅ Tᴏ Cᴏɴꜱᴏʟᴇ', 'warning');
+          console.log(text);
+        });
+      }
+    }
+
+    // ============================================
+    // Tᴏɢɢʟᴇ Aᴘ𝙸 Sᴛᴀᴛᴜꜱ
+    // ============================================
+    function toggleApiStatus() {
+      const toggle = document.getElementById('apiToggle');
+      const badge = document.getElementById('statusBadge');
+      const statusText = document.getElementById('statusText');
+      const statusDesc = document.getElementById('statusDesc');
+      
+      isApiActive = toggle.checked;
+      
+      if (isApiActive) {
+        badge.className = 'status-badge active';
+        statusText.textContent = 'Aᴄᴛ𝙸ᴠᴇ';
+        statusDesc.textContent = 'Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Aʀᴇ Eɴᴀʙʟᴇᴅ';
+        
+        document.getElementById('apiCredentialsCard').classList.remove('api-disabled');
+        document.getElementById('apiEndpointCard').classList.remove('api-disabled');
+        document.getElementById('testApiCard').classList.remove('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = false;
+        
+        showToast('✅ Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Hᴀᴠᴇ Bᴇᴇɴ Eɴᴀʙʟᴇᴅ', 'success');
+      } else {
+        badge.className = 'status-badge inactive';
+        statusText.textContent = 'Iɴᴀᴄᴛ𝙸ᴠᴇ';
+        statusDesc.textContent = 'Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Aʀᴇ D𝙸ꜱᴀʙʟᴇᴅ';
+        
+        document.getElementById('apiCredentialsCard').classList.add('api-disabled');
+        document.getElementById('apiEndpointCard').classList.add('api-disabled');
+        document.getElementById('testApiCard').classList.add('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = true;
+        
+        showToast('⛔ Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Hᴀᴠᴇ Bᴇᴇɴ D𝙸ꜱᴀʙʟᴇᴅ', 'warning');
+      }
+      
+      localStorage.setItem('apiStatus', isApiActive ? 'active' : 'inactive');
+      document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+    }
+
+    // ============================================
+    // Lᴏᴀᴅ Aᴘ𝙸 Kᴇʏ Fʀᴏᴍ Dᴀᴛᴀʙᴀꜱᴇ
+    // ============================================
+    async function loadApiKeyFromDatabase() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = '/';
+          return;
+        }
+
+        const response = await fetch(`${API_BASE}/api-key`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success && data.apiKey) {
+          updateApiDisplay(data.apiKey);
+          localStorage.setItem('apiKey', data.apiKey);
+          return data.apiKey;
+        } else {
+          return await saveNewApiKey();
+        }
+      } catch (error) {
+        console.error('❌ Eʀʀᴏʀ Lᴏᴀᴅ𝙸ɴɢ Aᴘ𝙸 Kᴇʏ:', error);
+        const savedKey = localStorage.getItem('apiKey');
+        if (savedKey && savedKey.length === 18 && /^[A-Z0-9]+$/.test(savedKey)) {
+          updateApiDisplay(savedKey);
+          return savedKey;
+        }
+        return await saveNewApiKey();
+      }
+    }
+
+    // ============================================
+    // Sᴀᴠᴇ Nᴇᴡ Aᴘ𝙸 Kᴇʏ
+    // ============================================
+    async function saveNewApiKey() {
+      try {
+        const token = localStorage.getItem('token');
+        const newKey = generateRandomApiKey();
+
+        const response = await fetch(`${API_BASE}/api-key`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ apiKey: newKey })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          updateApiDisplay(newKey);
+          localStorage.setItem('apiKey', newKey);
+          return newKey;
+        } else {
+          throw new Error(data.message || 'Fᴀɪʟᴇᴅ Tᴏ Sᴀᴠᴇ Aᴘ𝙸 Kᴇʏ');
+        }
+      } catch (error) {
+        console.error('❌ Eʀʀᴏʀ Sᴀᴠ𝙸ɴɢ Aᴘ𝙸 Kᴇʏ:', error);
+        const fallbackKey = generateRandomApiKey();
+        updateApiDisplay(fallbackKey);
+        localStorage.setItem('apiKey', fallbackKey);
+        showToast('⚠️ Aᴘ𝙸 Kᴇʏ Sᴀᴠᴇᴅ Lᴏᴄᴀʟʟʏ Oɴʟʏ', 'warning');
+        return fallbackKey;
+      }
+    }
+
+    // ============================================
+    // Rᴇɢᴇɴᴇʀᴀᴛᴇ Aᴘ𝙸 Kᴇʏ
+    // ============================================
+    async function regenerateApiKey() {
+      const btn = event.target;
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span>';
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          showToast('❌ Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ Fɪʀꜱᴛ', 'error');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE}/api-key/regenerate`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          updateApiDisplay(data.apiKey);
+          localStorage.setItem('apiKey', data.apiKey);
+          showToast('🔄 Aᴘ𝙸 Kᴇʏ Rᴇɢᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!', 'success');
+        } else {
+          throw new Error(data.message || 'Fᴀɪʟᴇᴅ Tᴏ Rᴇɢᴇɴᴇʀᴀᴛᴇ Aᴘ𝙸 Kᴇʏ');
+        }
+      } catch (error) {
+        console.error('❌ Rᴇɢᴇɴᴇʀᴀᴛᴇ Eʀʀᴏʀ:', error);
+        showToast('❌ ' + (error.message || 'Fᴀɪʟᴇᴅ Tᴏ Rᴇɢᴇɴᴇʀᴀᴛᴇ Aᴘ𝙸 Kᴇʏ'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    // ============================================
+    // Mᴀᴋᴇ Tᴇꜱᴛ Pᴀʏᴍᴇɴᴛ - FIXED VERSION
+    // ============================================
+    async function makeTestPayment() {
+      // Check if API is active
+      if (!isApiActive) {
+        showToast('⛔ Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Aʀᴇ Cᴜʀʀᴇɴᴛʟʏ D𝙸ꜱᴀʙʟᴇᴅ. Pʟᴇᴀꜱᴇ Eɴᴀʙʟᴇ Tʜᴇᴍ Fɪʀꜱᴛ.', 'error');
+        return;
+      }
+
+      // Get input values
+      const numberInput = document.getElementById('payNumber');
+      const amountInput = document.getElementById('testAmount');
+      const commentInput = document.getElementById('testComment');
+
+      const number = numberInput.value.trim();
+      const amount = amountInput.value;
+      const comment = commentInput.value.trim();
+
+      // Validate inputs
+      if (!number || number.length < 10) {
+        showToast('⚠️ Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Nᴜᴍʙᴇʀ (Mɪɴ 10 Dɪɢɪᴛꜱ)', 'error');
+        numberInput.focus();
+        return;
+      }
+
+      if (!amount || parseFloat(amount) <= 0) {
+        showToast('⚠️ Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Aᴍᴏᴜɴᴛ (Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0)', 'error');
+        amountInput.focus();
+        return;
+      }
+
+      // Get API key
+      const key = localStorage.getItem('apiKey');
+      if (!key || key === '—' || key === 'YOUR_KEY') {
+        showToast('⚠️ Nᴏ Vᴀʟ𝙸ᴅ Aᴘ𝙸 Kᴇʏ Fᴏᴜɴᴅ. Pʟᴇᴀꜱᴇ Rᴇɢᴇɴᴇʀᴀᴛᴇ.', 'error');
+        return;
+      }
+
+      // Get button reference
+      const btn = document.getElementById('testPaymentBtn');
+      const originalText = btn.innerHTML;
+      
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Pʀᴏᴄᴇꜱꜱɪɴɢ...';
+
+      try {
+        // Build the API URL with proper encoding
+        const apiUrl = `https://prime-wallet-lifafa.vercel.app/api/payment?key=${encodeURIComponent(key)}&number=${encodeURIComponent(number)}&amount=${encodeURIComponent(amount)}&comment=${encodeURIComponent(comment || 'Test Payment')}`;
+        
+        console.log('📤 Sᴇɴᴅɪɴɢ Rᴇǫᴜᴇꜱᴛ Tᴏ:', apiUrl);
+
+        // Make the API call
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        // Parse response
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          data = { status: 'error', message: 'Iɴᴠᴀʟɪᴅ Rᴇꜱᴘᴏɴꜱᴇ Fʀᴏᴍ Sᴇʀᴠᴇʀ' };
+        }
+
+        console.log('📥 Rᴇꜱᴘᴏɴꜱᴇ Rᴇᴄᴇɪᴠᴇᴅ:', data);
+
+        // Show response
+        const responseContainer = document.getElementById('testResponse');
+        const responseContent = document.getElementById('testResponseContent');
+
+        // Format and colorize JSON response
+        const formattedJson = JSON.stringify(data, null, 4);
+        let coloredJson = formattedJson;
+
+        if (data.status === 'success') {
+          coloredJson = coloredJson.replace(/"status": "success"/g, '"status": "<span class="success">success</span>"');
+          coloredJson = coloredJson.replace(/"message": "[^"]*"/g, (match) => {
+            const msg = match.match(/"message": "([^"]*)"/)[1];
+            return `"message": "<span class="success">${msg}</span>"`;
+          });
+          showToast('✅ Pᴀʏᴍᴇɴᴛ Tᴇꜱᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟ!', 'success');
+          
+          // Update total calls counter
+          let totalCalls = parseInt(document.getElementById('totalCalls').textContent) || 0;
+          document.getElementById('totalCalls').textContent = totalCalls + 1;
+        } else {
+          coloredJson = coloredJson.replace(/"status": "error"/g, '"status": "<span class="error">error</span>"');
+          coloredJson = coloredJson.replace(/"message": "[^"]*"/g, (match) => {
+            const msg = match.match(/"message": "([^"]*)"/)[1];
+            return `"message": "<span class="error">${msg}</span>"`;
+          });
+          showToast('❌ ' + (data.message || 'Pᴀʏᴍᴇɴᴛ Fᴀɪʟᴇᴅ'), 'error');
+        }
+
+        // Colorize keys
+        coloredJson = coloredJson.replace(/"([^"]+)":/g, (match, key) => {
+          if (key !== 'status' && key !== 'message') {
+            return `"<span class="key">${key}</span>":`;
+          }
+          return match;
+        });
+
+        // Colorize string values
+        coloredJson = coloredJson.replace(/: "([^"]*)"/g, (match, value) => {
+          if (match.includes('span class')) return match;
+          return `: "<span class="string">${value}</span>"`;
+        });
+
+        // Colorize numbers
+        coloredJson = coloredJson.replace(/: (\d+\.?\d*)/g, (match, value) => {
+          if (match.includes('span class')) return match;
+          return `: <span class="number">${value}</span>`;
+        });
+
+        responseContent.innerHTML = coloredJson;
+        responseContainer.classList.add('show');
+
+        // Update last used time
+        document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+
+      } catch (error) {
+        console.error('❌ Tᴇꜱᴛ Pᴀʏᴍᴇɴᴛ Eʀʀᴏʀ:', error);
+        showToast('🌐 Nᴇᴛᴡᴏʀᴋ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Cʜᴇᴄᴋ Yᴏᴜʀ Cᴏɴɴᴇᴄᴛɪᴏɴ Aɴᴅ Tʀʏ Aɢᴀɪɴ.', 'error');
+        
+        // Show error in response box
+        const responseContainer = document.getElementById('testResponse');
+        const responseContent = document.getElementById('testResponseContent');
+        responseContent.innerHTML = `<span class="error">❌ Eʀʀᴏʀ: ${error.message || 'Uɴᴋɴᴏᴡɴ Eʀʀᴏʀ'}</span>`;
+        responseContainer.classList.add('show');
+      } finally {
+        // Re-enable button
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    // ============================================
+    // Lᴏᴀᴅ Aᴘ𝙸 Sᴛᴀᴛᴜꜱ
+    // ============================================
+    function loadApiStatus() {
+      const savedStatus = localStorage.getItem('apiStatus');
+      if (savedStatus === 'inactive') {
+        document.getElementById('apiToggle').checked = false;
+        isApiActive = false;
+        
+        const badge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const statusDesc = document.getElementById('statusDesc');
+        
+        badge.className = 'status-badge inactive';
+        statusText.textContent = 'Iɴᴀᴄᴛ𝙸ᴠᴇ';
+        statusDesc.textContent = 'Aᴘ𝙸 Pᴀʏᴍᴇɴᴛꜱ Aʀᴇ D𝙸ꜱᴀʙʟᴇᴅ';
+        
+        document.getElementById('apiCredentialsCard').classList.add('api-disabled');
+        document.getElementById('apiEndpointCard').classList.add('api-disabled');
+        document.getElementById('testApiCard').classList.add('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = true;
+      }
+    }
+
+    // ============================================
+    // Cʜᴇᴄᴋ Aᴜᴛʜᴇɴᴛ𝙸ᴄᴀᴛ𝙸ᴏɴ
+    // ============================================
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/';
+        return false;
+      }
+      return true;
+    }
+
+    // ============================================
+    // Iɴ𝙸ᴛ𝙸ᴀʟ𝙸ᴢᴇ
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async function() {
+      loadTheme();
+      createStarDots();
+
+      if (!checkAuth()) return;
+      
+      loadApiStatus();
+      await loadApiKeyFromDatabase();
+
+      document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+    });
+  </script>
+</body>
+</html>

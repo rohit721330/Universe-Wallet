@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mᴀɴᴜᴀʟ Dᴇᴘᴏꜱɪᴛ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title><!-- ===== Fᴀᴠɪᴄᴏɴ ===== -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/arpita330/Only-For-Image/main/jarvis_logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5f7fb;
+  color: #111827;
+  min-height: 100vh;
+  padding: 1rem;
+  padding-bottom: 80px;
+}
+
+/* ===== Hᴇᴀᴅᴇʀ ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0 1rem 0;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.back-btn {
+  background: #ffffff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #111827;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+
+.back-btn:active {
+  transform: scale(0.95);
+}
+
+.header-logo-img {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.header-right {
+  width: 40px;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ===== Pʀᴏɢʀᴇꜱꜱ Bᴀʀ ===== */
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 2rem;
+  padding: 0.4rem 0.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.progress-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+  background: transparent;
+  transition: all 0.3s;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.progress-step .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #e5e7eb;
+  color: #9ca3af;
+  transition: all 0.3s;
+}
+
+.progress-step.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.progress-step.active .num {
+  background: #ffffff;
+  color: #2563eb;
+}
+
+.progress-step.done {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.progress-step.done .num {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+/* ===== Cᴀʀᴅ ===== */
+.card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===== Sᴛᴇᴘ 1: Aᴍᴏᴜɴᴛ ===== */
+#step1 { display: block; }
+#step2 { display: none; }
+#step3 { display: none; }
+
+.amount-input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.amount-input-wrapper .rupee-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.amount-input {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem 1rem 1rem 2.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+  font-family: monospace;
+}
+
+.amount-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+}
+
+.amount-input::placeholder {
+  color: #d1d5db;
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.quick-amount {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.6rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.quick-amount:active {
+  transform: scale(0.96);
+  background: #e5e7eb;
+}
+
+.quick-amount-full {
+  grid-column: 1 / -1;
+}
+
+.error-msg {
+  background: #fee2e2;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 1rem;
+  display: none;
+}
+
+.error-msg.show {
+  display: block;
+}
+
+/* ===== Sᴛᴇᴘ 2: Pᴀʏ ===== */
+.pay-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.pay-amount-badge {
+  display: inline-block;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 2rem;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.pay-amount-badge i {
+  margin-right: 0.3rem;
+}
+
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.qr-box {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1rem;
+  width: 220px;
+  height: 220px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.qr-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upi-card {
+  background: #2563eb;
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.upi-card-left {
+  color: #ffffff;
+}
+
+.upi-card-left .upi-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.upi-card-left .upi-id {
+  font-size: 1rem;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.upi-copy-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+
+.upi-copy-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pay-via-btn {
+  width: 100%;
+  background: #2563eb;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.pay-via-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  color: #9ca3af;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.already-paid-btn {
+  width: 100%;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.already-paid-btn:active {
+  transform: scale(0.98);
+  background: #e5e7eb;
+}
+
+/* ===== Sᴛᴇᴘ 3: Cᴏɴꜰɪʀᴍ ===== */
+.confirm-info-box {
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-info-box h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c2410c;
+  margin-bottom: 0.3rem;
+}
+
+.confirm-info-box p {
+  font-size: 0.75rem;
+  color: #9a3412;
+  line-height: 1.5;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.input-group input {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  color: #111827;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-group input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+}
+
+.input-group input::placeholder {
+  color: #d1d5db;
+}
+
+.confirm-btn {
+  width: 100%;
+  background: #2563eb;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirm-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* ===== Bᴏᴛᴛᴏᴍ Nᴀᴠ ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem 0 1rem 0;
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
+
+.nav-item.active {
+  color: #2563eb;
+}
+
+.nav-item:active {
+  transform: scale(0.95);
+}
+
+/* ===== Tᴏᴀꜱᴛ ===== */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 2000;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.toast.success { background: #22c55e; color: white; }
+.toast.error { background: #ef4444; color: white; }
+.toast.info { background: #3b82f6; color: white; }
+
+/* ===== Rᴇꜱᴘᴏɴꜱɪᴠᴇ ===== */
+@media (max-width: 480px) {
+  .quick-amounts { grid-template-columns: 1fr 1fr; }
+  .quick-amount-full { grid-column: 1 / -1; }
+  .progress-step { font-size: 0.65rem; padding: 0.4rem 0.5rem; }
+  .progress-step .num { width: 20px; height: 20px; font-size: 0.6rem; }
+  .qr-box { width: 180px; height: 180px; }
+  .upi-card { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .upi-copy-btn { align-self: flex-start; }
+}
+</style>
+ </head>
+ <body>
+  <div class="toast" id="toast"></div>
+  <header class="header">
+   <div class="header-left">
+    <button class="back-btn" onclick="goBack()"> <i class="fas fa-arrow-left"></i> </button> <img src="https://raw.githubusercontent.com/arpita330/Only-For-Image/main/jarvis_logo.png" alt="Pʀɪᴍᴇ Wᴀʟʟᴇᴛ" class="header-logo-img"> <span class="header-title">Aᴅᴅ Mᴏɴᴇʏ</span>
+   </div>
+   <div class="header-right"></div>
+  </header>
+  <div class="container">
+   <!-- ===== Pʀᴏɢʀᴇꜱꜱ Bᴀʀ ===== -->
+   <div class="progress-container">
+    <div class="progress-step active" id="progress1">
+     <span class="num">1</span> Aᴍᴏᴜɴᴛ
+    </div>
+    <div class="progress-step" id="progress2">
+     <span class="num">2</span> Pᴀʏ
+    </div>
+    <div class="progress-step" id="progress3">
+     <span class="num">3</span> Cᴏɴꜰɪʀᴍ
+    </div>
+   </div><!-- ===== Sᴛᴇᴘ 1: Aᴍᴏᴜɴᴛ ===== -->
+   <div id="step1">
+    <div class="card">
+     <div class="card-title">
+      <i class="fas fa-rupee-sign"></i> Eɴᴛᴇʀ Aᴍᴏᴜɴᴛ
+     </div>
+     <div class="amount-input-wrapper">
+      <span class="rupee-icon">₹</span> <input type="number" id="amount" class="amount-input" placeholder="0" min="1" max="5000">
+     </div>
+     <div class="quick-amounts">
+      <button class="quick-amount" onclick="setAmount(50)">₹𝟻𝟶</button> <button class="quick-amount" onclick="setAmount(100)">₹𝟷𝟶𝟶</button> <button class="quick-amount" onclick="setAmount(500)">₹𝟻𝟶𝟶</button> <button class="quick-amount" onclick="setAmount(1000)">₹𝟷ᴋ</button> <button class="quick-amount quick-amount-full" onclick="setAmount(2000)">₹𝟸ᴋ</button>
+     </div>
+     <div class="error-msg" id="amountError">
+      Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ Mɪɴɪᴍᴜᴍ ₹𝟷
+     </div><button class="pay-via-btn" onclick="goToStep2()" style="margin-top: 1rem;"> Gᴇɴᴇʀᴀᴛᴇ Qʀ <i class="fas fa-qrcode"></i> </button>
+    </div>
+   </div><!-- ===== Sᴛᴇᴘ 2: Pᴀʏ ===== -->
+   <div id="step2">
+    <div class="card">
+     <div class="pay-header">
+      <div class="pay-amount-badge">
+       <i class="fas fa-rupee-sign"></i> <span id="payAmountDisplay">0</span> ᴛᴏ ᴘᴀʏ
+      </div>
+     </div>
+     <div class="qr-container">
+      <div class="qr-box" id="qrCodeContainer">
+       <!-- Qʀ ᴡɪʟʟ ʙᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ ᴅʏɴᴀᴍɪᴄᴀʟʟʏ -->
+       <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 0.8rem;">
+        Sᴄᴀɴ ᴛᴏ ᴘᴀʏ
+       </div>
+      </div>
+     </div>
+     <div class="upi-card">
+      <div class="upi-card-left">
+       <div class="upi-label">
+        Uᴘɪ Iᴅ
+       </div>
+       <div class="upi-id" id="upiIdDisplay">
+        rohit.1474@superyes
+       </div>
+      </div><button class="upi-copy-btn" onclick="copyUpi()"> <i class="fas fa-copy"></i> Cᴏᴘʏ </button>
+     </div><button class="pay-via-btn" id="payViaUpiBtn"> <i class="fas fa-mobile-alt"></i> Pᴀʏ Vɪᴀ Uᴘɪ Aᴘᴘ </button>
+     <div class="or-divider">
+      Oʀ
+     </div><button class="already-paid-btn" onclick="goToStep3()"> Aʟʀᴇᴀᴅʏ Pᴀɪᴅ? Eɴᴛᴇʀ Uᴛʀ <i class="fas fa-arrow-right"></i> </button>
+    </div>
+   </div><!-- ===== Sᴛᴇᴘ 3: Cᴏɴꜰɪʀᴍ ===== -->
+   <div id="step3">
+    <div class="card">
+     <div class="card-title">
+      <i class="fas fa-file-invoice"></i> Pᴀʏᴍᴇɴᴛ Cᴏɴꜰɪʀᴍᴀᴛɪᴏɴ
+     </div>
+     <div class="confirm-info-box">
+      <h4>Wʜᴇʀᴇ ᴛᴏ ꜰɪɴᴅ Uᴛʀ?</h4>
+      <p>Pᴀʏᴍᴇɴᴛ ᴀᴘᴘ → Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Hɪꜱᴛᴏʀʏ → Sᴇʟᴇᴄᴛ ᴛʜɪꜱ ᴘᴀʏᴍᴇɴᴛ → Cᴏᴘʏ 12-ᴅɪɢɪᴛ Uᴛʀ/Rᴇꜰ ɴᴜᴍʙᴇʀ</p>
+     </div>
+     <div class="error-msg" id="utrError">
+      Uᴛʀ ɴᴜᴍʙᴇʀ ʀᴇǫᴜɪʀᴇᴅ!
+     </div>
+     <div class="input-group">
+      <label>Uᴛʀ / Rᴇꜰᴇʀᴇɴᴄᴇ Nᴜᴍʙᴇʀ</label> <input type="text" id="utrInput" placeholder="Eɴᴛᴇʀ 12-ᴅɪɢɪᴛ Uᴛʀ ɴᴜᴍʙᴇʀ" maxlength="20">
+     </div>
+     <div class="input-group">
+      <label>Aᴍᴏᴜɴᴛ Pᴀɪᴅ (₹)</label> <input type="number" id="confirmAmount" placeholder="0" min="1" max="5000">
+     </div><button class="confirm-btn" onclick="submitDeposit()"> Cᴏɴꜰɪʀᴍ Dᴇᴘᴏꜱɪᴛ </button>
+    </div>
+   </div>
+  </div><!-- ===== Bᴏᴛᴛᴏᴍ Nᴀᴠ ===== -->
+  <div class="bottom-nav">
+   <a href="/dashboard" class="nav-item"> <i class="fas fa-home"></i> <span>Hᴏᴍᴇ</span> </a> <a href="/transfer" class="nav-item"> <i class="fas fa-paper-plane"></i> <span>Sᴇɴᴅ</span> </a> <a href="/deposit" class="nav-item active"> <i class="fas fa-plus-circle"></i> <span>Aᴅᴅ</span> </a> <a href="/withdraw" class="nav-item"> <i class="fas fa-arrow-up"></i> <span>Wɪᴛʜᴅʀᴀᴡ</span> </a> <a href="/lifafa" class="nav-item"> <i class="fas fa-envelope"></i> <span>Lɪꜰᴀꜰᴀ</span> </a>
+  </div>
+  <script>
+// Mᴀɴᴜᴀʟ Dᴇᴘᴏꜱɪᴛ Pᴀɢᴇ - Fɪxᴇᴅ Vᴇʀꜱɪᴏɴ
+console.log('🟢 Mᴀɴᴜᴀʟ Dᴇᴘᴏꜱɪᴛ Pᴀɢᴇ Sᴛᴀʀᴛᴇᴅ');
+
+const adminUpi = 'rohit.1474@superyes';
+let depositAmount = 0;
+const token = localStorage.getItem('token');
+
+// Cʜᴇᴄᴋ ᴀᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ
+if (!token) {
+  console.error('❌ Nᴏ Tᴏᴋᴇɴ Fᴏᴜɴᴅ - Rᴇᴅɪʀᴇᴄᴛɪɴɢ Tᴏ Lᴏɢɪɴ');
+  window.location.href = '/index';
+}
+
+// ===== Tᴏᴀꜱᴛ =====
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== Sᴇᴛ Aᴍᴏᴜɴᴛ =====
+function setAmount(amount) {
+  document.getElementById('amount').value = amount;
+  console.log('💰 Qᴜɪᴄᴋ Aᴍᴏᴜɴᴛ Sᴇʟᴇᴄᴛᴇᴅ: ₹' + amount);
+}
+
+// ===== Sᴛᴇᴘ Nᴀᴠɪɢᴀᴛɪᴏɴ =====
+function goToStep2() {
+  const amount = parseFloat(document.getElementById('amount').value);
+  
+  if (!amount || amount < 1) {
+    document.getElementById('amountError').classList.add('show');
+    console.error('❌ Iɴᴠᴀʟɪᴅ Aᴍᴏᴜɴᴛ: Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ ₹𝟷');
+    return;
+  }
+  if (amount > 5000) {
+    showToast('❌ Mᴀxɪᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹𝟻,𝟶𝟶𝟶', 'error');
+    console.error('❌ Iɴᴠᴀʟɪᴅ Aᴍᴏᴜɴᴛ: E x ᴄᴇᴇᴅꜱ Mᴀxɪᴍᴜᴍ Lɪᴍɪᴛ');
+    return;
+  }
+  
+  document.getElementById('amountError').classList.remove('show');
+  depositAmount = amount;
+  console.log('💰 Dᴇᴘᴏꜱɪᴛ Aᴍᴏᴜɴᴛ Sᴇᴛ Tᴏ: ₹' + amount);
+  
+  // Uᴘᴅᴀᴛᴇ Sᴛᴇᴘ 2 UI
+  document.getElementById('payAmountDisplay').textContent = amount;
+  document.getElementById('upiIdDisplay').textContent = adminUpi;
+  
+  // Cʟᴇᴀʀ ᴀɴʏ ᴘʀᴇᴠɪᴏᴜꜱʟʏ ᴀᴜᴛᴏ-ꜰɪʟʟᴇᴅ ᴀᴍᴏᴜɴᴛ ɪɴ Sᴛᴇᴘ 3
+  document.getElementById('confirmAmount').value = '';
+  
+  // Gᴇɴᴇʀᴀᴛᴇ Qʀ ᴡɪᴛʜ ᴛʜᴇ ᴇɴᴛᴇʀᴇᴅ ᴀᴍᴏᴜɴᴛ
+  const qrData = `upi://pay?pa=${adminUpi}&am=${amount}`;
+  document.getElementById('qrCodeContainer').innerHTML = 
+    `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}" alt="QR">`;
+  
+  // Uᴘᴅᴀᴛᴇ Uᴘɪ ᴀᴘᴘ ʟɪɴᴋ
+  document.getElementById('payViaUpiBtn').onclick = function() {
+    window.location.href = qrData;
+    console.log('📱 Uᴘɪ Aᴘᴘ Oᴘᴇɴᴇᴅ Fᴏʀ Pᴀʏᴍᴇɴᴛ');
+  };
+  
+  // Sᴡɪᴛᴄʜ ꜱᴛᴇᴘꜱ
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('step3').style.display = 'none';
+  
+  document.getElementById('progress1').className = 'progress-step done';
+  document.getElementById('progress2').className = 'progress-step active';
+  document.getElementById('progress3').className = 'progress-step';
+  
+  console.log('✅ Qʀ Gᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Fᴏʀ ₹' + amount);
+  showToast('✅ Qʀ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ', 'success');
+}
+
+function goToStep3() {
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  
+  document.getElementById('progress1').className = 'progress-step done';
+  document.getElementById('progress2').className = 'progress-step done';
+  document.getElementById('progress3').className = 'progress-step active';
+  
+  console.log('📝 Mᴏᴠᴇᴅ Tᴏ Cᴏɴꜰɪʀᴍᴀᴛɪᴏɴ Sᴛᴇᴘ');
+}
+
+// ===== Cᴏᴘʏ Uᴘɪ =====
+function copyUpi() {
+  navigator.clipboard.writeText(adminUpi).then(() => {
+    showToast('✅ Uᴘɪ Iᴅ Cᴏᴘɪᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!', 'success');
+    console.log('✅ Uᴘɪ Iᴅ Cᴏᴘɪᴇᴅ');
+  }).catch(() => {
+    showToast('❌ Fᴀɪʟᴇᴅ Tᴏ Cᴏᴘʏ Uᴘɪ Iᴅ', 'error');
+    console.error('❌ Cᴏᴘʏ Fᴀɪʟᴇᴅ');
+  });
+}
+
+// ===== Sᴜʙᴍɪᴛ Dᴇᴘᴏꜱɪᴛ =====
+function submitDeposit() {
+  const utr = document.getElementById('utrInput').value.trim();
+  const amount = parseFloat(document.getElementById('confirmAmount').value);
+  
+  document.getElementById('utrError').classList.remove('show');
+  
+  if (!utr || utr.length < 12) {
+    document.getElementById('utrError').classList.add('show');
+    console.error('❌ Iɴᴠᴀʟɪᴅ Uᴛʀ Lᴇɴɢᴛʜ:', utr.length);
+    return;
+  }
+  
+  if (!amount || amount < 1) {
+    showToast('❌ Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ', 'error');
+    console.error('❌ Iɴᴠᴀʟɪᴅ Aᴍᴏᴜɴᴛ:', amount);
+    return;
+  }
+  
+  if (amount > 5000) {
+    showToast('❌ Mᴀxɪᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹𝟻,𝟶𝟶𝟶', 'error');
+    console.error('❌ Aᴍᴏᴜɴᴛ E x ᴄᴇᴇᴅꜱ Lɪᴍɪᴛ');
+    return;
+  }
+  
+  console.log('🔄 Sᴜʙᴍɪᴛᴛɪɴɢ Dᴇᴘᴏꜱɪᴛ - Uᴛʀ:', utr, 'Aᴍᴏᴜɴᴛ: ₹' + amount);
+  showToast('🔄 Sᴜʙᴍɪᴛᴛɪɴɢ... Pʟᴇᴀꜱᴇ Wᴀɪᴛ', 'info');
+  
+  // Sɪᴍᴜʟᴀᴛᴇ Aᴘɪ Cᴀʟʟ
+  setTimeout(() => {
+    showToast('✅ Dᴇᴘᴏꜱɪᴛ Cᴏɴꜰɪʀᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ! Mᴏɴᴇʏ Aᴅᴅᴇᴅ Tᴏ Wᴀʟʟᴇᴛ', 'success');
+    console.log('✅ Dᴇᴘᴏꜱɪᴛ Cᴏɴꜰɪʀᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 1500);
+  }, 1500);
+}
+
+// ===== Gᴏ Bᴀᴄᴋ =====
+function goBack() {
+  if (document.getElementById('step2').style.display === 'block') {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('progress1').className = 'progress-step active';
+    document.getElementById('progress2').className = 'progress-step';
+    document.getElementById('progress3').className = 'progress-step';
+    console.log('🔄 Rᴇᴛᴜʀɴᴇᴅ Tᴏ Aᴍᴏᴜɴᴛ Sᴛᴇᴘ');
+  } else if (document.getElementById('step3').style.display === 'block') {
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('progress1').className = 'progress-step done';
+    document.getElementById('progress2').className = 'progress-step active';
+    document.getElementById('progress3').className = 'progress-step';
+    console.log('🔄 Rᴇᴛᴜʀɴᴇᴅ Tᴏ Pᴀʏ Sᴛᴇᴘ');
+  } else {
+    window.location.href = '/dashboard';
+  }
+}
+
+// ===== Iɴɪᴛ =====
+// Aʟʟ ꜰɪᴇʟᴅꜱ ᴀʀᴇ ᴇᴍᴘᴛʏ ʙʏ ᴅᴇꜰᴀᴜʟᴛ
+document.getElementById('amount').value = '';
+document.getElementById('confirmAmount').value = '';
+console.log('✅ Mᴀɴᴜᴀʟ Dᴇᴘᴏꜱɪᴛ Pᴀɢᴇ Iɴɪᴛɪᴀʟɪᴢᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+</script>
+ </body>
+</html>

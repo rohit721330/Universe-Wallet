@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dᴀꜱʜʙᴏᴀʀᴅ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --p1: #a855f7; --p2: #6d28d9; --card-light: rgba(241, 239, 255, 0.9); --input-light: #ebe9ff; --border-soft: #555555; --red: #dc2626; --green: #16a34a; --neon-blue: #00f0ff; --dark-bg-start: #0a0a1a; --dark-bg-mid: #0c1022; --glass-dark: rgba(8, 12, 25, 0.85); }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background-attachment: fixed; transition: background 0.4s ease, color 0.3s ease; overflow-y: auto; overflow-x: hidden; position: relative; }
+
+#splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 50%, #0b0d1a 0%, #030408 100%); transition: opacity 0.8s ease, transform 0.8s ease; overflow: hidden; }
+#splash-screen.hidden { opacity: 0; transform: scale(1.1); pointer-events: none; }
+.splash-grid-overlay { position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 10s linear infinite; z-index: 1; }
+@keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(40px, 40px); } }
+.splash-particle-bg { position: absolute; width: 100%; height: 100%; z-index: 1; }
+.splash-particle { position: absolute; border-radius: 50%; background: #00f0ff; box-shadow: 0 0 10px #00f0ff; opacity: 0; animation: particleRise linear infinite; }
+@keyframes particleRise { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(-120vh) scale(1.5); opacity: 0; } }
+.splash-arc-container { position: relative; z-index: 2; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
+.splash-arc-svg { width: 100px; height: 100px; overflow: visible; }
+.splash-arc-path { fill: none; stroke: #00f0ff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 314.159; stroke-dashoffset: 314.159; filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.6)); transition: stroke-dashoffset 0.2s linear; }
+.splash-arc-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-weight: 800; font-size: 28px; font-family: 'Inter', sans-serif; }
+.splash-holo-title { position: relative; z-index: 2; font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.splash-holo-title span { color: #00f0ff; text-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
+.splash-holo-sub { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.3); z-index: 2; margin-bottom: 20px; text-transform: uppercase; }
+.splash-counter-text { position: relative; z-index: 2; font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 700; color: #00f0ff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+.splash-counter-text span { color: #ffffff; }
+
+body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+body.dark::before { background-image: linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px); }
+
+.star-dot { position: fixed; bottom: -20px; border-radius: 50%; pointer-events: none; z-index: 0; animation: riseStar linear infinite; opacity: 0; }
+.star-dot.big { box-shadow: 0 0 12px currentColor; }
+.star-dot.small { box-shadow: 0 0 4px currentColor; }
+@keyframes riseStar { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.5); opacity: 0; } }
+
+body::after { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+body.dark::after { background: radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%); }
+body.light { background: linear-gradient(135deg, #f5f0ff 0%, #ede7fe 100%); background-attachment: fixed; color: #1a1a2e; }
+body.dark { background: linear-gradient(135deg, #0a0a1a, #0c1025, #060610); background-attachment: fixed; color: #e0f0ff; }
+
+.container { max-width: 500px; margin: 0 auto; position: relative; min-height: 100vh; z-index: 1; }
+.wrapper { width: 100%; padding: 80px 16px 70px 16px; position: relative; z-index: 2; }
+
+.header-fixed { position: fixed; top: 0; left: 0; right: 0; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; backdrop-filter: blur(16px); transition: all 0.3s ease; }
+body.light .header-fixed { background: rgba(245, 240, 255, 0.92); border-bottom: 1px solid rgba(139, 92, 246, 0.2); }
+body.dark .header-fixed { background: rgba(8, 12, 28, 0.92); border-bottom: 1px solid rgba(0, 240, 255, 0.25); }
+.header-left { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.menu-btn { font-size: 16px; cursor: pointer; background: none; border: none; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 24px; transition: all 0.2s; }
+body.light .menu-btn { color: #6d28d9; background: rgba(139, 92, 246, 0.1); }
+body.dark .menu-btn { color: #00f0ff; background: rgba(0, 240, 255, 0.1); }
+.menu-btn:active { transform: scale(0.92); }
+.prime-word { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease; }
+body.light .prime-word { color: #000000; }
+body.dark .prime-word { color: #ffffff; }
+.wallet-word { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease; }
+body.light .wallet-word { color: #8b5cf6; }
+body.dark .wallet-word { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.5); }
+.pay-badge { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 30px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; transition: all 0.3s ease; background: #8b5cf6; color: white; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3); }
+body.dark .pay-badge { background: #00f0ff; color: #0a0a1a; box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s ease; background: transparent; border: none; }
+body.light .icon-circle { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+body.dark .icon-circle { background: rgba(0, 240, 255, 0.12); color: #00f0ff; }
+.icon-circle:active { transform: scale(0.92); }
+.theme-toggle-header { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+body.light .theme-toggle-header { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+body.dark .theme-toggle-header { color: #00f0ff; background: rgba(0, 240, 255, 0.12); }
+.theme-toggle-header:active { transform: scale(0.92); }
+.avatar-p { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; background: linear-gradient(135deg, #8b5cf6, #a855f7); color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3); }
+body.dark .avatar-p { background: linear-gradient(135deg, #00e0ff, #0088ff); color: #0a0a1a; box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+.avatar-p:active { transform: scale(0.95); }
+
+.sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 24px 20px; overflow-y: auto; }
+.sidebar.open { left: 0; }
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; backdrop-filter: blur(3px); }
+.sidebar-overlay.active { display: block; }
+body.light .sidebar { background: linear-gradient(180deg, #ffffff 0%, #f8f6ff 100%); border-right: 1px solid rgba(139, 92, 246, 0.15); box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05); }
+body.dark .sidebar { background: linear-gradient(180deg, #0c0f24 0%, #0a0a1a 100%); border-right: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 4px 0 20px rgba(0, 240, 255, 0.05); }
+.sidebar-profile { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid; }
+body.light .sidebar-profile { border-bottom-color: rgba(139, 92, 246, 0.2); }
+body.dark .sidebar-profile { border-bottom-color: rgba(0, 240, 255, 0.2); }
+.profile-pic-container { width: 70px; height: 70px; margin: 0 auto 10px; position: relative; cursor: pointer; }
+.profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, #8b5cf6, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: white; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); transition: all 0.3s; }
+body.dark .profile-pic { background: linear-gradient(135deg, #00e0ff, #0088ff); box-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
+.sidebar-username { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; word-break: break-word; }
+body.light .sidebar-username { color: #1a1a2e; }
+body.dark .sidebar-username { color: #ffffff; }
+.sidebar-mobile { font-size: 11px; font-weight: 500; margin-bottom: 6px; opacity: 0.7; }
+body.light .sidebar-mobile { color: #4a4a6a; }
+body.dark .sidebar-mobile { color: #8aa0bb; }
+.sidebar-balance { font-size: 20px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; padding: 6px 16px; border-radius: 40px; margin-top: 6px; }
+body.light .sidebar-balance { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+body.dark .sidebar-balance { background: rgba(0, 240, 255, 0.12); color: #00f0ff; }
+.sidebar-balance i { font-size: 16px; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; font-size: 13px; font-weight: 500; text-decoration: none; }
+body.light .sidebar-menu-item { color: #3a3a5a; }
+body.dark .sidebar-menu-item { color: #c0d0e8; }
+.sidebar-menu-item i { width: 20px; font-size: 15px; text-align: center; }
+body.light .sidebar-menu-item i { color: #8b5cf6; }
+body.dark .sidebar-menu-item i { color: #00f0ff; }
+.sidebar-menu-item:hover { transform: translateX(4px); }
+body.light .sidebar-menu-item:hover { background: rgba(139, 92, 246, 0.08); }
+body.dark .sidebar-menu-item:hover { background: rgba(0, 240, 255, 0.08); }
+.sidebar-menu-item.logout-item { margin-top: 16px; border-top: 1px solid; border-radius: 0; padding-top: 16px; }
+body.light .sidebar-menu-item.logout-item { border-top-color: rgba(139, 92, 246, 0.2); color: #dc2626; }
+body.dark .sidebar-menu-item.logout-item { border-top-color: rgba(0, 240, 255, 0.2); color: #ff5e5e; }
+.sidebar-menu-item.logout-item i { color: inherit !important; }
+
+.card { border-radius: 28px; overflow: hidden; }
+body.light .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+body.dark .card { background: var(--glass-dark); backdrop-filter: blur(20px); border: 1px solid rgba(0, 240, 255, 0.3); }
+.balance-card { border-radius: 28px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+body.light .balance-card { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+body.dark .balance-card { background: linear-gradient(135deg, #00e0ff, #0088ff); box-shadow: 0 0 16px rgba(0, 240, 255, 0.3); }
+.balance-row { display: flex; align-items: center; gap: 10px; margin-top: 3px; }
+.balance-amount { font-size: 28px; font-weight: 800; color: white; }
+.reload-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; font-size: 13px; transition: all 0.3s ease; flex-shrink: 0; }
+.reload-btn:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(180deg); }
+.reload-btn:active { transform: rotate(180deg) scale(0.9); }
+.reload-btn.spinning { animation: spin 0.8s ease-in-out; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.balance-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; opacity: 0.8; color: white; }
+.mobile-row { display: flex; align-items: center; gap: 6px; }
+.mobile-row .mobile-number { font-size: 10px; font-weight: 600; color: white; }
+.eye-btn { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; font-size: 10px; transition: all 0.3s ease; flex-shrink: 0; }
+.eye-btn:hover { background: rgba(255, 255, 255, 0.25); }
+.eye-btn:active { transform: scale(0.9); }
+.eye-btn.hidden-eye { opacity: 0.6; }
+
+.stat-card { border-radius: 20px; padding: 14px; backdrop-filter: blur(4px); }
+body.light .stat-card { background: rgba(255, 255, 255, 0.8); border: 1px solid #c4b5fd; }
+body.dark .stat-card { background: rgba(10, 16, 48, 0.7); border: 1px solid rgba(0, 240, 255, 0.3); }
+body.light .stat-card .stat-label, body.light .stat-card .stat-number { color: #2d1b69; }
+body.dark .stat-card .stat-label, body.dark .stat-card .stat-number { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.5); }
+.action-card { border-radius: 20px; padding: 10px 6px; text-align: center; cursor: pointer; transition: transform 0.15s; }
+body.light .action-card { background: rgba(255, 255, 255, 0.8); border: 1px solid #c4b5fd; }
+body.dark .action-card { background: rgba(10, 16, 48, 0.7); border: 1px solid rgba(0, 240, 255, 0.3); }
+body.light .action-card span, body.light .action-card i { color: #4a1d96; }
+body.dark .action-card span, body.dark .action-card i { color: #00f0ff; }
+.action-card:active { transform: scale(0.97); }
+
+.txn-item { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid; }
+body.light .txn-item { background: rgba(255, 255, 255, 0.7); border-bottom-color: #e9e6ff; }
+body.dark .txn-item { background: rgba(10, 16, 48, 0.5); border-bottom-color: rgba(0, 240, 255, 0.15); }
+body.light .txn-item { color: #1a1a2e; }
+body.light .txn-item .text-muted { color: #6b6b8a; }
+body.dark .txn-item { color: #e0f0ff; }
+body.dark .txn-item .text-muted { color: #8aa0bb; }
+
+.stat-number { font-size: 18px; font-weight: 800; }
+.stat-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.section-title { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+body.light .section-title { color: #6d28d9; }
+body.dark .section-title { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.3); }
+.text-primary { text-decoration: none; }
+body.light .text-primary { color: #8b5cf6; }
+body.dark .text-primary { color: #00f0ff; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+
+.see-more-bar { border-radius: 24px; padding: 12px; text-align: center; display: block; margin: 16px 0; text-decoration: none; transition: transform 0.2s; }
+body.light .see-more-bar { background: #8b5cf6; box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3); }
+body.dark .see-more-bar { background: #00f0ff; box-shadow: 0 3px 10px rgba(0, 240, 255, 0.4); }
+.see-more-text { font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+body.light .see-more-text { color: white; }
+body.dark .see-more-text { color: #0a0a1a; }
+
+.empty-state { text-align: center; padding: 32px 16px; }
+.empty-state i { font-size: 40px; opacity: 0.4; margin-bottom: 10px; display: block; }
+body.light .empty-state { color: #4a4a6a; }
+body.dark .empty-state { color: #b0c4de; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 8px 0 16px; z-index: 50; }
+body.light .bottom-nav { background: rgba(241, 239, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #c4b5fd; }
+body.dark .bottom-nav { background: rgba(8, 12, 28, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 8px; font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none; flex: 1; }
+.nav-item i { font-size: 16px; }
+body.light .nav-item { color: #94a3b8; }
+body.dark .nav-item { color: #6a7a9a; }
+body.light .nav-item.active { color: #8b5cf6; }
+body.dark .nav-item.active { color: #00f0ff; }
+
+.toast-message { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 600; z-index: 10000; backdrop-filter: blur(8px); animation: fadeInUp 0.3s ease; background: rgba(0, 100, 255, 0.35); color: #ffffff; border: 1px solid rgba(0, 150, 255, 0.25); box-shadow: 0 4px 15px rgba(0, 80, 255, 0.2); letter-spacing: 0.3px; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+.modal-overlay.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-box { background: #1a1a2e; border-radius: 28px; padding: 32px 24px; max-width: 360px; width: 90%; text-align: center; border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+body.light .modal-box { background: #ffffff; border-color: rgba(139, 92, 246, 0.2); }
+.modal-icon { font-size: 48px; color: #dc2626; margin-bottom: 12px; display: block; }
+.modal-title { font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 8px; }
+body.light .modal-title { color: #1a1a2e; }
+.modal-sub { font-size: 13px; color: #8aa0bb; margin-bottom: 24px; line-height: 1.5; }
+body.light .modal-sub { color: #6b6b8a; }
+.modal-buttons { display: flex; gap: 12px; justify-content: center; }
+.modal-btn { padding: 12px 28px; border-radius: 50px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s ease; flex: 1; }
+.modal-btn:active { transform: scale(0.95); }
+.modal-btn.cancel { background: rgba(255, 255, 255, 0.1); color: #c0d0e8; border: 1px solid rgba(255, 255, 255, 0.1); }
+body.light .modal-btn.cancel { background: #f0f0f0; color: #4a4a6a; border-color: #ddd; }
+.modal-btn.cancel:hover { background: rgba(255, 255, 255, 0.2); }
+body.light .modal-btn.cancel:hover { background: #e5e5e5; }
+.modal-btn.logout { background: #dc2626; color: white; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); }
+.modal-btn.logout:hover { background: #b91c1c; }
+
+@media (max-width: 480px) { .wrapper { padding: 80px 14px 70px; } .prime-word, .wallet-word { font-size: 16px; } .pay-badge { font-size: 10px; padding: 2px 10px; } .avatar-p { width: 30px; height: 30px; font-size: 14px; } .icon-circle, .theme-toggle-header { width: 30px; height: 30px; font-size: 13px; } .header-right { gap: 6px; } .sidebar { width: 260px; left: -260px; } .sidebar-username { font-size: 15px; } .sidebar-mobile { font-size: 10px; } .balance-amount { font-size: 24px; } .reload-btn { width: 26px; height: 26px; font-size: 12px; } .modal-box { padding: 24px 16px; } }
+</style>
+</head>
+<body class="light">
+
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal-box">
+        <i class="fas fa-sign-out-alt modal-icon"></i>
+        <div class="modal-title">Lᴏɢᴏᴜᴛ Cᴏɴꜰ𝙸ʀᴍᴀᴛ𝙸ᴏɴ</div>
+        <div class="modal-sub">Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Lᴏɢ Oᴜᴛ Fʀᴏᴍ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ?</div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeLogoutModal()">Nᴏ</button>
+            <button class="modal-btn logout" onclick="confirmLogout()">Yᴇꜱ</button>
+        </div>
+    </div>
+</div>
+
+<div id="splash-screen">
+    <div class="splash-grid-overlay"></div>
+    <div class="splash-particle-bg" id="particleBg"></div>
+    <div class="splash-arc-container">
+        <svg class="splash-arc-svg" viewBox="0 0 100 100">
+            <path class="splash-arc-path" id="arcPath" d="M 50 5 A 45 45 0 1 1 49.9 5" />
+        </svg>
+        <div class="splash-arc-center">P</div>
+    </div>
+    <div class="splash-holo-title">Pʀ𝙸ᴍᴇ <span>Pᴀʏ</span></div>
+    <div class="splash-holo-sub">Cᴏɴɴᴇᴄᴛ𝙸ɴɢ Tᴏ Sᴇʀᴠᴇʀ...</div>
+    <div class="splash-counter-text"><span id="loadingPercent">0</span>%</div>
+</div>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+        <div class="profile-pic-container" onclick="goToProfile()">
+            <div class="profile-pic" id="sidebarProfilePic"><i class="fa-solid fa-user"></i></div>
+        </div>
+        <div class="sidebar-username" id="sidebarUsername">Lᴏᴀᴅ𝙸ɴɢ...</div>
+        <div class="sidebar-mobile" id="sidebarMobile">---</div>
+        <div class="sidebar-balance"><i class="fa-solid fa-indian-rupee-sign"></i> <span id="sidebarBalanceAmount">0.00</span></div>
+    </div>
+    <div class="sidebar-menu">
+        <div class="sidebar-menu-item" onclick="location.href='/dashboard'"><i class="fa-solid fa-chart-line"></i> <span>Dᴀꜱʜʙᴏᴀʀᴅ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/lifafa'"><i class="fa-solid fa-envelope-open-text"></i> <span>Cʀᴇᴀᴛᴇ L𝙸ꜰᴀꜰᴀ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/deposit'"><i class="fa-solid fa-plus-circle"></i> <span>Aᴅᴅ Fᴜɴᴅ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/wallet'"><i class="fa-solid fa-wallet"></i> <span>Wᴀʟʟᴇᴛ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/game'"><i class="fa-solid fa-gamepad"></i> <span>Gᴀᴍᴇ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transactions'"><i class="fa-solid fa-receipt"></i> <span>Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/profile'"><i class="fa-solid fa-user-circle"></i> <span>Pʀᴏꜰ𝙸ʟᴇ</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/api'"><i class="fa-solid fa-code"></i> <span>Aᴘ𝙸 Sᴇᴛᴛ𝙸ɴɢꜱ</span></div>
+        <div class="sidebar-menu-item" onclick="window.open('https://t.me/Prime_Wallet_OFC', '_blank')"><i class="fa-brands fa-telegram"></i> <span>Jᴏ𝙸ɴ Tᴇʟᴇɢʀᴀᴍ</span></div>
+        <div class="sidebar-menu-item" onclick="window.open('https://t.me/PRIME_OFC_SUPPORT', '_blank')"><i class="fa-solid fa-headset"></i> <span>Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ</span></div>
+        <div class="sidebar-menu-item logout-item" onclick="showLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> <span>Lᴏɢ Oᴜᴛ</span></div>
+    </div>
+</div>
+
+<div class="header-fixed">
+    <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars-staggered"></i></button>
+        <span class="prime-word">Pʀ𝙸ᴍᴇ</span>
+        <span class="wallet-word">Wᴀʟʟᴇᴛ</span>
+        <div class="pay-badge">Pᴀʏ</div>
+    </div>
+    <div class="header-right">
+        <button class="icon-circle" id="telegramBtn" onclick="openTelegram()"><i class="fa-brands fa-telegram"></i></button>
+        <button class="theme-toggle-header" id="headerThemeBtn" onclick="toggleTheme()"><i id="headerThemeIcon" class="fas fa-moon"></i></button>
+        <div class="avatar-p" id="avatarP" onclick="goToProfile()">P</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="wrapper">
+
+        <div class="balance-card">
+            <div class="balance-label">Aᴠᴀ𝙸ʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+            <div class="balance-row">
+                <div class="balance-amount"><i class="fa-solid fa-indian-rupee-sign" style="font-size:22px;margin-right:4px;"></i><span id="balance">0.00</span></div>
+                <button class="reload-btn" id="reloadBalanceBtn" onclick="reloadBalance()" title="Refresh Balance"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <div style="margin-top:14px;display:flex;justify-content:space-between;">
+                <div>
+                    <span class="balance-label" style="font-size:9px;">Wᴀʟʟᴇᴛ Iᴅ</span><br>
+                    <span style="font-size:10px;font-weight:600;" id="walletId">---</span>
+                </div>
+                <div>
+                    <span class="balance-label" style="font-size:9px;">Mᴏʙ𝙸ʟᴇ</span><br>
+                    <div class="mobile-row">
+                        <span style="font-size:10px;font-weight:600;color:white;" id="mobile">---</span>
+                        <button class="eye-btn" id="toggleMobileBtn" onclick="toggleMobileVisibility()" title="Toggle Mobile Number Visibility"><i class="fas fa-eye" id="mobileEyeIcon"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Tᴏᴛᴀʟ Cʀᴇᴅ𝙸ᴛ</div>
+                <div class="stat-number" style="color:var(--green)"><i class="fa-solid fa-indian-rupee-sign" style="font-size:14px;margin-right:2px;"></i><span id="totalCredit">0.00</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Tᴏᴛᴀʟ Dᴇʙ𝙸ᴛ</div>
+                <div class="stat-number" style="color:var(--red)"><i class="fa-solid fa-indian-rupee-sign" style="font-size:14px;margin-right:2px;"></i><span id="totalDebit">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="section-title">Qᴜ𝙸ᴄᴋ Aᴄᴄᴇꜱꜱ <i class="fa-solid fa-bolt" style="font-size:12px;"></i></div>
+        <div class="actions-grid">
+            <div class="action-card" onclick="location.href='/transfer'"><i class="fa-solid fa-paper-plane" style="font-size:20px;margin-bottom:4px;display:block;"></i><span style="font-size:9px;font-weight:700;">Sᴇɴᴅ</span></div>
+            <div class="action-card" onclick="location.href='/deposit'"><i class="fa-solid fa-plus" style="font-size:20px;margin-bottom:4px;display:block;"></i><span style="font-size:9px;font-weight:700;">Aᴅᴅ</span></div>
+            <div class="action-card" onclick="location.href='/withdraw'"><i class="fa-solid fa-arrow-up" style="font-size:20px;margin-bottom:4px;display:block;"></i><span style="font-size:9px;font-weight:700;">W𝙸ᴛʜᴅʀᴀᴡ</span></div>
+            <div class="action-card" onclick="location.href='/lifafa'"><i class="fa-solid fa-envelope-open-text" style="font-size:20px;margin-bottom:4px;display:block;"></i><span style="font-size:9px;font-weight:700;">L𝙸ꜰᴀꜰᴀ</span></div>
+        </div>
+
+        <a href="/more" class="see-more-bar"><div class="see-more-text">Sᴇᴇ Mᴏʀᴇ Oᴘᴛ𝙸ᴏɴꜱ <i class="fa-solid fa-arrow-right"></i></div></a>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="section-title" style="margin-bottom:0;">Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ</div>
+            <a href="/transactions" style="font-size:10px;font-weight:600;text-decoration:none;" class="text-primary">V𝙸ᴇᴡ Aʟʟ <i class="fa-solid fa-arrow-right" style="font-size:10px;"></i></a>
+        </div>
+        <div class="card" id="txnList" style="padding:0;overflow:hidden;">
+            <div class="empty-state"><i class="fa-solid fa-receipt"></i><p style="font-size:12px;">Lᴏᴀᴅ𝙸ɴɢ...</p></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item active"><i class="fa-solid fa-house"></i><span>Hᴏᴍᴇ</span></a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
+    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i><span>Qʀ</span></a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i><span>Aᴅᴅ</span></a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i><span>H𝙸ꜱᴛᴏʀʏ</span></a>
+</div>
+
+<script>
+var API_BASE = '/api';
+var isMobileVisible = false, originalMobileNumber = '';
+var isProcessing = false;
+
+// ============================================================
+// SVG ICONS
+// ============================================================
+
+function getDepositIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M12 4V15M8 11L12 15L16 11M5 19H19" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getWithdrawIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M12 20V9M8 13L12 9L16 13M5 20H19" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getTransferIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M7 8H17M17 8L14 5M17 8L14 11M17 16H7M7 16L10 13M7 16L10 19" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getApiIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M9 8L5 12L9 16M15 8L19 12L15 16M13 6L11 18" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getEnvelopeIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M4 7H20V17H4V7M4 7L12 13L20 7" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getGiftIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M12 4V20M4 10H20M5 10H19V20H5V10M4 7C4 5.9 4.9 5 6 5C8 5 9 7 12 10C15 7 16 5 18 5C19.1 5 20 5.9 20 7C20 8.1 19.1 9 18 9H6C4.9 9 4 8.1 4 7Z" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getGameIcon(color) {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M7.5 9H16.5C18.8 9 20 10.2 20 12.5C20 15.8 18.6 18.5 17 18.5C15.9 18.5 15.2 17.8 14.5 17C13.8 16.2 13.1 15.5 12 15.5C10.9 15.5 10.2 16.2 9.5 17C8.8 17.8 8.1 18.5 7 18.5C5.4 18.5 4 15.8 4 12.5C4 10.2 5.2 9 7.5 9Z" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12H11M9.5 10.5V13.5" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/><circle cx="15.5" cy="11.5" r="1" fill="' + color + '"/><circle cx="17.5" cy="13.5" r="1" fill="' + color + '"/></svg>';
+}
+
+// ============================================================
+// LOGOUT FUNCTIONS
+// ============================================================
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('pin_verified');
+    window.location.href = '/index';
+}
+
+function showLogoutModal() {
+    document.getElementById('logoutModal').classList.add('active');
+    closeSidebar();
+}
+
+function closeLogoutModal() {
+    document.getElementById('logoutModal').classList.remove('active');
+}
+
+function confirmLogout() {
+    closeLogoutModal();
+    setTimeout(function() {
+        logout();
+    }, 200);
+}
+
+document.getElementById('logoutModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLogoutModal();
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeLogoutModal();
+    }
+});
+
+// ============================================================
+// API REQUEST
+// ============================================================
+async function apiRequest(endpoint, options) {
+    options = options || {};
+    var token = localStorage.getItem('token');
+    if (!token) {
+        logout();
+        throw new Error('Nᴏ Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Tᴏᴋᴇɴ Fᴏᴜɴᴅ');
+    }
+    var response = await fetch(API_BASE + endpoint, {
+        method: options.method || 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+            ...(options.headers || {})
+        },
+        body: options.body || null
+    });
+    var data = await response.json();
+    if (response.status === 401) {
+        logout();
+        throw new Error('Sᴇꜱꜱɪᴏɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.');
+    }
+    return data;
+}
+
+// ============================================================
+// TOAST NOTIFICATION
+// ============================================================
+function showToast(msg) {
+    var toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.innerHTML = msg;
+    document.body.appendChild(toast);
+    setTimeout(function() {
+        toast.remove();
+    }, 3000);
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('active');
+}
+
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+}
+
+function goToProfile() {
+    window.location.href = '/profile';
+}
+
+function openTelegram() {
+    window.location.href = '/tg';
+}
+
+// ============================================================
+// MOBILE NUMBER VISIBILITY TOGGLE
+// ============================================================
+function toggleMobileVisibility() {
+    var mobileElement = document.getElementById('mobile');
+    var eyeIcon = document.getElementById('mobileEyeIcon');
+    var btn = document.getElementById('toggleMobileBtn');
+    
+    if (!originalMobileNumber) {
+        originalMobileNumber = mobileElement.textContent;
+    }
+    
+    isMobileVisible = !isMobileVisible;
+    
+    if (isMobileVisible) {
+        mobileElement.textContent = originalMobileNumber;
+        eyeIcon.className = 'fas fa-eye-slash';
+        btn.classList.remove('hidden-eye');
+    } else {
+        var last4 = originalMobileNumber.slice(-4);
+        mobileElement.textContent = '****' + last4;
+        eyeIcon.className = 'fas fa-eye';
+        btn.classList.add('hidden-eye');
+    }
+}
+
+// ============================================================
+// RELOAD BALANCE
+// ============================================================
+async function reloadBalance() {
+    if (isProcessing) {
+        showToast('Pʟᴇᴀꜱᴇ Wᴀɪᴛ, Pʀᴇᴠɪᴏᴜꜱ Rᴇǫᴜᴇꜱᴛ Iꜱ Pʀᴏᴄᴇꜱꜱɪɴɢ...');
+        return;
+    }
+    isProcessing = true;
+    
+    var reloadBtn = document.getElementById('reloadBalanceBtn');
+    var balanceElement = document.getElementById('balance');
+    var sidebarBalanceElement = document.getElementById('sidebarBalanceAmount');
+    
+    reloadBtn.classList.add('spinning');
+    reloadBtn.disabled = true;
+    
+    try {
+        var token = localStorage.getItem('token');
+        if (!token) {
+            logout();
+            return;
+        }
+        var response = await fetch(API_BASE + '/wallet/balance', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        var data = await response.json();
+        var newBalance = null;
+        
+        if (data.status === 'success') {
+            if (data.data && data.data.balance !== undefined) {
+                newBalance = data.data.balance;
+            } else if (data.balance !== undefined) {
+                newBalance = data.balance;
+            }
+        }
+        
+        if (newBalance !== null) {
+            balanceElement.textContent = newBalance.toFixed(2);
+            sidebarBalanceElement.textContent = newBalance.toFixed(2);
+            showToast('Bᴀʟᴀɴᴄᴇ Rᴇꜰʀᴇꜱʜᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+        } else {
+            showToast('Fᴀɪʟᴇᴅ Tᴏ Rᴇꜰʀᴇꜱʜ Bᴀʟᴀɴᴄᴇ');
+        }
+    } catch (error) {
+        console.error('Reload balance error:', error);
+        showToast('Nᴇᴛᴡᴏʀᴋ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.');
+    } finally {
+        setTimeout(function() {
+            reloadBtn.classList.remove('spinning');
+            reloadBtn.disabled = false;
+            isProcessing = false;
+        }, 800);
+    }
+}
+
+// ============================================================
+// SPLASH SCREEN
+// ============================================================
+var splashScreen = document.getElementById('splash-screen');
+var arcPath = document.getElementById('arcPath');
+var loadingPercent = document.getElementById('loadingPercent');
+var FULL_CIRCLE_LENGTH = 314.159;
+var progress = 0, loadingInterval;
+
+function startLoadingProgress() {
+    loadingInterval = setInterval(function() {
+        progress += Math.floor(Math.random() * 3) + 1;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(loadingInterval);
+        }
+        var offset = FULL_CIRCLE_LENGTH - (progress / 100) * FULL_CIRCLE_LENGTH;
+        arcPath.style.strokeDashoffset = offset;
+        loadingPercent.textContent = progress;
+    }, 180);
+}
+
+function hideSplash() {
+    if (loadingInterval) clearInterval(loadingInterval);
+    progress = 100;
+    arcPath.style.strokeDashoffset = 0;
+    loadingPercent.textContent = '100';
+    setTimeout(function() {
+        splashScreen.classList.add('hidden');
+    }, 500);
+}
+
+function createSplashParticles() {
+    var container = document.getElementById('particleBg');
+    for (var i = 0; i < 30; i++) {
+        var p = document.createElement('div');
+        p.className = 'splash-particle';
+        var size = Math.random() * 3 + 1;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.bottom = '-10px';
+        p.style.animationDuration = (Math.random() * 8 + 6) + 's';
+        p.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(p);
+    }
+}
+
+createSplashParticles();
+startLoadingProgress();
+
+// ============================================================
+// TRANSACTION HELPERS - FIXED
+// ============================================================
+function getUserId(field) {
+    if (!field) return null;
+    if (typeof field === 'string') return field;
+    if (field._id) return field._id.toString();
+    if (field.toString) return field.toString();
+    return null;
+}
+
+function getUserName(userObj) {
+    if (!userObj) return '';
+    if (typeof userObj === 'string') return userObj;
+    if (userObj.fullName) return userObj.fullName;
+    if (userObj.name) return userObj.name;
+    if (userObj.username) return userObj.username;
+    return '';
+}
+
+function getFormattedMobile(mobile) {
+    if (!mobile) return '';
+    var str = mobile.toString();
+    if (str.length === 10) {
+        return str.slice(0, 3) + '••' + str.slice(5, 7) + '••' + str.slice(9);
+    }
+    return str;
+}
+
+// ✅ FIXED: Correctly identifies CREDIT vs DEBIT
+function isTransactionCredit(tx, userIdStr) {
+    var receiverId = getUserId(tx.receiver || tx.receiver_id);
+    var senderId = getUserId(tx.sender || tx.sender_id);
+    var txnUserId = getUserId(tx.user_id);
+    
+    var isSender = senderId === userIdStr;
+    var isReceiver = receiverId === userIdStr;
+    var isUserTxn = txnUserId === userIdStr;
+    var backendType = tx.transactionType || tx.type || 'unknown';
+    
+    // SENDER = DEBIT (Money goes OUT)
+    if (isSender) return false;
+    
+    // RECEIVER = CREDIT (Money comes IN)
+    if (isReceiver) return true;
+    
+    // Special cases
+    if (backendType === 'payment_sent') return false;
+    if (backendType === 'payment_received') return true;
+    
+    if (tx.type === 'transfer' && isSender) return false;
+    if (tx.type === 'transfer' && isReceiver) return true;
+    
+    if (tx.type === 'api' && isSender) return false;
+    if (tx.type === 'api' && isReceiver) return true;
+    
+    if (tx.type === 'payment' && isSender) return false;
+    if (tx.type === 'payment' && isReceiver) return true;
+    
+    if (tx.type === 'single_pay' && isSender) return false;
+    if (tx.type === 'single_pay' && isReceiver) return true;
+    
+    if (tx.type === 'lifafa' && isSender) return false;
+    if (tx.type === 'lifafa' && isReceiver) return true;
+    
+    if (tx.type === 'gift' && isSender) return false;
+    if (tx.type === 'gift' && isReceiver) return true;
+    
+    if (tx.type === 'game_loss' && isSender) return false;
+    if (tx.type === 'game_win' && isReceiver) return true;
+    
+    if (tx.type === 'admin_deduct' && isSender) return false;
+    if (tx.type === 'admin_add' && isReceiver) return true;
+    
+    // Deposits = CREDIT
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
+        tx.type === 'auto-deposit' || tx.type === 'web-deposit') {
+        return true;
+    }
+    
+    // Withdrawals = DEBIT
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') {
+        return false;
+    }
+    
+    // Lifafa creation = DEBIT
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_edit') {
+        return false;
+    }
+    
+    // Default: if user is involved, check if they're receiver
+    if (isUserTxn && isReceiver) return true;
+    if (isUserTxn && isSender) return false;
+    
+    // Fallback: if not sender, assume credit
+    if (!isSender && isReceiver) return true;
+    if (!isSender) return true;
+    
+    return false;
+}
+
+// ============================================================
+// FIXED: getTransactionDisplayName - PROPER NAMES + ICONS
+// ============================================================
+function getTransactionDisplayName(tx, userIdStr) {
+    var receiverId = getUserId(tx.receiver || tx.receiver_id);
+    var senderId = getUserId(tx.sender || tx.sender_id);
+    var txnUserId = getUserId(tx.user_id);
+    
+    var isSender = senderId === userIdStr;
+    var isReceiver = receiverId === userIdStr;
+    var isUserTxn = txnUserId === userIdStr;
+    var backendType = tx.transactionType || tx.type || 'unknown';
+    
+    var senderName = '';
+    var receiverName = '';
+    var senderMobile = '';
+    var receiverMobile = '';
+    
+    if (tx.sender_id && typeof tx.sender_id === 'object') {
+        senderName = getUserName(tx.sender_id);
+        senderMobile = tx.sender_id.mobile || '';
+    } else if (tx.sender && typeof tx.sender === 'object') {
+        senderName = getUserName(tx.sender);
+        senderMobile = tx.sender.mobile || '';
+    } else if (tx.senderName) {
+        senderName = tx.senderName;
+    } else if (tx.senderMobile) {
+        senderMobile = tx.senderMobile;
+    }
+    
+    if (tx.receiver_id && typeof tx.receiver_id === 'object') {
+        receiverName = getUserName(tx.receiver_id);
+        receiverMobile = tx.receiver_id.mobile || '';
+    } else if (tx.receiver && typeof tx.receiver === 'object') {
+        receiverName = getUserName(tx.receiver);
+        receiverMobile = tx.receiver.mobile || '';
+    } else if (tx.receiverName) {
+        receiverName = tx.receiverName;
+    } else if (tx.receiverMobile) {
+        receiverMobile = tx.receiverMobile;
+    }
+    
+    var formattedSenderMobile = getFormattedMobile(senderMobile);
+    var formattedReceiverMobile = getFormattedMobile(receiverMobile);
+    var greenColor = '#16a34a';
+    var redColor = '#dc2626';
+    var grayColor = '#6b7280';
+    
+    // =============================================
+    // 1. TRANSFER (Money Sent / Money Received)
+    // =============================================
+    if (tx.type === 'transfer') {
+        if (isSender) {
+            var namePart2 = receiverName ? ' Tᴏ ' + receiverName : '';
+            var mobilePart2 = formattedReceiverMobile ? ' (' + formattedReceiverMobile + ')' : '';
+            return getTransferIcon(redColor) + ' Mᴏɴᴇʏ Sᴇɴᴛ' + namePart2 + mobilePart2;
+        }
+        if (isReceiver) {
+            var namePart = senderName ? ' Fʀᴏᴍ ' + senderName : '';
+            var mobilePart = formattedSenderMobile ? ' (' + formattedSenderMobile + ')' : '';
+            return getTransferIcon(greenColor) + ' Mᴏɴᴇʏ Rᴇᴄᴇɪᴠᴇᴅ' + namePart + mobilePart;
+        }
+        return getTransferIcon(grayColor) + ' Tʀᴀɴꜱꜰᴇʀ';
+    }
+    
+    // =============================================
+    // 2. API PAYMENT
+    // =============================================
+    if (tx.type === 'api') {
+        if (isSender) {
+            var namePart4 = receiverName ? ' Tᴏ ' + receiverName : '';
+            var mobilePart4 = formattedReceiverMobile ? ' (' + formattedReceiverMobile + ')' : '';
+            return getApiIcon(redColor) + ' Mᴏɴᴇʏ Sᴇɴᴛ' + namePart4 + mobilePart4;
+        }
+        if (isReceiver) {
+            var namePart3 = senderName ? ' Fʀᴏᴍ ' + senderName : '';
+            var mobilePart3 = formattedSenderMobile ? ' (' + formattedSenderMobile + ')' : '';
+            return getApiIcon(greenColor) + ' Mᴏɴᴇʏ Rᴇᴄᴇɪᴠᴇᴅ' + namePart3 + mobilePart3;
+        }
+        return getApiIcon(grayColor) + ' Aᴘɪ Pᴀʏᴍᴇɴᴛ';
+    }
+    
+    // =============================================
+    // 3. PAYMENT (Single Pay)
+    // =============================================
+    if (tx.type === 'payment' || tx.type === 'single_pay' || backendType === 'payment') {
+        if (isSender) {
+            var namePart6 = receiverName ? ' Tᴏ ' + receiverName : '';
+            var mobilePart6 = formattedReceiverMobile ? ' (' + formattedReceiverMobile + ')' : '';
+            return getApiIcon(redColor) + ' Pᴀʏᴍᴇɴᴛ Sᴇɴᴛ' + namePart6 + mobilePart6;
+        }
+        if (isReceiver) {
+            var namePart5 = senderName ? ' Fʀᴏᴍ ' + senderName : '';
+            var mobilePart5 = formattedSenderMobile ? ' (' + formattedSenderMobile + ')' : '';
+            return getApiIcon(greenColor) + ' Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴠᴇᴅ' + namePart5 + mobilePart5;
+        }
+        return getApiIcon(grayColor) + ' Pᴀʏᴍᴇɴᴛ';
+    }
+    
+    // =============================================
+    // 4. DEPOSIT
+    // =============================================
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
+        tx.type === 'auto-deposit' || tx.type === 'web-deposit') {
+        return getDepositIcon(greenColor) + ' Bᴀʟᴀɴᴄᴇ Aᴅᴅᴇᴅ';
+    }
+    
+    // =============================================
+    // 5. WITHDRAWAL
+    // =============================================
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') {
+        return getWithdrawIcon(redColor) + ' Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ';
+    }
+    
+    // =============================================
+    // 6. LIFAFA
+    // =============================================
+    if (tx.type === 'lifafa' || tx.type === 'lifafa_creation') {
+        if (isSender || isUserTxn) {
+            return getEnvelopeIcon(redColor) + ' Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ';
+        }
+        if (isReceiver) {
+            return getEnvelopeIcon(greenColor) + ' Lɪꜰᴀꜰᴀ Cʟᴀɪᴍᴇᴅ';
+        }
+        return getEnvelopeIcon(grayColor) + ' Lɪꜰᴀꜰᴀ';
+    }
+    
+    // =============================================
+    // 7. GIFT
+    // =============================================
+    if (tx.type === 'gift') {
+        if (isSender || isUserTxn) {
+            return getGiftIcon(redColor) + ' Gɪꜰᴛ Cʀᴇᴀᴛᴇᴅ';
+        }
+        if (isReceiver) {
+            return getGiftIcon(greenColor) + ' Gɪꜰᴛ Rᴇᴄᴇɪᴠᴇᴅ';
+        }
+        return getGiftIcon(grayColor) + ' Gɪꜰᴛ';
+    }
+    
+    // =============================================
+    // 8. GAME
+    // =============================================
+    if (tx.type === 'game_win') {
+        return getGameIcon(greenColor) + ' Gᴀᴍᴇ Wɪɴ';
+    }
+    if (tx.type === 'game_loss') {
+        return getGameIcon(redColor) + ' Gᴀᴍᴇ Lᴏꜱꜱ';
+    }
+    
+    // =============================================
+    // 9. ADMIN
+    // =============================================
+    if (tx.type === 'admin_add') {
+        return getDepositIcon(greenColor) + ' Bᴀʟᴀɴᴄᴇ Aᴅᴅᴇᴅ';
+    }
+    if (tx.type === 'admin_deduct') {
+        return getWithdrawIcon(redColor) + ' Bᴀʟᴀɴᴄᴇ Dᴇᴅᴜᴄᴛᴇᴅ';
+    }
+    
+    // =============================================
+    // 10. DEFAULT
+    // =============================================
+    if (isSender) {
+        return getWithdrawIcon(redColor) + ' Bᴀʟᴀɴᴄᴇ Dᴇᴅᴜᴄᴛᴇᴅ';
+    }
+    if (isReceiver) {
+        return getDepositIcon(greenColor) + ' Bᴀʟᴀɴᴄᴇ Aᴅᴅᴇᴅ';
+    }
+    
+    return getDepositIcon(greenColor) + ' Bᴀʟᴀɴᴄᴇ Aᴅᴅᴇᴅ';
+}
+
+// ============================================================
+// REMOVE DUPLICATE TRANSACTIONS
+// ============================================================
+function filterDuplicateTransactions(txns) {
+    var seen = {};
+    var result = [];
+    txns.forEach(function(tx) {
+        var key = tx.tx_id || tx._id;
+        if (!seen[key]) {
+            seen[key] = true;
+            result.push(tx);
+        }
+    });
+    return result;
+}
+
+// ============================================================
+// LOAD DASHBOARD
+// ============================================================
+async function loadDashboard() {
+    try {
+        var userRes = await apiRequest('/auth/me');
+        var user = userRes.user || userRes.data || userRes;
+        
+        if (!user || (!user.id && !user._id)) {
+            console.error('Invalid user data:', user);
+            showToast('Uꜱᴇʀ Dᴀᴛᴀ Nᴏᴛ Fᴏᴜɴᴅ');
+            document.getElementById('txnList').innerHTML = 
+                '<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p style="font-size:12px;">Uꜱᴇʀ Dᴀᴛᴀ Nᴏᴛ Fᴏᴜɴᴅ</p></div>';
+            hideSplash();
+            return;
+        }
+        
+        var userId = user.id || user._id;
+        var userIdStr = userId.toString();
+        
+        var txns = [];
+        try {
+            var txnRes = await apiRequest('/wallet/transactions?limit=100');
+            txns = txnRes.transactions || txnRes.data || [];
+            console.log('Found', txns.length, 'transactions');
+            
+            var uniqueTxns = filterDuplicateTransactions(txns);
+            if (uniqueTxns.length !== txns.length) {
+                console.log('Filtered to', uniqueTxns.length, 'unique transactions');
+                txns = uniqueTxns;
+            }
+        } catch (txnError) {
+            console.warn('Could not fetch transactions:', txnError.message);
+            txns = [];
+        }
+        
+        var calculatedBalance = 0, totalCredit = 0, totalDebit = 0;
+        
+        txns.forEach(function(tx) {
+            var isCredit = isTransactionCredit(tx, userIdStr);
+            if (isCredit) {
+                totalCredit += tx.amount;
+                calculatedBalance += tx.amount;
+            } else {
+                totalDebit += tx.amount;
+                calculatedBalance -= tx.amount;
+            }
+        });
+        
+        var serverBalance = 0;
+        try {
+            var balanceRes = await apiRequest('/wallet/balance');
+            if (balanceRes && balanceRes.status === 'success') {
+                if (balanceRes.data && balanceRes.data.balance !== undefined) {
+                    serverBalance = balanceRes.data.balance;
+                } else if (balanceRes.balance !== undefined) {
+                    serverBalance = balanceRes.balance;
+                }
+                if (serverBalance !== calculatedBalance) {
+                    console.log('Using server balance:', serverBalance);
+                    calculatedBalance = serverBalance;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not fetch server balance, using calculated');
+        }
+        
+        updateUI(user, calculatedBalance, totalCredit, totalDebit, txns, userIdStr);
+        
+    } catch (err) {
+        console.error('Load Dashboard Error:', err);
+        showToast('Fᴀɪʟᴇᴅ Tᴏ Lᴏᴀᴅ Dᴀꜱʜʙᴏᴀʀᴅ Dᴀᴛᴀ');
+        document.getElementById('txnList').innerHTML = 
+            '<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p style="font-size:12px;">Fᴀɪʟᴇᴅ Tᴏ Lᴏᴀᴅ Dᴀᴛᴀ</p></div>';
+    } finally {
+        hideSplash();
+    }
+}
+
+function updateUI(user, balance, totalCredit, totalDebit, txns, userIdStr) {
+    originalMobileNumber = user.mobile || '---';
+    
+    var avatarEl = document.getElementById('avatarP');
+    if (avatarEl && user.fullName) {
+        avatarEl.innerHTML = user.fullName.charAt(0).toUpperCase();
+    } else if (avatarEl && user.mobile) {
+        avatarEl.innerHTML = user.mobile.charAt(0).toUpperCase();
+    }
+    
+    var profilePicDiv = document.getElementById('sidebarProfilePic');
+    if (profilePicDiv) {
+        var initial = (user.fullName ? user.fullName.charAt(0) : 
+                      (user.mobile ? user.mobile.charAt(0) : 'U')).toUpperCase();
+        profilePicDiv.innerHTML = '<span style="font-size:30px;font-weight:bold;">' + initial + '</span>';
+    }
+    
+    document.getElementById('sidebarUsername').innerHTML = user.fullName || user.username || 'User';
+    var mobile = user.mobile || '---';
+    document.getElementById('sidebarMobile').innerHTML = (mobile.length === 10) ? 
+        '+91 ' + mobile.slice(0,5) + ' ' + mobile.slice(5) : mobile;
+    document.getElementById('sidebarBalanceAmount').innerHTML = balance.toFixed(2);
+    document.getElementById('walletId').innerHTML = user.walletId || '---';
+    
+    if (mobile && mobile.length >= 4) {
+        var last4 = mobile.slice(-4);
+        document.getElementById('mobile').textContent = '****' + last4;
+    } else {
+        document.getElementById('mobile').textContent = mobile || '---';
+    }
+    document.getElementById('mobileEyeIcon').className = 'fas fa-eye';
+    document.getElementById('toggleMobileBtn').classList.add('hidden-eye');
+    isMobileVisible = false;
+    
+    document.getElementById('balance').innerHTML = balance.toFixed(2);
+    document.getElementById('totalCredit').innerHTML = totalCredit.toFixed(2);
+    document.getElementById('totalDebit').innerHTML = totalDebit.toFixed(2);
+    
+    console.log('Final Stats:');
+    console.log('   Balance:', balance.toFixed(2));
+    console.log('   Total Credit:', totalCredit.toFixed(2));
+    console.log('   Total Debit:', totalDebit.toFixed(2));
+    
+    renderTransactions(txns, userIdStr);
+}
+
+// ✅ FIXED: Renders transactions with correct icon and type
+function renderTransactions(txns, userIdStr) {
+    var txnList = document.getElementById('txnList');
+    if (!txns || txns.length === 0) {
+        txnList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p style="font-size:12px;">Nᴏ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Yᴇᴛ</p></div>';
+        return;
+    }
+    
+    txnList.innerHTML = '';
+    var displayLimit = Math.min(5, txns.length);
+    for (var i = 0; i < displayLimit; i++) {
+        var tx = txns[i];
+        var isCredit = isTransactionCredit(tx, userIdStr);
+        var displayName = getTransactionDisplayName(tx, userIdStr);
+        var date = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var timeStr = date.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        
+        var div = document.createElement('div');
+        div.className = 'txn-item';
+        
+        // ✅ FIXED: Credit = ↓ (down arrow), Debit = ↑ (up arrow)
+        var statusText = isCredit ? 'CREDIT' : 'DEBIT';
+        var statusColor = isCredit ? '#10b981' : '#ef4444';
+        var statusIcon = isCredit ? 'fa-arrow-down' : 'fa-arrow-up';
+        
+        var txStatus = tx.status || 'success';
+        if (txStatus !== 'success') {
+            statusIcon = 'fa-clock';
+            statusText = 'PENDING';
+            statusColor = '#f59e0b';
+        }
+        
+        // ✅ FIXED: Amount sign: + for Credit, - for Debit
+        var amountSign = isCredit ? '+' : '-';
+        var amountColor = isCredit ? '#16a34a' : '#dc2626';
+        
+        div.innerHTML = 
+            '<div style="flex:1;min-width:0;">' +
+                '<div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + displayName + '</div>' +
+                '<div style="font-size:10px;margin-top:2px;" class="text-muted"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>' + timeStr + '</div>' +
+            '</div>' +
+            '<div style="text-align:right;flex-shrink:0;margin-left:10px;">' +
+                '<div style="font-weight:700;font-size:14px;color:' + amountColor + '">' + 
+                amountSign + '<i class="fa-solid fa-indian-rupee-sign" style="font-size:11px;margin-right:1px;"></i>' + 
+                tx.amount.toFixed(2) + '</div>' +
+                '<div style="font-size:9px;color:' + statusColor + ';margin-top:2px;"><i class="fa-solid ' + statusIcon + '" style="margin-right:3px;"></i>' + 
+                statusText + '</div>' +
+            '</div>';
+        txnList.appendChild(div);
+    }
+}
+
+// ============================================================
+// STARS & THEME
+// ============================================================
+function createStarDots() {
+    document.querySelectorAll('.star-dot').forEach(function(star) {
+        star.remove();
+    });
+    for (var i = 0; i < 25; i++) {
+        var dot = document.createElement('div');
+        dot.className = 'star-dot';
+        dot.style.left = Math.random() * 100 + '%';
+        dot.style.animationDuration = (6 + Math.random() * 12) + 's';
+        dot.style.animationDelay = Math.random() * 12 + 's';
+        var size = 2 + Math.random() * 6;
+        dot.style.width = size + 'px';
+        dot.style.height = size + 'px';
+        dot.classList.add(size > 4 ? 'big' : 'small');
+        document.body.appendChild(dot);
+    }
+    updateStarColors();
+}
+
+function updateStarColors() {
+    var color = document.body.classList.contains('dark') ? '#00f0ff' : '#8b5cf6';
+    document.querySelectorAll('.star-dot').forEach(function(star) {
+        star.style.color = color;
+        star.style.backgroundColor = color;
+    });
+}
+
+function updateHeaderThemeIcon() {
+    var icon = document.getElementById('headerThemeIcon');
+    if (icon) {
+        icon.className = document.body.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+    }
+}
+
+window.toggleTheme = function() {
+    document.body.classList.toggle('dark');
+    document.body.classList.toggle('light');
+    updateStarColors();
+    updateHeaderThemeIcon();
+    localStorage.setItem('primeTheme', document.body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+function loadTheme() {
+    var saved = localStorage.getItem('primeTheme');
+    if (saved === 'dark') {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+    } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
+    }
+    updateStarColors();
+    updateHeaderThemeIcon();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    loadTheme();
+    createStarDots();
+    
+    var token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/index';
+        return;
+    }
+    
+    loadDashboard();
+});
+</script>
+</body>
+</html>

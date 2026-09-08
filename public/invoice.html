@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Iɴᴠᴏɪᴄᴇ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --balance-gradient: linear-gradient(135deg, #00e0ff, #0088ff);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --manual-color: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .star-dot {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseStar linear infinite;
+            opacity: 0;
+            background-color: #00f0ff;
+            color: #00f0ff;
+        }
+
+        .star-dot.big { box-shadow: 0 0 12px currentColor; }
+        .star-dot.small { box-shadow: 0 0 4px currentColor; }
+
+        @keyframes riseStar {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0 1.5rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active { transform: scale(0.95); }
+
+        .header-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-right { width: 40px; }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-card {
+            background: var(--balance-gradient);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .balance-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.9);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wallet-badge i { margin-right: 0.3rem; }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(4px);
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i { color: var(--accent); }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .input-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .user-status {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .user-status.active { display: inline-flex; }
+        .user-status.verified { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .user-status.error { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .user-status.loading { background: rgba(0, 240, 255, 0.15); color: var(--accent); }
+
+        .user-status i { font-size: 0.8rem; }
+
+        .quick-amounts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .quick-amt {
+            padding: 0.3rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .quick-amt:active {
+            transform: scale(0.95);
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .fee-panel {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+        }
+
+        .fee-panel.open { display: block; }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0.2rem 0;
+        }
+
+        .fee-row.total-row {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 0.4rem;
+            margin-top: 0.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .fee-row.total-row span:last-child { color: var(--accent); }
+
+        .action-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--accent-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            margin-top: 0.5rem;
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn i { font-size: 1rem; }
+
+        .action-btn .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .webhook-field {
+            display: none;
+        }
+
+        .webhook-field.show {
+            display: block;
+        }
+
+        .webhook-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .webhook-toggle i {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .webhook-toggle i.rotate {
+            transform: rotate(180deg);
+        }
+
+        .invoice-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .invoice-item .invoice-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .invoice-item .invoice-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .invoice-item .invoice-id {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .invoice-item .invoice-status-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .invoice-item .invoice-status-badge.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .invoice-item .invoice-status-badge.paid {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .invoice-item .invoice-status-badge.expired {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .invoice-item .invoice-status-badge.cancelled {
+            background: rgba(107, 114, 128, 0.2);
+            color: var(--text-muted);
+        }
+
+        .invoice-item .invoice-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .invoice-item .invoice-actions button {
+            flex: 1;
+            padding: 0.4rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .invoice-item .invoice-actions .pay-btn {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .invoice-item .invoice-actions .cancel-btn {
+            background: var(--danger);
+            color: #ffffff;
+            opacity: 0.8;
+        }
+
+        .invoice-item .invoice-actions .view-btn {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent);
+        }
+
+        .invoice-item .invoice-actions button:active { transform: scale(0.95); }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast i { margin-right: 0.5rem; }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0 1rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            transition: color 0.2s;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item:active { transform: scale(0.95); }
+
+        @media (max-width: 480px) {
+            .invoice-item .invoice-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+            .invoice-item .invoice-row .invoice-right {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+
+    <header class="header">
+        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+        <span class="header-logo"><i class="fas fa-file-invoice"></i> Iɴᴠᴏɪᴄᴇ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</span>
+        <div class="header-right"></div>
+    </header>
+
+    <div class="container">
+
+        <!-- ===== BALANCE CARD ===== -->
+        <div class="balance-card">
+            <div class="balance-label"><i class="fas fa-wallet"></i> Aᴠᴀɪʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+            <div class="balance-amount" id="balance">₹0.00</div>
+            <div class="wallet-badge"><i class="fas fa-shield-alt"></i> Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</div>
+        </div>
+
+        <!-- ===== CREATE INVOICE ===== -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-pen"></i> Cʀᴇᴀᴛᴇ Iɴᴠᴏɪᴄᴇ</div>
+
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Rᴇᴄᴇɪᴠᴇʀ's Mᴏʙɪʟᴇ</label>
+                <input type="tel" id="receiverMobile" maxlength="10" placeholder="Eɴᴛᴇʀ 10-ᴅɪɢɪᴛ ᴍᴏʙɪʟᴇ" oninput="lookupReceiver(this.value)">
+                <div id="userStatusBadge" class="user-status">
+                    <i class="fas fa-circle-check"></i>
+                    <span id="userStatusText"></span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ</label>
+                <input type="number" id="invoiceAmount" placeholder="0.00" step="1" min="1" oninput="calculateBreakdown(this.value)">
+                <div class="quick-amounts">
+                    <button class="quick-amt" onclick="setQuickAmount(100)">₹100</button>
+                    <button class="quick-amt" onclick="setQuickAmount(500)">₹500</button>
+                    <button class="quick-amt" onclick="setQuickAmount(1000)">₹1000</button>
+                    <button class="quick-amt" onclick="setQuickAmount(2000)">₹2000</button>
+                    <button class="quick-amt" onclick="setQuickAmount(5000)">₹5000</button>
+                </div>
+                <div id="feeBreakdown" class="fee-panel">
+                    <div class="fee-row">
+                        <span>Iɴᴠᴏɪᴄᴇ Aᴍᴏᴜɴᴛ</span>
+                        <span id="breakdownAmount">₹0.00</span>
+                    </div>
+                    <div class="fee-row">
+                        <span>Pʟᴀᴛꜰᴏʀᴍ Fᴇᴇ</span>
+                        <span>Fʀᴇᴇ</span>
+                    </div>
+                    <div class="fee-row total-row">
+                        <span>Tᴏᴛᴀʟ</span>
+                        <span id="breakdownTotal">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-sticky-note"></i> Nᴏᴛᴇ (Oᴘᴛɪᴏɴᴀʟ)</label>
+                <input type="text" id="invoiceNote" placeholder="Wʜᴀᴛ'ꜱ ᴛʜɪꜱ ꜰᴏʀ?">
+            </div>
+
+            <!-- ===== WEBHOOK TOGGLE ===== -->
+            <div class="webhook-toggle" onclick="toggleWebhook()">
+                <i class="fas fa-globe" id="webhookIcon"></i>
+                <span id="webhookToggleText">Aᴅᴅ Wᴇʙʜᴏᴏᴋ</span>
+                <i class="fas fa-chevron-down" id="webhookArrow"></i>
+            </div>
+
+            <div class="webhook-field" id="webhookField">
+                <div class="input-group" style="margin-top:0.5rem;">
+                    <label><i class="fas fa-link"></i> Wᴇʙʜᴏᴏᴋ URL</label>
+                    <input type="url" id="webhookUrl" placeholder="Hᴛᴛᴘꜱ://ʏᴏᴜʀᴅᴏᴍᴀɪɴ.ᴄᴏᴍ/ᴡᴇʙʜᴏᴏᴋ">
+                    <div style="font-size:0.55rem;color:var(--text-muted);margin-top:0.2rem;">
+                        <i class="fas fa-info-circle"></i> Yᴏᴜ ᴡɪʟʟ ʀᴇᴄᴇɪᴠᴇ ᴀ Pᴏꜱᴛ ʀᴇǫᴜᴇꜱᴛ ᴡʜᴇɴ ᴛʜᴇ ɪɴᴠᴏɪᴄᴇ ɪꜱ ᴄʀᴇᴀᴛᴇᴅ, ᴘᴀɪᴅ, ᴏʀ ᴄᴀɴᴄᴇʟʟᴇᴅ.
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="createInvoiceBtn" onclick="createInvoice()">
+                <i class="fas fa-file-invoice"></i> Cʀᴇᴀᴛᴇ Iɴᴠᴏɪᴄᴇ
+            </button>
+        </div>
+
+        <!-- ===== MY INVOICES ===== -->
+        <div style="margin-top: 1.5rem;">
+            <div class="card-title" style="margin-bottom: 0.75rem;">
+                <i class="fas fa-history"></i> Mʏ Iɴᴠᴏɪᴄᴇꜱ
+            </div>
+            <div id="invoicesContainer">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-pulse"></i>
+                    <p>Lᴏᴀᴅɪɴɢ Iɴᴠᴏɪᴄᴇꜱ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Hᴏᴍᴇ</span></a>
+        <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
+        <a href="/invoice" class="nav-item active"><i class="fas fa-file-invoice"></i><span>Iɴᴠᴏɪᴄᴇ</span></a>
+        <a href="/deposit" class="nav-item"><i class="fas fa-plus-circle"></i><span>Aᴅᴅ</span></a>
+        <a href="/transactions" class="nav-item"><i class="fas fa-receipt"></i><span>Hɪꜱᴛᴏʀʏ</span></a>
+    </div>
+
+    <script>
+        console.log('Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('Nᴏ Tᴏᴋᴇɴ Fᴏᴜɴᴅ');
+            window.location.href = '/index';
+        }
+
+        const API_BASE = '/api/invoice-payment';
+        let isVerified = false;
+        let currentReceiverName = '';
+        let currentReceiverMobile = '';
+        let searchTimeout = null;
+        let webhookVisible = false;
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = message;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.className = 'toast', 3500);
+        }
+
+        function createStarDots() {
+            document.querySelectorAll('.star-dot').forEach(star => star.remove());
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'star-dot';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.animationDuration = (6 + Math.random() * 12) + 's';
+                dot.style.animationDelay = Math.random() * 12 + 's';
+                const size = 2 + Math.random() * 6;
+                dot.style.width = size + 'px';
+                dot.style.height = size + 'px';
+                dot.classList.add(size > 4 ? 'big' : 'small');
+                document.body.appendChild(dot);
+            }
+        }
+
+        function toggleWebhook() {
+            webhookVisible = !webhookVisible;
+            const field = document.getElementById('webhookField');
+            const arrow = document.getElementById('webhookArrow');
+            const text = document.getElementById('webhookToggleText');
+            const icon = document.getElementById('webhookIcon');
+
+            if (webhookVisible) {
+                field.classList.add('show');
+                arrow.classList.add('rotate');
+                text.textContent = 'Hɪᴅᴇ Wᴇʙʜᴏᴏᴋ';
+                icon.style.color = 'var(--accent)';
+            } else {
+                field.classList.remove('show');
+                arrow.classList.remove('rotate');
+                text.textContent = 'Aᴅᴅ Wᴇʙʜᴏᴏᴋ';
+                icon.style.color = '';
+            }
+        }
+
+        async function loadBalance() {
+            try {
+                const response = await fetch('/api/transfer/balance', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('balance').textContent = '₹' + parseFloat(data.balance).toFixed(2);
+                }
+            } catch (e) {
+                console.error('Lᴏᴀᴅ Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', e.message);
+            }
+        }
+
+        async function loadMyInvoices() {
+            try {
+                const container = document.getElementById('invoicesContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-pulse"></i>
+                        <p>Lᴏᴀᴅɪɴɢ Iɴᴠᴏɪᴄᴇꜱ...</p>
+                    </div>
+                `;
+
+                const response = await fetch(API_BASE + '/my-invoices?limit=50', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                if (!data.success || !data.invoices || data.invoices.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Nᴏ Iɴᴠᴏɪᴄᴇꜱ Yᴇᴛ</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                data.invoices.forEach(inv => {
+                    const sender = inv.sender || inv.senderId || {};
+                    const receiver = inv.receiver || inv.userId || {};
+
+                    const isSender = sender._id ? true : false;
+                    const isReceiver = receiver._id ? true : false;
+
+                    let otherParty = null;
+                    if (isSender) {
+                        otherParty = receiver;
+                    } else if (isReceiver) {
+                        otherParty = sender;
+                    }
+
+                    const partyName = otherParty ? (otherParty.fullName || otherParty.username || 'Uɴᴋɴᴏᴡɴ') : 'Uɴᴋɴᴏᴡɴ';
+                    const partyMobile = otherParty ? (otherParty.mobile || 'N/A') : 'N/A';
+
+                    const canPay = inv.status === 'pending' && inv.canBePaid && isReceiver;
+
+                    const statusClass = inv.status || 'pending';
+                    const statusDisplay = inv.statusLabel || inv.status || 'PENDING';
+                    let statusIcon = '';
+                    if (inv.status === 'pending') { statusIcon = '⏳ '; }
+                    else if (inv.status === 'paid') { statusIcon = '✅ '; }
+                    else if (inv.status === 'expired') { statusIcon = '⏰ '; }
+                    else if (inv.status === 'cancelled') { statusIcon = '🚫 '; }
+
+                    const webhookBadge = inv.webhook ? 
+                        `<span style="font-size:0.5rem;color:var(--text-muted);margin-left:0.3rem;"><i class="fas fa-globe"></i></span>` : '';
+
+                    let actionsHtml = '';
+                    if (canPay) {
+                        actionsHtml = `
+                            <div class="invoice-actions">
+                                <button class="pay-btn" onclick="window.location.href='/invoice-pay?id=${inv.invoiceId}'">
+                                    <i class="fas fa-eye"></i> Vɪᴇᴡ & Pᴀʏ
+                                </button>
+                                <button class="cancel-btn" onclick="cancelInvoice('${inv.invoiceId}')">
+                                    <i class="fas fa-times"></i> Cᴀɴᴄᴇʟ
+                                </button>
+                            </div>
+                        `;
+                    } else if (inv.status === 'pending' && !inv.isExpired && isSender) {
+                        actionsHtml = `
+                            <div class="invoice-actions">
+                                <button class="view-btn" onclick="window.location.href='/invoice-pay?id=${inv.invoiceId}'" style="flex:1;">
+                                    <i class="fas fa-eye"></i> Vɪᴇᴡ
+                                </button>
+                                <button class="cancel-btn" onclick="cancelInvoice('${inv.invoiceId}')">
+                                    <i class="fas fa-times"></i> Cᴀɴᴄᴇʟ
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        actionsHtml = `
+                            <div class="invoice-actions">
+                                <button class="view-btn" onclick="window.location.href='/invoice-pay?id=${inv.invoiceId}'" style="flex:1;">
+                                    <i class="fas fa-eye"></i> Vɪᴇᴡ
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="invoice-item">
+                            <div class="invoice-row">
+                                <div>
+                                    <div class="invoice-amount">₹${(inv.amount || 0).toFixed(2)} ${webhookBadge}</div>
+                                    <div class="invoice-id">${inv.invoiceId || 'N/A'}</div>
+                                    <div style="font-size:0.55rem;color:var(--text-secondary);margin-top:0.1rem;">
+                                        <i class="fas fa-user"></i> ${partyName} (${partyMobile})
+                                        ${isSender ? '<span style="color:var(--warning);margin-left:0.3rem;">📤 Sᴇɴᴛ</span>' : ''}
+                                        ${isReceiver ? '<span style="color:var(--success);margin-left:0.3rem;">📥 Tᴏ Rᴇᴄᴇɪᴠᴇ</span>' : ''}
+                                    </div>
+                                    ${inv.notes ? `<div style="font-size:0.55rem;color:var(--text-muted);margin-top:0.1rem;">📝 ${inv.notes}</div>` : ''}
+                                </div>
+                                <div class="invoice-right">
+                                    <span class="invoice-status-badge ${statusClass}">${statusIcon}${statusDisplay}</span>
+                                    ${canPay ? `<div style="font-size:0.5rem;color:var(--success);margin-top:0.2rem;"><i class="fas fa-hand-pointer"></i> Pᴀʏ Nᴏᴡ</div>` : ''}
+                                    ${inv.formattedRemainingTime && inv.status === 'pending' ? `<div style="font-size:0.5rem;color:var(--warning);margin-top:0.2rem;">⏱️ ${inv.formattedRemainingTime}</div>` : ''}
+                                </div>
+                            </div>
+                            ${actionsHtml}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (e) {
+                console.error('Lᴏᴀᴅ Iɴᴠᴏɪᴄᴇꜱ Eʀʀᴏʀ:', e.message);
+                document.getElementById('invoicesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Fᴀɪʟᴇᴅ Tᴏ Lᴏᴀᴅ Iɴᴠᴏɪᴄᴇꜱ</p>
+                    </div>
+                `;
+            }
+        }
+
+        function lookupReceiver(mobileNumber) {
+            clearTimeout(searchTimeout);
+            const badge = document.getElementById('userStatusBadge');
+            const textSpan = document.getElementById('userStatusText');
+            const icon = badge.querySelector('i');
+
+            badge.classList.remove('active', 'verified', 'error', 'loading');
+
+            const cleanMobile = mobileNumber.toString().trim();
+
+            if (!/^\d{10}$/.test(cleanMobile)) {
+                isVerified = false;
+                currentReceiverMobile = '';
+                currentReceiverName = '';
+                return;
+            }
+
+            currentReceiverMobile = cleanMobile;
+            badge.classList.add('active', 'loading');
+            icon.className = 'fas fa-spinner fa-pulse';
+            textSpan.textContent = ' Vᴇʀɪꜰʏɪɴɢ...';
+            isVerified = false;
+
+            searchTimeout = setTimeout(() => {
+                fetch('/api/transfer/view?number=' + encodeURIComponent(cleanMobile), {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(data => {
+                            throw new Error(data.error || 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ');
+                        });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        currentReceiverName = data.name || data.fullName || 'Uɴᴋɴᴏᴡɴ';
+                        badge.classList.remove('loading');
+                        badge.classList.add('verified');
+                        icon.className = 'fas fa-circle-check';
+                        textSpan.textContent = ' ' + currentReceiverName;
+                        isVerified = true;
+                    } else {
+                        badge.classList.remove('loading');
+                        badge.classList.add('error');
+                        icon.className = 'fas fa-circle-exclamation';
+                        textSpan.textContent = ' ' + (data.error || 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ');
+                        isVerified = false;
+                    }
+                })
+                .catch(err => {
+                    badge.classList.remove('loading');
+                    badge.classList.add('error');
+                    icon.className = 'fas fa-circle-exclamation';
+                    textSpan.textContent = ' ' + err.message;
+                    isVerified = false;
+                });
+            }, 500);
+        }
+
+        function setQuickAmount(amount) {
+            document.getElementById('invoiceAmount').value = amount;
+            calculateBreakdown(amount);
+        }
+
+        function calculateBreakdown(amountValue) {
+            const panel = document.getElementById('feeBreakdown');
+            if (!amountValue || amountValue <= 0) {
+                panel.classList.remove('open');
+                return;
+            }
+            panel.classList.add('open');
+            const numericAmount = parseFloat(amountValue);
+            document.getElementById('breakdownAmount').textContent = '₹' + numericAmount.toFixed(2);
+            document.getElementById('breakdownTotal').textContent = '₹' + numericAmount.toFixed(2);
+        }
+
+        async function createInvoice() {
+            const mobile = document.getElementById('receiverMobile').value.trim();
+            const amount = document.getElementById('invoiceAmount').value;
+            const note = document.getElementById('invoiceNote').value.trim();
+            const webhook = document.getElementById('webhookUrl').value.trim();
+
+            if (!mobile || mobile.length < 10) {
+                showToast('Eɴᴛᴇʀ A Vᴀʟɪᴅ 10-Dɪɢɪᴛ Mᴏʙɪʟᴇ', 'error');
+                return;
+            }
+
+            if (!isVerified) {
+                showToast('Wᴀɪᴛ, Vᴇʀɪꜰʏɪɴɢ Rᴇᴄᴇɪᴠᴇʀ...', 'error');
+                return;
+            }
+
+            if (!amount || amount <= 0) {
+                showToast('Eɴᴛᴇʀ A Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ', 'error');
+                return;
+            }
+
+            if (parseFloat(amount) > 5000) {
+                showToast('Mᴀxɪᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹5,000', 'error');
+                return;
+            }
+
+            if (webhook) {
+                try {
+                    new URL(webhook);
+                } catch (e) {
+                    showToast('Iɴᴠᴀʟɪᴅ Wᴇʙʜᴏᴏᴋ URL', 'error');
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('createInvoiceBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Cʀᴇᴀᴛɪɴɢ...';
+
+            try {
+                const response = await fetch(API_BASE + '/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        amount: parseFloat(amount),
+                        receiverMobile: mobile,
+                        note: note || 'Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ',
+                        webhook: webhook || null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Iɴᴠᴏɪᴄᴇ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!', 'success');
+                    
+                    document.getElementById('receiverMobile').value = '';
+                    document.getElementById('invoiceAmount').value = '';
+                    document.getElementById('invoiceNote').value = '';
+                    document.getElementById('webhookUrl').value = '';
+                    document.getElementById('feeBreakdown').classList.remove('open');
+                    const badge = document.getElementById('userStatusBadge');
+                    badge.classList.remove('active', 'verified', 'error', 'loading');
+                    isVerified = false;
+                    currentReceiverName = '';
+                    currentReceiverMobile = '';
+
+                    if (data.invoice && data.invoice.invoiceId) {
+                        window.location.href = '/invoice-pay?id=' + data.invoice.invoiceId;
+                    } else {
+                        loadMyInvoices();
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+
+            } catch (e) {
+                console.error('Cʀᴇᴀᴛᴇ Iɴᴠᴏɪᴄᴇ Eʀʀᴏʀ:', e.message);
+                showToast(e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-file-invoice"></i> Cʀᴇᴀᴛᴇ Iɴᴠᴏɪᴄᴇ';
+        }
+
+        async function cancelInvoice(invoiceId) {
+            if (!confirm('Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Cᴀɴᴄᴇʟ Tʜɪꜱ Iɴᴠᴏɪᴄᴇ?')) return;
+
+            try {
+                const response = await fetch(API_BASE + '/cancel/' + invoiceId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ reason: 'Cᴀɴᴄᴇʟʟᴇᴅ Bʏ Uꜱᴇʀ' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Iɴᴠᴏɪᴄᴇ Cᴀɴᴄᴇʟʟᴇᴅ', 'success');
+                    loadMyInvoices();
+                } else {
+                    showToast(data.message, 'error');
+                }
+
+            } catch (e) {
+                console.error('Cᴀɴᴄᴇʟ Iɴᴠᴏɪᴄᴇ Eʀʀᴏʀ:', e.message);
+                showToast(e.message, 'error');
+            }
+        }
+
+        function goBack() {
+            window.location.href = '/dashboard';
+        }
+
+        document.getElementById('invoiceAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') createInvoice();
+        });
+
+        document.getElementById('receiverMobile').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('invoiceAmount').focus();
+        });
+
+        document.getElementById('webhookUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') createInvoice();
+        });
+
+        createStarDots();
+        loadBalance();
+        loadMyInvoices();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const invoiceId = urlParams.get('id');
+        if (invoiceId) {
+            window.location.href = '/invoice-pay?id=' + invoiceId;
+        }
+
+        console.log('✅ Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ Rᴇᴀᴅʏ');
+    </script>
+</body>
+</html>

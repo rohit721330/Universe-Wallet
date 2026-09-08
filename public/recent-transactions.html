@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --pending-color: #f59e0b;
+            --completed-color: #22c55e;
+            --cancelled-color: #ef4444;
+            --anodized-glow: 0 0 30px rgba(0, 240, 255, 0.15);
+            --anodized-border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        
+        .electron-particle {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseElectron linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 60px rgba(0,240,255,0.1);
+        }
+        .electron-particle.big { box-shadow: 0 0 30px rgba(0,240,255,0.6), 0 0 80px rgba(0,240,255,0.15); background: radial-gradient(circle, #00f0ff, #0088ff); }
+        .electron-particle.small { box-shadow: 0 0 15px rgba(0,240,255,0.3); background: radial-gradient(circle, #00f0ff, transparent); }
+        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+
+        /* Sidebar */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--bg-secondary); z-index: 1000; transition: all 0.3s ease; padding: 1.5rem 0; overflow-y: auto; border-right: var(--anodized-border); box-shadow: var(--anodized-glow); }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-header .sidebar-logo { font-size: 1.2rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-header .sidebar-close { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: var(--anodized-border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-header .sidebar-close:active { transform: scale(0.9); }
+        .sidebar-user { padding: 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-user .user-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-user .user-info { flex: 1; min-width: 0; }
+        .sidebar-user .user-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-user .user-role { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu { padding: 0.5rem 0; }
+        .sidebar-menu .menu-label { padding: 0.5rem 1.5rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .sidebar-menu .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; }
+        .sidebar-menu .menu-item i { width: 20px; font-size: 1rem; color: var(--text-muted); }
+        .sidebar-menu .menu-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .sidebar-menu .menu-item.active { background: var(--bg-card); color: var(--accent); border-left: 3px solid var(--accent); }
+        .sidebar-menu .menu-item.active i { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .sidebar-menu .menu-item.logout { margin-top: 0.5rem; border-top: var(--anodized-border); padding-top: 1rem; color: var(--danger); }
+        .sidebar-menu .menu-item.logout i { color: var(--danger); }
+        .sidebar-menu .menu-item.logout:hover { background: rgba(239,68,68,0.1); }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .menu-btn { background: var(--bg-secondary); border: var(--anodized-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,240,255,0.05); }
+        .menu-btn:active { transform: scale(0.95); }
+        .header-logo { font-size: 1.3rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .header-right { display: flex; gap: 0.5rem; align-items: center; }
+        .header-right .admin-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .admin-badge { background: rgba(0,240,255,0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: var(--anodized-border); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* Filter Section */
+        .filter-section { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: var(--anodized-glow); }
+        .filter-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .filter-tabs button { background: var(--input-bg); border: var(--anodized-border); color: var(--text-secondary); padding: 0.4rem 1rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .filter-tabs button.active { background: rgba(0,240,255,0.15); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .filter-tabs button:active { transform: scale(0.95); }
+        .search-box { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+        .search-box input { flex: 1; background: var(--input-bg); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.7rem 1rem; color: var(--text-primary); outline: none; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 30px rgba(0,240,255,0.1); }
+        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box button { background: var(--accent-gradient); border: none; color: #fff; padding: 0.7rem 1.2rem; border-radius: 0.75rem; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .search-box button:active { transform: scale(0.95); }
+
+        /* Stats Row */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+        .stat-mini { background: var(--bg-card); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.5rem; text-align: center; box-shadow: var(--anodized-glow); }
+        .stat-mini .stat-num { font-size: 1rem; font-weight: 800; }
+        .stat-mini .stat-num.total { color: var(--accent); }
+        .stat-mini .stat-num.positive { color: var(--success); }
+        .stat-mini .stat-num.negative { color: var(--danger); }
+        .stat-mini .stat-label { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Transaction Item */
+        .transaction-item { 
+            background: var(--bg-card); 
+            border: var(--anodized-border); 
+            border-radius: 0.75rem; 
+            padding: 0.75rem 1rem; 
+            margin-bottom: 0.5rem; 
+            box-shadow: var(--anodized-glow);
+            transition: all 0.2s;
+        }
+        .transaction-item:hover { border-color: rgba(0,240,255,0.3); }
+        
+        .tx-row { display: flex; justify-content: space-between; align-items: center; }
+        .tx-id { font-size: 0.65rem; color: var(--text-secondary); font-family: monospace; font-weight: 600; }
+        .tx-amount { font-weight: 700; font-size: 1rem; }
+        .tx-amount.positive { color: var(--success); }
+        .tx-amount.negative { color: var(--danger); }
+        
+        .tx-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem; }
+        .tx-reason { font-size: 0.7rem; color: var(--text-muted); }
+        .tx-status { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; padding: 0.15rem 0.6rem; border-radius: 2rem; }
+        .tx-status.success { background: rgba(34,197,94,0.15); color: var(--success); }
+        .tx-status.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .tx-status.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .tx-status.cancelled { background: rgba(107,114,128,0.15); color: var(--text-muted); }
+        .tx-time { font-size: 0.55rem; color: var(--text-muted); }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.5rem 0; }
+        .pagination button { background: var(--bg-card); border: var(--anodized-border); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; font-family: 'Inter', sans-serif; }
+        .pagination button.active { background: rgba(0,240,255,0.15); border-color: var(--accent); color: var(--accent); }
+        .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination button:active:not(:disabled) { transform: scale(0.95); }
+        .pagination .page-info { font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; }
+
+        /* Toast */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: var(--anodized-border); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.2); }
+
+        /* Loading & Empty */
+        .loading-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
+        .loading-state i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 1s linear infinite; color: var(--accent); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.3; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: var(--anodized-border); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; padding: 0.25rem 0.5rem; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .nav-item:active { transform: scale(0.95); }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .transaction-item { flex-wrap: wrap; }
+            .tx-row { flex-wrap: wrap; }
+            .tx-amount { margin-left: auto; }
+            .tx-bottom { flex-wrap: wrap; gap: 0.3rem; }
+            .sidebar { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Aᴅᴍɪɴ</span>
+            <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarName">Aᴅᴍɪɴ</div>
+                <div class="user-role"><i class="fas fa-bolt"></i> Sᴜᴘᴇʀ Aᴅᴍɪɴ</div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Mᴀɪɴ Mᴇɴᴜ</div>
+            <a href="/rohit" class="menu-item"><i class="fas fa-chart-pie"></i><span>Dᴀꜱʜʙᴏᴀʀᴅ</span></a>
+            <a href="/admin-deposit" class="menu-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱɪᴛꜱ</span></a>
+            <a href="/admin-withdraw" class="menu-item"><i class="fas fa-arrow-up"></i><span>Wɪᴛʜᴅʀᴀᴡᴀʟꜱ</span></a>
+            <a href="/admin-users" class="menu-item"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <a href="/admin-adjust" class="menu-item"><i class="fas fa-coins"></i><span>Aᴅᴊᴜꜱᴛ Bᴀʟᴀɴᴄᴇ</span></a>
+            <a href="/admin-settings" class="menu-item"><i class="fas fa-cog"></i><span>Sᴇᴛᴛɪɴɢꜱ</span></a>
+            <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Lᴏɢᴏᴜᴛ</span></button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bolt"></i></button>
+                <span class="header-logo">Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ</span>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge"><i class="fas fa-bolt"></i> Aᴅᴍɪɴ</span>
+                <div class="admin-avatar" onclick="toggleSidebar()" title="Menu"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Stats Row -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-mini">
+                    <div class="stat-num total" id="totalTx">0</div>
+                    <div class="stat-label">Tᴏᴛᴀʟ</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-num positive" id="creditTx">0</div>
+                    <div class="stat-label">Cʀᴇᴅɪᴛ</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-num negative" id="debitTx">0</div>
+                    <div class="stat-label">Dᴇʙɪᴛ</div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-tabs">
+                    <button class="active" data-filter="all" onclick="filterTransactions('all')">Aʟʟ</button>
+                    <button data-filter="deposit" onclick="filterTransactions('deposit')">Dᴇᴘᴏꜱɪᴛ</button>
+                    <button data-filter="withdrawal" onclick="filterTransactions('withdrawal')">Wɪᴛʜᴅʀᴀᴡ</button>
+                    <button data-filter="transfer" onclick="filterTransactions('transfer')">Tʀᴀɴꜱꜰᴇʀ</button>
+                    <button data-filter="lifafa" onclick="filterTransactions('lifafa')">Lɪꜰᴀꜰᴀ</button>
+                    <button data-filter="gift" onclick="filterTransactions('gift')">Gɪꜰᴛ</button>
+                    <button data-filter="admin_add" onclick="filterTransactions('admin_add')">Aᴅᴅ</button>
+                    <button data-filter="admin_deduct" onclick="filterTransactions('admin_deduct')">Dᴇᴅᴜᴄᴛ</button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Sᴇᴀʀᴄʜ ʙʏ ID, ᴜꜱᴇʀ, ᴏʀ ᴛʏᴘᴇ..." onkeyup="handleSearch(event)">
+                    <button onclick="searchTransactions()"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div id="transactionList">
+                <div class="loading-state">
+                    <i class="fas fa-bolt"></i>
+                    <p>Lᴏᴀᴅɪɴɢ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ...</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button onclick="changePage('prev')" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+                <span class="page-info" id="pageInfo">Pᴀɢᴇ 1 ᴏꜰ 1</span>
+                <button onclick="changePage('next')" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <a href="/rohit" class="nav-item"><i class="fas fa-bolt"></i><span>Dᴀꜱʜ</span></a>
+            <a href="/admin-deposit" class="nav-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱɪᴛ</span></a>
+            <a href="/admin-withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>Wɪᴛʜᴅʀᴀᴡ</span></a>
+            <a href="/admin-users" class="nav-item"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+            <a href="/admin-settings" class="nav-item"><i class="fas fa-cog"></i><span>Sᴇᴛᴛɪɴɢꜱ</span></a>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let state = {
+            transactions: [],
+            currentPage: 1,
+            limit: 20,
+            totalPages: 1,
+            totalTransactions: 0,
+            filter: 'all',
+            search: ''
+        };
+
+        // ============================================
+        // PARTICLES
+        // ============================================
+        function createElectronParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'electron-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                const size = 2 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.classList.add(size > 5 ? 'big' : 'small');
+                container.appendChild(p);
+            }
+        }
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        function getToken() { return localStorage.getItem('adminToken'); }
+
+        function checkAuth() {
+            const token = getToken();
+            if (!token) { window.location.href = '/rohit'; return false; }
+            return true;
+        }
+
+        function handleLogout() {
+            if (confirm('Aʀᴇ ʏᴏᴜ ꜱᴜʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʟᴏɢᴏᴜᴛ?')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                window.location.href = '/rohit';
+            }
+        }
+
+        // ============================================
+        // SIDEBAR
+        // ============================================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const s = document.getElementById('sidebar');
+            const btn = document.querySelector('.menu-btn');
+            if (s.classList.contains('open') && !s.contains(e.target) && !btn.contains(e.target)) {
+                closeSidebar();
+            }
+        });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.className = 'toast', 3500);
+        }
+
+        // ============================================
+        // API CALLS
+        // ============================================
+        async function apiCall(endpoint, options = {}) {
+            const token = getToken();
+            if (!token) { window.location.href = '/rohit'; throw new Error('Nᴏᴛ ᴀᴜᴛʜᴇɴᴛɪᴄᴀᴛᴇᴅ'); }
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            try {
+                const response = await fetch(endpoint, { ...defaultOptions, ...options });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('adminData');
+                        window.location.href = '/rohit';
+                        throw new Error('Sᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ');
+                    }
+                    throw new Error(data.message || 'Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ');
+                }
+                return data;
+            } catch (error) {
+                console.error('API Eʀʀᴏʀ:', error);
+                showToast(error.message, 'error');
+                throw error;
+            }
+        }
+
+        // ============================================
+        // FETCH TRANSACTIONS
+        // ============================================
+        async function fetchTransactions() {
+            if (!checkAuth()) return;
+
+            const listEl = document.getElementById('transactionList');
+            listEl.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-bolt"></i>
+                    <p>Lᴏᴀᴅɪɴɢ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ...</p>
+                </div>
+            `;
+
+            try {
+                let url = `/api/admin/transactions?page=${state.currentPage}&limit=${state.limit}`;
+                if (state.filter !== 'all') {
+                    url += `&type=${state.filter}`;
+                }
+                if (state.search) {
+                    url += `&search=${encodeURIComponent(state.search)}`;
+                }
+
+                const data = await apiCall(url);
+                state.transactions = data.transactions || [];
+                state.totalTransactions = data.pagination?.total || 0;
+                state.totalPages = data.pagination?.totalPages || 1;
+
+                renderTransactions();
+                renderPagination();
+                updateStats();
+
+            } catch (error) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Fᴀɪʟᴇᴅ ᴛᴏ ʟᴏᴀᴅ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ</p>
+                        <button onclick="fetchTransactions()" style="margin-top:0.75rem;padding:0.5rem 1.5rem;background:var(--bg-card);border:var(--anodized-border);border-radius:0.75rem;color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">
+                            <i class="fas fa-redo"></i> Rᴇᴛʀʏ
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // RENDER TRANSACTIONS
+        // ============================================
+        function renderTransactions() {
+            const listEl = document.getElementById('transactionList');
+
+            if (!state.transactions || state.transactions.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exchange-alt"></i>
+                        <p>Nᴏ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ ꜰᴏᴜɴᴅ</p>
+                        <p style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Tʀʏ ᴀᴅᴊᴜꜱᴛɪɴɢ ʏᴏᴜʀ ꜰɪʟᴛᴇʀ ᴏʀ ꜱᴇᴀʀᴄʜ</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            state.transactions.forEach(tx => {
+                const type = tx.type || 'unknown';
+                const description = tx.description || tx.remark || '';
+                
+                // Determine if transaction is Credit or Debit
+                let isNegative = false;
+                
+                // Debit transactions (money goes out)
+                if (type === 'withdrawal' || 
+                    type === 'admin_deduct' || 
+                    type === 'transfer') {
+                    isNegative = true;
+                }
+                
+                // Check for Gift/Lifafa creation vs redeem/claim
+                if (type === 'gift' && description.toLowerCase().includes('created')) {
+                    isNegative = true; // Gift created = Debit
+                } else if (type === 'gift' && (description.toLowerCase().includes('redeem') || description.toLowerCase().includes('redeemed'))) {
+                    isNegative = false; // Gift redeemed = Credit
+                }
+                
+                if (type === 'lifafa' && description.toLowerCase().includes('created')) {
+                    isNegative = true; // Lifafa created = Debit
+                } else if (type === 'lifafa' && (description.toLowerCase().includes('claimed') || description.toLowerCase().includes('claim'))) {
+                    isNegative = false; // Lifafa claimed = Credit
+                }
+
+                const amountClass = isNegative ? 'negative' : 'positive';
+                const amountSign = isNegative ? '-' : '+';
+                const status = tx.status || 'pending';
+                const reason = tx.remark || tx.description || 'N/A';
+                const time = new Date(tx.createdAt).toLocaleString('en-IN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    day: '2-digit', 
+                    month: 'short',
+                    year: 'numeric'
+                });
+                const sender = tx.sender_id?.fullName || 'N/A';
+                const receiver = tx.receiver_id?.fullName || 'N/A';
+                const user = tx.user_id?.fullName || 'N/A';
+                const displayName = sender !== 'N/A' ? sender : receiver !== 'N/A' ? receiver : user;
+                
+                html += `<div class="transaction-item">
+                    <div class="tx-row">
+                        <span class="tx-id"><i class="fas fa-user" style="margin-right:0.3rem;opacity:0.5;"></i>${displayName} • ${tx.tx_id || tx._id}</span>
+                        <span class="tx-amount ${amountClass}">${amountSign}₹${(tx.amount || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="tx-bottom">
+                        <span class="tx-reason"><i class="fas fa-sticky-note" style="margin-right:0.3rem;opacity:0.5;"></i>${reason}</span>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span class="tx-time">${time}</span>
+                            <span class="tx-status ${status}">${status}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        // ============================================
+        // UPDATE STATS
+        // ============================================
+        function updateStats() {
+            const total = state.transactions.length;
+            let credit = 0;
+            let debit = 0;
+
+            state.transactions.forEach(tx => {
+                const type = tx.type || 'unknown';
+                const description = tx.description || tx.remark || '';
+                
+                let isNegative = false;
+                
+                if (type === 'withdrawal' || type === 'admin_deduct' || type === 'transfer') {
+                    isNegative = true;
+                }
+                
+                if (type === 'gift' && description.toLowerCase().includes('created')) {
+                    isNegative = true;
+                } else if (type === 'gift' && (description.toLowerCase().includes('redeem') || description.toLowerCase().includes('redeemed'))) {
+                    isNegative = false;
+                }
+                
+                if (type === 'lifafa' && description.toLowerCase().includes('created')) {
+                    isNegative = true;
+                } else if (type === 'lifafa' && (description.toLowerCase().includes('claimed') || description.toLowerCase().includes('claim'))) {
+                    isNegative = false;
+                }
+
+                if (isNegative) {
+                    debit += tx.amount || 0;
+                } else {
+                    credit += tx.amount || 0;
+                }
+            });
+
+            document.getElementById('totalTx').textContent = total;
+            document.getElementById('creditTx').textContent = '₹' + credit.toFixed(2);
+            document.getElementById('debitTx').textContent = '₹' + debit.toFixed(2);
+        }
+
+        // ============================================
+        // PAGINATION
+        // ============================================
+        function renderPagination() {
+            document.getElementById('pageInfo').textContent = `Pᴀɢᴇ ${state.currentPage} ᴏꜰ ${state.totalPages || 1}`;
+            document.getElementById('prevPage').disabled = state.currentPage <= 1;
+            document.getElementById('nextPage').disabled = state.currentPage >= state.totalPages;
+        }
+
+        function changePage(direction) {
+            if (direction === 'prev' && state.currentPage > 1) {
+                state.currentPage--;
+            } else if (direction === 'next' && state.currentPage < state.totalPages) {
+                state.currentPage++;
+            } else {
+                return;
+            }
+            fetchTransactions();
+        }
+
+        // ============================================
+        // FILTER & SEARCH
+        // ============================================
+        function filterTransactions(filter) {
+            state.filter = filter;
+            state.currentPage = 1;
+
+            document.querySelectorAll('.filter-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.filter-tabs button[data-filter="${filter}"]`).classList.add('active');
+
+            fetchTransactions();
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                searchTransactions();
+            }
+        }
+
+        function searchTransactions() {
+            state.search = document.getElementById('searchInput').value.trim();
+            state.currentPage = 1;
+            fetchTransactions();
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            createElectronParticles();
+            if (checkAuth()) {
+                fetchTransactions();
+            }
+        });
+
+        console.log('⚡ Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Lᴏᴀᴅᴇᴅ');
+    </script>
+</body>
+</html>

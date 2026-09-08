@@ -1,0 +1,1169 @@
+// FILE: public/admin-invoice.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aᴅᴍɪɴ • Iɴᴠᴏɪᴄᴇ Mᴀɴᴀɢᴇᴍᴇɴᴛ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --manual-color: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .star-dot {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseStar linear infinite;
+            opacity: 0;
+            background-color: #00f0ff;
+            color: #00f0ff;
+        }
+
+        .star-dot.big { box-shadow: 0 0 12px currentColor; }
+        .star-dot.small { box-shadow: 0 0 4px currentColor; }
+
+        @keyframes riseStar {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0 1.5rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active { transform: scale(0.95); }
+
+        .header-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-right { width: 40px; }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+        }
+
+        .stat-card .stat-number {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .stat-card .stat-number.total { color: var(--accent); }
+        .stat-card .stat-number.pending { color: var(--warning); }
+        .stat-card .stat-number.paid { color: var(--success); }
+        .stat-card .stat-number.expired { color: var(--danger); }
+
+        .stat-card .stat-label {
+            font-size: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .filter-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tabs button {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-tabs button.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .filter-tabs button:active { transform: scale(0.95); }
+
+        .filter-search {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .filter-search input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.6rem 1rem;
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.8rem;
+            transition: border-color 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-search input:focus { border-color: var(--accent); }
+        .filter-search input::placeholder { color: var(--text-muted); }
+
+        .filter-search button {
+            background: var(--accent);
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.2rem;
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-search button:active { transform: scale(0.95); }
+
+        .invoice-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .invoice-item:hover { border-color: rgba(0, 240, 255, 0.3); }
+
+        .invoice-item .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .invoice-item .invoice-user {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .invoice-item .invoice-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .invoice-item .invoice-details span {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .invoice-item .invoice-details i {
+            margin-right: 0.2rem;
+            color: var(--accent);
+            opacity: 0.6;
+        }
+
+        .invoice-item .invoice-amount {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .invoice-item .invoice-status {
+            padding: 0.15rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .invoice-item .invoice-status.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .invoice-item .invoice-status.paid {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .invoice-item .invoice-status.expired {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .invoice-item .invoice-status.cancelled {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-muted);
+        }
+
+        .invoice-item .invoice-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .invoice-item .invoice-actions button {
+            padding: 0.3rem 0.9rem;
+            border-radius: 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .invoice-item .invoice-actions button:active { transform: scale(0.95); }
+        .invoice-item .invoice-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .invoice-item .invoice-actions .btn-view {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent);
+        }
+
+        .invoice-item .invoice-actions .btn-view:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .invoice-item .invoice-actions .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .invoice-item .invoice-actions .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .pagination button {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .pagination button.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination button:active:not(:disabled) { transform: scale(0.95); }
+
+        .pagination .page-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 0 0.5rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast i { margin-right: 0.5rem; }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); }
+
+        .loading-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            animation: spin 1s linear infinite;
+            color: var(--accent);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            opacity: 0.3;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-header h3 i {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+
+        .modal-close {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .modal-close:active { transform: scale(0.9); }
+
+        .modal-body .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .modal-body .detail-row:last-child { border-bottom: none; }
+
+        .modal-body .detail-row .label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .modal-body .detail-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+        .modal-body .detail-row .value.balance {
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .modal-body .detail-row .value.id-value {
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .modal-footer button {
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-footer button:active { transform: scale(0.95); }
+
+        .modal-footer .btn-cancel {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-footer .btn-danger {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0 1rem 0;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            transition: color 0.2s;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item:active { transform: scale(0.95); }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .invoice-item .invoice-header {
+                flex-direction: column;
+            }
+            .invoice-item .invoice-right {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                margin-top: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+
+    <header class="header">
+        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+        <span class="header-logo"><i class="fas fa-file-invoice"></i> Iɴᴠᴏɪᴄᴇ Mɢᴍᴛ</span>
+        <div class="header-right"></div>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number total" id="totalInvoices">0</div>
+                <div class="stat-label">Tᴏᴛᴀʟ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number pending" id="pendingInvoices">0</div>
+                <div class="stat-label">Pᴇɴᴅɪɴɢ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number paid" id="paidInvoices">0</div>
+                <div class="stat-label">Pᴀɪᴅ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number expired" id="expiredInvoices">0</div>
+                <div class="stat-label">Exᴘɪʀᴇᴅ</div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-tabs">
+                <button class="active" data-filter="all" onclick="filterInvoices('all')">Aʟʟ</button>
+                <button data-filter="pending" onclick="filterInvoices('pending')">⏳ Pᴇɴᴅɪɴɢ</button>
+                <button data-filter="paid" onclick="filterInvoices('paid')">✅ Pᴀɪᴅ</button>
+                <button data-filter="expired" onclick="filterInvoices('expired')">⏰ Exᴘɪʀᴇᴅ</button>
+                <button data-filter="cancelled" onclick="filterInvoices('cancelled')">🚫 Cᴀɴᴄᴇʟʟᴇᴅ</button>
+            </div>
+            <div class="filter-search">
+                <input type="text" id="searchInput" placeholder="Sᴇᴀʀᴄʜ Iɴᴠᴏɪᴄᴇ Iᴅ Oʀ Mᴏʙɪʟᴇ..." onkeyup="searchInvoices(event)">
+                <button onclick="searchInvoices()"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div id="invoiceList">
+            <div class="loading-state">
+                <i class="fas fa-spinner"></i>
+                <p>Lᴏᴀᴅɪɴɢ Iɴᴠᴏɪᴄᴇꜱ...</p>
+            </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <button onclick="changePage('prev')" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+            <span class="page-info" id="pageInfo">Pᴀɢᴇ 1 ᴏꜰ 1</span>
+            <button onclick="changePage('next')" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="/rohit" class="nav-item"><i class="fas fa-bolt"></i><span>Dᴀꜱʜ</span></a>
+        <a href="/admin-deposit" class="nav-item"><i class="fas fa-coins"></i><span>Dᴇᴘᴏꜱɪᴛ</span></a>
+        <a href="/admin-withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>Wɪᴛʜᴅʀᴀᴡ</span></a>
+        <a href="/admin-users" class="nav-item"><i class="fas fa-users"></i><span>Uꜱᴇʀꜱ</span></a>
+        <a href="/admin-invoice" class="nav-item active"><i class="fas fa-file-invoice"></i><span>Iɴᴠᴏɪᴄᴇ</span></a>
+    </div>
+
+    <!-- ===== VIEW INVOICE MODAL ===== -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice"></i> <span id="viewModalTitle">Iɴᴠᴏɪᴄᴇ Dᴇᴛᴀɪʟꜱ</span></h3>
+                <button class="modal-close" onclick="closeViewModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="viewModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeViewModal()">Cʟᴏꜱᴇ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DELETE CONFIRM MODAL ===== -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash" style="color:var(--danger);"></i> Dᴇʟᴇᴛᴇ Iɴᴠᴏɪᴄᴇ</h3>
+                <button class="modal-close" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+                    Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Dᴇʟᴇᴛᴇ Tʜɪꜱ Iɴᴠᴏɪᴄᴇ?
+                </p>
+                <div class="detail-row">
+                    <span class="label">Iɴᴠᴏɪᴄᴇ Iᴅ</span>
+                    <span class="value id-value" id="deleteInvoiceId">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Aᴍᴏᴜɴᴛ</span>
+                    <span class="value balance" id="deleteAmount">₹0</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Sᴛᴀᴛᴜꜱ</span>
+                    <span class="value" id="deleteStatus">-</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cᴀɴᴄᴇʟ</button>
+                <button class="btn-danger" onclick="confirmDelete()"><i class="fas fa-trash"></i> Dᴇʟᴇᴛᴇ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🟢 Aᴅᴍɪɴ Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
+
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+        if (!token) {
+            console.error('❌ Nᴏ Tᴏᴋᴇɴ Fᴏᴜɴᴅ');
+            window.location.href = 'admin.html';
+        }
+
+        let state = {
+            invoices: [],
+            currentPage: 1,
+            limit: 20,
+            totalPages: 1,
+            totalInvoices: 0,
+            filter: 'all',
+            search: '',
+            deleteTargetId: null
+        };
+
+        function createStarDots() {
+            document.querySelectorAll('.star-dot').forEach(star => star.remove());
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'star-dot';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.animationDuration = (6 + Math.random() * 12) + 's';
+                dot.style.animationDelay = Math.random() * 12 + 's';
+                const size = 2 + Math.random() * 6;
+                dot.style.width = size + 'px';
+                dot.style.height = size + 'px';
+                dot.classList.add(size > 4 ? 'big' : 'small');
+                document.body.appendChild(dot);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = message;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.className = 'toast', 3500);
+        }
+
+        function goBack() {
+            window.location.href = '/rohit';
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            try {
+                const response = await fetch(endpoint, { ...defaultOptions, ...options });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('token');
+                        window.location.href = 'admin.html';
+                        throw new Error('Sᴇꜱꜱɪᴏɴ Exᴘɪʀᴇᴅ');
+                    }
+                    throw new Error(data.message || 'Sᴏᴍᴇᴛʜɪɴɢ Wᴇɴᴛ Wʀᴏɴɢ');
+                }
+                return data;
+            } catch (error) {
+                console.error('API Eʀʀᴏʀ:', error);
+                showToast('<i class="fas fa-exclamation-circle"></i> ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        async function fetchInvoices() {
+            const listEl = document.getElementById('invoiceList');
+            listEl.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner"></i>
+                    <p>Lᴏᴀᴅɪɴɢ Iɴᴠᴏɪᴄᴇꜱ...</p>
+                </div>
+            `;
+
+            try {
+                let url = `/api/admin-invoice/invoices?page=${state.currentPage}&limit=${state.limit}`;
+                if (state.filter !== 'all') {
+                    url += `&status=${state.filter}`;
+                }
+                if (state.search) {
+                    url += `&search=${encodeURIComponent(state.search)}`;
+                }
+
+                const data = await apiCall(url);
+                state.invoices = data.invoices || [];
+                state.totalInvoices = data.pagination?.total || 0;
+                state.totalPages = data.pagination?.totalPages || 1;
+
+                renderInvoices();
+                renderPagination();
+                updateStats(data.stats);
+
+            } catch (error) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Fᴀɪʟᴇᴅ Tᴏ Lᴏᴀᴅ Iɴᴠᴏɪᴄᴇꜱ</p>
+                        <button onclick="fetchInvoices()" style="margin-top:0.75rem;padding:0.5rem 1.5rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:0.75rem;color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">
+                            <i class="fas fa-redo"></i> Rᴇᴛʀʏ
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderInvoices() {
+            const listEl = document.getElementById('invoiceList');
+
+            if (!state.invoices || state.invoices.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nᴏ Iɴᴠᴏɪᴄᴇꜱ Fᴏᴜɴᴅ</p>
+                        <p style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Tʀʏ Cʜᴀɴɢɪɴɢ Tʜᴇ Fɪʟᴛᴇʀ</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            state.invoices.forEach(inv => {
+                const status = inv.status || 'pending';
+                const senderName = inv.senderId?.fullName || 'Uɴᴋɴᴏᴡɴ';
+                const senderMobile = inv.senderId?.mobile || 'N/A';
+                const receiverName = inv.userId?.fullName || 'Uɴᴋɴᴏᴡɴ';
+                const receiverMobile = inv.userId?.mobile || 'N/A';
+                const time = new Date(inv.createdAt).toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                let statusDisplay = status;
+                let statusClass = status;
+                if (status === 'pending') { statusDisplay = '⏳ Pᴇɴᴅɪɴɢ'; statusClass = 'pending'; }
+                else if (status === 'paid') { statusDisplay = '✅ Pᴀɪᴅ'; statusClass = 'paid'; }
+                else if (status === 'expired') { statusDisplay = '⏰ Exᴘɪʀᴇᴅ'; statusClass = 'expired'; }
+                else if (status === 'cancelled') { statusDisplay = '🚫 Cᴀɴᴄᴇʟʟᴇᴅ'; statusClass = 'cancelled'; }
+
+                const remaining = inv.remainingTime > 0 ? inv.formattedRemainingTime : null;
+
+                html += `
+                    <div class="invoice-item">
+                        <div class="invoice-header">
+                            <div>
+                                <div class="invoice-user">
+                                    <i class="fas fa-arrow-right" style="color:var(--warning);font-size:0.6rem;"></i> ${senderName} (${senderMobile})
+                                    <span style="margin:0 0.3rem;color:var(--text-muted);">→</span>
+                                    <i class="fas fa-arrow-left" style="color:var(--success);font-size:0.6rem;"></i> ${receiverName} (${receiverMobile})
+                                </div>
+                                <div class="invoice-details">
+                                    <span><i class="fas fa-hashtag"></i> ${inv.invoiceId}</span>
+                                    <span><i class="fas fa-clock"></i> ${time}</span>
+                                    ${remaining ? `<span><i class="fas fa-hourglass-half" style="color:var(--warning);"></i> ${remaining}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="invoice-right">
+                                <div class="invoice-amount">₹${(inv.amount || 0).toFixed(2)}</div>
+                                <div style="display:flex;align-items:center;gap:0.5rem;justify-content:flex-end;">
+                                    <span class="invoice-status ${statusClass}">${statusDisplay}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="invoice-actions">
+                            <button class="btn-view" onclick="viewInvoice('${inv.invoiceId}')">
+                                <i class="fas fa-eye"></i> Vɪᴇᴡ
+                            </button>
+                            ${status !== 'paid' ? `
+                                <button class="btn-delete" onclick="openDeleteModal('${inv.invoiceId}')">
+                                    <i class="fas fa-trash"></i> Dᴇʟᴇᴛᴇ
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${inv.notes ? `
+                            <div style="margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid var(--border-soft);font-size:0.6rem;color:var(--text-muted);">
+                                <i class="fas fa-sticky-note"></i> ${inv.notes}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        function renderPagination() {
+            document.getElementById('pageInfo').textContent = `Pᴀɢᴇ ${state.currentPage} ᴏꜰ ${state.totalPages || 1}`;
+            document.getElementById('prevPage').disabled = state.currentPage <= 1;
+            document.getElementById('nextPage').disabled = state.currentPage >= state.totalPages;
+        }
+
+        function updateStats(stats) {
+            if (!stats) return;
+            document.getElementById('totalInvoices').textContent = stats.total || 0;
+            document.getElementById('pendingInvoices').textContent = stats.pending || 0;
+            document.getElementById('paidInvoices').textContent = stats.paid || 0;
+            document.getElementById('expiredInvoices').textContent = stats.expired || 0;
+        }
+
+        function changePage(direction) {
+            if (direction === 'prev' && state.currentPage > 1) {
+                state.currentPage--;
+            } else if (direction === 'next' && state.currentPage < state.totalPages) {
+                state.currentPage++;
+            } else {
+                return;
+            }
+            fetchInvoices();
+        }
+
+        function filterInvoices(filter) {
+            state.filter = filter;
+            state.currentPage = 1;
+
+            document.querySelectorAll('.filter-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.filter-tabs button[data-filter="${filter}"]`).classList.add('active');
+
+            fetchInvoices();
+        }
+
+        function searchInvoices(e) {
+            if (e && e.key && e.key !== 'Enter') return;
+            state.search = document.getElementById('searchInput').value.trim();
+            state.currentPage = 1;
+            fetchInvoices();
+        }
+
+        // ============================================
+        // Vɪᴇᴡ Iɴᴠᴏɪᴄᴇ
+        // ============================================
+        function viewInvoice(invoiceId) {
+            const inv = state.invoices.find(i => i.invoiceId === invoiceId);
+            if (!inv) {
+                showToast('<i class="fas fa-exclamation-circle"></i> Iɴᴠᴏɪᴄᴇ Nᴏᴛ Fᴏᴜɴᴅ', 'error');
+                return;
+            }
+
+            const senderName = inv.senderId?.fullName || 'Uɴᴋɴᴏᴡɴ';
+            const senderMobile = inv.senderId?.mobile || 'N/A';
+            const senderWallet = inv.senderId?.walletId || 'N/A';
+            const receiverName = inv.userId?.fullName || 'Uɴᴋɴᴏᴡɴ';
+            const receiverMobile = inv.userId?.mobile || 'N/A';
+            const receiverWallet = inv.userId?.walletId || 'N/A';
+
+            let statusDisplay = inv.status;
+            if (inv.status === 'pending') statusDisplay = '⏳ Pᴇɴᴅɪɴɢ';
+            else if (inv.status === 'paid') statusDisplay = '✅ Pᴀɪᴅ';
+            else if (inv.status === 'expired') statusDisplay = '⏰ Exᴘɪʀᴇᴅ';
+            else if (inv.status === 'cancelled') statusDisplay = '🚫 Cᴀɴᴄᴇʟʟᴇᴅ';
+
+            const modalBody = document.getElementById('viewModalBody');
+            const modalTitle = document.getElementById('viewModalTitle');
+
+            modalTitle.textContent = `💳 ${inv.invoiceId}`;
+
+            modalBody.innerHTML = `
+                <div class="detail-row">
+                    <span class="label">Sᴛᴀᴛᴜꜱ</span>
+                    <span class="value"><span class="invoice-status ${inv.status}">${statusDisplay}</span></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Aᴍᴏᴜɴᴛ</span>
+                    <span class="value balance">₹${(inv.amount || 0).toFixed(2)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Sᴇɴᴅᴇʀ</span>
+                    <span class="value">${senderName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Sᴇɴᴅᴇʀ Mᴏʙɪʟᴇ</span>
+                    <span class="value">${senderMobile}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Sᴇɴᴅᴇʀ Wᴀʟʟᴇᴛ</span>
+                    <span class="value">${senderWallet}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Rᴇᴄᴇɪᴠᴇʀ</span>
+                    <span class="value">${receiverName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Rᴇᴄᴇɪᴠᴇʀ Mᴏʙɪʟᴇ</span>
+                    <span class="value">${receiverMobile}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Rᴇᴄᴇɪᴠᴇʀ Wᴀʟʟᴇᴛ</span>
+                    <span class="value">${receiverWallet}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Cʀᴇᴀᴛᴇᴅ</span>
+                    <span class="value">${new Date(inv.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                ${inv.expiresAt ? `
+                    <div class="detail-row">
+                        <span class="label">Exᴘɪʀᴇꜱ</span>
+                        <span class="value" style="color:var(--warning);">${new Date(inv.expiresAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                ` : ''}
+                ${inv.paidAt ? `
+                    <div class="detail-row">
+                        <span class="label">Pᴀɪᴅ Aᴛ</span>
+                        <span class="value" style="color:var(--success);">${new Date(inv.paidAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                ` : ''}
+                ${inv.notes ? `
+                    <div class="detail-row">
+                        <span class="label">Nᴏᴛᴇꜱ</span>
+                        <span class="value" style="font-size:0.75rem;">${inv.notes}</span>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        // ============================================
+        // Dᴇʟᴇᴛᴇ Iɴᴠᴏɪᴄᴇ
+        // ============================================
+        function openDeleteModal(invoiceId) {
+            const inv = state.invoices.find(i => i.invoiceId === invoiceId);
+            if (!inv) {
+                showToast('<i class="fas fa-exclamation-circle"></i> Iɴᴠᴏɪᴄᴇ Nᴏᴛ Fᴏᴜɴᴅ', 'error');
+                return;
+            }
+
+            state.deleteTargetId = invoiceId;
+            document.getElementById('deleteInvoiceId').textContent = invoiceId;
+            document.getElementById('deleteAmount').textContent = '₹' + (inv.amount || 0).toFixed(2);
+            
+            let statusDisplay = inv.status;
+            if (inv.status === 'pending') statusDisplay = '⏳ Pᴇɴᴅɪɴɢ';
+            else if (inv.status === 'paid') statusDisplay = '✅ Pᴀɪᴅ';
+            else if (inv.status === 'expired') statusDisplay = '⏰ Exᴘɪʀᴇᴅ';
+            else if (inv.status === 'cancelled') statusDisplay = '🚫 Cᴀɴᴄᴇʟʟᴇᴅ';
+            document.getElementById('deleteStatus').textContent = statusDisplay;
+
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            state.deleteTargetId = null;
+        }
+
+        async function confirmDelete() {
+            if (!state.deleteTargetId) {
+                showToast('<i class="fas fa-exclamation-circle"></i> Nᴏ Iɴᴠᴏɪᴄᴇ Sᴇʟᴇᴄᴛᴇᴅ', 'error');
+                return;
+            }
+
+            try {
+                const data = await apiCall(`/api/admin-invoice/delete/${state.deleteTargetId}`, {
+                    method: 'DELETE'
+                });
+
+                showToast('<i class="fas fa-check-circle"></i> ' + data.message, 'success');
+                closeDeleteModal();
+                fetchInvoices();
+
+            } catch (error) {
+                showToast('<i class="fas fa-exclamation-circle"></i> ' + error.message, 'error');
+            }
+        }
+
+        // ============================================
+        // Mᴏᴅᴀʟ Cʟᴏꜱᴇ Oɴ Oᴠᴇʀʟᴀʏ
+        // ============================================
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeViewModal();
+        });
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        // ============================================
+        // Eɴᴛᴇʀ Kᴇʏ Sʜᴏʀᴛᴄᴜᴛ
+        // ============================================
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') searchInvoices();
+        });
+
+        // ============================================
+        // Iɴɪᴛ
+        // ============================================
+        createStarDots();
+        fetchInvoices();
+
+        setInterval(fetchInvoices, 30000);
+
+        console.log('✅ Aᴅᴍɪɴ Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ Rᴇᴀᴅʏ');
+    </script>
+</body>
+</html>

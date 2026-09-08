@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Mʏ Lɪꜰᴀꜰᴀ · Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --p1: #a855f7; --p2: #6d28d9; --card-light: rgba(241, 239, 255, 0.9); --input-light: #ebe9ff; --border-soft: #555555; --red: #dc2626; --green: #16a34a; --neon-blue: #00f0ff; --dark-bg-start: #0a0a1a; --dark-bg-mid: #0c1022; --glass-dark: rgba(8, 12, 25, 0.85); }
+    body { font-family: 'Inter', sans-serif; min-height: 100vh; background-attachment: fixed; transition: background 0.4s ease, color 0.3s ease; overflow-y: auto; overflow-x: hidden; position: relative; }
+    body.light { background: linear-gradient(135deg, #f5f0ff 0%, #ede7fe 100%); background-attachment: fixed; color: #1a1a2e; }
+    body.dark { background: linear-gradient(135deg, #0a0a1a, #0c1025, #060610); background-attachment: fixed; color: #e0f0ff; }
+    body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+    body.dark::before { background-image: linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px); }
+    body::after { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+    body.dark::after { background: radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%); }
+
+    h1, h2, h3, h4, h5, h6, .balance-label, .balance-amount, .form-label, .section-label, .tab, .nav-item, .status-badge, .badge-count, .modal-title, .modal-sub, .modal-detail-row .label, .modal-detail-row .value, .prime-word, .wallet-word, .pay-badge, .btn-primary, .check-btn, .add-channel-btn, .add-admin-btn, .copy-btn, .modal-actions button, .channels-header span, .channel-count, .channel-item, .bot-section p, .toast-message, .loading-text, .my-lifafa-bar span, .lifafa-title, .lifafa-type, .lifafa-status, .lifafa-detail .label, .lifafa-detail .value, .filter-tab, .page-title h1, .lifafa-link, .action-btn { font-variant: small-caps; letter-spacing: 0.02em; }
+
+    .form-control, .form-control::placeholder, input.form-control, input[type="text"], input[type="number"], input[type="password"], input[type="email"], input[type="url"], textarea.form-control, select.form-control, .code-item input, .code-item input::placeholder, .bot-username-row .form-control, .bot-username-row .form-control::placeholder, .special-users-wrapper .form-control, .special-users-wrapper .form-control::placeholder, .channel-input-row .form-control, .channel-input-row .form-control::placeholder, .youtube-wrapper .form-control, .youtube-wrapper .form-control::placeholder, .modal-link-box .link-text, .modal-link-box .link-text::placeholder, .edit-form-group .form-control, .edit-form-group .form-control::placeholder { font-variant: normal !important; text-transform: none !important; letter-spacing: normal !important; font-weight: 400; }
+    ::placeholder { font-variant: normal !important; text-transform: none !important; letter-spacing: normal !important; font-weight: 400; opacity: 0.7; }
+    input, textarea, select { font-variant: normal !important; text-transform: none !important; letter-spacing: normal !important; }
+    .fa-solid, .fa-regular, .fa-brands, .fas, .far, .fab { font-variant: normal !important; letter-spacing: normal !important; }
+    
+    .container { max-width: 500px; margin: 0 auto; position: relative; min-height: 100vh; z-index: 1; }
+    .wrapper { width: 100%; padding: 75px 14px 70px 14px; position: relative; z-index: 2; }
+    
+    .header-fixed { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 100; backdrop-filter: blur(16px); transition: all 0.3s ease; }
+    body.light .header-fixed { background: rgba(245, 240, 255, 0.92); border-bottom: 1px solid rgba(139, 92, 246, 0.2); }
+    body.dark .header-fixed { background: rgba(8, 12, 28, 0.92); border-bottom: 1px solid rgba(0, 240, 255, 0.25); }
+    .header-left { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+    .back-btn { font-size: 15px; cursor: pointer; background: none; border: none; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 30px; transition: all 0.2s; text-decoration: none; }
+    body.light .back-btn { color: #6d28d9; background: rgba(139, 92, 246, 0.1); }
+    body.dark .back-btn { color: #00f0ff; background: rgba(0, 240, 255, 0.1); }
+    .back-btn:active { transform: scale(0.92); }
+    .prime-word { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease; font-variant: small-caps; }
+    body.light .prime-word { color: #000000; }
+    body.dark .prime-word { color: #ffffff; }
+    .wallet-word { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease; font-variant: small-caps; }
+    body.light .wallet-word { color: #8b5cf6; }
+    body.dark .wallet-word { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.5); }
+    .pay-badge { display: inline-flex; align-items: center; justify-content: center; padding: 1px 8px; border-radius: 40px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; transition: all 0.3s ease; background: #8b5cf6; color: white; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3); font-variant: small-caps; }
+    body.dark .pay-badge { background: #00f0ff; color: #0a0a1a; box-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+    .header-right { display: flex; align-items: center; gap: 6px; }
+    .icon-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; transition: all 0.2s ease; background: transparent; border: none; }
+    body.light .icon-circle { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+    body.dark .icon-circle { background: rgba(0, 240, 255, 0.12); color: #00f0ff; }
+    .icon-circle:active { transform: scale(0.92); }
+    .theme-toggle-header { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    body.light .theme-toggle-header { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+    body.dark .theme-toggle-header { color: #00f0ff; background: rgba(0, 240, 255, 0.12); }
+    .theme-toggle-header:active { transform: scale(0.92); }
+    .avatar-p { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, #8b5cf6, #a855f7); color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3); font-variant: small-caps; }
+    body.dark .avatar-p { background: linear-gradient(135deg, #00e0ff, #0088ff); color: #0a0a1a; box-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+    .avatar-p:active { transform: scale(0.95); }
+
+    .page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .page-title h1 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 6px; font-variant: small-caps; }
+    body.light .page-title h1 { color: #1a1a2e; }
+    body.dark .page-title h1 { color: #ffffff; }
+    .page-title h1 i { color: #8b5cf6; }
+    body.dark .page-title h1 i { color: #00f0ff; }
+    .page-title .count-badge { background: #8b5cf6; color: white; padding: 1px 10px; border-radius: 40px; font-size: 10px; font-weight: 700; }
+    body.dark .page-title .count-badge { background: #00f0ff; color: #0a0a1a; }
+
+    .filter-tabs { display: flex; gap: 5px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 3px; }
+    .filter-tab { padding: 5px 12px; border-radius: 40px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: transparent; color: #475569; white-space: nowrap; font-variant: small-caps; transition: 0.2s; }
+    body.dark .filter-tab { border-color: rgba(0, 240, 255, 0.2); color: #8aa0bb; }
+    .filter-tab.active { background: #8b5cf6; color: white; border-color: #8b5cf6; }
+    body.dark .filter-tab.active { background: #00f0ff; color: #0a0a1a; border-color: #00f0ff; }
+    .filter-tab:active { transform: scale(0.95); }
+
+    .lifafa-card { border-radius: 18px; padding: 14px; margin-bottom: 10px; transition: 0.2s; }
+    body.light .lifafa-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(139, 92, 246, 0.08); }
+    body.dark .lifafa-card { background: var(--glass-dark); backdrop-filter: blur(20px); border: 1px solid rgba(0, 240, 255, 0.15); }
+    .lifafa-card:active { transform: scale(0.99); }
+
+    .lifafa-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .lifafa-title { font-size: 13px; font-weight: 700; font-variant: small-caps; }
+    body.light .lifafa-title { color: #1a1a2e; }
+    body.dark .lifafa-title { color: #ffffff; }
+    .lifafa-type { font-size: 8px; font-weight: 700; padding: 1px 8px; border-radius: 40px; text-transform: uppercase; letter-spacing: 0.5px; font-variant: small-caps; }
+    .lifafa-type.normal { background: #e9edf2; color: #475569; }
+    body.dark .lifafa-type.normal { background: rgba(0, 240, 255, 0.1); color: #8aa0bb; }
+    .lifafa-type.dice { background: #fef3c7; color: #b45309; }
+    body.dark .lifafa-type.dice { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .lifafa-type.toss { background: #dbeafe; color: #1d4ed8; }
+    body.dark .lifafa-type.toss { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .lifafa-type.scratch { background: #fce7f3; color: #be185d; }
+    body.dark .lifafa-type.scratch { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+    .lifafa-status { font-size: 8px; font-weight: 700; padding: 1px 8px; border-radius: 40px; font-variant: small-caps; }
+    .lifafa-status.active { background: #dcfce7; color: #16a34a; }
+    body.dark .lifafa-status.active { background: rgba(0, 240, 255, 0.15); color: #00f0ff; }
+    .lifafa-status.completed { background: #e9edf2; color: #475569; }
+    body.dark .lifafa-status.completed { background: rgba(0, 240, 255, 0.05); color: #6a7a9a; }
+    .lifafa-status.expired { background: #fee2e2; color: #dc2626; }
+    body.dark .lifafa-status.expired { background: rgba(220, 38, 38, 0.2); color: #ff5e5e; }
+    .lifafa-status.cancelled { background: #fee2e2; color: #dc2626; }
+    body.dark .lifafa-status.cancelled { background: rgba(220, 38, 38, 0.2); color: #ff5e5e; }
+
+    .lifafa-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin: 6px 0; padding: 6px 0; border-top: 1px solid #e9edf2; border-bottom: 1px solid #e9edf2; }
+    body.dark .lifafa-details { border-color: rgba(0, 240, 255, 0.08); }
+    .lifafa-detail { text-align: center; }
+    .lifafa-detail .label { font-size: 8px; opacity: 0.6; font-variant: small-caps; }
+    body.light .lifafa-detail .label { color: #4a4a6a; }
+    body.dark .lifafa-detail .label { color: #8aa0bb; }
+    .lifafa-detail .value { font-size: 11px; font-weight: 700; font-variant: small-caps; }
+    body.light .lifafa-detail .value { color: #1a1a2e; }
+    body.dark .lifafa-detail .value { color: #00f0ff; }
+    .lifafa-detail .value .currency { font-size: 8px; opacity: 0.7; }
+    .lifafa-detail .win-chance { font-size: 10px; font-weight: 600; color: #f59e0b; }
+    body.dark .lifafa-detail .win-chance { color: #fbbf24; }
+
+    .lifafa-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .lifafa-link { font-size: 9px; font-weight: 500; color: #8b5cf6; word-break: break-all; flex: 1; margin-right: 6px; font-variant: small-caps; cursor: pointer; }
+    body.dark .lifafa-link { color: #00f0ff; }
+    .lifafa-link i { margin-right: 3px; font-size: 8px; }
+    .lifafa-actions { display: flex; gap: 4px; }
+    .action-btn { padding: 4px 8px; border: none; border-radius: 30px; font-size: 9px; font-weight: 700; cursor: pointer; font-variant: small-caps; transition: 0.15s; display: flex; align-items: center; gap: 3px; }
+    .action-btn:active { transform: scale(0.95); }
+    .action-btn.copy-btn { background: #e9edf2; color: #475569; }
+    body.dark .action-btn.copy-btn { background: rgba(0, 240, 255, 0.1); color: #8aa0bb; }
+    .action-btn.delete-btn { background: #fee2e2; color: #dc2626; }
+    body.dark .action-btn.delete-btn { background: rgba(220, 38, 38, 0.2); color: #ff5e5e; }
+    .action-btn.view-btn { background: #8b5cf6; color: white; }
+    body.dark .action-btn.view-btn { background: #00f0ff; color: #0a0a1a; }
+    .action-btn.edit-btn { background: #fef3c7; color: #b45309; }
+    body.dark .action-btn.edit-btn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+    .empty-state { text-align: center; padding: 50px 20px; }
+    .empty-state .empty-icon { font-size: 40px; color: #c4b5fd; margin-bottom: 14px; }
+    body.dark .empty-state .empty-icon { color: rgba(0, 240, 255, 0.3); }
+    .empty-state .empty-title { font-size: 16px; font-weight: 700; font-variant: small-caps; margin-bottom: 3px; }
+    body.light .empty-state .empty-title { color: #1a1a2e; }
+    body.dark .empty-state .empty-title { color: #ffffff; }
+    .empty-state .empty-sub { font-size: 12px; opacity: 0.7; font-variant: small-caps; }
+    body.light .empty-state .empty-sub { color: #4a4a6a; }
+    body.dark .empty-state .empty-sub { color: #8aa0bb; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 6px 0 14px; z-index: 50; }
+    body.light .bottom-nav { background: rgba(241, 239, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #c4b5fd; }
+    body.dark .bottom-nav { background: rgba(8, 12, 28, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 8px; font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none; flex: 1; font-variant: small-caps; letter-spacing: 0.05em; }
+    .nav-item i { font-size: 16px; }
+    body.light .nav-item { color: #94a3b8; }
+    body.dark .nav-item { color: #6a7a9a; }
+    body.light .nav-item.active { color: #8b5cf6; }
+    body.dark .nav-item.active { color: #00f0ff; }
+
+    .toast-message { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); padding: 8px 16px; border-radius: 60px; font-size: 11px; font-weight: 600; z-index: 10000; backdrop-filter: blur(8px); animation: fadeInUp 0.3s ease; font-variant: small-caps; letter-spacing: 0.04em; }
+    body.light .toast-message { background: #1e293b; color: white; }
+    body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { max-width: 380px; width: 100%; border-radius: 26px; padding: 20px 16px; animation: modalSlide 0.3s ease; }
+    body.light .modal-box { background: #ffffff; }
+    body.dark .modal-box { background: #0c0f24; border: 1px solid rgba(0, 240, 255, 0.2); }
+    @keyframes modalSlide { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal-title { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 3px; font-variant: small-caps; }
+    body.light .modal-title { color: #1a1a2e; }
+    body.dark .modal-title { color: #ffffff; }
+    .modal-sub { text-align: center; font-size: 11px; opacity: 0.7; margin-bottom: 14px; font-variant: small-caps; }
+    body.light .modal-sub { color: #4a4a6a; }
+    body.dark .modal-sub { color: #8aa0bb; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .modal-actions button { flex: 1; padding: 8px; border: none; border-radius: 40px; font-weight: 700; font-size: 12px; cursor: pointer; font-variant: small-caps; letter-spacing: 0.04em; transition: 0.15s; }
+    .modal-actions button:active { transform: scale(0.97); }
+    .modal-cancel { background: #e9edf2; color: #475569; }
+    body.dark .modal-cancel { background: rgba(0, 240, 255, 0.1); color: #8aa0bb; }
+    .modal-danger { background: #dc2626; color: white; }
+    body.dark .modal-danger { background: #ff5e5e; color: #0a0a1a; }
+    .modal-proceed { background: #8b5cf6; color: white; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25); }
+    body.dark .modal-proceed { background: #00f0ff; color: #0a0a1a; box-shadow: 0 0 16px rgba(0, 240, 255, 0.2); }
+
+    .edit-form-group { margin-bottom: 10px; }
+    .edit-form-group label { display: block; font-size: 9px; font-weight: 600; font-variant: small-caps; color: #4a4a6a; margin-bottom: 2px; }
+    body.dark .edit-form-group label { color: #8aa0bb; }
+    .edit-form-group .form-control { width: 100%; padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 11px; font-weight: 500; color: #0b1b32; outline: none; font-variant: normal !important; text-transform: none !important; letter-spacing: normal !important; transition: 0.15s; }
+    body.dark .edit-form-group .form-control { background: rgba(10, 16, 48, 0.6); border-color: rgba(0, 240, 255, 0.2); color: #e0f0ff; }
+    .edit-form-group .form-control:focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08); }
+    body.dark .edit-form-group .form-control:focus { border-color: #00f0ff; box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1); }
+    .edit-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .edit-info-box { background: #eef2ff; padding: 6px 10px; border-radius: 10px; margin-bottom: 10px; font-size: 10px; font-variant: small-caps; color: #475569; display: flex; justify-content: space-between; align-items: center; }
+    body.dark .edit-info-box { background: rgba(0, 240, 255, 0.08); color: #8aa0bb; }
+    .edit-info-box .info-value { font-weight: 700; color: #1a1a2e; }
+    body.dark .edit-info-box .info-value { color: #00f0ff; }
+    .edit-warning { font-size: 8px; opacity: 0.6; font-variant: small-caps; color: #4a4a6a; margin-top: 4px; }
+    body.dark .edit-warning { color: #8aa0bb; }
+
+    @media (max-width: 480px) {
+      .wrapper { padding: 70px 10px 60px; }
+      .prime-word, .wallet-word { font-size: 15px; }
+      .pay-badge { font-size: 8px; padding: 1px 6px; }
+      .avatar-p { width: 26px; height: 26px; font-size: 11px; }
+      .icon-circle, .theme-toggle-header { width: 26px; height: 26px; font-size: 11px; }
+      .header-right { gap: 4px; }
+      .lifafa-details { grid-template-columns: 1fr 1fr; }
+      .lifafa-footer { flex-direction: column; align-items: stretch; gap: 6px; }
+      .lifafa-actions { justify-content: flex-end; }
+      .modal-box { padding: 16px 12px; }
+      .modal-actions { flex-direction: column; }
+      .edit-row-2col { grid-template-columns: 1fr; }
+    }
+
+    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 99999; flex-direction: column; gap: 16px; }
+    .loading-overlay .spinner { width: 40px; height: 40px; border: 4px solid rgba(139, 92, 246, 0.2); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    body.dark .loading-overlay .spinner { border: 4px solid rgba(0, 240, 255, 0.2); border-top-color: #00f0ff; }
+    .loading-overlay .loading-text { font-size: 14px; font-weight: 600; font-variant: small-caps; color: white; letter-spacing: 0.06em; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="light">
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Vᴇʀɪꜰʏɪɴɢ Aᴄᴄᴏᴜɴᴛ...</div>
+  </div>
+
+  <div class="header-fixed">
+    <div class="header-left">
+      <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+      <span class="prime-word">Pʀɪᴍᴇ</span>
+      <span class="wallet-word">Wᴀʟʟᴇᴛ</span>
+      <div class="pay-badge">Pᴀʏ</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-circle" id="telegramBtn"><i class="fab fa-telegram"></i></button>
+      <button class="theme-toggle-header" id="headerThemeBtn"><i id="headerThemeIcon" class="fas fa-moon"></i></button>
+      <div class="avatar-p" id="avatarP">P</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="wrapper">
+      <div class="page-title">
+        <h1><i class="fas fa-folder-open"></i> Mʏ Lɪꜰᴀꜰᴀ</h1>
+        <span class="count-badge" id="totalCount">0</span>
+      </div>
+
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all"><i class="fas fa-list"></i> Aʟʟ</button>
+        <button class="filter-tab" data-filter="active"><i class="fas fa-check-circle"></i> Aᴄᴛɪᴠᴇ</button>
+        <button class="filter-tab" data-filter="completed"><i class="fas fa-check-double"></i> Cᴏᴍᴘʟᴇᴛᴇᴅ</button>
+        <button class="filter-tab" data-filter="expired"><i class="fas fa-clock"></i> Exᴘɪʀᴇᴅ</button>
+      </div>
+
+      <div id="lifafaList"></div>
+
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <div class="empty-title">Nᴏ Lɪꜰᴀꜰᴀ Fᴏᴜɴᴅ</div>
+        <div class="empty-sub">Cʀᴇᴀᴛᴇ Yᴏᴜʀ Fɪʀꜱᴛ Lɪꜰᴀꜰᴀ Gɪᴠᴇᴀᴡᴀʏ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Hᴏᴍᴇ</span></a>
+    <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
+    <a href="/qr" class="nav-item"><i class="fas fa-qrcode"></i><span>Qʀ</span></a>
+    <a href="/deposit" class="nav-item"><i class="fas fa-plus-circle"></i><span>Aᴅᴅ</span></a>
+    <a href="/my-lifafa" class="nav-item active"><i class="fas fa-folder-open"></i><span>Lɪꜰᴀꜰᴀ</span></a>
+  </div>
+
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <div class="modal-title"><i class="fas fa-trash"></i> Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ</div>
+      <div class="modal-sub">Aʀᴇ Yᴏᴜ Sᴜʀᴇ Yᴏᴜ Wᴀɴᴛ Tᴏ Dᴇʟᴇᴛᴇ Tʜɪꜱ Lɪꜰᴀꜰᴀ?</div>
+      <div style="text-align:center; font-size:12px; font-weight:600; font-variant:small-caps; padding:6px; border-radius:10px; background:#fee2e2; color:#dc2626; margin-bottom:10px;" id="deleteLifafaName">
+        Lɪꜰᴀꜰᴀ Nᴀᴍᴇ
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeDeleteModal()"><i class="fas fa-times"></i> Cᴀɴᴄᴇʟ</button>
+        <button class="modal-danger" id="confirmDeleteBtn"><i class="fas fa-trash"></i> Dᴇʟᴇᴛᴇ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <div class="modal-title"><i class="fas fa-pen"></i> Eᴅɪᴛ Lɪꜰᴀꜰᴀ</div>
+      <div class="modal-sub">Uᴘᴅᴀᴛᴇ Yᴏᴜʀ Lɪꜰᴀꜰᴀ Dᴇᴛᴀɪʟꜱ</div>
+      
+      <div class="edit-info-box">
+        <span><i class="fas fa-wallet"></i> Cᴜʀʀᴇɴᴛ Tᴏᴛᴀʟ</span>
+        <span class="info-value" id="editCurrentTotal">₹0</span>
+      </div>
+      
+      <div class="edit-form-group">
+        <label><i class="fas fa-tag"></i> Lɪꜰᴀꜰᴀ Tɪᴛʟᴇ</label>
+        <input class="form-control" type="text" id="editTitle" placeholder="Enter title">
+      </div>
+      
+      <div class="edit-row-2col">
+        <div class="edit-form-group">
+          <label><i class="fas fa-users"></i> Tᴏᴛᴀʟ Uꜱᴇʀꜱ</label>
+          <input class="form-control" type="number" id="editTotalUsers" placeholder="100" min="1">
+        </div>
+        <div class="edit-form-group">
+          <label><i class="fas fa-coins"></i> Pᴇʀ Uꜱᴇʀ Aᴍᴏᴜɴᴛ</label>
+          <input class="form-control" type="number" id="editPerUser" placeholder="₹10" min="1">
+        </div>
+      </div>
+      
+      <div class="edit-form-group">
+        <label><i class="fas fa-calculator"></i> Nᴇᴡ Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ</label>
+        <input class="form-control" type="text" id="editNewTotal" readonly style="background:#e9edf2; font-weight:700;">
+      </div>
+      
+      <div class="edit-warning">
+        <i class="fas fa-exclamation-triangle"></i> Yᴏᴜ ᴄᴀɴ ᴏɴʟʏ ᴇᴅɪᴛ ᴀᴄᴛɪᴠᴇ ʟɪꜰᴀꜰᴀꜱ ᴛʜᴀᴛ ʜᴀᴠᴇɴ'ᴛ ʙᴇᴇɴ ᴄʟᴀɪᴍᴇᴅ ʏᴇᴛ.
+      </div>
+      
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeEditModal()"><i class="fas fa-times"></i> Cᴀɴᴄᴇʟ</button>
+        <button class="modal-proceed" id="confirmEditBtn"><i class="fas fa-save"></i> Sᴀᴠᴇ Cʜᴀɴɢᴇꜱ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      var loadingOverlay = document.getElementById('loadingOverlay');
+      var listEl = document.getElementById('lifafaList');
+      var emptyEl = document.getElementById('emptyState');
+      var totalCountEl = document.getElementById('totalCount');
+      var deleteModal = document.getElementById('deleteModal');
+      var deleteLifafaName = document.getElementById('deleteLifafaName');
+      var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      var editModal = document.getElementById('editModal');
+      var editTitle = document.getElementById('editTitle');
+      var editTotalUsers = document.getElementById('editTotalUsers');
+      var editPerUser = document.getElementById('editPerUser');
+      var editNewTotal = document.getElementById('editNewTotal');
+      var editCurrentTotal = document.getElementById('editCurrentTotal');
+      var confirmEditBtn = document.getElementById('confirmEditBtn');
+
+      var lifafas = [];
+      var currentFilter = 'all';
+      var deleteTargetId = null;
+      var editTargetId = null;
+      var editTargetData = null;
+      var isAdmin = false;
+      var API_BASE = '/api';
+
+      function verifyToken() {
+        var token = localStorage.getItem('token');
+        if (!token) { window.location.href = '/'; return false; }
+        
+        return fetch(API_BASE + '/auth/verify', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          if (data.success === true || data.status === 'success') {
+            var user = data.user || data.data?.user;
+            if (user) {
+              isAdmin = user.isAdmin || false;
+              localStorage.setItem('user', JSON.stringify(user));
+              localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+            }
+            return true;
+          }
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('isAdmin');
+          window.location.href = '/';
+          return false;
+        })
+        ['catch'](function(error) {
+          console.error('Token verification error:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('isAdmin');
+          window.location.href = '/';
+          return false;
+        });
+      }
+
+      function loadLifafasFromAPI() {
+        var token = localStorage.getItem('token');
+        if (!token) return Promise.resolve(false);
+        
+        return fetch(API_BASE + '/lifafa/user/all', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          if (data.success) {
+            lifafas = (data.data || []).map(function(item) {
+              return {
+                id: item.id,
+                title: item.title,
+                type: item.type || 'normal',
+                winChance: item.winChance || null,
+                totalUsers: item.totalUsers,
+                perUser: item.perUser,
+                totalAmount: item.totalAmount,
+                status: item.status || 'active',
+                link: item.claimLink || '',
+                claimedCount: item.claimedCount || 0,
+                remainingUsers: item.remainingUsers || item.totalUsers,
+                createdAt: item.createdAt
+              };
+            });
+            localStorage.setItem('my_lifafas', JSON.stringify(lifafas));
+            return true;
+          } else {
+            loadFromLocalStorage();
+            return false;
+          }
+        })
+        ['catch'](function(error) {
+          console.error('Error loading lifafas:', error);
+          loadFromLocalStorage();
+          return false;
+        });
+      }
+
+      function loadFromLocalStorage() {
+        var stored = localStorage.getItem('my_lifafas');
+        if (stored) {
+          try { 
+            lifafas = JSON.parse(stored); 
+          } catch (e) { 
+            lifafas = []; 
+          }
+        } else {
+          lifafas = [];
+          localStorage.setItem('my_lifafas', JSON.stringify(lifafas));
+        }
+        renderLifafas();
+      }
+
+      function renderLifafas() {
+        var filtered = lifafas.filter(function(l) {
+          if (currentFilter === 'all') return true;
+          return l.status === currentFilter;
+        });
+
+        totalCountEl.textContent = lifafas.length;
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = '';
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+        emptyEl.classList.add('hidden');
+
+        var html = '';
+        for (var i = 0; i < filtered.length; i++) {
+          var l = filtered[i];
+          var statusClass = l.status || 'active';
+          var typeClass = (l.type || 'normal').toLowerCase();
+          
+          // ✅ Total Amount = Total Users * Per User
+          var totalAmount = l.totalUsers * l.perUser;
+          var claimedCount = l.claimedCount || 0;
+          var remaining = l.totalUsers - claimedCount;
+          
+          var winChanceHtml = '';
+          if (l.winChance !== null && l.winChance !== undefined) {
+            winChanceHtml = '<div class="lifafa-detail"><div class="label"><i class="fas fa-dice"></i> Wɪɴ Cʜᴀɴᴄᴇ</div><div class="win-chance">' + l.winChance + '%</div></div>';
+          }
+
+          var canEdit = l.status === 'active' && l.claimedCount === 0;
+          var editButtonHtml = canEdit ? '<button class="action-btn edit-btn" onclick="openEditModal(\'' + l.id + '\')"><i class="fas fa-pen"></i></button>' : '';
+          var deleteButtonHtml = isAdmin ? '<button class="action-btn delete-btn" onclick="openDeleteModal(\'' + l.id + '\')"><i class="fas fa-trash"></i></button>' : '';
+
+          html += '<div class="lifafa-card" data-index="' + i + '">' +
+            '<div class="lifafa-header">' +
+              '<div class="lifafa-title">' + (l.title || 'Untitled') + '</div>' +
+              '<div style="display:flex; gap:3px; align-items:center; flex-wrap:wrap;">' +
+                '<span class="lifafa-type ' + typeClass + '">' + (l.type || 'Normal').toUpperCase() + '</span>' +
+                '<span class="lifafa-status ' + statusClass + '">' + (statusClass).toUpperCase() + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="lifafa-details">' +
+              '<div class="lifafa-detail"><div class="label"><i class="fas fa-users"></i> Uꜱᴇʀꜱ</div><div class="value">' + l.totalUsers + '</div></div>' +
+              '<div class="lifafa-detail"><div class="label"><i class="fas fa-coins"></i> Pᴇʀ Uꜱᴇʀ</div><div class="value"><span class="currency">₹</span>' + l.perUser + '</div></div>' +
+              '<div class="lifafa-detail"><div class="label"><i class="fas fa-wallet"></i> Tᴏᴛᴀʟ</div><div class="value"><span class="currency">₹</span>' + totalAmount + '</div></div>' +
+              winChanceHtml +
+              '<div class="lifafa-detail"><div class="label"><i class="fas fa-hourglass-half"></i> Rᴇᴍᴀɪɴɪɴɢ</div><div class="value">' + remaining + '</div></div>' +
+              '<div class="lifafa-detail"><div class="label"><i class="fas fa-check-circle"></i> Cʟᴀɪᴍᴇᴅ</div><div class="value">' + claimedCount + '</div></div>' +
+            '</div>' +
+            '<div class="lifafa-footer">' +
+              '<div class="lifafa-link" onclick="copyLink(\'' + l.link + '\')"><i class="fas fa-link"></i> ' + (l.link || 'No link') + '</div>' +
+              '<div class="lifafa-actions">' +
+                '<button class="action-btn view-btn" onclick="viewLifafa(\'' + l.id + '\')"><i class="fas fa-eye"></i></button>' +
+                '<button class="action-btn copy-btn" onclick="copyLink(\'' + l.link + '\')"><i class="fas fa-copy"></i></button>' +
+                editButtonHtml +
+                deleteButtonHtml +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }
+        listEl.innerHTML = html;
+      }
+
+      window.copyLink = function(link) {
+        var fullUrl = window.location.origin + link;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(fullUrl).then(function() {
+            showToast('Lɪɴᴋ Cᴏᴘɪᴇᴅ');
+          })['catch'](function() {
+            fallbackCopy(fullUrl);
+          });
+        } else {
+          fallbackCopy(fullUrl);
+        }
+      };
+
+      function fallbackCopy(text) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+        showToast('Lɪɴᴋ Cᴏᴘɪᴇᴅ');
+      }
+
+      window.viewLifafa = function(id) {
+        var lifafa = null;
+        for (var i = 0; i < lifafas.length; i++) {
+          if (lifafas[i].id === id) {
+            lifafa = lifafas[i];
+            break;
+          }
+        }
+        if (lifafa && lifafa.link) {
+          window.location.href = lifafa.link;
+        } else {
+          showToast('Lɪɴᴋ Nᴏᴛ Fᴏᴜɴᴅ');
+        }
+      };
+
+      window.openDeleteModal = function(id) {
+        if (!isAdmin) {
+          showToast('Oɴʟʏ Aᴅᴍɪɴ Cᴀɴ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ');
+          return;
+        }
+        deleteTargetId = id;
+        var lifafa = null;
+        for (var i = 0; i < lifafas.length; i++) {
+          if (lifafas[i].id === id) {
+            lifafa = lifafas[i];
+            break;
+          }
+        }
+        deleteLifafaName.textContent = lifafa ? lifafa.title : 'Lɪꜰᴀꜰᴀ';
+        deleteModal.classList.add('active');
+      };
+
+      window.closeDeleteModal = function() {
+        deleteModal.classList.remove('active');
+        deleteTargetId = null;
+      };
+
+      confirmDeleteBtn.addEventListener('click', function() {
+        if (!deleteTargetId) return;
+        if (!isAdmin) {
+          showToast('Oɴʟʏ Aᴅᴍɪɴ Cᴀɴ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ');
+          closeDeleteModal();
+          return;
+        }
+        var index = -1;
+        for (var i = 0; i < lifafas.length; i++) {
+          if (lifafas[i].id === deleteTargetId) {
+            index = i;
+            break;
+          }
+        }
+        if (index !== -1) {
+          var token = localStorage.getItem('token');
+          fetch(API_BASE + '/lifafa/' + lifafas[index].id, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(result) {
+            if (result.success) {
+              lifafas.splice(index, 1);
+              localStorage.setItem('my_lifafas', JSON.stringify(lifafas));
+              renderLifafas();
+              showToast('Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+            } else {
+              showToast(result.message || 'Fᴀɪʟᴇᴅ Tᴏ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ');
+            }
+          })
+          ['catch'](function(error) {
+            console.error('Delete error:', error);
+            showToast('Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.');
+          });
+        }
+        closeDeleteModal();
+      });
+
+      window.openEditModal = function(id) {
+        var lifafa = null;
+        for (var i = 0; i < lifafas.length; i++) {
+          if (lifafas[i].id === id) {
+            lifafa = lifafas[i];
+            break;
+          }
+        }
+        if (!lifafa) {
+          showToast('Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ');
+          return;
+        }
+        if (lifafa.status !== 'active') {
+          showToast('Oɴʟʏ Aᴄᴛɪᴠᴇ Lɪꜰᴀꜰᴀ Cᴀɴ Bᴇ Eᴅɪᴛᴇᴅ');
+          return;
+        }
+        if (lifafa.claimedCount > 0) {
+          showToast('Cᴀɴɴᴏᴛ Eᴅɪᴛ Lɪꜰᴀꜰᴀ Tʜᴀᴛ Hᴀꜱ Bᴇᴇɴ Cʟᴀɪᴍᴇᴅ');
+          return;
+        }
+        editTargetId = id;
+        editTargetData = lifafa;
+        editTitle.value = lifafa.title || '';
+        editTotalUsers.value = lifafa.totalUsers || 1;
+        editPerUser.value = lifafa.perUser || 1;
+        editCurrentTotal.textContent = '₹' + (lifafa.totalUsers * lifafa.perUser);
+        updateEditTotal();
+        editModal.classList.add('active');
+      };
+
+      window.closeEditModal = function() {
+        editModal.classList.remove('active');
+        editTargetId = null;
+        editTargetData = null;
+      };
+
+      function updateEditTotal() {
+        var users = parseInt(editTotalUsers.value) || 0;
+        var perUser = parseFloat(editPerUser.value) || 0;
+        var total = users * perUser;
+        editNewTotal.value = total > 0 ? '₹' + total.toFixed(2) : '₹0.00';
+      }
+
+      editTotalUsers.addEventListener('input', updateEditTotal);
+      editPerUser.addEventListener('input', updateEditTotal);
+
+      confirmEditBtn.addEventListener('click', function() {
+        if (!editTargetId || !editTargetData) return;
+        var title = editTitle.value.trim();
+        var totalUsers = parseInt(editTotalUsers.value) || 0;
+        var perUser = parseFloat(editPerUser.value) || 0;
+        
+        if (!title) { showToast('Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Tɪᴛʟᴇ'); return; }
+        if (totalUsers < 1) { showToast('Tᴏᴛᴀʟ Uꜱᴇʀꜱ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 1'); return; }
+        if (perUser < 1) { showToast('Pᴇʀ Uꜱᴇʀ Aᴍᴏᴜɴᴛ Mᴜꜱᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0'); return; }
+        
+        if (title === editTargetData.title && totalUsers === editTargetData.totalUsers && perUser === editTargetData.perUser) {
+          showToast('Nᴏ Cʜᴀɴɢᴇꜱ Dᴇᴛᴇᴄᴛᴇᴅ');
+          return;
+        }
+        
+        var btn = confirmEditBtn;
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sᴀᴠɪɴɢ...';
+        btn.disabled = true;
+        
+        var token = localStorage.getItem('token');
+        var payload = {
+          title: title,
+          totalUsers: totalUsers,
+          perUser: perUser,
+          comment: editTargetData.comment || '',
+          redirectLink: editTargetData.redirectLink || '',
+          accessCode: editTargetData.accessCode || '',
+          specialUsers: editTargetData.specialUsers || '',
+          channels: editTargetData.channels || [],
+          referAmount: editTargetData.referAmount || 0,
+          referComment: editTargetData.referComment || '',
+          youtubeVideo: editTargetData.youtubeVideo || '',
+          winChance: editTargetData.winChance || null,
+          type: editTargetData.type || 'normal',
+          accessEnabled: !!editTargetData.accessCode,
+          channelsEnabled: editTargetData.channels && editTargetData.channels.length > 0,
+          referEnabled: editTargetData.referAmount > 0,
+          youtubeEnabled: !!editTargetData.youtubeVideo
+        };
+        
+        fetch(API_BASE + '/lifafa/' + editTargetId, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(result) {
+          if (result.success) {
+            var index = -1;
+            for (var i = 0; i < lifafas.length; i++) {
+              if (lifafas[i].id === editTargetId) {
+                index = i;
+                break;
+              }
+            }
+            if (index !== -1) {
+              lifafas[index] = {
+                id: lifafas[index].id,
+                title: title,
+                type: lifafas[index].type,
+                winChance: lifafas[index].winChance,
+                totalUsers: totalUsers,
+                perUser: perUser,
+                totalAmount: totalUsers * perUser,
+                status: lifafas[index].status,
+                link: lifafas[index].link,
+                claimedCount: lifafas[index].claimedCount,
+                remainingUsers: totalUsers - lifafas[index].claimedCount,
+                createdAt: lifafas[index].createdAt
+              };
+              localStorage.setItem('my_lifafas', JSON.stringify(lifafas));
+            }
+            renderLifafas();
+            closeEditModal();
+            showToast('Lɪꜰᴀꜰᴀ Uᴘᴅᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+          } else {
+            showToast(result.message || 'Fᴀɪʟᴇᴅ Tᴏ Uᴘᴅᴀᴛᴇ Lɪꜰᴀꜰᴀ');
+          }
+        })
+        ['catch'](function(error) {
+          console.error('Edit error:', error);
+          showToast('Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.');
+        })
+        ['finally'](function() {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        });
+      });
+
+      function showToast(msg) {
+        var toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 3000);
+      }
+
+      var filterTabs = document.querySelectorAll('.filter-tab');
+      for (var i = 0; i < filterTabs.length; i++) {
+        filterTabs[i].addEventListener('click', function() {
+          var tabs = document.querySelectorAll('.filter-tab');
+          for (var j = 0; j < tabs.length; j++) {
+            tabs[j].classList.remove('active');
+          }
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          renderLifafas();
+        });
+      }
+
+      deleteModal.addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+      });
+      editModal.addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+      });
+
+      function toggleTheme() {
+        document.body.classList.toggle('dark');
+        document.body.classList.toggle('light');
+        var icon = document.getElementById('headerThemeIcon');
+        if (document.body.classList.contains('dark')) {
+          icon.className = 'fas fa-sun';
+        } else {
+          icon.className = 'fas fa-moon';
+        }
+        localStorage.setItem('primeTheme', document.body.classList.contains('dark') ? 'dark' : 'light');
+      }
+      document.getElementById('headerThemeBtn').addEventListener('click', toggleTheme);
+
+      var savedTheme = localStorage.getItem('primeTheme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+        document.getElementById('headerThemeIcon').className = 'fas fa-sun';
+      }
+
+      function initPage() {
+        loadingOverlay.classList.remove('hidden');
+        verifyToken()
+        .then(function(isValid) {
+          if (!isValid) {
+            loadingOverlay.classList.add('hidden');
+            return;
+          }
+          return loadLifafasFromAPI();
+        })
+        .then(function() {
+          renderLifafas();
+          loadingOverlay.classList.add('hidden');
+        })
+        ['catch'](function(error) {
+          console.error('Init error:', error);
+          loadingOverlay.classList.add('hidden');
+        });
+      }
+
+      initPage();
+      console.log('Mʏ Lɪꜰᴀꜰᴀ · Pʀɪᴍᴇ Wᴀʟʟᴇᴛ');
+    })();
+  </script>
+</body>
+</html>

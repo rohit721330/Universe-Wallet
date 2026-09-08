@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Qʀ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+/* ============================================
+   SECTION 1: RESET & VARIABLES
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --p1: #a855f7;
+    --p2: #6d28d9;
+    --p3: #8b5cf6;
+    --p4: #7c3aed;
+    
+    --bg-start: #f0ecfe;
+    --bg-mid: #f8f5ff;
+    --bg-end: #f5f0ff;
+    
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-border: #e5d9ff;
+    --card-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
+    
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #8a8aaa;
+    --text-white: #ffffff;
+    
+    --input-bg: #f8f5ff;
+    --input-border: #d5c4ff;
+    --input-focus: #8b5cf6;
+    
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --nav-border: #e5d9ff;
+    --nav-inactive: #8a8aaa;
+    --nav-active: #8b5cf6;
+    
+    --shadow-light: 0 4px 20px rgba(139, 92, 246, 0.08);
+    --shadow-medium: 0 8px 30px rgba(139, 92, 246, 0.15);
+    --shadow-heavy: 0 12px 40px rgba(139, 92, 246, 0.25);
+    
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    --radius-xl: 36px;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   SECTION 2: DARK THEME VARIABLES
+   ============================================ */
+[data-theme="dark"] {
+    --bg-start: #0a0a1a;
+    --bg-mid: #0c1025;
+    --bg-end: #060610;
+    
+    --card-bg: rgba(10, 16, 48, 0.92);
+    --card-border: rgba(0, 240, 255, 0.25);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 224, 255, 0.1);
+    
+    --text-primary: #f0f5ff;
+    --text-secondary: #b0c0e0;
+    --text-muted: #6a7a9a;
+    --text-white: #ffffff;
+    
+    --input-bg: rgba(8, 12, 28, 0.9);
+    --input-border: rgba(0, 200, 230, 0.4);
+    --input-focus: #00f0ff;
+    
+    --nav-bg: rgba(10, 16, 48, 0.95);
+    --nav-border: rgba(0, 240, 255, 0.2);
+    --nav-inactive: #6a7a9a;
+    --nav-active: #00f0ff;
+    
+    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --shadow-heavy: 0 12px 40px rgba(0, 240, 255, 0.15);
+}
+
+/* ============================================
+   SECTION 3: BODY & BASE STYLES
+   ============================================ */
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background: 
+        radial-gradient(circle at 20% 30%, var(--p1)15 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, var(--p2)15 0%, transparent 40%),
+        linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+    background-attachment: fixed;
+    padding-bottom: 80px;
+    transition: var(--transition);
+    color: var(--text-primary);
+}
+
+body.light {
+    background: 
+        radial-gradient(circle at 20% 30%, #d1c4fd 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, #b8a9fa 0%, transparent 40%),
+        linear-gradient(135deg, #f0ecfe, #f8f5ff);
+    background-attachment: fixed;
+}
+
+body.dark {
+    background: 
+        radial-gradient(circle at 15% 25%, #00e0ff20 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, #0088ff30 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
+    background-attachment: fixed;
+}
+
+/* ============================================
+   SECTION 4: HEADER STYLES
+   ============================================ */
+.header {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-light);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--card-border);
+    transition: var(--transition);
+}
+body.light .header {
+    background: rgba(245, 240, 255, 0.92);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+body.dark .header {
+    background: rgba(8, 12, 28, 0.92);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+}
+
+.back {
+    width: 40px;
+    height: 40px;
+    background: var(--input-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    border: 1px solid var(--input-border);
+    font-size: 18px;
+}
+body.light .back {
+    background: rgba(139, 92, 246, 0.1);
+    color: #6d28d9;
+}
+body.dark .back {
+    background: rgba(0, 240, 255, 0.1);
+    color: #00f0ff;
+}
+
+.back:hover {
+    transform: scale(1.05);
+}
+body.light .back:hover {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+body.dark .back:hover {
+    border-color: #00f0ff;
+    color: #00f0ff;
+}
+
+.header h1 {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: var(--transition);
+}
+
+.header h1 span {
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+body.dark .header h1 span {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-placeholder {
+    width: 40px;
+}
+
+/* ============================================
+   SECTION 5: CONTAINER
+   ============================================ */
+.container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1.25rem;
+}
+
+/* ============================================
+   SECTION 6: QR CARD
+   ============================================ */
+.qr-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--card-border);
+    text-align: center;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+body.light .qr-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #c4b5fd;
+}
+body.dark .qr-card {
+    background: rgba(8, 12, 25, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.qr-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--p1), var(--p2));
+    transition: var(--transition);
+}
+body.dark .qr-card::before {
+    background: linear-gradient(90deg, #00e0ff, #0088ff);
+}
+
+.my-qr-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 0.3rem 0.9rem;
+    border-radius: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: var(--transition);
+}
+body.dark .my-qr-badge {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
+}
+
+.qr-wrap {
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 1.25rem;
+    padding: 8px;
+    border: 2px dashed var(--input-border);
+    border-radius: var(--radius-md);
+    background: var(--input-bg);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    transition: var(--transition);
+}
+
+.user-mobile {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--p3);
+    transition: var(--transition);
+}
+body.dark .user-mobile {
+    color: #00f0ff;
+}
+
+.download-btn {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    border: none;
+    color: white;
+    padding: 0.6rem 1.8rem;
+    border-radius: var(--radius-md);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+    letter-spacing: 0.05em;
+}
+body.dark .download-btn {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    box-shadow: 0 4px 15px rgba(0, 224, 255, 0.3);
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.download-btn:active {
+    transform: scale(0.95);
+}
+
+.download-btn i {
+    margin-right: 0.5rem;
+}
+
+/* ============================================
+   SECTION 7: SCANNER CARD
+   ============================================ */
+.scanner-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--card-border);
+    margin-bottom: 1.25rem;
+    display: none;
+    transition: var(--transition);
+}
+body.light .scanner-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #c4b5fd;
+}
+body.dark .scanner-card {
+    background: rgba(8, 12, 25, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.scanner-wrapper {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 3px solid var(--p3);
+    transition: var(--transition);
+}
+body.dark .scanner-wrapper {
+    border-color: #00f0ff;
+    box-shadow: 0 0 30px rgba(0, 224, 255, 0.2);
+}
+
+#reader {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: #000;
+}
+
+.scan-line {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--p3), transparent);
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    top: 0;
+    animation: scanAnim 2s infinite;
+    box-shadow: 0 0 20px var(--p3);
+    z-index: 10;
+    border-radius: 2px;
+    transition: var(--transition);
+}
+body.dark .scan-line {
+    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+    box-shadow: 0 0 30px #00f0ff;
+}
+
+@keyframes scanAnim {
+    0% { top: 5%; }
+    50% { top: 85%; }
+    100% { top: 5%; }
+}
+
+.scanner-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--p3);
+    z-index: 11;
+    transition: var(--transition);
+}
+body.dark .scanner-corner {
+    border-color: #00f0ff;
+}
+
+.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+.stop-btn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #fee2e2;
+    border: none;
+    color: #dc2626;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+    letter-spacing: 0.05em;
+}
+body.dark .stop-btn {
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+/* ============================================
+   SECTION 8: RESULT CARD
+   ============================================ */
+.result-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--card-border);
+    margin-bottom: 1.25rem;
+    display: none;
+    text-align: center;
+    transition: var(--transition);
+}
+body.light .result-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #c4b5fd;
+}
+body.dark .result-card {
+    background: rgba(8, 12, 25, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.result-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 28px;
+    color: white;
+}
+
+.result-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    transition: var(--transition);
+}
+
+.result-mobile {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    transition: var(--transition);
+}
+
+.result-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--p3);
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+}
+body.dark .result-name {
+    color: #00f0ff;
+}
+
+.pay-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    letter-spacing: 0.05em;
+}
+body.dark .pay-btn {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    box-shadow: 0 4px 20px rgba(0, 224, 255, 0.3);
+}
+
+.pay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.pay-btn:active {
+    transform: scale(0.95);
+}
+
+.scan-again-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 0.5rem;
+    transition: var(--transition);
+    letter-spacing: 0.05em;
+}
+body.light .scan-again-btn {
+    background: #f9fafb;
+    border: 2px solid #f0f0f0;
+    color: #1a1a2e;
+}
+body.dark .scan-again-btn {
+    background: rgba(8, 12, 28, 0.9);
+    border: 2px solid rgba(0, 200, 230, 0.5);
+    color: #e0f0ff;
+}
+
+/* ============================================
+   SECTION 9: ACTION BUTTONS
+   ============================================ */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.action-btn {
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    color: white;
+    box-shadow: var(--shadow-medium);
+}
+body.dark .action-btn.primary {
+    background: linear-gradient(135deg, #00e0ff, #0088ff);
+    box-shadow: 0 8px 30px rgba(0, 224, 255, 0.3);
+}
+
+.action-btn.primary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.action-btn.primary:hover::before {
+    opacity: 1;
+}
+
+.action-btn.secondary {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--card-border);
+}
+body.light .action-btn.secondary {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #c4b5fd;
+}
+body.dark .action-btn.secondary {
+    background: rgba(8, 12, 25, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.action-btn.secondary i {
+    color: var(--p3);
+    transition: var(--transition);
+}
+body.dark .action-btn.secondary i {
+    color: #00f0ff;
+}
+
+.action-btn i {
+    font-size: 1.6rem;
+    transition: var(--transition);
+}
+
+.action-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ============================================
+   SECTION 10: FOOTER
+   ============================================ */
+.footer-text {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin-top: 1rem;
+    transition: var(--transition);
+}
+
+/* ============================================
+   SECTION 11: BOTTOM NAVIGATION
+   ============================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--nav-border);
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem 0 0.7rem;
+    z-index: 50;
+    transition: var(--transition);
+}
+body.light .bottom-nav {
+    background: rgba(241, 239, 255, 0.95);
+    border-top: 1px solid #c4b5fd;
+}
+body.dark .bottom-nav {
+    background: rgba(8, 12, 28, 0.95);
+    border-top: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--nav-inactive);
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    flex: 1;
+    transition: var(--transition);
+    padding: 0.25rem 0;
+    position: relative;
+}
+body.light .nav-item {
+    color: #94a3b8;
+}
+body.dark .nav-item {
+    color: #6a7a9a;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    transition: var(--transition);
+}
+
+.nav-item.active {
+    color: var(--nav-active);
+}
+body.light .nav-item.active {
+    color: #8b5cf6;
+}
+body.dark .nav-item.active {
+    color: #00f0ff;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 30%;
+    right: 30%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--p1), var(--p2));
+    border-radius: 0 0 3px 3px;
+    transition: var(--transition);
+}
+body.dark .nav-item.active::after {
+    background: linear-gradient(90deg, #00e0ff, #0088ff);
+}
+
+.nav-item:hover {
+    color: var(--nav-active);
+}
+
+/* ============================================
+   SECTION 12: RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 480px) {
+    .container {
+        padding: 0.8rem;
+    }
+    
+    .qr-card {
+        padding: 1.5rem;
+    }
+    
+    .qr-wrap {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .action-grid {
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        padding: 1.2rem 0.8rem;
+    }
+    
+    .result-mobile {
+        font-size: 1.2rem;
+    }
+    
+    .header h1 {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .qr-wrap {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .user-name {
+        font-size: 0.95rem;
+    }
+    
+    .action-btn i {
+        font-size: 1.3rem;
+    }
+    
+    .action-label {
+        font-size: 0.55rem;
+    }
+}
+</style>
+ </head>
+ <body>
+  <!-- ============================================
+     SECTION 13: HEADER
+     ============================================ -->
+  <div class="header">
+   <a href="/dashboard" class="back"> <i class="fa-solid fa-arrow-left"></i> </a>
+   <h1>Pʀɪᴍᴇ <span>Qʀ</span></h1>
+   <div class="header-placeholder"></div>
+  </div><!-- ============================================
+     SECTION 14: MAIN CONTENT
+     ============================================ -->
+  <div class="container">
+   <!-- MY QR CARD -->
+   <div class="qr-card">
+    <div class="my-qr-badge">
+     <i class="fa-solid fa-qrcode"></i> Mʏ Qʀ
+    </div>
+    <div class="qr-wrap">
+     <img id="qr-img" src="" alt="Your QR Code">
+    </div>
+    <div class="user-name" id="qr-name">
+     Lᴏᴀᴅɪɴɢ...
+    </div>
+    <div class="user-mobile" id="qr-mobile"></div><button class="download-btn" onclick="downloadQR()"> <i class="fa-solid fa-download"></i> Dᴏᴡɴʟᴏᴀᴅ Qʀ </button>
+   </div><!-- SCANNER -->
+   <div class="scanner-card" id="scanner-card">
+    <div class="scanner-wrapper">
+     <div id="reader"></div>
+     <div class="scan-line"></div>
+     <div class="scanner-corner tl"></div>
+     <div class="scanner-corner tr"></div>
+     <div class="scanner-corner bl"></div>
+     <div class="scanner-corner br"></div>
+    </div><button class="stop-btn" onclick="stopScanner()"> <i class="fa-solid fa-xmark"></i> Cᴀɴᴄᴇʟ Sᴄᴀɴ </button>
+   </div><!-- SCAN RESULT -->
+   <div class="result-card" id="result-card">
+    <div class="result-icon">
+     <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <div class="result-title">
+     Qʀ Sᴄᴀɴɴᴇᴅ!
+    </div>
+    <div class="result-mobile" id="result-mobile"></div>
+    <div class="result-name" id="result-name"></div><button class="pay-btn" onclick="goToTransfer()"> <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ Mᴏɴᴇʏ </button> <button class="scan-again-btn" onclick="scanAgain()"> <i class="fa-solid fa-rotate-right"></i> Sᴄᴀɴ Aɢᴀɪɴ </button>
+   </div><!-- ACTION BUTTONS -->
+   <div class="action-grid" id="action-buttons">
+    <button class="action-btn primary" onclick="startScanner()"> <i class="fa-solid fa-qrcode"></i> <span class="action-label">Sᴄᴀɴ Qʀ</span> </button> <label class="action-btn secondary"> <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)"> <i class="fa-solid fa-image"></i> <span class="action-label">Fʀᴏᴍ Gᴀʟʟᴇʀʏ</span> </label>
+   </div>
+   <div class="footer-text">
+    <i class="fa-solid fa-lock" style="margin-right:0.5rem"></i> Sᴇᴄᴜʀᴇ Eɴᴄʀʏᴘᴛɪᴏɴ · Pʀɪᴍᴇ 𝟸𝟶𝟸𝟼
+   </div>
+  </div><!-- ============================================
+     SECTION 15: BOTTOM NAVIGATION
+     ============================================ -->
+  <div class="bottom-nav">
+   <a href="/dashboard" class="nav-item"> <i class="fa-solid fa-house"></i> Hᴏᴍᴇ </a> <a href="/transfer" class="nav-item"> <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ </a> <a href="/qr" class="nav-item active"> <i class="fa-solid fa-qrcode"></i> Qʀ </a> <a href="/deposit" class="nav-item"> <i class="fa-solid fa-plus-circle"></i> Aᴅᴅ </a> <a href="/transactions" class="nav-item"> <i class="fa-solid fa-receipt"></i> Hɪꜱᴛᴏʀʏ </a>
+  </div><!-- ============================================
+     SECTION 16: JAVASCRIPT
+     ============================================ -->
+  <script>
+// ============================================
+// SECTION 16a: CONFIGURATION & INIT
+// ============================================
+const API = '/api';
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!token) {
+    window.location.href = '/index';
+}
+
+let scannedMobile = '';
+let scannedUserData = null;
+let html5QrCode = null;
+
+// ============================================
+// SECTION 16b: THEME SYNC WITH DASHBOARD
+// ============================================
+function loadThemeFromStorage() {
+    const savedTheme = localStorage.getItem('primeTheme');
+    const body = document.body;
+    
+    if (savedTheme === 'dark') {
+        body.classList.add('dark');
+        body.classList.remove('light');
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        body.classList.add('light');
+        body.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
+
+// Initialize theme on page load
+loadThemeFromStorage();
+
+// ============================================
+// SECTION 16c: LOAD QR CODE
+// ============================================
+function loadQR() {
+    const mobile = user.mobile || '';
+    const name = user.fullName || user.name || 'Uꜱᴇʀ';
+    
+    document.getElementById('qr-name').textContent = name;
+    document.getElementById('qr-mobile').textContent = mobile;
+    
+    const qrData = mobile || 'prime-user';
+    document.getElementById('qr-img').src = 
+        `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=8b5cf6&margin=10`;
+}
+
+// ============================================
+// SECTION 16d: DOWNLOAD QR CODE
+// ============================================
+function downloadQR() {
+    const link = document.createElement('a');
+    link.href = document.getElementById('qr-img').src;
+    link.download = `PRIME_QR_${user.mobile || 'user'}.png`;
+    link.click();
+}
+
+// ============================================
+// SECTION 16e: START SCANNER
+// ============================================
+function startScanner() {
+    document.getElementById('scanner-card').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'none';
+    document.getElementById('result-card').style.display = 'none';
+
+    html5QrCode = new Html5Qrcode('reader');
+    html5QrCode.start(
+        { facingMode: 'environment' },
+        { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1
+        },
+        onScanSuccess
+    ).catch(() => {
+        alert('Cᴀᴍᴇʀᴀ ᴘᴇʀᴍɪꜱꜱɪᴏɴ ᴅᴇɴɪᴇᴅ!');
+        stopScanner();
+    });
+}
+
+// ============================================
+// SECTION 16f: STOP SCANNER
+// ============================================
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+            html5QrCode = null;
+        });
+    } else {
+        document.getElementById('scanner-card').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'grid';
+    }
+}
+
+// ============================================
+// SECTION 16g: SCAN SUCCESS HANDLER - FETCH USER DETAILS
+// ============================================
+async function onScanSuccess(decodedText) {
+    if (html5QrCode) {
+        await html5QrCode.stop();
+        html5QrCode = null;
+    }
+    
+    document.getElementById('scanner-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
+
+    const mobile = decodedText.trim();
+    
+    // Validate if it's a 10-digit number
+    if (!/^\d{10}$/.test(mobile)) {
+        alert('Iɴᴠᴀʟɪᴅ Qʀ Cᴏᴅᴇ! Mᴜꜱᴛ ᴄᴏɴᴛᴀɪɴ 10-ᴅɪɢɪᴛ ᴍᴏʙɪʟᴇ ɴᴜᴍʙᴇʀ');
+        scanAgain();
+        return;
+    }
+
+    scannedMobile = mobile;
+    document.getElementById('result-mobile').textContent = mobile;
+    document.getElementById('result-name').textContent = '🔍 Fᴇᴛᴄʜɪɴɢ ᴜꜱᴇʀ ᴅᴇᴛᴀɪʟꜱ...';
+    document.getElementById('result-card').style.display = 'block';
+
+    // Fetch user details from the server
+    try {
+        // Try using the /api/view endpoint which returns full user details
+        const response = await fetch(`${API}/view?number=${mobile}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.name) {
+            scannedUserData = data;
+            // Display user's full name
+            document.getElementById('result-name').textContent = data.name;
+            
+            // Optional: You can also display wallet ID or other details
+            // document.getElementById('result-name').textContent = `${data.name} (${data.wallet_id})`;
+        } else {
+            // Fallback: Try the transfer/lookup endpoint
+            const lookupResponse = await fetch(`${API}/transfer/lookup/${mobile}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const lookupData = await lookupResponse.json();
+            
+            if (lookupData.status === 'success' && lookupData.name) {
+                scannedUserData = lookupData;
+                document.getElementById('result-name').textContent = lookupData.name;
+            } else {
+                document.getElementById('result-name').textContent = '👤 Uꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ';
+                scannedUserData = null;
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        document.getElementById('result-name').textContent = '🌐 Eʀʀᴏʀ ꜰᴇᴛᴄʜɪɴɢ ᴜꜱᴇʀ';
+        scannedUserData = null;
+    }
+}
+
+// ============================================
+// SECTION 16h: UPLOAD QR FROM GALLERY
+// ============================================
+function uploadQR(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Use html5-qrcode to decode the image
+                const qrScanner = new Html5Qrcode('reader');
+                qrScanner.scanFile(input.files[0], true)
+                    .then(decoded => {
+                        onScanSuccess(decoded);
+                        input.value = '';
+                    })
+                    .catch(() => {
+                        alert('Nᴏ ᴠᴀʟɪᴅ Qʀ ᴄᴏᴅᴇ ꜰᴏᴜɴᴅ ɪɴ ᴛʜᴇ ɪᴍᴀɢᴇ!');
+                        input.value = '';
+                    });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// ============================================
+// SECTION 16i: GO TO TRANSFER
+// ============================================
+function goToTransfer() {
+    if (scannedMobile) {
+        window.location.href = `/transfer?to=${scannedMobile}`;
+    } else {
+        alert('Nᴏ ᴜꜱᴇʀ ꜱᴄᴀɴɴᴇᴅ. Pʟᴇᴀꜱᴇ ꜱᴄᴀɴ ᴀ Qʀ ᴄᴏᴅᴇ ꜰɪʀꜱᴛ.');
+    }
+}
+
+// ============================================
+// SECTION 16j: SCAN AGAIN
+// ============================================
+function scanAgain() {
+    scannedMobile = '';
+    scannedUserData = null;
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'grid';
+}
+
+// ============================================
+// SECTION 16k: INITIALIZE
+// ============================================
+loadQR();
+</script>
+ </body>
+</html>
