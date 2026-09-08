@@ -1,0 +1,364 @@
+// FILE: routes/wallet.js
+const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const Transaction = require('../models/Transaction');
+
+// CONSTANTS
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// ==================== VERIFY TOKEN MIDDLEWARE ====================
+const verifyToken = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' 
+            });
+        }
+        
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        
+        if (!user) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' 
+            });
+        }
+        
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('Token verification error:', error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+            });
+        }
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+            });
+        }
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' 
+        });
+    }
+};
+
+// ============================================
+// GET WALLET BALANCE (FIXED)
+// ============================================
+router.get('/balance', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        
+        res.json({
+            status: 'success',
+            data: {
+                balance: user.balance || 0,
+                walletId: user.walletId,
+                fullName: user.fullName,
+                mobile: user.mobile
+            }
+        });
+    } catch (error) {
+        console.error('Get balance error:', error);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ' 
+        });
+    }
+});
+
+// ============================================
+// CREATE TRANSACTION - POST (For games)
+// ============================================
+router.post('/transaction', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { type, amount, remark, status = 'success', metadata = {} } = req.body;
+        
+        console.log('📥 Transaction Request:', { type, amount, remark, userId: user._id });
+        console.log('💰 User balance before:', user.balance);
+        
+        if (!type || !amount || amount <= 0) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Iɴᴠᴀʟɪᴅ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴀᴛᴀ'
+            });
+        }
+        
+        let newBalance = parseFloat(user.balance) || 0;
+        const parsedAmount = parseFloat(amount);
+        
+        if (type === 'game_win' || type === 'win') {
+            newBalance = newBalance + parsedAmount;
+            user.balance = newBalance;
+        } else if (type === 'game_loss' || type === 'loss') {
+            newBalance = newBalance - parsedAmount;
+            user.balance = newBalance;
+        }
+        
+        await user.save();
+        console.log('💰 User balance after:', user.balance);
+        
+        const transaction = new Transaction({
+            user_id: user._id,
+            sender_id: user._id,
+            receiver_id: user._id,
+            amount: parsedAmount,
+            type: type,
+            status: status || 'success',
+            remark: remark || '',
+            description: remark || '',
+            tx_time: new Date(),
+            metadata: {
+                ...metadata,
+                transactionType: type,
+                source: 'game',
+                balanceAfter: newBalance
+            }
+        });
+        
+        await transaction.save();
+        console.log('✅ Transaction saved:', transaction._id);
+        
+        res.json({
+            status: 'success',
+            transaction: {
+                _id: transaction._id,
+                amount: transaction.amount,
+                type: transaction.type,
+                remark: transaction.remark,
+                tx_time: transaction.tx_time
+            },
+            newBalance: parseFloat(user.balance) || 0
+        });
+        
+    } catch (error) {
+        console.error('❌ Create transaction error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ: ' + error.message
+        });
+    }
+});
+
+// ============================================
+// GET TRANSACTIONS - DASHBOARD & TRANSACTIONS PAGE
+// ============================================
+router.get('/transactions', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { limit = 50, page = 1, type, status } = req.query;
+        const skip = (page - 1) * limit;
+        
+        let query = {
+            $or: [
+                { user_id: user._id },
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        };
+        
+        if (type) query.type = type;
+        if (status) query.status = status;
+        
+        console.log('🔍 Fᴇᴛᴄʜɪɴɢ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Fᴏʀ Uꜱᴇʀ:', user._id);
+        
+        const transactions = await Transaction.find(query)
+            .populate('sender_id', 'fullName username mobile walletId')
+            .populate('receiver_id', 'fullName username mobile walletId')
+            .sort({ tx_time: -1 })
+            .skip(parseInt(skip))
+            .limit(parseInt(limit));
+        
+        const total = await Transaction.countDocuments(query);
+        
+        console.log('✅ Fᴏᴜɴᴅ', transactions.length, 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ');
+        
+        const transformedTransactions = transactions.map(tx => {
+            const txObj = tx.toObject ? tx.toObject() : tx;
+            
+            let transactionType = txObj.type || 'unknown';
+            
+            const isSender = txObj.sender_id && txObj.sender_id._id && 
+                           txObj.sender_id._id.toString() === user._id.toString();
+            const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
+                             txObj.receiver_id._id.toString() === user._id.toString();
+            
+            if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
+                transactionType = 'payment_sent';
+            } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
+                transactionType = 'payment_received';
+            } else if (txObj.type === 'deposit') {
+                transactionType = 'payment_received';
+            } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
+                transactionType = 'payment_sent';
+            }
+            
+            if (txObj.metadata && txObj.metadata.transactionType) {
+                transactionType = txObj.metadata.transactionType;
+            }
+            
+            return {
+                _id: txObj._id,
+                tx_id: txObj.tx_id,
+                user_id: txObj.user_id,
+                sender_id: txObj.sender_id,
+                receiver_id: txObj.receiver_id,
+                amount: txObj.amount,
+                fee: txObj.fee || 0,
+                type: txObj.type,
+                transactionType: transactionType,
+                status: txObj.status || 'success',
+                remark: txObj.remark,
+                description: txObj.description,
+                tx_time: txObj.tx_time,
+                createdAt: txObj.createdAt,
+                metadata: txObj.metadata
+            };
+        });
+        
+        res.json({
+            status: 'success',
+            transactions: transformedTransactions,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error('❌ Gᴇᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Eʀʀᴏʀ:', error.message);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ: ' + error.message
+        });
+    }
+});
+
+// ============================================
+// GET SINGLE TRANSACTION
+// ============================================
+router.get('/transaction/:id', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+        
+        const transaction = await Transaction.findOne({
+            _id: id,
+            $or: [
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        })
+        .populate('sender_id', 'fullName username mobile walletId')
+        .populate('receiver_id', 'fullName username mobile walletId');
+        
+        if (!transaction) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Nᴏᴛ Fᴏᴜɴᴅ'
+            });
+        }
+        
+        res.json({
+            status: 'success',
+            transaction
+        });
+    } catch (error) {
+        console.error('Get transaction error:', error);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ' 
+        });
+    }
+});
+
+// ============================================
+// GET RECENT TRANSACTIONS (For Dashboard)
+// ============================================
+router.get('/recent', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { limit = 5 } = req.query;
+        
+        const query = {
+            $or: [
+                { user_id: user._id },
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        };
+        
+        const transactions = await Transaction.find(query)
+            .populate('sender_id', 'fullName username mobile walletId')
+            .populate('receiver_id', 'fullName username mobile walletId')
+            .sort({ tx_time: -1 })
+            .limit(parseInt(limit));
+        
+        const transformedTransactions = transactions.map(tx => {
+            const txObj = tx.toObject ? tx.toObject() : tx;
+            
+            let transactionType = txObj.type || 'unknown';
+            
+            const isSender = txObj.sender_id && txObj.sender_id._id && 
+                           txObj.sender_id._id.toString() === user._id.toString();
+            const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
+                             txObj.receiver_id._id.toString() === user._id.toString();
+            
+            if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
+                transactionType = 'payment_sent';
+            } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
+                transactionType = 'payment_received';
+            } else if (txObj.type === 'deposit') {
+                transactionType = 'payment_received';
+            } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
+                transactionType = 'payment_sent';
+            }
+            
+            if (txObj.metadata && txObj.metadata.transactionType) {
+                transactionType = txObj.metadata.transactionType;
+            }
+            
+            return {
+                _id: txObj._id,
+                tx_id: txObj.tx_id,
+                user_id: txObj.user_id,
+                sender: txObj.sender_id,
+                receiver: txObj.receiver_id,
+                amount: txObj.amount,
+                fee: txObj.fee || 0,
+                type: txObj.type,
+                transactionType: transactionType,
+                status: txObj.status || 'success',
+                remark: txObj.remark,
+                description: txObj.description,
+                tx_time: txObj.tx_time,
+                createdAt: txObj.createdAt
+            };
+        });
+        
+        res.json({
+            status: 'success',
+            transactions: transformedTransactions
+        });
+    } catch (error) {
+        console.error('❌ Gᴇᴛ Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Eʀʀᴏʀ:', error.message);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ' 
+        });
+    }
+});
+
+module.exports = router;

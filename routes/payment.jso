@@ -1,0 +1,1513 @@
+// FILE: routes/payment.js
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const Transaction = require('../models/Transaction');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const BOT_TOKEN = process.env.BOT_TOKEN;
+
+// ============================================
+// Helper: Generate Transaction ID (API vs Regular)
+// ============================================
+function generateTxnId(existingTxnId, isApi = false) {
+    if (existingTxnId) {
+        return existingTxnId;
+    }
+    if (isApi) {
+        return 'TXN_API_' + generateRandomString(20);
+    }
+    return 'TXN' + Date.now() + Math.floor(Math.random() * 99999);
+}
+
+function generateRandomString(length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// Helper: Send Telegram notification (STYLISH MESSAGES)
+async function sendTelegramMessage(chatId, message) {
+    return new Promise((resolve) => {
+        const https = require('https');
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        const data = JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML'
+        });
+        
+        const request = https.request(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data)
+            }
+        }, (res) => {
+            let responseData = '';
+            res.on('data', (chunk) => responseData += chunk);
+            res.on('end', () => {
+                try {
+                    const result = JSON.parse(responseData);
+                    resolve({ success: result.ok });
+                } catch (e) {
+                    resolve({ success: false });
+                }
+            });
+        });
+        
+        request.on('error', () => resolve({ success: false }));
+        request.write(data);
+        request.end();
+    });
+}
+
+// ============================================
+// Helper: Check if API Key is Active
+// ============================================
+async function isApiKeyActive(apiKey) {
+    try {
+        const user = await User.findOne({ apiKey }).select('apiKeyActive');
+        if (!user) return false;
+        return user.apiKeyActive !== false;
+    } catch (error) {
+        console.error('Error checking API key status:', error);
+        return false;
+    }
+}
+
+// ============================================
+// Helper: Validate API Key with Status Check
+// ============================================
+async function validateApiKey(apiKey) {
+    if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+        return { status: 'failed', message: 'Invalid API Key format' };
+    }
+    
+    const user = await User.findOne({ apiKey }).select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
+    
+    if (!user) {
+        return { status: 'failed', message: 'Invalid API Key' };
+    }
+    
+    if (user.apiKeyActive === false) {
+        return { status: 'failed', message: 'API Key is disabled' };
+    }
+    
+    if (user.isBlocked) {
+        return { status: 'failed', message: 'User account is blocked' };
+    }
+    
+    return { status: 'success', user };
+}
+
+// Helper: Find user by mobile number
+async function findUserByMobile(mobile) {
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+        return { status: 'failed', message: 'Invalid mobile number format' };
+    }
+    
+    const user = await User.findOne({ mobile }).select('_id fullName mobile walletId balance isBlocked telegramId');
+    
+    if (!user) {
+        return { status: 'failed', message: 'User not found with this mobile number' };
+    }
+    
+    if (user.isBlocked) {
+        return { status: 'failed', message: 'Receiver account is blocked' };
+    }
+    
+    return { status: 'success', user };
+}
+
+// Helper: Validate API Key for receiver
+async function validateReceiverApiKey(apiKey) {
+    if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+        return { status: 'failed', message: 'Invalid receiver API Key format' };
+    }
+    
+    const user = await User.findOne({ apiKey }).select('_id fullName mobile walletId balance isBlocked telegramId');
+    
+    if (!user) {
+        return { status: 'failed', message: 'Receiver not found' };
+    }
+    
+    if (user.isBlocked) {
+        return { status: 'failed', message: 'Receiver account is blocked' };
+    }
+    
+    return { status: 'success', user };
+}
+
+// Auth middleware
+async function auth(req, res, next) {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(400).json({ status: 'failed', message: 'No token provided' });
+        }
+        
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        
+        if (!user) {
+            return res.status(401).json({ status: 'failed', message: 'User not found' });
+        }
+        
+        if (user.isBlocked) {
+            return res.status(402).json({ status: 'failed', message: 'Account blocked' });
+        }
+        
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('Auth Error:', error.message);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(403).json({ status: 'failed', message: 'Invalid token' });
+        }
+        if (error.name === 'TokenExpiredError') {
+            return res.status(404).json({ status: 'failed', message: 'Token expired' });
+        }
+        return res.status(500).json({ status: 'failed', message: 'Authentication error' });
+    }
+}
+
+// ============================================
+// GET PAYMENT (API Payment - TXN_API_)
+// ============================================
+router.get('/', async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+        const { key, number, amount, comment = '', txnId } = req.query;
+
+        console.log('📱 Payment Request Via Get:');
+        console.log('  Key:', key ? '***' + key.slice(-4) : 'MISSING');
+        console.log('  Number:', number);
+        console.log('  Amount:', amount);
+        console.log('  Comment:', comment);
+        console.log('  TxnId:', txnId || 'AUTO-GENERATED');
+
+        // 405 - API Key is required
+        if (!key) {
+            await session.abortTransaction();
+            return res.status(405).json({ 
+                status: 'failed', 
+                message: 'API Key is required',
+                data: []
+            });
+        }
+
+        // 406 - Receiver number is required
+        if (!number) {
+            await session.abortTransaction();
+            return res.status(406).json({ 
+                status: 'failed', 
+                message: 'Receiver number is required',
+                data: []
+            });
+        }
+
+        // 407 - Amount is required
+        if (!amount) {
+            await session.abortTransaction();
+            return res.status(407).json({ 
+                status: 'failed', 
+                message: 'Amount is required',
+                data: []
+            });
+        }
+
+        const paymentAmount = parseFloat(amount);
+
+        // 408 - Invalid amount. Minimum is ₹1
+        if (isNaN(paymentAmount) || paymentAmount < 1) {
+            await session.abortTransaction();
+            return res.status(408).json({ 
+                status: 'failed', 
+                message: 'Invalid amount. Minimum is ₹1',
+                data: []
+            });
+        }
+
+        // 409 - Maximum payment amount is ₹5,000
+        if (paymentAmount > 5000) {
+            await session.abortTransaction();
+            return res.status(409).json({ 
+                status: 'failed', 
+                message: 'Maximum payment amount is ₹5,000',
+                data: []
+            });
+        }
+
+        // 410 - Transaction ID already used
+        if (txnId) {
+            const exists = await Transaction.findOne({ tx_id: txnId });
+            if (exists) {
+                await session.abortTransaction();
+                return res.status(410).json({ 
+                    status: 'failed', 
+                    message: 'Already claimed! This transaction ID is used.',
+                    data: []
+                });
+            }
+        }
+
+        // 411 - Invalid API Key format
+        if (!key || key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+            await session.abortTransaction();
+            return res.status(411).json({ 
+                status: 'failed', 
+                message: 'Invalid API Key format',
+                data: []
+            });
+        }
+
+        // 412 - API Key is disabled
+        const isActive = await isApiKeyActive(key);
+        if (!isActive) {
+            await session.abortTransaction();
+            return res.status(412).json({ 
+                status: 'failed', 
+                message: 'API Key is disabled',
+                data: []
+            });
+        }
+
+        // 413 - Sender not found
+        const senderResult = await validateApiKey(key);
+        if (senderResult.status === 'failed') {
+            await session.abortTransaction();
+            return res.status(413).json({ 
+                status: 'failed', 
+                message: senderResult.message,
+                data: []
+            });
+        }
+        const sender = senderResult.user;
+
+        // 414 - Receiver not found
+        const receiverResult = await findUserByMobile(number);
+        if (receiverResult.status === 'failed') {
+            await session.abortTransaction();
+            return res.status(414).json({ 
+                status: 'failed', 
+                message: receiverResult.message,
+                data: []
+            });
+        }
+        const receiver = receiverResult.user;
+
+        // 415 - Cannot pay yourself
+        if (sender._id.toString() === receiver._id.toString()) {
+            await session.abortTransaction();
+            return res.status(415).json({ 
+                status: 'failed', 
+                message: 'You cannot pay yourself',
+                data: []
+            });
+        }
+
+        // 416 - Insufficient balance
+        if (sender.balance < paymentAmount) {
+            await session.abortTransaction();
+            return res.status(416).json({ 
+                status: 'failed', 
+                message: 'Insufficient balance',
+                data: { balance: sender.balance }
+            });
+        }
+
+        // 417 - Receiver account is blocked
+        if (receiver.isBlocked) {
+            await session.abortTransaction();
+            return res.status(417).json({ 
+                status: 'failed', 
+                message: 'Receiver account is blocked',
+                data: []
+            });
+        }
+
+        // 418 - Sender account is blocked
+        if (sender.isBlocked) {
+            await session.abortTransaction();
+            return res.status(418).json({ 
+                status: 'failed', 
+                message: 'Sender account is blocked',
+                data: []
+            });
+        }
+
+        const txn_Id = generateTxnId(txnId, true);
+
+        const senderOldBalance = sender.balance;
+        const receiverOldBalance = receiver.balance;
+        
+        sender.balance = senderOldBalance - paymentAmount;
+        receiver.balance = receiverOldBalance + paymentAmount;
+
+        await sender.save({ session });
+        await receiver.save({ session });
+
+        const senderTransaction = new Transaction({
+            user_id: sender._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: paymentAmount,
+            type: 'api',
+            status: 'success',
+            remark: comment || 'API Transfer',
+            description: comment || 'API Transfer',
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_sent',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile,
+                note: comment || '',
+                apiEndpoint: 'GET'
+            }
+        });
+        await senderTransaction.save({ session });
+
+        const receiverTransaction = new Transaction({
+            user_id: receiver._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: paymentAmount,
+            type: 'api',
+            status: 'success',
+            remark: comment || 'API Transfer',
+            description: comment || 'API Transfer',
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_received',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile,
+                note: comment || '',
+                apiEndpoint: 'GET'
+            }
+        });
+        await receiverTransaction.save({ session });
+
+        await session.commitTransaction();
+        console.log('✅ Payment Successful:', txn_Id);
+
+        // ===== BOT MESSAGES - STYLISH (For Telegram Users) =====
+        if (sender.telegramId) {
+            const senderMessage = 
+`<b>────────────────────</b>
+<b>💸 Aᴩɪ Pᴀʏᴍᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ</b>
+<b>────────────────────</b>
+
+<b>👤 Dᴇᴀʀ ${sender.fullName},</b> Yᴏᴜʀ Pᴀʏᴍᴇɴᴛ Hᴀꜱ Bᴇᴇɴ Pʀᴏᴄᴇꜱꜱᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${paymentAmount}
+👤 <b>Tᴏ:</b> ${receiver.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${sender.balance}
+🆔 <b>Txɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Cᴏᴍᴍᴇɴᴛ:</b> ${comment || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+⚠️ Iꜰ Tʜɪꜱ Wᴀꜱɴ'ᴛ Yᴏᴜ, Pʟᴇᴀꜱᴇ Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ Iᴍᴍᴇᴅɪᴀᴛᴇʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(sender.telegramId, senderMessage);
+        }
+
+        if (receiver.telegramId) {
+            const receiverMessage = 
+`<b>─────────────────</b>
+<b>💰 Aᴩɪ Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴠᴇᴅ</b>
+<b>─────────────────</b>
+
+<b>👤 Dᴇᴀʀ ${receiver.fullName},</b> Yᴏᴜ Hᴀᴠᴇ Rᴇᴄᴇɪᴠᴇᴅ A Pᴀʏᴍᴇɴᴛ Iɴ Yᴏᴜʀ Wᴀʟʟᴇᴛ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${paymentAmount}
+👤 <b>Fʀᴏᴍ:</b> ${sender.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${receiver.balance}
+🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Cᴏᴍᴍᴇɴᴛ:</b> ${comment || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(receiver.telegramId, receiverMessage);
+        }
+
+        // ============================================
+        // 200 - Payment successful
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Payment successful',
+            data: {
+                transaction_id: txn_Id,
+                amount: paymentAmount,
+                sender: {
+                    name: sender.fullName,
+                    number: sender.mobile
+                },
+                receiver: {
+                    name: receiver.fullName,
+                    number: receiver.mobile
+                },
+                comment: comment || 'Paid',
+                timestamp: new Date().toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\//g, '-')
+            }
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Payment Error:', error);
+        
+        // 419 - Transaction ID conflict
+        if (error.code === 11000) {
+            return res.status(419).json({
+                status: 'failed',
+                message: 'Transaction ID conflict. Please retry',
+                data: []
+            });
+        }
+        
+        // 500 - Failed to process payment
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to process payment',
+            data: []
+        });
+    } finally {
+        session.endSession();
+    }
+});
+
+// ============================================
+// POST PAYMENT (API Payment - TXN_API_)
+// ============================================
+router.post('/', async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+        const { key, number, amount, comment = '', txnId } = req.body;
+
+        console.log('📱 Payment Request Via Post:');
+        console.log('  Key:', key ? '***' + key.slice(-4) : 'MISSING');
+        console.log('  Number:', number);
+        console.log('  Amount:', amount);
+        console.log('  Comment:', comment);
+        console.log('  TxnId:', txnId || 'AUTO-GENERATED');
+
+        // 420 - API Key is required
+        if (!key) {
+            await session.abortTransaction();
+            return res.status(420).json({ 
+                status: 'failed', 
+                message: 'API Key is required',
+                data: []
+            });
+        }
+
+        // 421 - Receiver number is required
+        if (!number) {
+            await session.abortTransaction();
+            return res.status(421).json({ 
+                status: 'failed', 
+                message: 'Receiver number is required',
+                data: []
+            });
+        }
+
+        // 422 - Amount is required
+        if (!amount) {
+            await session.abortTransaction();
+            return res.status(422).json({ 
+                status: 'failed', 
+                message: 'Amount is required',
+                data: []
+            });
+        }
+
+        const paymentAmount = parseFloat(amount);
+
+        // 423 - Invalid amount. Minimum is ₹1
+        if (isNaN(paymentAmount) || paymentAmount < 1) {
+            await session.abortTransaction();
+            return res.status(423).json({ 
+                status: 'failed', 
+                message: 'Invalid amount. Minimum is ₹1',
+                data: []
+            });
+        }
+
+        // 424 - Maximum payment amount is ₹5,000
+        if (paymentAmount > 5000) {
+            await session.abortTransaction();
+            return res.status(424).json({ 
+                status: 'failed', 
+                message: 'Maximum payment amount is ₹5,000',
+                data: []
+            });
+        }
+
+        // 425 - Transaction ID already used
+        if (txnId) {
+            const exists = await Transaction.findOne({ tx_id: txnId });
+            if (exists) {
+                await session.abortTransaction();
+                return res.status(425).json({ 
+                    status: 'failed', 
+                    message: 'Already claimed! This transaction ID is used.',
+                    data: []
+                });
+            }
+        }
+
+        // 426 - Invalid API Key format
+        if (!key || key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+            await session.abortTransaction();
+            return res.status(426).json({ 
+                status: 'failed', 
+                message: 'Invalid API Key format',
+                data: []
+            });
+        }
+
+        // 427 - API Key is disabled
+        const isActive = await isApiKeyActive(key);
+        if (!isActive) {
+            await session.abortTransaction();
+            return res.status(427).json({ 
+                status: 'failed', 
+                message: 'API Key is disabled',
+                data: []
+            });
+        }
+
+        // 428 - Sender not found
+        const senderResult = await validateApiKey(key);
+        if (senderResult.status === 'failed') {
+            await session.abortTransaction();
+            return res.status(428).json({ 
+                status: 'failed', 
+                message: senderResult.message,
+                data: []
+            });
+        }
+        const sender = senderResult.user;
+
+        // 429 - Receiver not found
+        const receiverResult = await findUserByMobile(number);
+        if (receiverResult.status === 'failed') {
+            await session.abortTransaction();
+            return res.status(429).json({ 
+                status: 'failed', 
+                message: receiverResult.message,
+                data: []
+            });
+        }
+        const receiver = receiverResult.user;
+
+        // 430 - Cannot pay yourself
+        if (sender._id.toString() === receiver._id.toString()) {
+            await session.abortTransaction();
+            return res.status(430).json({ 
+                status: 'failed', 
+                message: 'You cannot pay yourself',
+                data: []
+            });
+        }
+
+        // 431 - Insufficient balance
+        if (sender.balance < paymentAmount) {
+            await session.abortTransaction();
+            return res.status(431).json({ 
+                status: 'failed', 
+                message: 'Insufficient balance',
+                data: { balance: sender.balance }
+            });
+        }
+
+        // 432 - Receiver account is blocked
+        if (receiver.isBlocked) {
+            await session.abortTransaction();
+            return res.status(432).json({ 
+                status: 'failed', 
+                message: 'Receiver account is blocked',
+                data: []
+            });
+        }
+
+        // 433 - Sender account is blocked
+        if (sender.isBlocked) {
+            await session.abortTransaction();
+            return res.status(433).json({ 
+                status: 'failed', 
+                message: 'Sender account is blocked',
+                data: []
+            });
+        }
+
+        const txn_Id = generateTxnId(txnId, true);
+
+        const senderOldBalance = sender.balance;
+        const receiverOldBalance = receiver.balance;
+        
+        sender.balance = senderOldBalance - paymentAmount;
+        receiver.balance = receiverOldBalance + paymentAmount;
+
+        await sender.save({ session });
+        await receiver.save({ session });
+
+        const senderTransaction = new Transaction({
+            user_id: sender._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: paymentAmount,
+            type: 'api',
+            status: 'success',
+            remark: comment || 'API Transfer',
+            description: comment || 'API Transfer',
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_sent',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile,
+                note: comment || '',
+                apiEndpoint: 'POST'
+            }
+        });
+        await senderTransaction.save({ session });
+
+        const receiverTransaction = new Transaction({
+            user_id: receiver._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: paymentAmount,
+            type: 'api',
+            status: 'success',
+            remark: comment || 'API Transfer',
+            description: comment || 'API Transfer',
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_received',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile,
+                note: comment || '',
+                apiEndpoint: 'POST'
+            }
+        });
+        await receiverTransaction.save({ session });
+
+        await session.commitTransaction();
+        console.log('✅ Payment Successful:', txn_Id);
+
+        // ===== BOT MESSAGES - STYLISH (For Telegram Users) =====
+        if (sender.telegramId) {
+            const senderMessage = 
+`<b>───────────────</b>
+<b>💸 Aᴩɪ Pᴀʏᴍᴇɴᴛ Sᴇɴᴛ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${sender.fullName},</b> Yᴏᴜʀ Pᴀʏᴍᴇɴᴛ Hᴀꜱ Bᴇᴇɴ Pʀᴏᴄᴇꜱꜱᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${paymentAmount}
+👤 <b>Tᴏ:</b> ${receiver.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${sender.balance}
+🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Cᴏᴍᴍᴇɴᴛ:</b> ${comment || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+⚠️ Iꜰ Tʜɪꜱ Wᴀꜱɴ'ᴛ Yᴏᴜ, Pʟᴇᴀꜱᴇ Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ Iᴍᴍᴇᴅɪᴀᴛᴇʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(sender.telegramId, senderMessage);
+        }
+
+        if (receiver.telegramId) {
+            const receiverMessage = 
+`<b>───────────────</b>
+<b>💰 Aᴩɪ Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴠᴇᴅ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${receiver.fullName},</b> Yᴏᴜ Hᴀᴠᴇ Rᴇᴄᴇɪᴠᴇᴅ A Pᴀʏᴍᴇɴᴛ Iɴ Yᴏᴜʀ Wᴀʟʟᴇᴛ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${paymentAmount}
+👤 <b>Fʀᴏᴍ:</b> ${sender.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${receiver.balance}
+🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Cᴏᴍᴍᴇɴᴛ:</b> ${comment || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(receiver.telegramId, receiverMessage);
+        }
+
+        // ============================================
+        // 200 - Payment successful
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Payment successful',
+            data: {
+                transaction_id: txn_Id,
+                amount: paymentAmount,
+                sender: {
+                    name: sender.fullName,
+                    number: sender.mobile
+                },
+                receiver: {
+                    name: receiver.fullName,
+                    number: receiver.mobile
+                },
+                comment: comment || 'Paid',
+                timestamp: new Date().toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\//g, '-')
+            }
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Payment Error:', error);
+        
+        // 434 - Transaction ID conflict
+        if (error.code === 11000) {
+            return res.status(434).json({
+                status: 'failed',
+                message: 'Transaction ID conflict. Please retry',
+                data: []
+            });
+        }
+        
+        // 500 - Failed to process payment
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to process payment',
+            data: []
+        });
+    } finally {
+        session.endSession();
+    }
+});
+
+// ============================================
+// MAKE PAYMENT (AUTHENTICATED - Regular TXN)
+// ============================================
+router.post('/make', auth, async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+        const { receiverApiKey, amount, note = '', txnId } = req.body;
+        const sender = req.user;
+
+        console.log('💳 Payment Request From:', sender._id);
+
+        // 435 - Receiver API Key and amount are required
+        if (!receiverApiKey || !amount) {
+            await session.abortTransaction();
+            return res.status(435).json({
+                status: 'failed',
+                message: 'Receiver API Key and amount are required',
+                data: []
+            });
+        }
+
+        // 436 - Minimum payment amount is ₹1
+        if (amount < 1) {
+            await session.abortTransaction();
+            return res.status(436).json({
+                status: 'failed',
+                message: 'Minimum payment amount is ₹1',
+                data: []
+            });
+        }
+
+        // 437 - Maximum payment amount is ₹5,000
+        if (amount > 5000) {
+            await session.abortTransaction();
+            return res.status(437).json({
+                status: 'failed',
+                message: 'Maximum payment amount is ₹5,000',
+                data: []
+            });
+        }
+
+        // 438 - Cannot pay yourself
+        if (sender.apiKey === receiverApiKey) {
+            await session.abortTransaction();
+            return res.status(438).json({
+                status: 'failed',
+                message: 'You cannot pay yourself',
+                data: []
+            });
+        }
+
+        // 439 - Invalid receiver API Key format
+        if (!receiverApiKey || receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+            await session.abortTransaction();
+            return res.status(439).json({
+                status: 'failed',
+                message: 'Invalid receiver API Key format',
+                data: []
+            });
+        }
+
+        // 440 - Receiver not found
+        const receiverResult = await validateReceiverApiKey(receiverApiKey);
+        if (receiverResult.status === 'failed') {
+            await session.abortTransaction();
+            return res.status(440).json({
+                status: 'failed',
+                message: receiverResult.message,
+                data: []
+            });
+        }
+        const receiver = receiverResult.user;
+
+        // 441 - Insufficient balance
+        if (sender.balance < amount) {
+            await session.abortTransaction();
+            return res.status(441).json({
+                status: 'failed',
+                message: 'Insufficient balance',
+                data: { balance: sender.balance }
+            });
+        }
+
+        // 442 - Receiver account is blocked
+        if (receiver.isBlocked) {
+            await session.abortTransaction();
+            return res.status(442).json({
+                status: 'failed',
+                message: 'Receiver account is blocked',
+                data: []
+            });
+        }
+
+        const txn_Id = generateTxnId(txnId, false);
+
+        const senderOldBalance = sender.balance;
+        const receiverOldBalance = receiver.balance;
+        
+        sender.balance = senderOldBalance - amount;
+        receiver.balance = receiverOldBalance + amount;
+
+        await sender.save({ session });
+        await receiver.save({ session });
+
+        const senderTransaction = new Transaction({
+            user_id: sender._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: amount,
+            type: 'transfer',
+            status: 'success',
+            remark: note || `Payment to ${receiver.fullName}`,
+            description: note || `Payment to ${receiver.fullName}`,
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_sent',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                note: note || '',
+                apiEndpoint: 'POST'
+            }
+        });
+        await senderTransaction.save({ session });
+
+        const receiverTransaction = new Transaction({
+            user_id: receiver._id,
+            sender_id: sender._id,
+            receiver_id: receiver._id,
+            amount: amount,
+            type: 'transfer',
+            status: 'success',
+            remark: note || `Payment from ${sender.fullName}`,
+            description: note || `Payment from ${sender.fullName}`,
+            tx_id: txn_Id,
+            metadata: {
+                transactionType: 'payment_received',
+                senderOldBalance,
+                receiverOldBalance,
+                senderName: sender.fullName,
+                receiverName: receiver.fullName,
+                note: note || '',
+                apiEndpoint: 'POST'
+            }
+        });
+        await receiverTransaction.save({ session });
+
+        await session.commitTransaction();
+        console.log('✅ Payment Successful:', txn_Id);
+
+        // ===== BOT MESSAGES - STYLISH (For Telegram Users) =====
+        if (sender.telegramId) {
+            const senderMessage = 
+`<b>───────────────</b>
+<b>💸 Aᴩɪ Pᴀʏᴍᴇɴᴛ Sᴇɴᴛ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${sender.fullName},</b> Yᴏᴜʀ Pᴀʏᴍᴇɴᴛ Hᴀꜱ Bᴇᴇɴ Pʀᴏᴄᴇꜱꜱᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount}
+👤 <b>Tᴏ:</b> ${receiver.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${sender.balance}
+🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+⚠️ Iꜰ Tʜɪꜱ Wᴀꜱɴ'ᴛ Yᴏᴜ, Pʟᴇᴀꜱᴇ Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ Iᴍᴍᴇᴅɪᴀᴛᴇʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(sender.telegramId, senderMessage);
+        }
+
+        if (receiver.telegramId) {
+            const receiverMessage = 
+`<b>───────────────</b>
+<b>💰 Aᴩɪ Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴠᴇᴅ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${receiver.fullName},</b> Yᴏᴜ Hᴀᴠᴇ Rᴇᴄᴇɪᴠᴇᴅ A Pᴀʏᴍᴇɴᴛ Iɴ Yᴏᴜʀ Wᴀʟʟᴇᴛ.
+
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount}
+👤 <b>Fʀᴏᴍ:</b> ${sender.fullName}
+💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${receiver.balance}
+🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${txn_Id}
+📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+───────────────────────`;
+            await sendTelegramMessage(receiver.telegramId, receiverMessage);
+        }
+
+        // ============================================
+        // 200 - Payment sent successfully
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Payment sent successfully',
+            data: {
+                transaction_id: txn_Id,
+                amount: amount,
+                sender: {
+                    name: sender.fullName,
+                    number: sender.mobile
+                },
+                receiver: {
+                    name: receiver.fullName,
+                    number: receiver.mobile
+                },
+                comment: note || 'Paid',
+                timestamp: new Date().toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\//g, '-')
+            },
+            newBalance: sender.balance
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Payment Error:', error);
+        
+        // 443 - Transaction ID conflict
+        if (error.code === 11000) {
+            return res.status(443).json({
+                status: 'failed',
+                message: 'Transaction ID conflict. Please retry',
+                data: []
+            });
+        }
+        
+        // 500 - Failed to process payment
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to process payment',
+            data: []
+        });
+    } finally {
+        session.endSession();
+    }
+});
+
+// ============================================
+// GET USER BY API KEY (For Payment Lookup)
+// ============================================
+router.post('/lookup', auth, async (req, res) => {
+    try {
+        const { apiKey } = req.body;
+        const user = req.user;
+
+        // 444 - API Key required
+        if (!apiKey) {
+            return res.status(444).json({
+                status: 'failed',
+                message: 'API Key required',
+                data: []
+            });
+        }
+
+        // 445 - Cannot lookup yourself
+        if (user.apiKey === apiKey) {
+            return res.status(445).json({
+                status: 'failed',
+                message: 'You cannot lookup yourself',
+                data: []
+            });
+        }
+
+        // 446 - User not found
+        const receiver = await User.findOne({ apiKey }).select('fullName mobile walletId');
+        
+        if (!receiver) {
+            return res.status(446).json({
+                status: 'failed',
+                message: 'User not found',
+                data: []
+            });
+        }
+
+        // ============================================
+        // 200 - User found
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'User found',
+            data: {
+                name: receiver.fullName,
+                number: receiver.mobile,
+                walletId: receiver.walletId
+            }
+        });
+
+    } catch (error) {
+        console.error('Lookup Error:', error);
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to lookup user',
+            data: []
+        });
+    }
+});
+
+// ============================================
+// GET PAYMENT HISTORY
+// ============================================
+router.get('/history', auth, async (req, res) => {
+    try {
+        const user = req.user;
+        const { page = 1, limit = 20 } = req.query;
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const transactions = await Transaction.find({
+            $or: [
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        })
+        .sort({ tx_time: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate('sender_id', 'fullName mobile')
+        .populate('receiver_id', 'fullName mobile');
+
+        const total = await Transaction.countDocuments({
+            $or: [
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        });
+
+        const transformedTransactions = transactions.map(txn => {
+            const txnObj = txn.toObject();
+            if (txn.sender_id && txn.sender_id._id.toString() === user._id.toString()) {
+                txnObj.userRole = 'sender';
+                txnObj.transactionType = 'payment_sent';
+            } else if (txn.receiver_id && txn.receiver_id._id.toString() === user._id.toString()) {
+                txnObj.userRole = 'receiver';
+                txnObj.transactionType = 'payment_received';
+            }
+            if (txn.metadata && txn.metadata.transactionType) {
+                txnObj.transactionType = txn.metadata.transactionType;
+            }
+            delete txnObj.metadata?.senderApiKey;
+            delete txnObj.metadata?.receiverApiKey;
+            return txnObj;
+        });
+
+        // ============================================
+        // 200 - Transactions fetched successfully
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Transactions fetched successfully',
+            data: {
+                transactions: transformedTransactions,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / parseInt(limit)),
+                    totalTransactions: total
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Get Payment History Error:', error);
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to fetch payment history',
+            data: []
+        });
+    }
+});
+
+// ============================================
+// GET PAYMENT DETAILS BY TRANSACTION ID
+// ============================================
+router.get('/:txnId', auth, async (req, res) => {
+    try {
+        const { txnId } = req.params;
+        const user = req.user;
+
+        // 447 - Transaction not found
+        const transaction = await Transaction.findOne({
+            tx_id: txnId,
+            $or: [
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ]
+        })
+        .populate('sender_id', 'fullName mobile walletId')
+        .populate('receiver_id', 'fullName mobile walletId');
+
+        if (!transaction) {
+            return res.status(447).json({
+                status: 'failed',
+                message: 'Transaction not found',
+                data: []
+            });
+        }
+
+        const txnObj = transaction.toObject();
+        if (txnObj.sender_id && txnObj.sender_id._id.toString() === user._id.toString()) {
+            txnObj.userRole = 'sender';
+            txnObj.transactionType = 'payment_sent';
+        } else if (txnObj.receiver_id && txnObj.receiver_id._id.toString() === user._id.toString()) {
+            txnObj.userRole = 'receiver';
+            txnObj.transactionType = 'payment_received';
+        }
+        if (txnObj.metadata && txnObj.metadata.transactionType) {
+            txnObj.transactionType = txnObj.metadata.transactionType;
+        }
+        delete txnObj.metadata?.senderApiKey;
+        delete txnObj.metadata?.receiverApiKey;
+
+        // ============================================
+        // 200 - Transaction found
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Transaction found',
+            data: {
+                transaction: txnObj
+            }
+        });
+
+    } catch (error) {
+        console.error('Get Transaction Error:', error);
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to fetch transaction',
+            data: []
+        });
+    }
+});
+
+// ============================================
+// REQUEST PAYMENT (User Requests Payment)
+// ============================================
+router.post('/request', auth, async (req, res) => {
+    try {
+        const { receiverApiKey, amount, note = '' } = req.body;
+        const requester = req.user;
+
+        console.log('📨 Payment Request From:', requester._id);
+
+        // 448 - Receiver API Key and amount are required
+        if (!receiverApiKey || !amount) {
+            return res.status(448).json({
+                status: 'failed',
+                message: 'Receiver API Key and amount are required',
+                data: []
+            });
+        }
+
+        // 449 - Minimum request amount is ₹1
+        if (amount < 1) {
+            return res.status(449).json({
+                status: 'failed',
+                message: 'Minimum request amount is ₹1',
+                data: []
+            });
+        }
+
+        // 450 - Invalid receiver API Key format
+        if (!receiverApiKey || receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+            return res.status(450).json({
+                status: 'failed',
+                message: 'Invalid receiver API Key format',
+                data: []
+            });
+        }
+
+        // 451 - Receiver not found
+        const receiverResult = await validateReceiverApiKey(receiverApiKey);
+        if (receiverResult.status === 'failed') {
+            return res.status(451).json({
+                status: 'failed',
+                message: receiverResult.message,
+                data: []
+            });
+        }
+        const receiver = receiverResult.user;
+
+        // 452 - Cannot request payment from yourself
+        if (requester.apiKey === receiverApiKey) {
+            return res.status(452).json({
+                status: 'failed',
+                message: 'You cannot request payment from yourself',
+                data: []
+            });
+        }
+
+        // 453 - Receiver account is blocked
+        if (receiver.isBlocked) {
+            return res.status(453).json({
+                status: 'failed',
+                message: 'Receiver account is blocked',
+                data: []
+            });
+        }
+
+        // ===== BOT MESSAGES - STYLISH (For Telegram Users) =====
+        if (receiver.telegramId) {
+            const requestMessage = 
+`<b>───────────────</b>
+<b>📨 Aᴩɪ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${receiver.fullName},</b> Yᴏᴜ Hᴀᴠᴇ Rᴇᴄᴇɪᴠᴇᴅ A Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ.
+
+👤 <b>Rᴇǫᴜᴇꜱᴛᴇʀ:</b> ${requester.fullName}
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount}
+📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+✅ Pʟᴇᴀꜱᴇ Aᴘᴘʀᴏᴠᴇ Tʜɪꜱ Rᴇǫᴜᴇꜱᴛ Tᴏ Cᴏᴍᴘʟᴇᴛᴇ Tʜᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ.
+⚠️ Iꜰ Tʜɪꜱ Wᴀꜱɴ'ᴛ Yᴏᴜ, Pʟᴇᴀꜱᴇ Iɢɴᴏʀᴇ Tʜɪꜱ Mᴇꜱꜱᴀɢᴇ.
+───────────────────────`;
+            await sendTelegramMessage(receiver.telegramId, requestMessage);
+        }
+
+        if (requester.telegramId) {
+            const confirmMessage = 
+`<b>───────────────</b>
+<b>📤 Aᴩɪ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ Sᴇɴᴛ</b>
+<b>───────────────</b>
+
+<b>👤 Dᴇᴀʀ ${requester.fullName},</b> Yᴏᴜʀ Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ Hᴀꜱ Bᴇᴇɴ Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+
+👤 <b>Tᴏ:</b> ${receiver.fullName}
+💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount}
+📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
+📅 <code>${new Date().toLocaleString()}</code>
+
+───────────────────────
+✅ Yᴏᴜʀ Rᴇǫᴜᴇꜱᴛ Hᴀꜱ Bᴇᴇɴ Sᴇɴᴛ Tᴏ Tʜᴇ Rᴇᴄᴇɪᴠᴇʀ.
+⚠️ Yᴏᴜ Wɪʟʟ Bᴇ Nᴏᴛɪꜰɪᴇᴅ Wʜᴇɴ Tʜᴇ Rᴇǫᴜᴇꜱᴛ Iꜱ Aᴘᴘʀᴏᴠᴇᴅ.
+───────────────────────`;
+            await sendTelegramMessage(requester.telegramId, confirmMessage);
+        }
+
+        // ============================================
+        // 200 - Payment request sent successfully
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'Payment request sent successfully',
+            data: {
+                requester: requester.fullName,
+                receiver: receiver.fullName,
+                receiverMobile: receiver.mobile,
+                amount: amount,
+                note: note || '',
+                timestamp: new Date().toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\//g, '-')
+            }
+        });
+
+    } catch (error) {
+        console.error('Payment Request Error:', error);
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to send payment request',
+            data: []
+        });
+    }
+});
+
+// ============================================
+// GET MY API KEY
+// ============================================
+router.get('/my-apikey', auth, async (req, res) => {
+    try {
+        const user = req.user;
+        
+        // 454 - API Key not found
+        if (!user.apiKey) {
+            return res.status(454).json({
+                status: 'failed',
+                message: 'API Key not found. Please generate one',
+                data: []
+            });
+        }
+        
+        // ============================================
+        // 200 - API Key found
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'API Key found',
+            data: {
+                apiKey: user.apiKey,
+                walletId: user.walletId,
+                fullName: user.fullName,
+                mobile: user.mobile
+            }
+        });
+    } catch (error) {
+        console.error('Get My API Key Error:', error);
+        res.status(500).json({
+            status: 'failed',
+            message: 'Failed to fetch API Key',
+            data: []
+        });
+    }
+});
+
+// ============================================
+// VALIDATE API KEY (Internal)
+// ============================================
+router.get('/validate-key/:apiKey', async (req, res) => {
+    try {
+        const { apiKey } = req.params;
+        
+        // 455 - Invalid API Key format
+        if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+            return res.status(455).json({ 
+                status: 'failed', 
+                message: 'Invalid API Key format',
+                data: []
+            });
+        }
+        
+        const user = await User.findOne({ apiKey }).select('fullName walletId mobile balance apiKeyActive');
+        
+        // 456 - Invalid API Key
+        if (!user) {
+            return res.status(456).json({ 
+                status: 'failed', 
+                message: 'Invalid API Key',
+                data: []
+            });
+        }
+        
+        // 457 - API Key is disabled
+        if (user.apiKeyActive === false) {
+            return res.status(457).json({ 
+                status: 'failed', 
+                message: 'API Key is disabled',
+                data: []
+            });
+        }
+        
+        // ============================================
+        // 200 - API Key validated
+        // ============================================
+        res.status(200).json({
+            status: 'success',
+            message: 'API Key validated',
+            data: {
+                name: user.fullName,
+                walletId: user.walletId,
+                number: user.mobile,
+                balance: user.balance
+            }
+        });
+    } catch (error) {
+        console.error('Validate API Key Error:', error);
+        res.status(500).json({ 
+            status: 'failed', 
+            message: 'Server error',
+            data: []
+        });
+    }
+});
+
+module.exports = router;
