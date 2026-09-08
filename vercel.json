@@ -1,0 +1,59 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/payment/?(.*)",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
+      "src": "/(normal|dice|toss|scratch)(/?)",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt)$",
+      "dest": "/public/$1.$2",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(a|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|terms|qr|invoice|invoice-pay|txn)(/?)",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    }
+  ]
+}
