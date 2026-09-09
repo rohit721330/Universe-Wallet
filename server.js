@@ -2,26 +2,29 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 app.set('trust proxy', 1);
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGODB_URI;
 
-// ✅ ADMIN_WALLET_ID ডিফাইন করা হয়েছে
-const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'PW_ADMIN_DEFAULT';
+// ✅ ADMIN_WALLET_ID
+const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'UW_ADMIN_DEFAULT';
 
 // ✅ Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
 global.regOtpStore = new Map();
 global.resetOtpStore = new Map();
-global.tgIdStore = new Map();  // ← Telegram ID store
+global.tgIdStore = new Map();
+global.emailOtpStore = new Map();
 
 // Connect to MongoDB
 const connectWithRetry = async (retries = 5) => {
@@ -37,6 +40,16 @@ const connectWithRetry = async (retries = 5) => {
                 retryReads: true
             });
             console.log('✅ MongoDB Connected Successfully');
+            
+            // Email index
+            try {
+                const User = require('./models/User');
+                await User.collection.createIndex({ email: 1 }, { unique: true, sparse: true });
+                console.log('✅ Email index verified');
+            } catch (indexError) {
+                console.log('ℹ️ Email index check skipped');
+            }
+            
             return;
         } catch (error) {
             console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
@@ -70,45 +83,41 @@ app.use('/api/tg', require('./routes/tg'));
 app.use('/api/games', require('./routes/games'));
 app.use('/api/api-key', require('./routes/api-key'));
 app.use('/api/withdraw', require('./routes/withdraw'));
-
-// ==================== LIFAFA & GIFT MANAGEMENT ROUTES ====================
 app.use('/api/lifafa-mgmt', require('./routes/lifafa-mgmt'));
 app.use('/api/gift-mgmt', require('./routes/gift-mgmt'));
 
-console.log('✅ All Routes Loaded:');
-console.log('   /api/auth');
-console.log('   /api/wallet');
-console.log('   /api/admin');
-console.log('   /api/withdraw-settings');
-console.log('   /api/deposit');
-console.log('   /api/invoice-payment ✅');
-console.log('   /api/admin-invoice ✅');
-console.log('   /api/transfer');
-console.log('   /api/payment');
-console.log('   /api/lifafa');
-console.log('   /api/gift');
-console.log('   /api/pin');
-console.log('   /api/profile');
-console.log('   /api/tg');
-console.log('   /api/games');
-console.log('   /api/api-key');
-console.log('   /api/withdraw');
-console.log('   /api/lifafa-mgmt ✅');
-console.log('   /api/gift-mgmt ✅');
+console.log('✅ All Routes Loaded');
 
 // ==================== STATIC FILES ====================
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== HTML ROUTES ====================
-app.get('/a', (req, res) => res.sendFile(path.join(__dirname, 'public', 'own-username.html')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/index', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/pin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pin.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
+app.get('/transfer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transfer.html')));
+app.get('/deposit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'deposit.html')));
+app.get('/withdraw', (req, res) => res.sendFile(path.join(__dirname, 'public', 'withdraw.html')));
+app.get('/transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transactions.html')));
+app.get('/recent-transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'recent-transactions.html')));
+app.get('/lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lifafa.html')));
+app.get('/my-lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'my-lifafa.html')));
+app.get('/invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice.html')));
+app.get('/invoice-pay', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice-pay.html')));
+app.get('/gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'gift.html')));
+app.get('/forgot-password', (req, res) => res.sendFile(path.join(__dirname, 'public', 'forgot-password.html')));
+app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game.html')));
+app.get('/game-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game-settings.html')));
+app.get('/more', (req, res) => res.sendFile(path.join(__dirname, 'public', 'more.html')));
+app.get('/tg', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tg.html')));
 app.get('/api', (req, res) => res.sendFile(path.join(__dirname, 'public', 'api.html')));
 app.get('/txn', (req, res) => res.sendFile(path.join(__dirname, 'public', 'txn.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-app.get('/more', (req, res) => res.sendFile(path.join(__dirname, 'public', 'more.html')));
-app.get('/rohit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
+app.get('/qr', (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
+
+// Admin Pages
 app.get('/admin-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-settings.html')));
 app.get('/admin-users', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-users.html')));
 app.get('/admin-gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-gift.html')));
@@ -118,35 +127,17 @@ app.get('/admin-withdraw', (req, res) => res.sendFile(path.join(__dirname, 'publ
 app.get('/admin-deposit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-deposit.html')));
 app.get('/admin-transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-transactions.html')));
 app.get('/admin-invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-invoice.html')));
-app.get('/recent-transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'recent-transactions.html')));
-app.get('/transfer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transfer.html')));
-app.get('/deposit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'deposit.html')));
-app.get('/withdraw', (req, res) => res.sendFile(path.join(__dirname, 'public', 'withdraw.html')));
-app.get('/transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transactions.html')));
-app.get('/lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lifafa.html')));
-app.get('/my-lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'my-lifafa.html')));
-app.get('/invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice.html')));
-app.get('/invoice-pay', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice-pay.html')));
 
-// লিফাফা ক্লেইম পেজ
+// Games Pages
 app.get('/normal', (req, res) => res.sendFile(path.join(__dirname, 'public', 'normal.html')));
 app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice.html')));
 app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
 app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
 
-app.get('/gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'gift.html')));
-app.get('/forgot-password', (req, res) => res.sendFile(path.join(__dirname, 'public', 'forgot-password.html')));
-app.get('/tg', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tg.html')));
-app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game.html')));
-app.get('/game-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game-settings.html')));
-app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
-app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
-app.get('/qr', (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
-
 // ==================== FALLBACK ROUTE ====================
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'API Endpoint Not Found' });
+        return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
     }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -183,7 +174,28 @@ setInterval(() => {
     } catch (error) {
         console.error('❌ TG ID cleanup error:', error.message);
     }
-}, 2 * 60 * 1000); // Every 2 minutes
+}, 2 * 60 * 1000);
+
+// ==================== CLEANUP EXPIRED EMAIL OTP ====================
+setInterval(() => {
+    try {
+        if (global.emailOtpStore) {
+            const now = Date.now();
+            let deletedCount = 0;
+            for (const [key, value] of global.emailOtpStore.entries()) {
+                if (value.expires && value.expires < now) {
+                    global.emailOtpStore.delete(key);
+                    deletedCount++;
+                }
+            }
+            if (deletedCount > 0) {
+                console.log(`🧹 Cleaned up ${deletedCount} expired email OTP sessions`);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Email OTP cleanup error:', error.message);
+    }
+}, 5 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
