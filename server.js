@@ -17,10 +17,11 @@ const MONGO_URI = process.env.MONGODB_URI;
 // ✅ ADMIN_WALLET_ID ডিফাইন করা হয়েছে
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'PW_ADMIN_DEFAULT';
 
-// Global OTP Stores
+// ✅ Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
 global.regOtpStore = new Map();
 global.resetOtpStore = new Map();
+global.tgIdStore = new Map();  // ← Telegram ID store
 
 // Connect to MongoDB
 const connectWithRetry = async (retries = 5) => {
@@ -35,18 +36,18 @@ const connectWithRetry = async (retries = 5) => {
                 retryWrites: true,
                 retryReads: true
             });
-            console.log('✅ MᴏɴɢᴏDB Cᴏɴɴᴇᴄᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+            console.log('✅ MongoDB Connected Successfully');
             return;
         } catch (error) {
-            console.error(`❌ Cᴏɴɴᴇᴄᴛɪᴏɴ ᴀᴛᴛᴇᴍᴘᴛ ${i + 1} ꜰᴀɪʟᴇᴅ:`, error.message);
+            console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
             if (i < retries - 1) {
                 const waitTime = (i + 1) * 2;
-                console.log(`⏳ Rᴇᴛʀʏɪɴɢ ɪɴ ${waitTime} ꜱᴇᴄᴏɴᴅꜱ...`);
+                console.log(`⏳ Retrying in ${waitTime} seconds...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
             }
         }
     }
-    console.error('❌ Aʟʟ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ᴀᴛᴛᴇᴍᴘᴛꜱ ꜰᴀɪʟᴇᴅ');
+    console.error('❌ All connection attempts failed');
 };
 
 connectWithRetry();
@@ -74,7 +75,7 @@ app.use('/api/withdraw', require('./routes/withdraw'));
 app.use('/api/lifafa-mgmt', require('./routes/lifafa-mgmt'));
 app.use('/api/gift-mgmt', require('./routes/gift-mgmt'));
 
-console.log('✅ Aʟʟ Rᴏᴜᴛᴇꜱ Lᴏᴀᴅᴇᴅ:');
+console.log('✅ All Routes Loaded:');
 console.log('   /api/auth');
 console.log('   /api/wallet');
 console.log('   /api/admin');
@@ -127,7 +128,7 @@ app.get('/my-lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 
 app.get('/invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice.html')));
 app.get('/invoice-pay', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice-pay.html')));
 
-// ✅ লিফাফা ক্লেইম পেজ
+// লিফাফা ক্লেইম পেজ
 app.get('/normal', (req, res) => res.sendFile(path.join(__dirname, 'public', 'normal.html')));
 app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice.html')));
 app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
@@ -156,30 +157,40 @@ setInterval(async () => {
     try {
         const result = await Invoice.cleanupExpired();
         if (result.modifiedCount > 0) {
-            console.log(`🧹 Cʟᴇᴀɴᴇᴅ ᴜᴘ ${result.modifiedCount} ᴇxᴘɪʀᴇᴅ ɪɴᴠᴏɪᴄᴇꜱ`);
+            console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
         }
     } catch (error) {
-        console.error('❌ Cʟᴇᴀɴᴜᴘ ᴄʀᴏɴ ᴇʀʀᴏʀ:', error.message);
+        console.error('❌ Cleanup cron error:', error.message);
     }
-}, 5 * 60 * 1000); // Every 5 minutes
+}, 5 * 60 * 1000);
+
+// ==================== CLEANUP EXPIRED TG ID SESSIONS ====================
+setInterval(() => {
+    try {
+        if (global.tgIdStore) {
+            const now = Date.now();
+            let deletedCount = 0;
+            for (const [key, value] of global.tgIdStore.entries()) {
+                if (value.expires && value.expires < now) {
+                    global.tgIdStore.delete(key);
+                    deletedCount++;
+                }
+            }
+            if (deletedCount > 0) {
+                console.log(`🧹 Cleaned up ${deletedCount} expired TG ID sessions`);
+            }
+        }
+    } catch (error) {
+        console.error('❌ TG ID cleanup error:', error.message);
+    }
+}, 2 * 60 * 1000); // Every 2 minutes
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Sᴇʀᴠᴇʀ Rᴜɴɴɪɴɢ Oɴ Pᴏʀᴛ ${PORT}`);
+    console.log(`🚀 Server Running On Port ${PORT}`);
     console.log(`🌐 http://localhost:${PORT}`);
-    console.log(`📌 Aᴅᴍɪɴ Mᴀɴᴀɢᴇᴍᴇɴᴛ Rᴏᴜᴛᴇꜱ:`);
-    console.log(`   /api/lifafa-mgmt → Lɪꜰᴀꜰᴀ Mᴀɴᴀɢᴇᴍᴇɴᴛ API`);
-    console.log(`   /api/gift-mgmt   → Gɪꜰᴛ Mᴀɴᴀɢᴇᴍᴇɴᴛ API`);
-    console.log(`   /api/invoice-payment → Uꜱᴇʀ Iɴᴠᴏɪᴄᴇ Pᴀʏᴍᴇɴᴛ API ✅`);
-    console.log(`   /api/invoice-payment/public → Pᴜʙʟɪᴄ Iɴᴠᴏɪᴄᴇ API ✅`);
-    console.log(`   /api/admin-invoice  → Aᴅᴍɪɴ Iɴᴠᴏɪᴄᴇ Mᴀɴᴀɢᴇᴍᴇɴᴛ API ✅`);
-    console.log(`   /admin-lifafa    → Aᴅᴍɪɴ Lɪꜰᴀꜰᴀ Pᴀɢᴇ`);
-    console.log(`   /admin-gift      → Aᴅᴍɪɴ Gɪꜰᴛ Pᴀɢᴇ`);
-    console.log(`   /admin-invoice   → Aᴅᴍɪɴ Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ ✅`);
-    console.log(`   /invoice         → Uꜱᴇʀ Iɴᴠᴏɪᴄᴇ Pᴀɢᴇ ✅`);
-    console.log(`   /invoice-pay     → Uꜱᴇʀ Iɴᴠᴏɪᴄᴇ Pᴀʏ Pᴀɢᴇ ✅`);
-    console.log(`   /txn             → Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Vɪᴇᴡᴇʀ Pᴀɢᴇ ✅`);
-    console.log(`📌 Aᴅᴍɪɴ Wᴀʟʟᴇᴛ ID: ${ADMIN_WALLET_ID}`);
+    console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
+    console.log(`📌 TG ID Store: ${global.tgIdStore ? '✅ Initialized' : '❌ Not initialized'}`);
 });
 
 module.exports = app;
