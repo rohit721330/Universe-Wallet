@@ -120,11 +120,11 @@ userSchema.statics.getActiveUserCount = function() {
     return this.countDocuments({ isBlocked: false });
 };
 
-// Indexes for better performance
-userSchema.index({ mobile: 1 });
-userSchema.index({ email: 1 });
-userSchema.index({ telegramId: 1 });
-userSchema.index({ walletId: 1 });
-userSchema.index({ apiKey: 1 });
+// ❌ REMOVED: Duplicate indexes (already created by unique: true)
+// userSchema.index({ mobile: 1 });
+// userSchema.index({ email: 1 });
+// userSchema.index({ telegramId: 1 });
+// userSchema.index({ walletId: 1 });
+// userSchema.index({ apiKey: 1 });
 
 module.exports = mongoose.model('User', userSchema);
