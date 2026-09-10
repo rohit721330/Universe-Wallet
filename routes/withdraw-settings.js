@@ -30,7 +30,7 @@ function getCurrentDateTime() {
 
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) {
-        console.log('⚠️ Bᴏᴛ Tᴏᴋᴇɴ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ');
+        console.log('Bot Token Not Configured');
         return { success: false, error: 'BOT_TOKEN not configured' };
     }
     return new Promise((resolve) => {
@@ -43,24 +43,24 @@ async function sendTelegramMessage(chatId, message) {
             res.on('end', () => {
                 try {
                     const result = JSON.parse(responseData);
-                    result.ok ? console.log('✅ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ') : console.error('❌ Tᴇʟᴇɢʀᴀᴍ Eʀʀᴏʀ:', result.description);
+                    result.ok ? console.log('Telegram Message Sent') : console.error('Telegram Error:', result.description);
                     resolve({ success: result.ok, error: result.description });
                 } catch (e) {
-                    console.error('❌ Pᴀʀꜱᴇ Eʀʀᴏʀ:', e.message);
+                    console.error('Parse Error:', e.message);
                     resolve({ success: false, error: e.message });
                 }
             });
         });
-        request.on('error', (error) => { console.error('❌ Rᴇǫᴜᴇꜱᴛ Eʀʀᴏʀ:', error.message); resolve({ success: false, error: error.message }); });
+        request.on('error', (error) => { console.error('Request Error:', error.message); resolve({ success: false, error: error.message }); });
         request.write(data);
         request.end();
     });
 }
 
 async function notifyAdmin(message) {
-    if (!ADMIN_TG) { console.log('⚠️ Aᴅᴍɪɴ Tᴇʟᴇɢʀᴀᴍ Iᴅ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ'); return; }
-    try { await sendTelegramMessage(ADMIN_TG, message); console.log('✅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ'); } 
-    catch (error) { console.error('❌ Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ:', error.message); }
+    if (!ADMIN_TG) { console.log('Admin Telegram Id Not Configured'); return; }
+    try { await sendTelegramMessage(ADMIN_TG, message); console.log('Admin Notification Sent'); } 
+    catch (error) { console.error('Failed To Send Admin Notification:', error.message); }
 }
 
 // ============================================
@@ -70,18 +70,18 @@ async function getSettings() {
     try {
         if (settingsCache && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_TTL)) return settingsCache;
         let settings = await WithdrawSettings.findOne();
-        if (!settings) { settings = new WithdrawSettings(); await settings.save(); console.log('✅ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ Cʀᴇᴀᴛᴇᴅ Iɴ Dᴀᴛᴀʙᴀꜱᴇ'); }
+        if (!settings) { settings = new WithdrawSettings(); await settings.save(); console.log('Default Settings Created In Database'); }
         settingsCache = settings;
         cacheTimestamp = Date.now();
         return settings;
     } catch (error) {
-        console.error('❌ Gᴇᴛ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Settings Error:', error.message);
         if (settingsCache) return settingsCache;
         return { enabled: true, minAmount: 1, maxAmount: 5000, fee: 0, feeType: 'percentage', approvalRequired: true, maxDailyWithdrawals: 10, maxMonthlyWithdrawals: 50, requireBankDetails: true, requireUpiDetails: true, autoApproveBelow: 0, updatedBy: 'System', updatedAt: new Date() };
     }
 }
 
-function clearSettingsCache() { settingsCache = null; cacheTimestamp = null; console.log('🔄 Sᴇᴛᴛɪɴɢꜱ Cᴀᴄʜᴇ Cʟᴇᴀʀᴇᴅ'); }
+function clearSettingsCache() { settingsCache = null; cacheTimestamp = null; console.log('Settings Cache Cleared'); }
 
 // ============================================
 // VERIFY TOKEN MIDDLEWARE
@@ -89,16 +89,16 @@ function clearSettingsCache() { settingsCache = null; cacheTimestamp = null; con
 async function verifyToken(req, res, next) {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ success: false, message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' });
+        if (!token) return res.status(401).json({ success: false, message: 'No Token Provided' });
         if (token.startsWith('Admin_')) { req.user = { isAdmin: true, fullName: 'Admin', tokenType: 'admin_token' }; return next(); }
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
             if (decoded.isAdmin) { req.user = { isAdmin: true, fullName: decoded.fullName || 'Admin', tokenType: 'jwt', ...decoded }; return next(); } 
-            else return res.status(403).json({ success: false, message: 'Aᴅᴍɪɴ Aᴄᴄᴇꜱꜱ Rᴇǫᴜɪʀᴇᴅ' });
-        } catch (jwtError) { return res.status(401).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' }); }
+            else return res.status(403).json({ success: false, message: 'Admin Access Required' });
+        } catch (jwtError) { return res.status(401).json({ success: false, message: 'Invalid Token. Please Login Again.' }); }
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
-        return res.status(500).json({ success: false, message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' });
+        console.error('Token Verification Error:', error.message);
+        return res.status(500).json({ success: false, message: 'Authentication Error' });
     }
 }
 
@@ -124,8 +124,8 @@ router.get('/', async (req, res) => {
             updatedBy: settings.updatedBy
         }});
     } catch (error) {
-        console.error('Gᴇᴛ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴇᴛᴛɪɴɢꜱ' });
+        console.error('Get Settings Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Settings' });
     }
 });
 
@@ -143,79 +143,79 @@ router.put('/', verifyToken, async (req, res) => {
         if (!settings) settings = new WithdrawSettings();
 
         if (enabled !== undefined) {
-            if (typeof enabled !== 'boolean') return res.status(400).json({ success: false, message: 'Eɴᴀʙʟᴇᴅ Mᴜꜱᴛ Bᴇ A Bᴏᴏʟᴇᴀɴ Vᴀʟᴜᴇ' });
+            if (typeof enabled !== 'boolean') return res.status(400).json({ success: false, message: 'Enabled Must Be A Boolean Value' });
             settings.enabled = enabled;
-            updatedFields.push(`Eɴᴀʙʟᴇᴅ: ${enabled ? 'Yᴇꜱ' : 'Nᴏ'}`);
+            updatedFields.push(`Enabled: ${enabled ? 'Yes' : 'No'}`);
         }
 
         if (minAmount !== undefined) {
             const min = parseFloat(minAmount);
-            if (isNaN(min) || min < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Mɪɴɪᴍᴜᴍ Aᴍᴏᴜɴᴛ' });
+            if (isNaN(min) || min < 0) return res.status(400).json({ success: false, message: 'Invalid Minimum Amount' });
             settings.minAmount = min;
-            updatedFields.push(`Mɪɴ Aᴍᴏᴜɴᴛ: ₹${min}`);
+            updatedFields.push(`Min Amount: ₹${min}`);
         }
 
         if (maxAmount !== undefined) {
             const max = parseFloat(maxAmount);
-            if (isNaN(max) || max < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Mᴀxɪᴍᴜᴍ Aᴍᴏᴜɴᴛ' });
+            if (isNaN(max) || max < 0) return res.status(400).json({ success: false, message: 'Invalid Maximum Amount' });
             settings.maxAmount = max;
-            updatedFields.push(`Mᴀx Aᴍᴏᴜɴᴛ: ₹${max}`);
+            updatedFields.push(`Max Amount: ₹${max}`);
         }
 
         if (settings.minAmount > settings.maxAmount) {
-            return res.status(400).json({ success: false, message: 'Mɪɴɪᴍᴜᴍ Cᴀɴɴᴏᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ Mᴀxɪᴍᴜᴍ' });
+            return res.status(400).json({ success: false, message: 'Minimum Cannot Be Greater Than Maximum' });
         }
 
         if (fee !== undefined) {
             const feeValue = parseFloat(fee);
-            if (isNaN(feeValue) || feeValue < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Fᴇᴇ Vᴀʟᴜᴇ' });
+            if (isNaN(feeValue) || feeValue < 0) return res.status(400).json({ success: false, message: 'Invalid Fee Value' });
             settings.fee = feeValue;
-            updatedFields.push(`Fᴇᴇ: ${feeValue}%`);
+            updatedFields.push(`Fee: ${feeValue}%`);
         }
 
         if (feeType !== undefined) {
-            if (!['percentage', 'fixed'].includes(feeType)) return res.status(400).json({ success: false, message: 'Fᴇᴇ Tʏᴘᴇ Mᴜꜱᴛ Bᴇ "ᴘᴇʀᴄᴇɴᴛᴀɢᴇ" Oʀ "ꜰɪxᴇᴅ"' });
+            if (!['percentage', 'fixed'].includes(feeType)) return res.status(400).json({ success: false, message: 'Fee Type Must Be "percentage" Or "fixed"' });
             settings.feeType = feeType;
-            updatedFields.push(`Fᴇᴇ Tʏᴘᴇ: ${feeType.toUpperCase()}`);
+            updatedFields.push(`Fee Type: ${feeType.toUpperCase()}`);
         }
 
         if (approvalRequired !== undefined) {
-            if (typeof approvalRequired !== 'boolean') return res.status(400).json({ success: false, message: 'Aᴘᴘʀᴏᴠᴀʟ Rᴇǫᴜɪʀᴇᴅ Mᴜꜱᴛ Bᴇ A Bᴏᴏʟᴇᴀɴ Vᴀʟᴜᴇ' });
+            if (typeof approvalRequired !== 'boolean') return res.status(400).json({ success: false, message: 'Approval Required Must Be A Boolean Value' });
             settings.approvalRequired = approvalRequired;
-            updatedFields.push(`Aᴘᴘʀᴏᴠᴀʟ Rᴇǫᴜɪʀᴇᴅ: ${approvalRequired ? 'Yᴇꜱ' : 'Nᴏ'}`);
+            updatedFields.push(`Approval Required: ${approvalRequired ? 'Yes' : 'No'}`);
         }
 
         if (maxDailyWithdrawals !== undefined) {
             const maxDaily = parseInt(maxDailyWithdrawals);
-            if (isNaN(maxDaily) || maxDaily < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Mᴀx Dᴀɪʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟꜱ' });
+            if (isNaN(maxDaily) || maxDaily < 0) return res.status(400).json({ success: false, message: 'Invalid Max Daily Withdrawals' });
             settings.maxDailyWithdrawals = maxDaily;
-            updatedFields.push(`Mᴀx Dᴀɪʟʏ: ${maxDaily}`);
+            updatedFields.push(`Max Daily: ${maxDaily}`);
         }
 
         if (maxMonthlyWithdrawals !== undefined) {
             const maxMonthly = parseInt(maxMonthlyWithdrawals);
-            if (isNaN(maxMonthly) || maxMonthly < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Mᴀx Mᴏɴᴛʜʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟꜱ' });
+            if (isNaN(maxMonthly) || maxMonthly < 0) return res.status(400).json({ success: false, message: 'Invalid Max Monthly Withdrawals' });
             settings.maxMonthlyWithdrawals = maxMonthly;
-            updatedFields.push(`Mᴀx Mᴏɴᴛʜʟʏ: ${maxMonthly}`);
+            updatedFields.push(`Max Monthly: ${maxMonthly}`);
         }
 
         if (requireBankDetails !== undefined) {
-            if (typeof requireBankDetails !== 'boolean') return res.status(400).json({ success: false, message: 'Rᴇǫᴜɪʀᴇ Bᴀɴᴋ Dᴇᴛᴀɪʟꜱ Mᴜꜱᴛ Bᴇ A Bᴏᴏʟᴇᴀɴ Vᴀʟᴜᴇ' });
+            if (typeof requireBankDetails !== 'boolean') return res.status(400).json({ success: false, message: 'Require Bank Details Must Be A Boolean Value' });
             settings.requireBankDetails = requireBankDetails;
-            updatedFields.push(`Bᴀɴᴋ Dᴇᴛᴀɪʟꜱ: ${requireBankDetails ? 'Rᴇǫᴜɪʀᴇᴅ' : 'Oᴘᴛɪᴏɴᴀʟ'}`);
+            updatedFields.push(`Bank Details: ${requireBankDetails ? 'Required' : 'Optional'}`);
         }
 
         if (requireUpiDetails !== undefined) {
-            if (typeof requireUpiDetails !== 'boolean') return res.status(400).json({ success: false, message: 'Rᴇǫᴜɪʀᴇ Uᴘɪ Dᴇᴛᴀɪʟꜱ Mᴜꜱᴛ Bᴇ A Bᴏᴏʟᴇᴀɴ Vᴀʟᴜᴇ' });
+            if (typeof requireUpiDetails !== 'boolean') return res.status(400).json({ success: false, message: 'Require UPI Details Must Be A Boolean Value' });
             settings.requireUpiDetails = requireUpiDetails;
-            updatedFields.push(`Uᴘɪ Dᴇᴛᴀɪʟꜱ: ${requireUpiDetails ? 'Rᴇǫᴜɪʀᴇᴅ' : 'Oᴘᴛɪᴏɴᴀʟ'}`);
+            updatedFields.push(`UPI Details: ${requireUpiDetails ? 'Required' : 'Optional'}`);
         }
 
         if (autoApproveBelow !== undefined) {
             const auto = parseFloat(autoApproveBelow);
-            if (isNaN(auto) || auto < 0) return res.status(400).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Aᴜᴛᴏ Aᴘᴘʀᴏᴠᴇ Aᴍᴏᴜɴᴛ' });
+            if (isNaN(auto) || auto < 0) return res.status(400).json({ success: false, message: 'Invalid Auto Approve Amount' });
             settings.autoApproveBelow = auto;
-            updatedFields.push(`Aᴜᴛᴏ Aᴘᴘʀᴏᴠᴇ Bᴇʟᴏᴡ: ₹${auto}`);
+            updatedFields.push(`Auto Approve Below: ₹${auto}`);
         }
 
         settings.updatedAt = new Date();
@@ -225,22 +225,18 @@ router.put('/', verifyToken, async (req, res) => {
 
         if (updatedFields.length > 0) {
             const settingsMessage = 
-`<b>─────────────────</b>
-<b>⚙️ Wɪᴛʜᴅʀᴀᴡ Sᴇᴛᴛɪɴɢꜱ Uᴘᴅᴀᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Withdraw Settings Updated
 
-<b>👤 Uᴘᴅᴀᴛᴇᴅ Bʏ:</b> ${user.fullName || 'Aᴅᴍɪɴ'}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
-<b>📝 Cʜᴀɴɢᴇꜱ:</b>
+Updated By: ${user.fullName || 'Admin'}
+Time: ${dateTime}
+Changes:
 • ${updatedFields.join('\n• ')}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Jᴀʀᴠɪꜱ Wᴀʟʟᴇᴛ
-───────────────────────`;
+Team Universal Wallet`;
             await notifyAdmin(settingsMessage);
         }
 
-        res.json({ success: true, message: 'Wɪᴛʜᴅʀᴀᴡ Sᴇᴛᴛɪɴɢꜱ Uᴘᴅᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ', settings: {
+        res.json({ success: true, message: 'Withdraw Settings Updated Successfully', settings: {
             enabled: settings.enabled,
             minAmount: settings.minAmount,
             maxAmount: settings.maxAmount,
@@ -256,8 +252,8 @@ router.put('/', verifyToken, async (req, res) => {
             updatedBy: settings.updatedBy
         }});
     } catch (error) {
-        console.error('❌ Uᴘᴅᴀᴛᴇ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Uᴘᴅᴀᴛᴇ Sᴇᴛᴛɪɴɢꜱ: ' + error.message });
+        console.error('Update Settings Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Update Settings: ' + error.message });
     }
 });
 
@@ -274,20 +270,16 @@ router.post('/reset', verifyToken, async (req, res) => {
         clearSettingsCache();
 
         const resetMessage = 
-`<b>─────────────────</b>
-<b>🔄 Wɪᴛʜᴅʀᴀᴡ Sᴇᴛᴛɪɴɢꜱ Rᴇꜱᴇᴛ</b>
-<b>─────────────────</b>
+`Withdraw Settings Reset
 
-<b>👤 Rᴇꜱᴇᴛ Bʏ:</b> ${user.fullName || 'Aᴅᴍɪɴ'}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
-<b>📌 Aʟʟ Sᴇᴛᴛɪɴɢꜱ Hᴀᴠᴇ Bᴇᴇɴ Rᴇꜱᴇᴛ Tᴏ Dᴇꜰᴀᴜʟᴛ Vᴀʟᴜᴇꜱ</b>
+Reset By: ${user.fullName || 'Admin'}
+Time: ${dateTime}
+All Settings Have Been Reset To Default Values
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Jᴀʀᴠɪꜱ Wᴀʟʟᴇᴛ
-───────────────────────`;
+Team Universal Wallet`;
         await notifyAdmin(resetMessage);
 
-        res.json({ success: true, message: 'Sᴇᴛᴛɪɴɢꜱ Rᴇꜱᴇᴛ Tᴏ Dᴇꜰᴀᴜʟᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ', settings: {
+        res.json({ success: true, message: 'Settings Reset To Default Successfully', settings: {
             enabled: settings.enabled,
             minAmount: settings.minAmount,
             maxAmount: settings.maxAmount,
@@ -303,8 +295,8 @@ router.post('/reset', verifyToken, async (req, res) => {
             updatedBy: settings.updatedBy
         }});
     } catch (error) {
-        console.error('❌ Rᴇꜱᴇᴛ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Rᴇꜱᴇᴛ Sᴇᴛᴛɪɴɢꜱ: ' + error.message });
+        console.error('Reset Settings Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Reset Settings: ' + error.message });
     }
 });
 
@@ -325,8 +317,8 @@ router.get('/public', async (req, res) => {
             requireUpiDetails: settings.requireUpiDetails
         }});
     } catch (error) {
-        console.error('Gᴇᴛ Pᴜʙʟɪᴄ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴇᴛᴛɪɴɢꜱ' });
+        console.error('Get Public Settings Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Settings' });
     }
 });
 
@@ -339,11 +331,11 @@ router.get('/withdrawals', verifyToken, async (req, res) => {
         let query = {};
         if (status && status !== 'all') {
             const validStatuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'];
-            if (!validStatuses.includes(status)) return res.status(400).json({ success: false, message: `Iɴᴠᴀʟɪᴅ Sᴛᴀᴛᴜꜱ: "${status}"` });
+            if (!validStatuses.includes(status)) return res.status(400).json({ success: false, message: `Invalid Status: "${status}"` });
             query.status = status;
         }
         if (method && method !== 'all') {
-            if (!['upi', 'bank'].includes(method)) return res.status(400).json({ success: false, message: `Iɴᴠᴀʟɪᴅ Mᴇᴛʜᴏᴅ: "${method}"` });
+            if (!['upi', 'bank'].includes(method)) return res.status(400).json({ success: false, message: `Invalid Method: "${method}"` });
             query.method = method;
         }
         if (search) query.$or = [{ transactionId: { $regex: search, $options: 'i' } }, { upiId: { $regex: search, $options: 'i' } }, { accountNumber: { $regex: search, $options: 'i' } }, { bankName: { $regex: search, $options: 'i' } }, { walletId: { $regex: search, $options: 'i' } }];
@@ -357,8 +349,8 @@ router.get('/withdrawals', verifyToken, async (req, res) => {
 
         res.json({ success: true, withdrawals, pagination: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) } });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Wɪᴛʜᴅʀᴀᴡᴀʟꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Wɪᴛʜᴅʀᴀᴡᴀʟꜱ.' });
+        console.error('Get Withdrawals Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Withdrawals.' });
     }
 });
 
@@ -396,8 +388,8 @@ router.get('/stats', verifyToken, async (req, res) => {
             today: { count: todayCount || 0, amount: todayAmount.length > 0 ? todayAmount[0].total : 0 }
         }});
     } catch (error) {
-        console.error('❌ Sᴛᴀᴛꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴛᴀᴛɪꜱᴛɪᴄꜱ.' });
+        console.error('Stats Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Statistics.' });
     }
 });
 
@@ -408,11 +400,11 @@ router.get('/withdrawal/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const withdrawal = await Withdrawal.findById(id).populate('userId', 'fullName mobile walletId balance email');
-        if (!withdrawal) return res.status(404).json({ success: false, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Nᴏᴛ Fᴏᴜɴᴅ.' });
+        if (!withdrawal) return res.status(404).json({ success: false, message: 'Withdrawal Not Found.' });
         res.json({ success: true, withdrawal });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Wɪᴛʜᴅʀᴀᴡᴀʟ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Wɪᴛʜᴅʀᴀᴡᴀʟ Dᴇᴛᴀɪʟꜱ.' });
+        console.error('Get Withdrawal Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Withdrawal Details.' });
     }
 });
 
@@ -425,50 +417,46 @@ router.post('/withdrawal/approve', verifyToken, async (req, res) => {
         const admin = req.user;
         const dateTime = getCurrentDateTime();
 
-        if (!withdrawalId) return res.status(400).json({ success: false, message: 'Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ Wɪᴛʜᴅʀᴀᴡᴀʟ Iᴅ.' });
+        if (!withdrawalId) return res.status(400).json({ success: false, message: 'Please Provide Withdrawal Id.' });
 
         const withdrawal = await Withdrawal.findById(withdrawalId).populate('userId');
-        if (!withdrawal) return res.status(404).json({ success: false, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Nᴏᴛ Fᴏᴜɴᴅ.' });
-        if (withdrawal.status !== 'pending' && withdrawal.status !== 'processing') return res.status(400).json({ success: false, message: `Wɪᴛʜᴅʀᴀᴡᴀʟ Iꜱ Aʟʀᴇᴀᴅʏ "${withdrawal.status}".` });
+        if (!withdrawal) return res.status(404).json({ success: false, message: 'Withdrawal Not Found.' });
+        if (withdrawal.status !== 'pending' && withdrawal.status !== 'processing') return res.status(400).json({ success: false, message: `Withdrawal Is Already "${withdrawal.status}".` });
 
         const user = withdrawal.userId;
-        if (!user) return res.status(404).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ.' });
+        if (!user) return res.status(404).json({ success: false, message: 'User Not Found.' });
 
         withdrawal.status = 'completed';
-        withdrawal.adminNote = adminNote || 'Aᴘᴘʀᴏᴠᴇᴅ Bʏ Aᴅᴍɪɴ';
+        withdrawal.adminNote = adminNote || 'Approved By Admin';
         withdrawal.processedAt = new Date();
         withdrawal.processedBy = admin.fullName || 'Admin';
         await withdrawal.save();
 
-        await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'success', remark: `Aᴘᴘʀᴏᴠᴇᴅ Bʏ ${admin.fullName || 'Admin'}` });
+        await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'success', remark: `Approved By ${admin.fullName || 'Admin'}` });
 
-        console.log('✅ Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴘᴘʀᴏᴠᴇᴅ:', withdrawal.transactionId);
+        console.log('Withdrawal Approved:', withdrawal.transactionId);
 
         if (user.telegramId) {
             const methodText = withdrawal.method === 'upi' ? 'UPI' : 'Bank';
             const detailsText = withdrawal.method === 'upi' ? `UPI: ${withdrawal.upiId}` : `Bank: ${withdrawal.bankName}\nAccount: ${withdrawal.accountNumber}`;
             await sendTelegramMessage(user.telegramId,
-`<b>─────────────────</b>
-<b>✅ Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴘᴘʀᴏᴠᴇᴅ</b>
-<b>─────────────────</b>
+`Withdrawal Approved
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Wɪᴛʜᴅʀᴀᴡᴀʟ Hᴀꜱ Bᴇᴇɴ Aᴘᴘʀᴏᴠᴇᴅ!
+Dear ${user.fullName}, Your Withdrawal Has Been Approved!
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${withdrawal.amount.toFixed(2)}
-📱 <b>Mᴇᴛʜᴏᴅ:</b> ${methodText}
+Amount: ₹${withdrawal.amount.toFixed(2)}
+Method: ${methodText}
 ${detailsText}
-🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ:</b> ${withdrawal.transactionId}
-📅 <b>Tɪᴍᴇ:</b> ${dateTime}
+Transaction: ${withdrawal.transactionId}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Jᴀʀᴠɪꜱ Wᴀʟʟᴇᴛ
-───────────────────────`);
+Team Universal Wallet`);
         }
 
-        res.json({ success: true, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴘᴘʀᴏᴠᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.', withdrawal });
+        res.json({ success: true, message: 'Withdrawal Approved Successfully.', withdrawal });
     } catch (error) {
-        console.error('❌ Aᴘᴘʀᴏᴠᴇ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Aᴘᴘʀᴏᴠᴇ Wɪᴛʜᴅʀᴀᴡᴀʟ.' });
+        console.error('Approve Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Approve Withdrawal.' });
     }
 });
 
@@ -481,51 +469,47 @@ router.post('/withdrawal/reject', verifyToken, async (req, res) => {
         const admin = req.user;
         const dateTime = getCurrentDateTime();
 
-        if (!withdrawalId) return res.status(400).json({ success: false, message: 'Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ Wɪᴛʜᴅʀᴀᴡᴀʟ Iᴅ.' });
+        if (!withdrawalId) return res.status(400).json({ success: false, message: 'Please Provide Withdrawal Id.' });
 
         const withdrawal = await Withdrawal.findById(withdrawalId).populate('userId');
-        if (!withdrawal) return res.status(404).json({ success: false, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Nᴏᴛ Fᴏᴜɴᴅ.' });
-        if (withdrawal.status !== 'pending' && withdrawal.status !== 'processing') return res.status(400).json({ success: false, message: `Wɪᴛʜᴅʀᴀᴡᴀʟ Iꜱ Aʟʀᴇᴀᴅʏ "${withdrawal.status}".` });
+        if (!withdrawal) return res.status(404).json({ success: false, message: 'Withdrawal Not Found.' });
+        if (withdrawal.status !== 'pending' && withdrawal.status !== 'processing') return res.status(400).json({ success: false, message: `Withdrawal Is Already "${withdrawal.status}".` });
 
         const user = withdrawal.userId;
-        if (!user) return res.status(404).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ.' });
+        if (!user) return res.status(404).json({ success: false, message: 'User Not Found.' });
 
         user.balance += withdrawal.amount;
         await user.save();
 
         withdrawal.status = 'failed';
-        withdrawal.adminNote = adminNote || 'Rᴇᴊᴇᴄᴛᴇᴅ Bʏ Aᴅᴍɪɴ';
+        withdrawal.adminNote = adminNote || 'Rejected By Admin';
         withdrawal.processedAt = new Date();
         withdrawal.processedBy = admin.fullName || 'Admin';
         await withdrawal.save();
 
-        await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'failed', remark: `Rᴇᴊᴇᴄᴛᴇᴅ Bʏ ${admin.fullName || 'Admin'} - Rᴇꜰᴜɴᴅᴇᴅ` });
+        await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'failed', remark: `Rejected By ${admin.fullName || 'Admin'} - Refunded` });
 
-        console.log('✅ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇᴊᴇᴄᴛᴇᴅ:', withdrawal.transactionId);
+        console.log('Withdrawal Rejected:', withdrawal.transactionId);
 
         if (user.telegramId) {
             await sendTelegramMessage(user.telegramId,
-`<b>─────────────────</b>
-<b>❌ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇᴊᴇᴄᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Withdrawal Rejected
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Wɪᴛʜᴅʀᴀᴡᴀʟ Hᴀꜱ Bᴇᴇɴ Rᴇᴊᴇᴄᴛᴇᴅ.
+Dear ${user.fullName}, Your Withdrawal Has Been Rejected.
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${withdrawal.amount.toFixed(2)}
-📱 <b>Mᴇᴛʜᴏᴅ:</b> ${withdrawal.method.toUpperCase()}
-📝 <b>Rᴇᴀꜱᴏɴ:</b> ${adminNote || 'Nᴏ Rᴇᴀꜱᴏɴ Pʀᴏᴠɪᴅᴇᴅ'}
-💳 <b>Rᴇꜰᴜɴᴅᴇᴅ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
-📅 <b>Tɪᴍᴇ:</b> ${dateTime}
+Amount: ₹${withdrawal.amount.toFixed(2)}
+Method: ${withdrawal.method.toUpperCase()}
+Reason: ${adminNote || 'No Reason Provided'}
+Refunded Balance: ₹${user.balance.toFixed(2)}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Jᴀʀᴠɪꜱ Wᴀʟʟᴇᴛ
-───────────────────────`);
+Team Universal Wallet`);
         }
 
-        res.json({ success: true, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇᴊᴇᴄᴛᴇᴅ Aɴᴅ Bᴀʟᴀɴᴄᴇ Rᴇꜰᴜɴᴅᴇᴅ.', withdrawal, newBalance: user.balance });
+        res.json({ success: true, message: 'Withdrawal Rejected And Balance Refunded.', withdrawal, newBalance: user.balance });
     } catch (error) {
-        console.error('❌ Rᴇᴊᴇᴄᴛ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Rᴇᴊᴇᴄᴛ Wɪᴛʜᴅʀᴀᴡᴀʟ.' });
+        console.error('Reject Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Reject Withdrawal.' });
     }
 });
 
@@ -539,7 +523,7 @@ router.post('/withdrawal/bulk-approve', verifyToken, async (req, res) => {
         const dateTime = getCurrentDateTime();
 
         if (!withdrawalIds || !Array.isArray(withdrawalIds) || withdrawalIds.length === 0) {
-            return res.status(400).json({ success: false, message: 'Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ Aʀʀᴀʏ Oꜰ Wɪᴛʜᴅʀᴀᴡᴀʟ Iᴅꜱ.' });
+            return res.status(400).json({ success: false, message: 'Please Provide Array Of Withdrawal Ids.' });
         }
 
         let approved = 0, failed = 0;
@@ -549,28 +533,28 @@ router.post('/withdrawal/bulk-approve', verifyToken, async (req, res) => {
                 if (!withdrawal || (withdrawal.status !== 'pending' && withdrawal.status !== 'processing')) { failed++; continue; }
 
                 withdrawal.status = 'completed';
-                withdrawal.adminNote = adminNote || 'Bᴜʟᴋ Aᴘᴘʀᴏᴠᴇᴅ';
+                withdrawal.adminNote = adminNote || 'Bulk Approved';
                 withdrawal.processedAt = new Date();
                 withdrawal.processedBy = admin.fullName || 'Admin';
                 await withdrawal.save();
 
-                await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'success', remark: `Bᴜʟᴋ Aᴘᴘʀᴏᴠᴇᴅ Bʏ ${admin.fullName || 'Admin'}` });
+                await Transaction.findOneAndUpdate({ tx_id: withdrawal.transactionId }, { status: 'success', remark: `Bulk Approved By ${admin.fullName || 'Admin'}` });
 
                 approved++;
                 if (withdrawal.userId?.telegramId) {
                     await sendTelegramMessage(withdrawal.userId.telegramId,
-`<b>✅ Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴘᴘʀᴏᴠᴇᴅ</b>
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${withdrawal.amount.toFixed(2)}
-<b>🆔 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ:</b> ${withdrawal.transactionId}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}`);
+`Withdrawal Approved
+Amount: ₹${withdrawal.amount.toFixed(2)}
+Transaction: ${withdrawal.transactionId}
+Time: ${dateTime}`);
                 }
             } catch (error) { failed++; }
         }
 
-        res.json({ success: true, message: `${approved} Aᴘᴘʀᴏᴠᴇᴅ, ${failed} Fᴀɪʟᴇᴅ.`, approved, failed });
+        res.json({ success: true, message: `${approved} Approved, ${failed} Failed.`, approved, failed });
     } catch (error) {
-        console.error('❌ Bᴜʟᴋ Aᴘᴘʀᴏᴠᴇ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Pʀᴏᴄᴇꜱꜱ Bᴜʟᴋ Aᴘᴘʀᴏᴠᴀʟ.' });
+        console.error('Bulk Approve Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Process Bulk Approval.' });
     }
 });
 
@@ -599,8 +583,8 @@ router.get('/withdrawals/export', verifyToken, async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename=withdrawals_${Date.now()}.csv`);
         res.send(csv);
     } catch (error) {
-        console.error('❌ Exᴘᴏʀᴛ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Exᴘᴏʀᴛ Wɪᴛʜᴅʀᴀᴡᴀʟꜱ.' });
+        console.error('Export Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Export Withdrawals.' });
     }
 });
 
