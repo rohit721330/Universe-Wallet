@@ -1,4 +1,4 @@
-//FILE routes/lifafa.js
+// FILE: routes/lifafa.js
 const Router = require('express').Router();
 const Jwt = require('jsonwebtoken');
 const Crypto = require('crypto');
@@ -15,17 +15,17 @@ const AppUrl = process.env.APP_URL;
 const VerifyToken = async (Req, Res, Next) => {
     try {
         const Token = Req.headers.authorization?.split(' ')[1];
-        if (!Token) return Res.status(200).json({ success: false, message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' });
+        if (!Token) return Res.status(200).json({ success: false, message: 'No Token Provided' });
         const Decoded = Jwt.verify(Token, JwtSecret);
         const UserData = await User.findById(Decoded.userId);
-        if (!UserData) return Res.status(200).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' });
+        if (!UserData) return Res.status(200).json({ success: false, message: 'User Not Found' });
         Req.user = UserData;
         Req.userId = UserData._id;
         Next();
     } catch (Error) {
-        if (Error.name === 'JsonWebTokenError') return Res.status(200).json({ success: false, message: '𝙸ɴᴠᴀʟ𝙸ᴅ Tᴏᴋᴇɴ' });
-        if (Error.name === 'TokenExpiredError') return Res.status(200).json({ success: false, message: 'Tᴏᴋᴇɴ Exᴘ𝙸ʀᴇᴅ' });
-        return Res.status(200).json({ success: false, message: 'Aᴜᴛʜ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ.' });
+        if (Error.name === 'JsonWebTokenError') return Res.status(200).json({ success: false, message: 'Invalid Token' });
+        if (Error.name === 'TokenExpiredError') return Res.status(200).json({ success: false, message: 'Token Expired' });
+        return Res.status(200).json({ success: false, message: 'Auth Error. Please Try Again.' });
     }
 };
 
@@ -34,13 +34,13 @@ function GenerateLifafaTxnId() {
 }
 
 async function SendTelegramMessage(ChatId, Message) {
-    if (!BotToken) { console.error('❌ Bᴏᴛ Tᴏᴋᴇɴ Nᴏᴛ Cᴏɴꜰ𝙸ɢᴜʀᴇᴅ'); return { success: false, error: 'BOT_TOKEN not configured' }; }
+    if (!BotToken) { console.error('Bot Token Not Configured'); return { success: false, error: 'BOT_TOKEN not configured' }; }
     try {
         const Url = `https://api.telegram.org/bot${BotToken}/sendMessage`;
         const Response = await Axios.post(Url, { chat_id: ChatId, text: Message, parse_mode: 'HTML' }, { timeout: 15000, headers: { 'Content-Type': 'application/json' } });
         if (Response.data && Response.data.ok) { return { success: true }; }
-        else { return { success: false, error: Response.data?.description || 'Uɴᴋɴᴏᴡɴ Eʀʀᴏʀ' }; }
-    } catch (Error) { console.error('❌ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Eʀʀᴏʀ:', Error.message); return { success: false, error: Error.message }; }
+        else { return { success: false, error: Response.data?.description || 'Unknown Error' }; }
+    } catch (Error) { console.error('Telegram Message Error:', Error.message); return { success: false, error: Error.message }; }
 }
 
 async function SendNotificationToUser(UserData, Message) {
@@ -105,7 +105,7 @@ function getCurrentDateTime() {
     return now.toLocaleString('en-IN', options);
 }
 
-// ==================== চ্যানেল ভ্যালিডেশন ====================
+// ==================== CHANNEL VALIDATION ====================
 Router.post('/validate-channel', async (Req, Res) => {
     try {
         const { channel } = Req.body;
@@ -223,7 +223,7 @@ Router.post('/validate-channel', async (Req, Res) => {
             });
         }
     } catch (Error) {
-        console.error('❌ Cʜᴀɴɴᴇʟ Vᴀʟɪᴅᴀᴛɪᴏɴ Eʀʀᴏʀ:', Error.message);
+        console.error('Channel Validation Error:', Error.message);
         return Res.status(200).json({
             success: false,
             message: 'Failed to validate channel'
@@ -231,7 +231,7 @@ Router.post('/validate-channel', async (Req, Res) => {
     }
 });
 
-// ==================== চ্যানেল চেক ====================
+// ==================== CHECK CHANNELS ====================
 Router.post('/check-channels', async (Req, Res) => {
     try {
         const { userId, channels } = Req.body;
@@ -318,7 +318,7 @@ Router.post('/check-channels', async (Req, Res) => {
             }
         });
     } catch (Error) {
-        console.error('❌ Cʜᴀɴɴᴇʟ Cʜᴇᴄᴋ Eʀʀᴏʀ:', Error.message);
+        console.error('Channel Check Error:', Error.message);
         return Res.status(200).json({
             success: false,
             message: 'Failed to check channels'
@@ -326,7 +326,7 @@ Router.post('/check-channels', async (Req, Res) => {
     }
 });
 
-// ==================== লিফাফা তৈরি ====================
+// ==================== CREATE LIFAFA ====================
 Router.post('/create', VerifyToken, async (Req, Res) => {
     try {
         let { 
@@ -351,13 +351,13 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
         
         const UserData = Req.user;
         
-        if (!title || !title.trim()) return Res.status(200).json({ success: false, message: 'Gɪᴠᴇᴀᴡᴀʏ Tɪᴛʟᴇ Iꜱ Rᴇǫᴜɪʀᴇᴅ' });
-        if (!totalUsers || totalUsers < 1) return Res.status(200).json({ success: false, message: 'Tᴏᴛᴀʟ Uꜱᴇʀꜱ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 1' });
-        if (!perUser || perUser < 0.01) return Res.status(200).json({ success: false, message: 'Pᴇʀ Uꜱᴇʀ Aᴍᴏᴜɴᴛ Mᴜꜱᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0' });
+        if (!title || !title.trim()) return Res.status(200).json({ success: false, message: 'Giveaway Title Is Required' });
+        if (!totalUsers || totalUsers < 1) return Res.status(200).json({ success: false, message: 'Total Users Must Be At Least 1' });
+        if (!perUser || perUser < 0.01) return Res.status(200).json({ success: false, message: 'Per User Amount Must Be Greater Than 0' });
         
         const allowedTypes = ['normal', 'toss', 'dice', 'scratch'];
         if (!allowedTypes.includes(type)) {
-            return Res.status(200).json({ success: false, message: '𝙸ɴᴠᴀʟ𝙸ᴅ Lɪꜰᴀꜰᴀ Tʏᴘᴇ. Aʟʟᴏᴡᴇᴅ: normal, toss, dice, scratch' });
+            return Res.status(200).json({ success: false, message: 'Invalid Lifafa Type. Allowed: normal, toss, dice, scratch' });
         }
         
         let finalWinChance = winChance;
@@ -365,11 +365,11 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
             if (winChance === null || winChance === undefined) {
                 finalWinChance = 50;
             } else if (winChance < 0 || winChance > 100) {
-                return Res.status(200).json({ success: false, message: 'Wɪɴ Cʜᴀɴᴄᴇ Mᴜꜱᴛ Bᴇ Bᴇᴛᴡᴇᴇɴ 0 ᴀɴᴅ 100 Fᴏʀ ' + type.toUpperCase() });
+                return Res.status(200).json({ success: false, message: 'Win Chance Must Be Between 0 And 100 For ' + type.toUpperCase() });
             }
         }
         
-        // চ্যানেল ভ্যালিডেশন
+        // Channel validation
         if (channelsEnabled && channels && channels.length > 0) {
             const botToken = process.env.BOT_TOKEN;
             if (!botToken) {
@@ -474,7 +474,7 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
             if (!allChannelsValid) {
                 return Res.status(200).json({
                     success: false,
-                    message: 'Bᴏᴛ ᴍᴜꜱᴛ ʙᴇ ᴀᴅᴍɪɴ ᴏꜰ ᴀʟʟ ᴄʜᴀɴɴᴇʟꜱ ᴛᴏ ᴠᴇʀɪꜰʏ ᴜꜱᴇʀꜱ',
+                    message: 'Bot must be admin of all channels to verify users',
                     details: adminCheckResults
                 });
             }
@@ -483,7 +483,7 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
         }
         
         const TotalAmount = totalUsers * perUser;
-        if (UserData.balance < TotalAmount) return Res.status(200).json({ success: false, message: '𝙸ɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Pʟᴇᴀꜱᴇ Aᴅᴅ Fᴜɴᴅꜱ.' });
+        if (UserData.balance < TotalAmount) return Res.status(200).json({ success: false, message: 'Insufficient Balance. Please Add Funds.' });
         
         let LifafaId; let IsUnique = false; let Attempts = 0;
         while (!IsUnique && Attempts < 10) { 
@@ -492,7 +492,7 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
             if (!Existing) IsUnique = true; 
             Attempts++; 
         }
-        if (!IsUnique) return Res.status(200).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Gᴇɴᴇʀᴀᴛᴇ Uɴɪǫᴜᴇ Lɪꜰᴀꜰᴀ Iᴅ' });
+        if (!IsUnique) return Res.status(200).json({ success: false, message: 'Failed To Generate Unique Lifafa Id' });
         
         const NewLifafa = new Lifafa({ 
             lifafaId: LifafaId, 
@@ -535,8 +535,8 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
             amount: TotalAmount, 
             type: 'lifafa_creation', 
             status: 'success', 
-            remark: `Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ: ${title}`,
-            description: `Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ: ${title}`,
+            remark: `Lifafa Created: ${title}`,
+            description: `Lifafa Created: ${title}`,
             tx_time: new Date(),
             metadata: { 
                 lifafaId: LifafaId, 
@@ -553,58 +553,52 @@ Router.post('/create', VerifyToken, async (Req, Res) => {
         
         let winChanceText = '';
         if (type !== 'normal') {
-            winChanceText = `<b>Wɪɴ Cʜᴀɴᴄᴇ:</b> ${finalWinChance}%\n`;
+            winChanceText = `Win Chance: ${finalWinChance}%\n`;
         }
         
         const CreatorMessage = 
-`<b>─────────────────</b>
-<b>📨 Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ</b>
-<b>─────────────────</b>
+`Lifafa Created Successfully
 
-<b>👤 Dᴇᴀʀ ${UserData.fullName},</b> Yᴏᴜʀ Lɪꜰᴀꜰᴀ Hᴀꜱ Bᴇᴇɴ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+Dear ${UserData.fullName}, Your Lifafa Has Been Created Successfully.
 
-📌 <b>Tɪᴛʟᴇ:</b> ${title}
-📂 <b>Tʏᴘᴇ:</b> ${type.toUpperCase()}
-${winChanceText}👥 <b>Tᴏᴛᴀʟ Uꜱᴇʀꜱ:</b> ${totalUsers}
-💰 <b>Pᴇʀ Uꜱᴇʀ:</b> ₹${perUser}
-💵 <b>Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${TotalAmount}
-🔗 <b>Cʟᴀɪᴍ Lɪɴᴋ:</b> ${ClaimLink}
-${accessEnabled ? '🔑 <b>Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ:</b> ' + accessCode + '\n' : ''}
-${channelsEnabled ? '📢 <b>Cʜᴀɴɴᴇʟꜱ Rᴇǫᴜɪʀᴇᴅ:</b> ' + channels.length + '\n' : ''}
-${referEnabled ? '🎁 <b>Rᴇꜰᴇʀ Bᴏɴᴜꜱ:</b> ₹' + referAmount + '\n' : ''}
-${youtubeEnabled ? '📺 <b>YᴏᴜTᴜʙᴇ Vɪᴅᴇᴏ Rᴇǫᴜɪʀᴇᴅ</b>\n' : ''}
-───────────────────────
-📊 <b>Sᴛᴀᴛᴜꜱ:</b> ${NewLifafa.status.toUpperCase()}
-───────────────────────`;
+Title: ${title}
+Type: ${type.toUpperCase()}
+${winChanceText}Total Users: ${totalUsers}
+Per User: ₹${perUser}
+Total Amount: ₹${TotalAmount}
+Claim Link: ${ClaimLink}
+${accessEnabled ? 'Access Code: ' + accessCode + '\n' : ''}
+${channelsEnabled ? 'Channels Required: ' + channels.length + '\n' : ''}
+${referEnabled ? 'Refer Bonus: ₹' + referAmount + '\n' : ''}
+${youtubeEnabled ? 'YouTube Video Required\n' : ''}
+
+Status: ${NewLifafa.status.toUpperCase()}`;
         await SendNotificationToUser(UserData, CreatorMessage);
         
         const AdminMessage = 
-`<b>───────────────</b>
-<b>📨 Nᴇᴡ Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ</b>
-<b>───────────────</b>
+`New Lifafa Created
 
-👤 <b>Cʀᴇᴀᴛᴏʀ:</b> ${UserData.fullName}
-📱 <b>Mᴏʙɪʟᴇ:</b> ${UserData.mobile}
-🆔 <b>Wᴀʟʟᴇᴛ:</b> ${UserData.walletId}
-📌 <b>Tɪᴛʟᴇ:</b> ${title}
-📂 <b>Tʏᴘᴇ:</b> ${type.toUpperCase()}
-${type !== 'normal' ? '🎲 <b>Wɪɴ Cʜᴀɴᴄᴇ:</b> ' + finalWinChance + '%\n' : ''}
-👥 <b>Tᴏᴛᴀʟ Uꜱᴇʀꜱ:</b> ${totalUsers}
-💰 <b>Pᴇʀ Uꜱᴇʀ:</b> ₹${perUser}
-💵 <b>Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${TotalAmount}
-🔗 <b>Cʟᴀɪᴍ Lɪɴᴋ:</b> ${ClaimLink}
-${accessEnabled ? '🔑 <b>Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ:</b> ' + accessCode + '\n' : ''}
-${channelsEnabled ? '📢 <b>Cʜᴀɴɴᴇʟꜱ Rᴇǫᴜɪʀᴇᴅ:</b> ' + channels.length + '\n' : ''}
-${referEnabled ? '🎁 <b>Rᴇꜰᴇʀ Bᴏɴᴜꜱ:</b> ₹' + referAmount + '\n' : ''}
-${youtubeEnabled ? '📺 <b>YᴏᴜTᴜʙᴇ Vɪᴅᴇᴏ Rᴇǫᴜɪʀᴇᴅ</b>\n' : ''}
-───────────────────────
-📊 <b>Sᴛᴀᴛᴜꜱ:</b> ${NewLifafa.status.toUpperCase()}
-───────────────────────`;
+Creator: ${UserData.fullName}
+Mobile: ${UserData.mobile}
+Wallet: ${UserData.walletId}
+Title: ${title}
+Type: ${type.toUpperCase()}
+${type !== 'normal' ? 'Win Chance: ' + finalWinChance + '%\n' : ''}
+Total Users: ${totalUsers}
+Per User: ₹${perUser}
+Total Amount: ₹${TotalAmount}
+Claim Link: ${ClaimLink}
+${accessEnabled ? 'Access Code: ' + accessCode + '\n' : ''}
+${channelsEnabled ? 'Channels Required: ' + channels.length + '\n' : ''}
+${referEnabled ? 'Refer Bonus: ₹' + referAmount + '\n' : ''}
+${youtubeEnabled ? 'YouTube Video Required\n' : ''}
+
+Status: ${NewLifafa.status.toUpperCase()}`;
         await NotifyAdmin(AdminMessage);
         
         return Res.status(200).json({ 
             success: true, 
-            message: 'Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!', 
+            message: 'Lifafa Created Successfully!', 
             data: { 
                 id: LifafaId, 
                 title: NewLifafa.title, 
@@ -622,12 +616,12 @@ ${youtubeEnabled ? '📺 <b>YᴏᴜTᴜʙᴇ Vɪᴅᴇᴏ Rᴇǫᴜɪʀᴇᴅ</b
             } 
         });
     } catch (Error) { 
-        console.error('❌ Cʀᴇᴀᴛᴇ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', Error); 
-        return Res.status(200).json({ success: false, message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' }); 
+        console.error('Create Lifafa Error:', Error); 
+        return Res.status(200).json({ success: false, message: 'Server Error. Please Try Again Later.' }); 
     }
 });
 
-// ==================== লিফাফা এডিট ====================
+// ==================== EDIT LIFAFA ====================
 Router.put('/:id', VerifyToken, async (Req, Res) => {
     try {
         const { id } = Req.params;
@@ -657,63 +651,56 @@ Router.put('/:id', VerifyToken, async (Req, Res) => {
         if (!LifafaData) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ' 
+                message: 'Lifafa Not Found' 
             });
         }
         
-        // ✅ শুধুমাত্র ক্রিয়েটর বা এডমিন এডিট করতে পারবে
         const IsCreator = LifafaData.userId.toString() === UserData._id.toString();
         const IsAdmin = UserData.isAdmin === true;
         
         if (!IsCreator && !IsAdmin) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Yᴏᴜ Aʀᴇ Nᴏᴛ Aᴜᴛʜᴏʀɪᴢᴇᴅ Tᴏ Eᴅɪᴛ Tʜɪꜱ Lɪꜰᴀꜰᴀ' 
+                message: 'You Are Not Authorized To Edit This Lifafa' 
             });
         }
         
-        // ✅ শুধুমাত্র active status এর লিফাফা এডিট করা যাবে
         if (LifafaData.status !== 'active') {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Oɴʟʏ Aᴄᴛɪᴠᴇ Lɪꜰᴀꜰᴀ Cᴀɴ Bᴇ Eᴅɪᴛᴇᴅ' 
+                message: 'Only Active Lifafa Can Be Edited' 
             });
         }
         
-        // ✅ চেক করুন যে ইতিমধ্যে ক্লেইম হয়েছে কিনা
         const claimedCount = LifafaData.claimedUsers.length;
         if (claimedCount > 0) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Cᴀɴɴᴏᴛ Eᴅɪᴛ Lɪꜰᴀꜰᴀ Tʜᴀᴛ Hᴀꜱ Bᴇᴇɴ Cʟᴀɪᴍᴇᴅ' 
+                message: 'Cannot Edit Lifafa That Has Been Claimed' 
             });
         }
         
-        // ✅ নতুন টোটাল এমাউন্ট ক্যালকুলেশন
         let newTotalUsers = totalUsers || LifafaData.totalUsers;
         let newPerUser = perUser || LifafaData.perUser;
         let newTotalAmount = newTotalUsers * newPerUser;
         
-        // ✅ যদি এমাউন্ট বাড়ে, তাহলে ব্যালেন্স চেক করুন
         if (newTotalAmount > LifafaData.totalAmount) {
             const extraAmount = newTotalAmount - LifafaData.totalAmount;
             if (UserData.balance < extraAmount) {
                 return Res.status(200).json({ 
                     success: false, 
-                    message: '𝙸ɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Nᴇᴇᴅ ₹' + extraAmount + ' Mᴏʀᴇ' 
+                    message: 'Insufficient Balance. Need ₹' + extraAmount + ' More' 
                 });
             }
             UserData.balance -= extraAmount;
             await UserData.save();
         } 
-        // ✅ যদি এমাউন্ট কমে, তাহলে রিফান্ড করুন
         else if (newTotalAmount < LifafaData.totalAmount) {
             const refundAmount = LifafaData.totalAmount - newTotalAmount;
             UserData.balance += refundAmount;
             await UserData.save();
         }
         
-        // ✅ চ্যানেল ভ্যালিডেশন (যদি চ্যানেল ইন্যবল করা হয়)
         if (channelsEnabled && channels && channels.length > 0) {
             const botToken = process.env.BOT_TOKEN;
             if (!botToken) {
@@ -775,14 +762,13 @@ Router.put('/:id', VerifyToken, async (Req, Res) => {
             if (!allChannelsValid) {
                 return Res.status(200).json({
                     success: false,
-                    message: 'Bᴏᴛ ᴍᴜꜱᴛ ʙᴇ ᴀᴅᴍɪɴ ᴏꜰ ᴀʟʟ ᴄʜᴀɴɴᴇʟꜱ ᴛᴏ ᴠᴇʀɪꜰʏ ᴜꜱᴇʀꜱ'
+                    message: 'Bot must be admin of all channels to verify users'
                 });
             }
             
             channels = processedChannels;
         }
         
-        // ✅ লিফাফা আপডেট করুন
         const Updates = {
             title: title || LifafaData.title,
             totalUsers: newTotalUsers,
@@ -803,7 +789,6 @@ Router.put('/:id', VerifyToken, async (Req, Res) => {
             allChannelsHavePermission: channelsEnabled ? true : false
         };
         
-        // ✅ winChance আপডেট (শুধুমাত্র non-normal টাইপের জন্য)
         if (type !== 'normal') {
             let finalWinChance = winChance;
             if (winChance === null || winChance === undefined) {
@@ -811,7 +796,7 @@ Router.put('/:id', VerifyToken, async (Req, Res) => {
             } else if (winChance < 0 || winChance > 100) {
                 return Res.status(200).json({ 
                     success: false, 
-                    message: 'Wɪɴ Cʜᴀɴᴄᴇ Mᴜꜱᴛ Bᴇ Bᴇᴛᴡᴇᴇɴ 0 ᴀɴᴅ 100' 
+                    message: 'Win Chance Must Be Between 0 And 100' 
                 });
             }
             Updates.winChance = finalWinChance;
@@ -820,63 +805,55 @@ Router.put('/:id', VerifyToken, async (Req, Res) => {
         await LifafaData.updateOne(Updates);
         const UpdatedLifafa = await Lifafa.findOne({ lifafaId: id });
         
-        // ✅ টেলিগ্রাম নোটিফিকেশন
         const dateTime = getCurrentDateTime();
         if (UserData.telegramId) {
             const diffAmount = newTotalAmount - LifafaData.totalAmount;
             const diffText = diffAmount > 0 ? `+₹${diffAmount}` : `₹${diffAmount}`;
             
             const EditMessage = 
-`<b>─────────────────</b>
-<b>✏️ Lɪꜰᴀꜰᴀ Uᴘᴅᴀᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Lifafa Updated
 
-<b>👤 Dᴇᴀʀ ${UserData.fullName},</b> Yᴏᴜʀ Lɪꜰᴀꜰᴀ Hᴀꜱ Bᴇᴇɴ Uᴘᴅᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+Dear ${UserData.fullName}, Your Lifafa Has Been Updated Successfully.
 
-📌 <b>Tɪᴛʟᴇ:</b> ${UpdatedLifafa.title}
-📂 <b>Tʏᴘᴇ:</b> ${UpdatedLifafa.type.toUpperCase()}
-${UpdatedLifafa.type !== 'normal' ? '🎲 <b>Wɪɴ Cʜᴀɴᴄᴇ:</b> ' + UpdatedLifafa.winChance + '%\n' : ''}
-👥 <b>Uꜱᴇʀꜱ:</b> ${UpdatedLifafa.totalUsers}
-💰 <b>Pᴇʀ Uꜱᴇʀ:</b> ₹${UpdatedLifafa.perUser}
-💵 <b>Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${UpdatedLifafa.totalAmount}
-${diffAmount !== 0 ? '📊 <b>Aᴍᴏᴜɴᴛ Cʜᴀɴɢᴇ:</b> ' + diffText + '\n' : ''}
-${UpdatedLifafa.accessCode ? '🔑 <b>Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ:</b> ' + UpdatedLifafa.accessCode + '\n' : ''}
-${UpdatedLifafa.channels.length > 0 ? '📢 <b>Cʜᴀɴɴᴇʟꜱ:</b> ' + UpdatedLifafa.channels.length + '\n' : ''}
-${UpdatedLifafa.referAmount > 0 ? '🎁 <b>Rᴇꜰᴇʀ Bᴏɴᴜꜱ:</b> ₹' + UpdatedLifafa.referAmount + '\n' : ''}
-${UpdatedLifafa.requireYoutube ? '📺 <b>YᴏᴜTᴜʙᴇ Vɪᴅᴇᴏ Rᴇǫᴜɪʀᴇᴅ</b>\n' : ''}
-───────────────────────
-📊 <b>Sᴛᴀᴛᴜꜱ:</b> ${UpdatedLifafa.status.toUpperCase()}
-───────────────────────`;
+Title: ${UpdatedLifafa.title}
+Type: ${UpdatedLifafa.type.toUpperCase()}
+${UpdatedLifafa.type !== 'normal' ? 'Win Chance: ' + UpdatedLifafa.winChance + '%\n' : ''}
+Users: ${UpdatedLifafa.totalUsers}
+Per User: ₹${UpdatedLifafa.perUser}
+Total Amount: ₹${UpdatedLifafa.totalAmount}
+${diffAmount !== 0 ? 'Amount Change: ' + diffText + '\n' : ''}
+${UpdatedLifafa.accessCode ? 'Access Code: ' + UpdatedLifafa.accessCode + '\n' : ''}
+${UpdatedLifafa.channels.length > 0 ? 'Channels: ' + UpdatedLifafa.channels.length + '\n' : ''}
+${UpdatedLifafa.referAmount > 0 ? 'Refer Bonus: ₹' + UpdatedLifafa.referAmount + '\n' : ''}
+${UpdatedLifafa.requireYoutube ? 'YouTube Video Required\n' : ''}
+
+Status: ${UpdatedLifafa.status.toUpperCase()}`;
             await SendNotificationToUser(UserData, EditMessage);
         }
         
-        // ✅ এডমিন নোটিফিকেশন
         if (AdminTgId) {
             const diffAmount = newTotalAmount - LifafaData.totalAmount;
             const diffText = diffAmount > 0 ? `+₹${diffAmount}` : `₹${diffAmount}`;
             const AdminEditMessage = 
-`<b>─────────────────</b>
-<b>✏️ Lɪꜰᴀꜰᴀ Eᴅɪᴛᴇᴅ Bʏ Uꜱᴇʀ</b>
-<b>─────────────────</b>
+`Lifafa Edited By User
 
-👤 <b>Uꜱᴇʀ:</b> ${UserData.fullName}
-📱 <b>Mᴏʙɪʟᴇ:</b> ${UserData.mobile}
-🆔 <b>Wᴀʟʟᴇᴛ:</b> ${UserData.walletId}
-📌 <b>Tɪᴛʟᴇ:</b> ${UpdatedLifafa.title}
-📂 <b>Tʏᴘᴇ:</b> ${UpdatedLifafa.type.toUpperCase()}
-${UpdatedLifafa.type !== 'normal' ? '🎲 <b>Wɪɴ Cʜᴀɴᴄᴇ:</b> ' + UpdatedLifafa.winChance + '%\n' : ''}
-👥 <b>Uꜱᴇʀꜱ:</b> ${UpdatedLifafa.totalUsers}
-💰 <b>Pᴇʀ Uꜱᴇʀ:</b> ₹${UpdatedLifafa.perUser}
-💵 <b>Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${UpdatedLifafa.totalAmount}
-${diffAmount !== 0 ? '📊 <b>Aᴍᴏᴜɴᴛ Cʜᴀɴɢᴇ:</b> ' + diffText + '\n' : ''}
-⏰ <b>Tɪᴍᴇ:</b> ${dateTime}
-───────────────────────`;
+User: ${UserData.fullName}
+Mobile: ${UserData.mobile}
+Wallet: ${UserData.walletId}
+Title: ${UpdatedLifafa.title}
+Type: ${UpdatedLifafa.type.toUpperCase()}
+${UpdatedLifafa.type !== 'normal' ? 'Win Chance: ' + UpdatedLifafa.winChance + '%\n' : ''}
+Users: ${UpdatedLifafa.totalUsers}
+Per User: ₹${UpdatedLifafa.perUser}
+Total Amount: ₹${UpdatedLifafa.totalAmount}
+${diffAmount !== 0 ? 'Amount Change: ' + diffText + '\n' : ''}
+Time: ${dateTime}`;
             await NotifyAdmin(AdminEditMessage);
         }
         
         return Res.status(200).json({ 
             success: true, 
-            message: 'Lɪꜰᴀꜰᴀ Uᴘᴅᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!',
+            message: 'Lifafa Updated Successfully!',
             data: {
                 id: UpdatedLifafa.lifafaId,
                 title: UpdatedLifafa.title,
@@ -891,29 +868,29 @@ ${diffAmount !== 0 ? '📊 <b>Aᴍᴏᴜɴᴛ Cʜᴀɴɢᴇ:</b> ' + diffText + 
         });
         
     } catch (Error) {
-        console.error('❌ Eᴅɪᴛ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', Error);
+        console.error('Edit Lifafa Error:', Error);
         return Res.status(200).json({ 
             success: false, 
-            message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' 
+            message: 'Server Error. Please Try Again Later.' 
         });
     }
 });
 
-// ==================== লিফাফা ডিটেইলস ====================
+// ==================== LIFAFA DETAILS ====================
 Router.get('/:type', async (Req, Res) => {
     try {
         const { id } = Req.query;
         const { type } = Req.params;
         
-        if (!id) return Res.status(200).json({ success: false, message: 'Lɪꜰᴀꜰᴀ Iᴅ Iꜱ Rᴇǫᴜɪʀᴇᴅ' });
+        if (!id) return Res.status(200).json({ success: false, message: 'Lifafa Id Is Required' });
         
         const LifafaData = await Lifafa.findOne({ lifafaId: id });
-        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ' });
+        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lifafa Not Found' });
         
         if (LifafaData.type.toLowerCase() !== type.toLowerCase()) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Lɪꜰᴀꜰᴀ Tʏᴘᴇ. Expected: ' + LifafaData.type + ', Got: ' + type 
+                message: 'Invalid Lifafa Type. Expected: ' + LifafaData.type + ', Got: ' + type 
             });
         }
         
@@ -963,55 +940,55 @@ Router.get('/:type', async (Req, Res) => {
             } 
         });
     } catch (Error) { 
-        console.error('❌ Fᴇᴛᴄʜ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', Error); 
-        return Res.status(200).json({ success: false, message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' }); 
+        console.error('Fetch Lifafa Error:', Error); 
+        return Res.status(200).json({ success: false, message: 'Server Error. Please Try Again Later.' }); 
     }
 });
 
-// ==================== লিফাফা ক্লেইম ====================
+// ==================== CLAIM LIFAFA ====================
 Router.post('/:type/claim', async (Req, Res) => {
     try {
         const { type } = Req.params;
         const { id, mobile, tgid, ref, accessCode, fingerprint, winAmount: clientWinAmount, isWinner: clientIsWinner } = Req.body;
         
-        if (!id) return Res.status(200).json({ success: false, message: 'Lɪꜰᴀꜰᴀ Iᴅ Iꜱ Rᴇǫᴜɪʀᴇᴅ' });
-        if (!mobile && !tgid) return Res.status(200).json({ success: false, message: 'Mᴏʙɪʟᴇ Oʀ Tᴇʟᴇɢʀᴀᴍ Iᴅ Iꜱ Rᴇǫᴜɪʀᴇᴅ' });
+        if (!id) return Res.status(200).json({ success: false, message: 'Lifafa Id Is Required' });
+        if (!mobile && !tgid) return Res.status(200).json({ success: false, message: 'Mobile Or Telegram Id Is Required' });
         
         const LifafaData = await Lifafa.findOne({ lifafaId: id });
-        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ' });
+        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lifafa Not Found' });
         
         if (LifafaData.type.toLowerCase() !== type.toLowerCase()) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Lɪꜰᴀꜰᴀ Tʏᴘᴇ. Expected: ' + LifafaData.type + ', Got: ' + type 
+                message: 'Invalid Lifafa Type. Expected: ' + LifafaData.type + ', Got: ' + type 
             });
         }
         
-        if (LifafaData.status !== 'active') return Res.status(200).json({ success: false, message: 'Tʜɪꜱ Lɪꜰᴀꜰᴀ Iꜱ Nᴏ Lᴏɴɢᴇʀ Aᴄᴛɪᴠᴇ' });
+        if (LifafaData.status !== 'active') return Res.status(200).json({ success: false, message: 'This Lifafa Is No Longer Active' });
         if (LifafaData.isExpired) { 
             LifafaData.status = 'expired'; 
             await LifafaData.save(); 
-            return Res.status(200).json({ success: false, message: 'Tʜɪꜱ Lɪꜰᴀꜰᴀ Hᴀꜱ Exᴘɪʀᴇᴅ' }); 
+            return Res.status(200).json({ success: false, message: 'This Lifafa Has Expired' }); 
         }
         if (LifafaData.remainingUsers <= 0) { 
             LifafaData.status = 'completed'; 
             await LifafaData.save(); 
-            return Res.status(200).json({ success: false, message: 'Aʟʟ Uꜱᴇʀꜱ Hᴀᴠᴇ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ' }); 
+            return Res.status(200).json({ success: false, message: 'All Users Have Already Claimed This Lifafa' }); 
         }
         
         if (LifafaData.accessCode && LifafaData.accessCode !== accessCode) {
-            return Res.status(200).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Aᴄᴄᴇꜱꜱ Cᴏᴅᴇ' });
+            return Res.status(200).json({ success: false, message: 'Invalid Access Code' });
         }
         
         var AlreadyClaimed = LifafaData.claimedUsers.some(function(C) { return C.telegramId === tgid; });
-        if (AlreadyClaimed) return Res.status(200).json({ success: false, message: 'Yᴏᴜ Hᴀᴠᴇ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ' });
+        if (AlreadyClaimed) return Res.status(200).json({ success: false, message: 'You Have Already Claimed This Lifafa' });
         
         if (fingerprint) {
             var DeviceClaimed = LifafaData.claimedUsers.some(function(C) { return C.fingerprint === fingerprint; });
             if (DeviceClaimed) {
                 return Res.status(200).json({ 
                     success: false, 
-                    message: 'Tʜɪꜱ Dᴇᴠɪᴄᴇ Hᴀꜱ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ Tʜɪꜱ Lɪꜰᴀꜰᴀ' 
+                    message: 'This Device Has Already Claimed This Lifafa' 
                 });
             }
         }
@@ -1026,18 +1003,18 @@ Router.post('/:type/claim', async (Req, Res) => {
         if (!ClaimUser) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ. Pʟᴇᴀꜱᴇ Vᴇʀɪꜰʏ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ.' 
+                message: 'User Not Found. Please Verify Your Account.' 
             });
         }
         
         if (LifafaData.specialUsers) {
             var SpecialNumbers = LifafaData.specialUsers.split(',').map(function(S) { return S.trim(); });
             if (!SpecialNumbers.includes(ClaimUser.mobile)) {
-                return Res.status(200).json({ success: false, message: 'Yᴏᴜ Aʀᴇ Nᴏᴛ Aᴜᴛʜᴏʀɪᴢᴇᴅ Tᴏ Cʟᴀɪᴍ Tʜɪꜱ Lɪꜰᴀꜰᴀ' });
+                return Res.status(200).json({ success: false, message: 'You Are Not Authorized To Claim This Lifafa' });
             }
         }
         
-        // চ্যানেল চেক
+        // Channel check
         if (LifafaData.requireChannel && LifafaData.channels.length > 0) {
             const botToken = process.env.BOT_TOKEN;
             if (botToken && ClaimUser.telegramId) {
@@ -1069,13 +1046,13 @@ Router.post('/:type/claim', async (Req, Res) => {
                 if (!allJoined) {
                     return Res.status(200).json({ 
                         success: false, 
-                        message: 'Pʟᴇᴀꜱᴇ Jᴏɪɴ Aʟʟ Rᴇǫᴜɪʀᴇᴅ Tᴇʟᴇɢʀᴀᴍ Cʜᴀɴɴᴇʟꜱ Fɪʀꜱᴛ' 
+                        message: 'Please Join All Required Telegram Channels First' 
                     });
                 }
             } else {
                 return Res.status(200).json({ 
                     success: false, 
-                    message: 'Pʟᴇᴀꜱᴇ Vᴇʀɪꜰʏ Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ Tᴏ Cʟᴀɪᴍ' 
+                    message: 'Please Verify Your Account To Claim' 
                 });
             }
         }
@@ -1131,8 +1108,8 @@ Router.post('/:type/claim', async (Req, Res) => {
                 amount: winAmount, 
                 type: 'lifafa_claim', 
                 status: 'success', 
-                remark: 'Lɪꜰᴀꜰᴀ Cʟᴀɪᴍ: ' + LifafaData.title,
-                description: 'Lɪꜰᴀꜰᴀ Cʟᴀɪᴍ: ' + LifafaData.title,
+                remark: 'Lifafa Claim: ' + LifafaData.title,
+                description: 'Lifafa Claim: ' + LifafaData.title,
                 tx_time: new Date(),
                 metadata: { 
                     lifafaId: LifafaData.lifafaId, 
@@ -1145,19 +1122,15 @@ Router.post('/:type/claim', async (Req, Res) => {
             await ClaimTransaction.save();
         }
         
-        var winStatus = isWinner ? '✅ Wᴏɴ ₹' + winAmount : '❌ Lᴏꜱᴛ';
+        var winStatus = isWinner ? 'Won ₹' + winAmount : 'Lost';
         var ClaimerMessage = 
-'<b>─────────────────</b>\n' +
-(isWinner ? '🎉' : '😔') + ' <b>Lɪꜰᴀꜰᴀ Cʟᴀɪᴍ Rᴇꜱᴜʟᴛ</b>\n' +
-'<b>─────────────────</b>\n\n' +
-'<b>👤 Dᴇᴀʀ ' + ClaimUser.fullName + ',</b>\n' +
-'📌 <b>Tɪᴛʟᴇ:</b> ' + LifafaData.title + '\n' +
-'📂 <b>Tʏᴘᴇ:</b> ' + LifafaData.type.toUpperCase() + '\n' +
-(LifafaData.type !== 'normal' ? '🎲 <b>Wɪɴ Cʜᴀɴᴄᴇ:</b> ' + LifafaData.winChance + '%\n' : '') +
-'💰 <b>Rᴇꜱᴜʟᴛ:</b> ' + winStatus + '\n\n' +
-'───────────────────────\n' +
-(isWinner ? '✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.' : '😢 Bᴇᴛᴛᴇʀ Lᴜᴄᴋ Nᴇxᴛ Tɪᴍᴇ!') + '\n' +
-'───────────────────────';
+'Lifafa Claim Result\n\n' +
+'Dear ' + ClaimUser.fullName + ',\n' +
+'Title: ' + LifafaData.title + '\n' +
+'Type: ' + LifafaData.type.toUpperCase() + '\n' +
+(LifafaData.type !== 'normal' ? 'Win Chance: ' + LifafaData.winChance + '%\n' : '') +
+'Result: ' + winStatus + '\n\n' +
+(isWinner ? 'Amount Credited To Your Wallet Successfully.' : 'Better Luck Next Time!');
         await SendNotificationToUser(ClaimUser, ClaimerMessage);
         
         if (ReferrerId && LifafaData.referAmount > 0 && isWinner && winAmount > 0) {
@@ -1175,8 +1148,8 @@ Router.post('/:type/claim', async (Req, Res) => {
                     amount: LifafaData.referAmount, 
                     type: 'lifafa_referral', 
                     status: 'success', 
-                    remark: 'Rᴇꜰᴇʀʀᴀʟ Bᴏɴᴜꜱ Fʀᴏᴍ ' + LifafaData.title,
-                    description: 'Rᴇꜰᴇʀʀᴀʟ Bᴏɴᴜꜱ Fʀᴏᴍ ' + LifafaData.title,
+                    remark: 'Referral Bonus From ' + LifafaData.title,
+                    description: 'Referral Bonus From ' + LifafaData.title,
                     tx_time: new Date(),
                     metadata: { 
                         lifafaId: LifafaData.lifafaId, 
@@ -1187,24 +1160,20 @@ Router.post('/:type/claim', async (Req, Res) => {
                 await ReferTransaction.save();
                 
                 var ReferrerMessage = 
-'<b>─────────────────</b>\n' +
-'<b>🎁 Rᴇꜰᴇʀʀᴀʟ Bᴏɴᴜꜱ Rᴇᴄᴇɪᴠᴇᴅ</b>\n' +
-'<b>─────────────────</b>\n\n' +
-'<b>👤 Dᴇᴀʀ ' + Referrer.fullName + ',</b> Yᴏᴜ Hᴀᴠᴇ Rᴇᴄᴇɪᴠᴇᴅ A Rᴇꜰᴇʀʀᴀʟ Bᴏɴᴜꜱ.\n\n' +
-'📌 <b>Lɪꜰᴀꜰᴀ:</b> ' + LifafaData.title + '\n' +
-'👤 <b>Rᴇꜰᴇʀʀᴇᴅ Uꜱᴇʀ:</b> ' + ClaimUser.fullName + '\n' +
-'💰 <b>Bᴏɴᴜꜱ Aᴍᴏᴜɴᴛ:</b> ₹' + LifafaData.referAmount + '\n\n' +
-'───────────────────────────\n' +
-'✅ Bᴏɴᴜꜱ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ.\n' +
-'🥳 Kᴇᴇᴘ Rᴇꜰᴇʀʀɪɴɢ Tᴏ Eᴀʀɴ Mᴏʀᴇ Bᴏɴᴜꜱ.\n' +
-'───────────────────────────';
+'Referral Bonus Received\n\n' +
+'Dear ' + Referrer.fullName + ', You Have Received A Referral Bonus.\n\n' +
+'Lifafa: ' + LifafaData.title + '\n' +
+'Referred User: ' + ClaimUser.fullName + '\n' +
+'Bonus Amount: ₹' + LifafaData.referAmount + '\n\n' +
+'Bonus Amount Credited To Your Wallet.\n' +
+'Keep Referring To Earn More Bonus.';
                 await SendNotificationToUser(Referrer, ReferrerMessage);
             }
         }
         
         return Res.status(200).json({ 
             success: true, 
-            message: isWinner ? 'Lɪꜰᴀꜰᴀ Cʟᴀɪᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!' : 'Lɪꜰᴀꜰᴀ Cʟᴀɪᴍᴇᴅ Bᴜᴛ Nᴏ Wɪɴ', 
+            message: isWinner ? 'Lifafa Claimed Successfully!' : 'Lifafa Claimed But No Win', 
             data: { 
                 amount: winAmount, 
                 isWinner: isWinner,
@@ -1216,12 +1185,12 @@ Router.post('/:type/claim', async (Req, Res) => {
             } 
         });
     } catch (Error) { 
-        console.error('❌ Cʟᴀɪᴍ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', Error); 
-        return Res.status(200).json({ success: false, message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' }); 
+        console.error('Claim Lifafa Error:', Error); 
+        return Res.status(200).json({ success: false, message: 'Server Error. Please Try Again Later.' }); 
     }
 });
 
-// ==================== ইউজারের সব লিফাফা ====================
+// ==================== USER'S ALL LIFAFAS ====================
 Router.get('/user/all', VerifyToken, async (Req, Res) => {
     try {
         var Lifafas = await Lifafa.find({ userId: Req.userId }).sort({ createdAt: -1 }).limit(50);
@@ -1245,16 +1214,16 @@ Router.get('/user/all', VerifyToken, async (Req, Res) => {
             }) 
         });
     } catch (Error) { 
-        console.error('❌ Fᴇᴛᴄʜ Lɪꜰᴀꜰᴀꜱ Eʀʀᴏʀ:', Error); 
-        return Res.status(200).json({ success: false, message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' }); 
+        console.error('Fetch Lifafas Error:', Error); 
+        return Res.status(200).json({ success: false, message: 'Server Error. Please Try Again Later.' }); 
     }
 });
 
-// ==================== লিফাফা ডিলিট (শুধু এডমিন) ====================
+// ==================== DELETE LIFAFA (ADMIN ONLY) ====================
 Router.delete('/:id', VerifyToken, async (Req, Res) => {
     try {
         var LifafaData = await Lifafa.findOne({ lifafaId: Req.params.id });
-        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lɪꜰᴀꜰᴀ Nᴏᴛ Fᴏᴜɴᴅ' });
+        if (!LifafaData) return Res.status(200).json({ success: false, message: 'Lifafa Not Found' });
         
         var UserData = await User.findById(Req.userId);
         var IsAdmin = UserData && UserData.isAdmin === true;
@@ -1262,14 +1231,14 @@ Router.delete('/:id', VerifyToken, async (Req, Res) => {
         if (!IsAdmin) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Oɴʟʏ Aᴅᴍɪɴ Cᴀɴ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ.' 
+                message: 'Only Admin Can Delete Lifafa.' 
             });
         }
         
         if (LifafaData.claimedUsers.length > 0) {
             return Res.status(200).json({ 
                 success: false, 
-                message: 'Cᴀɴɴᴏᴛ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ Tʜᴀᴛ Hᴀꜱ Bᴇᴇɴ Cʟᴀɪᴍᴇᴅ' 
+                message: 'Cannot Delete Lifafa That Has Been Claimed' 
             });
         }
         
@@ -1278,42 +1247,35 @@ Router.delete('/:id', VerifyToken, async (Req, Res) => {
         
         if (Creator && Creator.telegramId) {
             var CreatorDeleteMessage = 
-'<b>─────────────────</b>\n' +
-'<b>🗑️ Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ Bʏ Aᴅᴍɪɴ</b>\n' +
-'<b>─────────────────</b>\n\n' +
-'<b>👤 Dᴇᴀʀ ' + Creator.fullName + ',</b> Yᴏᴜʀ Lɪꜰᴀꜰᴀ Hᴀꜱ Bᴇᴇɴ Dᴇʟᴇᴛᴇᴅ Bʏ Aᴅᴍɪɴ.\n\n' +
-'📌 <b>Tɪᴛʟᴇ:</b> ' + LifafaData.title + '\n' +
-'👤 <b>Dᴇʟᴇᴛᴇᴅ Bʏ:</b> Aᴅᴍɪɴ\n' +
-'⚠️ <b>Nᴏ Rᴇꜰᴜɴᴅ Wɪʟʟ Bᴇ Pʀᴏᴠɪᴅᴇᴅ</b>\n' +
-'───────────────────────────\n' +
-'📊 <b>Sᴛᴀᴛᴜꜱ:</b> Dᴇʟᴇᴛᴇᴅ Bʏ Aᴅᴍɪɴ\n' +
-'───────────────────────────';
+'Lifafa Deleted By Admin\n\n' +
+'Dear ' + Creator.fullName + ', Your Lifafa Has Been Deleted By Admin.\n\n' +
+'Title: ' + LifafaData.title + '\n' +
+'Deleted By: Admin\n' +
+'No Refund Will Be Provided\n\n' +
+'Status: Deleted By Admin';
             await SendNotificationToUser(Creator, CreatorDeleteMessage);
         }
         
         if (AdminTgId) {
             var AdminDeleteMessage = 
-'<b>─────────────────</b>\n' +
-'<b>🗑️ Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ Bʏ Aᴅᴍɪɴ</b>\n' +
-'<b>─────────────────</b>\n\n' +
-'👤 <b>Dᴇʟᴇᴛᴇᴅ Bʏ:</b> Aᴅᴍɪɴ (' + UserData.fullName + ')\n' +
-'📌 <b>Tɪᴛʟᴇ:</b> ' + LifafaData.title + '\n' +
-'👤 <b>Cʀᴇᴀᴛᴏʀ:</b> ' + (Creator ? Creator.fullName : 'Unknown') + '\n' +
-'💰 <b>Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹' + LifafaData.totalAmount + '\n' +
-'📊 <b>Sᴛᴀᴛᴜꜱ:</b> Dᴇʟᴇᴛᴇᴅ\n' +
-'───────────────────────────';
+'Lifafa Deleted By Admin\n\n' +
+'Deleted By: Admin (' + UserData.fullName + ')\n' +
+'Title: ' + LifafaData.title + '\n' +
+'Creator: ' + (Creator ? Creator.fullName : 'Unknown') + '\n' +
+'Total Amount: ₹' + LifafaData.totalAmount + '\n' +
+'Status: Deleted';
             await NotifyAdmin(AdminDeleteMessage);
         }
         
         return Res.status(200).json({ 
             success: true, 
-            message: 'Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Bʏ Aᴅᴍɪɴ (Nᴏ Rᴇꜰᴜɴᴅ)'
+            message: 'Lifafa Deleted Successfully By Admin (No Refund)'
         });
     } catch (Error) { 
-        console.error('❌ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', Error); 
+        console.error('Delete Lifafa Error:', Error); 
         return Res.status(200).json({ 
             success: false, 
-            message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' 
+            message: 'Server Error. Please Try Again Later.' 
         }); 
     }
 });
