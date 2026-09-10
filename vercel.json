@@ -52,6 +52,17 @@
       }
     },
     {
+      "src": "/ai/(.*)",
+      "dest": "/server.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
       "src": "/(normal|dice|toss|scratch)(/?)",
       "dest": "/server.js",
       "headers": {
@@ -66,7 +77,7 @@
       }
     },
     {
-      "src": "/(a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|terms|qr|invoice|invoice-pay|txn)(/?)",
+      "src": "/(a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|qr|invoice|invoice-pay|txn)(/?)",
       "dest": "/server.js",
       "headers": {
         "Access-Control-Allow-Origin": "*"
