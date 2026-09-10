@@ -8,17 +8,17 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 // ============================================================
-// Tᴇʟᴇɢʀᴀᴍ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ — Bᴀᴄᴋᴇɴᴅ Rᴏᴜᴛᴇꜱ
+// TELEGRAM - UNIVERSAL WALLET BACKEND ROUTES
 // ============================================================
 
-// Telegram Bot Configuration from .env with fallback values
+// Telegram Bot Configuration from .env
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const BOT_USERNAME = process.env.BOT_USERNAME;
 const ADMIN_TELEGRAM_ID = process.env.ADMIN_TG_ID;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ============================================================
-// Cᴏʟᴏʀ Cᴏɴꜱᴛᴀɴᴛꜱ Fᴏʀ Cᴏɴꜱᴏʟᴇ Lᴏɢꜱ
+// COLOR CONSTANTS FOR CONSOLE LOGS
 // ============================================================
 const COLORS = {
     GREEN: '\x1b[32m',
@@ -28,7 +28,7 @@ const COLORS = {
 };
 
 // ============================================================
-// Cᴏʟᴏʀᴇᴅ Cᴏɴꜱᴏʟᴇ Lᴏɢꜱ
+// COLORED CONSOLE LOGS
 // ============================================================
 function logSuccess(message) {
     console.log(`${COLORS.GREEN}✅ ${message}${COLORS.RESET}`);
@@ -42,11 +42,11 @@ function logInfo(message) {
     console.log(`${COLORS.BLUE}📌 ${message}${COLORS.RESET}`);
 }
 
-// Iɴ-Mᴇᴍᴏʀʏ OTP Sᴛᴏʀᴇ (Uꜱᴇ Rᴇᴅɪꜱ Iɴ Pʀᴏᴅᴜᴄᴛɪᴏɴ)
+// In-Memory OTP Store (Use Redis In Production)
 const otpStore = new Map();
 
 // ============================================================
-// Hᴇʟᴘᴇʀ: Sᴇɴᴅ Mᴇꜱꜱᴀɢᴇ Vɪᴀ Tᴇʟᴇɢʀᴀᴍ
+// HELPER: SEND MESSAGE VIA TELEGRAM
 // ============================================================
 async function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
@@ -71,20 +71,20 @@ async function sendTelegramMessage(chatId, message) {
                 try {
                     const result = JSON.parse(responseData);
                     if (result.ok) {
-                        logSuccess(`Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ Tᴏ ${chatId}`);
+                        logSuccess(`Telegram Message Sent To ${chatId}`);
                     } else {
-                        logError(`Tᴇʟᴇɢʀᴀᴍ Eʀʀᴏʀ: ${result.description}`);
+                        logError(`Telegram Error: ${result.description}`);
                     }
                     resolve({ success: result.ok, error: result.description });
                 } catch (e) {
-                    logError(`Pᴀʀꜱᴇ Eʀʀᴏʀ: ${e.message}`);
+                    logError(`Parse Error: ${e.message}`);
                     resolve({ success: false, error: e.message });
                 }
             });
         });
         
         request.on('error', (error) => {
-            logError(`Rᴇǫᴜᴇꜱᴛ Eʀʀᴏʀ: ${error.message}`);
+            logError(`Request Error: ${error.message}`);
             resolve({ success: false, error: error.message });
         });
         
@@ -94,13 +94,13 @@ async function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================================
-// Hᴇʟᴘᴇʀ: Vᴇʀɪꜰʏ JWT Tᴏᴋᴇɴ & Gᴇᴛ Uꜱᴇʀ
+// HELPER: VERIFY JWT TOKEN & GET USER
 // ============================================================
 async function getUserFromToken(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        logError('M𝙸ꜱꜱ𝙸ɴɢ Oʀ Iɴᴠᴀʟ𝙸ᴅ Aᴜᴛʜᴏʀ𝙸ᴢᴀᴛ𝙸ᴏɴ Hᴇᴀᴅᴇʀ');
-        throw new Error('M𝙸ꜱꜱ𝙸ɴɢ Oʀ Iɴᴠᴀʟ𝙸ᴅ Aᴜᴛʜᴏʀ𝙸ᴢᴀᴛ𝙸ᴏɴ Hᴇᴀᴅᴇʀ');
+        logError('Missing Or Invalid Authorization Header');
+        throw new Error('Missing Or Invalid Authorization Header');
     }
 
     const token = authHeader.split(' ')[1];
@@ -108,23 +108,23 @@ async function getUserFromToken(req) {
     
     const user = await User.findById(decoded.userId);
     if (!user) {
-        logError(`Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ: ${decoded.userId}`);
-        throw new Error('Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ');
+        logError(`User Not Found: ${decoded.userId}`);
+        throw new Error('User Not Found');
     }
 
-    logInfo(`Uꜱᴇʀ Aᴜᴛʜᴇɴᴛ𝙸ᴄᴀᴛᴇᴅ: ${user.fullName || user.mobile}`);
+    logInfo(`User Authenticated: ${user.fullName || user.mobile}`);
     return user;
 }
 
 // ============================================================
-// Hᴇʟᴘᴇʀ: Gᴇɴᴇʀᴀᴛᴇ OTP (6-D𝙸ɢ𝙸ᴛ)
+// HELPER: GENERATE OTP (6-DIGIT)
 // ============================================================
 function generateOTP() {
     return crypto.randomInt(100000, 999999).toString();
 }
 
 // ============================================================
-// Hᴇʟᴘᴇʀ: Gᴇᴛ Cᴜʀʀᴇɴᴛ T𝙸ᴍᴇ Iɴ Iꜱᴛ
+// HELPER: GET CURRENT TIME IN IST
 // ============================================================
 function getCurrentDateTime() {
     const now = new Date();
@@ -142,52 +142,52 @@ function getCurrentDateTime() {
 }
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Gᴇᴛ Tᴇʟᴇɢʀᴀᴍ Sᴛᴀᴛᴜꜱ
+// ROUTE: GET TELEGRAM STATUS
 // ============================================================
 router.get('/status', async (req, res) => {
     try {
-        logInfo('Gᴇᴛᴛ𝙸ɴɢ Tᴇʟᴇɢʀᴀᴍ Sᴛᴀᴛᴜꜱ...');
+        logInfo('Getting Telegram Status...');
         const user = await getUserFromToken(req);
 
-        logSuccess(`Tᴇʟᴇɢʀᴀᴍ Sᴛᴀᴛᴜꜱ: ${user.telegramId || 'Nᴏᴛ L𝙸ɴᴋᴇᴅ'}`);
+        logSuccess(`Telegram Status: ${user.telegramId || 'Not Linked'}`);
         res.json({
             success: true,
             telegramId: user.telegramId || null,
             linked: !!user.telegramId,
         });
     } catch (error) {
-        logError(`Sᴛᴀᴛᴜꜱ Eʀʀᴏʀ: ${error.message}`);
+        logError(`Status Error: ${error.message}`);
         res.status(401).json({
             success: false,
-            message: error.message || 'Uɴᴀᴜᴛʜᴏʀ𝙸ᴢᴇᴅ Aᴄᴄᴇꜱꜱ',
+            message: error.message || 'Unauthorized Access',
         });
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Sᴇɴᴅ OTP Tᴏ Tᴇʟᴇɢʀᴀᴍ
+// ROUTE: SEND OTP TO TELEGRAM
 // ============================================================
 router.post('/send-otp', async (req, res) => {
     try {
         const { telegramId } = req.body;
         const dateTime = getCurrentDateTime();
-        logInfo(`Sᴇɴᴅ𝙸ɴɢ OTP Tᴏ Tᴇʟᴇɢʀᴀᴍ Iᴅ: ${telegramId}`);
+        logInfo(`Sending OTP To Telegram Id: ${telegramId}`);
 
         if (!telegramId || !/^\d{10}$/.test(telegramId)) {
-            logError(`Iɴᴠᴀʟ𝙸ᴅ Tᴇʟᴇɢʀᴀᴍ Iᴅ Fᴏʀᴍᴀᴛ: ${telegramId}`);
+            logError(`Invalid Telegram Id Format: ${telegramId}`);
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟ𝙸ᴅ Tᴇʟᴇɢʀᴀᴍ Iᴅ Fᴏʀᴍᴀᴛ — Exᴘᴇᴄᴛᴇᴅ 10 D𝙸ɢ𝙸ᴛꜱ',
+                message: 'Invalid Telegram Id Format — Expected 10 Digits',
             });
         }
 
         const user = await getUserFromToken(req);
 
         if (user.telegramId) {
-            logError(`Tᴇʟᴇɢʀᴀᴍ Aʟʀᴇᴀᴅʏ L𝙸ɴᴋᴇᴅ Fᴏʀ Uꜱᴇʀ: ${user._id}`);
+            logError(`Telegram Already Linked For User: ${user._id}`);
             return res.status(400).json({
                 success: false,
-                message: 'Tᴇʟᴇɢʀᴀᴍ Aʟʀᴇᴀᴅʏ L𝙸ɴᴋᴇᴅ Tᴏ Tʜ𝙸ꜱ Aᴄᴄᴏᴜɴᴛ',
+                message: 'Telegram Already Linked To This Account',
             });
         }
 
@@ -203,111 +203,107 @@ router.post('/send-otp', async (req, res) => {
         setTimeout(() => {
             if (otpStore.get(telegramId)?.otp === otp) {
                 otpStore.delete(telegramId);
-                logInfo(`Cʟᴇᴀɴᴇᴅ Exᴘ𝙸ʀᴇᴅ OTP Fᴏʀ ${telegramId}`);
+                logInfo(`Cleaned Expired OTP For ${telegramId}`);
             }
         }, 5 * 60 * 1000);
 
-        logSuccess(`OTP Gᴇɴᴇʀᴀᴛᴇᴅ Fᴏʀ ${telegramId}: ${otp}`);
+        logSuccess(`OTP Generated For ${telegramId}: ${otp}`);
 
         const otpMessage = 
-`<b>──────────────</b>
-<b>🔐 Oᴛᴘ Sᴇᴄᴛɪᴏɴ</b>
-<b>──────────────</b>
+`OTP Section
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Oɴᴇ Tɪᴍᴇ Pᴀꜱꜱᴡᴏʀᴅ Hᴀꜱ Bᴇᴇɴ Gᴇɴᴇʀᴀᴛᴇᴅ.
+Dear ${user.fullName}, Your One Time Password Has Been Generated.
 
-📲 <b>Yᴏᴜʀ Oᴛᴘ:</b> <code>${otp}</code>
-⏳ <b>Vᴀʟɪᴅɪᴛʏ:</b> 5 M𝙸ɴᴜᴛᴇꜱ
-🎯 <b>Pᴜʀᴘᴏꜱᴇ:</b> Tᴇʟᴇɢʀᴀᴍ L𝙸ɴᴋ𝙸ɴɢ
-📅 <code>${dateTime}</code>
+Your OTP: ${otp}
+Validity: 5 Minutes
+Purpose: Telegram Linking
+Date: ${dateTime}
 
-───────────────────────
-🔒 Dᴏ Nᴏᴛ Sʜᴀʀᴇ Tʜɪꜱ Oᴛᴘ Wɪᴛʜ Aɴʏᴏɴᴇ.
-───────────────────────`;
+Do Not Share This OTP With Anyone.`;
 
         const result = await sendTelegramMessage(telegramId, otpMessage);
 
         if (!result.success) {
-            logError(`Fᴀ𝙸ʟᴇᴅ Tᴏ Sᴇɴᴅ OTP Vɪᴀ Tᴇʟᴇɢʀᴀᴍ: ${result.error}`);
+            logError(`Failed To Send OTP Via Telegram: ${result.error}`);
             return res.status(500).json({
                 success: false,
-                message: 'Fᴀ𝙸ʟᴇᴅ Tᴏ Sᴇɴᴅ Oᴛᴘ. Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Sᴜʀᴇ Yᴏᴜ Hᴀᴠᴇ Sᴛᴀʀᴛᴇᴅ Tʜᴇ Bᴏᴛ Aɴᴅ Tʀʏ Aɢᴀ𝙸ɴ.'
+                message: 'Failed To Send OTP. Please Make Sure You Have Started The Bot And Try Again.'
             });
         }
 
-        logSuccess(`OTP Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Tᴏ ${telegramId}`);
+        logSuccess(`OTP Sent Successfully To ${telegramId}`);
 
         res.json({
             success: true,
-            message: 'OTP Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Tᴏ Yᴏᴜʀ Tᴇʟᴇɢʀᴀᴍ',
+            message: 'OTP Sent Successfully To Your Telegram',
         });
     } catch (error) {
-        logError(`Sᴇɴᴅ OTP Eʀʀᴏʀ: ${error.message}`);
+        logError(`Send OTP Error: ${error.message}`);
         res.status(500).json({
             success: false,
-            message: error.message || 'Fᴀ𝙸ʟᴇᴅ Tᴏ Sᴇɴᴅ OTP — Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ',
+            message: error.message || 'Failed To Send OTP — Please Try Again',
         });
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Vᴇʀɪꜰʏ OTP & Lɪɴᴋ Tᴇʟᴇɢʀᴀᴍ
+// ROUTE: VERIFY OTP & LINK TELEGRAM
 // ============================================================
 router.post('/verify-otp', async (req, res) => {
     try {
         const { telegramId, otp } = req.body;
         const dateTime = getCurrentDateTime();
-        logInfo(`Vᴇʀ𝙸ꜰʏ𝙸ɴɢ OTP Fᴏʀ Tᴇʟᴇɢʀᴀᴍ Iᴅ: ${telegramId}`);
+        logInfo(`Verifying OTP For Telegram Id: ${telegramId}`);
 
         if (!telegramId || !otp) {
-            logError('M𝙸ꜱꜱ𝙸ɴɢ Tᴇʟᴇɢʀᴀᴍ Iᴅ Oʀ OTP');
+            logError('Missing Telegram Id Or OTP');
             return res.status(400).json({
                 success: false,
-                message: 'M𝙸ꜱꜱ𝙸ɴɢ Tᴇʟᴇɢʀᴀᴍ Iᴅ Oʀ OTP',
+                message: 'Missing Telegram Id Or OTP',
             });
         }
 
         const storedData = otpStore.get(telegramId);
         if (!storedData) {
-            logError(`Nᴏ OTP Fᴏᴜɴᴅ Fᴏʀ ${telegramId}`);
+            logError(`No OTP Found For ${telegramId}`);
             return res.status(400).json({
                 success: false,
-                message: 'Nᴏ OTP Fᴏᴜɴᴅ Fᴏʀ Tʜ𝙸ꜱ Tᴇʟᴇɢʀᴀᴍ Iᴅ — Pʟᴇᴀꜱᴇ Rᴇǫᴜᴇꜱᴛ A Nᴇᴡ OTP',
+                message: 'No OTP Found For This Telegram Id — Please Request A New OTP',
             });
         }
 
         if (Date.now() > storedData.expiresAt) {
             otpStore.delete(telegramId);
-            logError(`OTP Exᴘ𝙸ʀᴇᴅ Fᴏʀ ${telegramId}`);
+            logError(`OTP Expired For ${telegramId}`);
             return res.status(400).json({
                 success: false,
-                message: 'OTP Exᴘ𝙸ʀᴇᴅ — Pʟᴇᴀꜱᴇ Rᴇǫᴜᴇꜱᴛ A Nᴇᴡ OTP',
+                message: 'OTP Expired — Please Request A New OTP',
             });
         }
 
         if (storedData.otp !== otp) {
-            logError(`Iɴᴄᴏʀʀᴇᴄᴛ OTP Fᴏʀ ${telegramId}: ${otp}`);
+            logError(`Incorrect OTP For ${telegramId}: ${otp}`);
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴄᴏʀʀᴇᴄᴛ OTP — Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ',
+                message: 'Incorrect OTP — Please Try Again',
             });
         }
 
         const user = await User.findById(storedData.userId);
         if (!user) {
-            logError(`Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ: ${storedData.userId}`);
+            logError(`User Not Found: ${storedData.userId}`);
             return res.status(404).json({
                 success: false,
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ — Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ Aɢᴀ𝙸ɴ',
+                message: 'User Not Found — Please Login Again',
             });
         }
 
         const existingUser = await User.findOne({ telegramId });
         if (existingUser && existingUser._id.toString() !== user._id.toString()) {
-            logError(`Tᴇʟᴇɢʀᴀᴍ Iᴅ Aʟʀᴇᴀᴅʏ L𝙸ɴᴋᴇᴅ Tᴏ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ: ${telegramId}`);
+            logError(`Telegram Id Already Linked To Another User: ${telegramId}`);
             return res.status(400).json({
                 success: false,
-                message: 'Tʜ𝙸ꜱ Tᴇʟᴇɢʀᴀᴍ Aᴄᴄᴏᴜɴᴛ Iꜱ Aʟʀᴇᴀᴅʏ L𝙸ɴᴋᴇᴅ Tᴏ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ',
+                message: 'This Telegram Account Is Already Linked To Another User',
             });
         }
 
@@ -316,51 +312,47 @@ router.post('/verify-otp', async (req, res) => {
 
         otpStore.delete(telegramId);
 
-        logSuccess(`Tᴇʟᴇɢʀᴀᴍ L𝙸ɴᴋᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Fᴏʀ Uꜱᴇʀ: ${user.fullName || user._id}`);
+        logSuccess(`Telegram Linked Successfully For User: ${user.fullName || user._id}`);
 
         const confirmMessage = 
-`<b>─────────────────</b>
-<b>✅ Tᴇʟᴇɢʀᴀᴍ Lɪɴᴋᴇᴅ</b>
-<b>─────────────────</b>
+`Telegram Linked
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Tᴇʟᴇɢʀᴀᴍ Aᴄᴄᴏᴜɴᴛ Hᴀꜱ Bᴇᴇɴ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Lɪɴᴋᴇᴅ.
+Dear ${user.fullName}, Your Telegram Account Has Been Successfully Linked.
 
-🆔 <b>Tᴇʟᴇɢʀᴀᴍ Iᴅ:</b> ${telegramId}
-📅 <code>${dateTime}</code>
+Telegram Id: ${telegramId}
+Date: ${dateTime}
 
-───────────────────────
-✅ Yᴏᴜ Cᴀɴ Nᴏᴡ Rᴇᴄᴇɪᴠᴇ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴꜱ.
-───────────────────────`;
+You Can Now Receive Notifications.`;
 
         await sendTelegramMessage(telegramId, confirmMessage);
 
         res.json({
             success: true,
-            message: 'Tᴇʟᴇɢʀᴀᴍ L𝙸ɴᴋᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'Telegram Linked Successfully',
             telegramId: user.telegramId,
         });
     } catch (error) {
-        logError(`Vᴇʀ𝙸ꜰʏ OTP Eʀʀᴏʀ: ${error.message}`);
+        logError(`Verify OTP Error: ${error.message}`);
         res.status(500).json({
             success: false,
-            message: error.message || 'Fᴀ𝙸ʟᴇᴅ Tᴏ Vᴇʀ𝙸ꜰʏ OTP — Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ',
+            message: error.message || 'Failed To Verify OTP — Please Try Again',
         });
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Uɴʟɪɴᴋ Tᴇʟᴇɢʀᴀᴍ (Nᴏ OTP Rᴇǫᴜɪʀᴇᴅ)
+// ROUTE: UNLINK TELEGRAM (NO OTP REQUIRED)
 // ============================================================
 router.post('/unlink', async (req, res) => {
     try {
-        logInfo('Uɴʟ𝙸ɴᴋ𝙸ɴɢ Tᴇʟᴇɢʀᴀᴍ...');
+        logInfo('Unlinking Telegram...');
         const user = await getUserFromToken(req);
 
         if (!user.telegramId) {
-            logError('Nᴏ Tᴇʟᴇɢʀᴀᴍ Aᴄᴄᴏᴜɴᴛ Tᴏ Uɴʟ𝙸ɴᴋ');
+            logError('No Telegram Account To Unlink');
             return res.status(400).json({
                 success: false,
-                message: 'Nᴏ Tᴇʟᴇɢʀᴀᴍ Aᴄᴄᴏᴜɴᴛ Tᴏ Uɴʟ𝙸ɴᴋ',
+                message: 'No Telegram Account To Unlink',
             });
         }
 
@@ -370,39 +362,35 @@ router.post('/unlink', async (req, res) => {
         user.telegramId = null;
         await user.save();
 
-        logSuccess(`Tᴇʟᴇɢʀᴀᴍ Uɴʟ𝙸ɴᴋᴇᴅ Fᴏʀ Uꜱᴇʀ: ${user.fullName || user._id}`);
+        logSuccess(`Telegram Unlinked For User: ${user.fullName || user._id}`);
 
         const unlinkMessage = 
-`<b>─────────────────</b>
-<b>🔴 Tᴇʟᴇɢʀᴀᴍ Uɴʟɪɴᴋᴇᴅ</b>
-<b>─────────────────</b>
+`Telegram Unlinked
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Tᴇʟᴇɢʀᴀᴍ Aᴄᴄᴏᴜɴᴛ Hᴀꜱ Bᴇᴇɴ Dɪꜱᴄᴏɴɴᴇᴄᴛᴇᴅ Fʀᴏᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ.
+Dear ${user.fullName}, Your Telegram Account Has Been Disconnected From Universal Wallet.
 
-🆔 <b>Tᴇʟᴇɢʀᴀᴍ Iᴅ:</b> ${telegramId}
-📅 <code>${dateTime}</code>
+Telegram Id: ${telegramId}
+Date: ${dateTime}
 
-───────────────────────
-📵 Yᴏᴜ Wɪʟʟ Nᴏ Lᴏɴɢᴇʀ Rᴇᴄᴇɪᴠᴇ Aʟᴇʀᴛꜱ Oɴ Tʜɪꜱ Aᴄᴄᴏᴜɴᴛ.
-───────────────────────`;
+You Will No Longer Receive Alerts On This Account.`;
 
         await sendTelegramMessage(telegramId, unlinkMessage);
 
         res.json({
             success: true,
-            message: 'Tᴇʟᴇɢʀᴀᴍ Uɴʟ𝙸ɴᴋᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'Telegram Unlinked Successfully',
         });
     } catch (error) {
-        logError(`Uɴʟ𝙸ɴᴋ Eʀʀᴏʀ: ${error.message}`);
+        logError(`Unlink Error: ${error.message}`);
         res.status(500).json({
             success: false,
-            message: error.message || 'Fᴀ𝙸ʟᴇᴅ Tᴏ Uɴʟ𝙸ɴᴋ Tᴇʟᴇɢʀᴀᴍ — Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ',
+            message: error.message || 'Failed To Unlink Telegram — Please Try Again',
         });
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Wᴇʙʜᴏᴏᴋ Fᴏʀ Tᴇʟᴇɢʀᴀᴍ Bᴏᴛ
+// ROUTE: WEBHOOK FOR TELEGRAM BOT
 // ============================================================
 router.post('/webhook', async (req, res) => {
     try {
@@ -415,84 +403,76 @@ router.post('/webhook', async (req, res) => {
         const text = message.text || '';
         const dateTime = getCurrentDateTime();
 
-        logInfo(`Rᴇᴄᴇ𝙸ᴠᴇᴅ Mᴇꜱꜱᴀɢᴇ Fʀᴏᴍ ${chatId}: ${text}`);
+        logInfo(`Received Message From ${chatId}: ${text}`);
 
         if (text.startsWith('/status')) {
             const user = await User.findOne({ telegramId: chatId.toString() });
             if (user) {
                 const statusMessage = 
-`<b>──────────────</b>
-<b>✅ Lɪɴᴋᴇᴅ Sᴛᴀᴛᴜꜱ</b>
-<b>──────────────</b>
+`Linked Status
 
-Yᴏᴜʀ Tᴇʟᴇɢʀᴀᴍ Iꜱ Cᴜʀʀᴇɴᴛʟʏ Lɪɴᴋᴇᴅ Tᴏ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ.
+Your Telegram Is Currently Linked To Universal Wallet.
 
-👤 <b>Uꜱᴇʀ:</b> ${user.fullName}
-🆔 <b>Wᴀʟʟᴇᴛ Iᴅ:</b> ${user.walletId}
-📱 <b>Tᴇʟᴇɢʀᴀᴍ Iᴅ:</b> ${chatId}
+User: ${user.fullName}
+Wallet Id: ${user.walletId}
+Telegram Id: ${chatId}
 
-───────────────────────
-🔔 Yᴏᴜ Wɪʟʟ Rᴇᴄᴇɪᴠᴇ Rᴇᴀʟ-Tɪᴍᴇ Aʟᴇʀᴛꜱ Hᴇʀᴇ.
-───────────────────────`;
+You Will Receive Real-Time Alerts Here.`;
                 
                 await sendTelegramMessage(chatId, statusMessage);
-                logSuccess(`Sᴛᴀᴛᴜꜱ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ Tᴏ ${chatId} (L𝙸ɴᴋᴇᴅ)`);
+                logSuccess(`Status Message Sent To ${chatId} (Linked)`);
             } else {
                 const notLinkedMessage = 
-`<b>───────────</b>
-<b>❌ Nᴏᴛ Lɪɴᴋᴇᴅ</b>
-<b>───────────</b>
+`Not Linked
 
-Yᴏᴜʀ Tᴇʟᴇɢʀᴀᴍ Iꜱ Nᴏᴛ Cᴜʀʀᴇɴᴛʟʏ Lɪɴᴋᴇᴅ Tᴏ Aɴʏ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ Aᴄᴄᴏᴜɴᴛ.
+Your Telegram Is Not Currently Linked To Any Universal Wallet Account.
 
-───────────────────────
-Tᴏ Lɪɴᴋ, Pʟᴇᴀꜱᴇ Tʀʏ Tᴏ Cᴏɴᴛᴀᴄᴛ Sᴜᴩᴩᴏʀᴛ Tᴇᴀᴍ.
-───────────────────────`;
+To Link, Please Try To Contact Support Team.`;
                 
                 await sendTelegramMessage(chatId, notLinkedMessage);
-                logInfo(`Sᴛᴀᴛᴜꜱ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ Tᴏ ${chatId} (Nᴏᴛ L𝙸ɴᴋᴇᴅ)`);
+                logInfo(`Status Message Sent To ${chatId} (Not Linked)`);
             }
         }
 
         res.sendStatus(200);
     } catch (error) {
-        logError(`Wᴇʙʜᴏᴏᴋ Eʀʀᴏʀ: ${error.message}`);
+        logError(`Webhook Error: ${error.message}`);
         res.sendStatus(500);
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Sᴇᴛ Wᴇʙʜᴏᴏᴋ
+// ROUTE: SET WEBHOOK
 // ============================================================
 router.post('/set-webhook', async (req, res) => {
     try {
         if (!BOT_TOKEN) {
-            logError('BOT_TOKEN Iꜱ Nᴏᴛ Cᴏɴꜰ𝙸ɢᴜʀᴇᴅ');
+            logError('BOT_TOKEN Is Not Configured');
             return res.status(500).json({
                 success: false,
-                message: 'BOT_TOKEN Iꜱ Nᴏᴛ Cᴏɴꜰ𝙸ɢᴜʀᴇᴅ',
+                message: 'BOT_TOKEN Is Not Configured',
             });
         }
-        const webhookUrl = req.body.url || `${process.env.APP_URL || 'https://prime-wallet-lifafa.vercel.app'}/api/tg/webhook`;
+        const webhookUrl = req.body.url || `${process.env.APP_URL || 'https://universal-wallet.vercel.app'}/api/tg/webhook`;
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${webhookUrl}`;
         const response = await axios.get(url);
-        logSuccess(`Wᴇʙʜᴏᴏᴋ Sᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ: ${webhookUrl}`);
+        logSuccess(`Webhook Set Successfully: ${webhookUrl}`);
         res.json({
             success: true,
-            message: 'Wᴇʙʜᴏᴏᴋ Sᴇᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'Webhook Set Successfully',
             data: response.data,
         });
     } catch (error) {
-        logError(`Sᴇᴛ Wᴇʙʜᴏᴏᴋ Eʀʀᴏʀ: ${error.message}`);
+        logError(`Set Webhook Error: ${error.message}`);
         res.status(500).json({
             success: false,
-            message: error.message || 'Fᴀ𝙸ʟᴇᴅ Tᴏ Sᴇᴛ Wᴇʙʜᴏᴏᴋ — Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀ𝙸ɴ',
+            message: error.message || 'Failed To Set Webhook — Please Try Again',
         });
     }
 });
 
 // ============================================================
-// Rᴏᴜᴛᴇ: Cʟᴇᴀɴᴜᴘ Exᴘɪʀᴇᴅ OTPs
+// ROUTE: CLEANUP EXPIRED OTPS
 // ============================================================
 router.post('/cleanup-otps', (req, res) => {
     const now = Date.now();
@@ -503,10 +483,10 @@ router.post('/cleanup-otps', (req, res) => {
             count++;
         }
     }
-    logInfo(`Cʟᴇᴀɴᴇᴅ Uᴘ ${count} Exᴘ𝙸ʀᴇᴅ OTPꜱ`);
+    logInfo(`Cleaned Up ${count} Expired OTPs`);
     res.json({
         success: true,
-        message: `Cʟᴇᴀɴᴇᴅ Uᴘ ${count} Exᴘ𝙸ʀᴇᴅ OTPꜱ`,
+        message: `Cleaned Up ${count} Expired OTPs`,
         count,
     });
 });
