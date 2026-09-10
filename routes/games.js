@@ -12,29 +12,29 @@ const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
-            return res.status(401).json({ success: false, message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' });
+            return res.status(401).json({ success: false, message: 'No Token Provided' });
         }
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
         if (!user) {
-            return res.status(401).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' });
+            return res.status(401).json({ success: false, message: 'User Not Found' });
         }
         req.user = user;
         next();
     } catch (error) {
-        console.error('Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error);
+        console.error('Token Verification Error:', error);
         if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ' });
+            return res.status(401).json({ success: false, message: 'Invalid Token' });
         }
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ success: false, message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ' });
+            return res.status(401).json({ success: false, message: 'Token Expired' });
         }
-        return res.status(401).json({ success: false, message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ' });
+        return res.status(401).json({ success: false, message: 'Authentication Failed' });
     }
 };
 
 // ============================================================
-// 📊 Gᴇᴛ Gᴀᴍᴇ Sᴇᴛᴛɪɴɢꜱ
+// GET GAME SETTINGS
 // ============================================================
 router.get('/settings', async (req, res) => {
     try {
@@ -46,18 +46,18 @@ router.get('/settings', async (req, res) => {
             payoutMultiplier: 2
         });
     } catch (error) {
-        console.error('Gᴇᴛ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴇᴛᴛɪɴɢꜱ' });
+        console.error('Get Settings Error:', error);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Settings' });
     }
 });
 
 // ============================================================
-// 🪙 Cᴏɪɴ Fʟɪᴘ Gᴀᴍᴇ
+// COIN FLIP GAME
 // ============================================================
 router.post('/headtail', verifyToken, async (req, res) => {
     try {
-        console.log('📥 Coin Flip Request Received');
-        console.log('📦 Request Body:', req.body);
+        console.log('Coin Flip Request Received');
+        console.log('Request Body:', req.body);
         
         const user = req.user;
         const { amount, choice } = req.body;
@@ -65,7 +65,7 @@ router.post('/headtail', verifyToken, async (req, res) => {
         if (!amount || amount <= 0) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Valid Amount Required' 
             });
         }
 
@@ -73,7 +73,7 @@ router.post('/headtail', verifyToken, async (req, res) => {
         if (amount < minBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mɪɴɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${minBet}`
+                message: `Minimum Bet Is ₹${minBet}`
             });
         }
 
@@ -81,14 +81,14 @@ router.post('/headtail', verifyToken, async (req, res) => {
         if (amount > maxBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mᴀxɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${maxBet}`
+                message: `Maximum Bet Is ₹${maxBet}`
             });
         }
 
         if (!choice || !['heads', 'head', 'tails', 'tail'].includes(choice.toLowerCase())) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Pʟᴇᴀꜱᴇ Cʜᴏᴏꜱᴇ Hᴇᴀᴅ Oʀ Tᴀɪʟ' 
+                message: 'Please Choose Head Or Tail' 
             });
         }
 
@@ -98,7 +98,7 @@ router.post('/headtail', verifyToken, async (req, res) => {
         if (user.balance < betAmount) {
             return res.status(400).json({
                 success: false,
-                message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Cᴜʀʀᴇɴᴛ: ₹${user.balance.toFixed(2)}`
+                message: `Insufficient Balance. Current: ₹${user.balance.toFixed(2)}`
             });
         }
 
@@ -122,8 +122,8 @@ router.post('/headtail', verifyToken, async (req, res) => {
                 amount: winAmount,
                 type: 'game_win',
                 status: 'success',
-                remark: `Cᴏɪɴ Fʟɪᴘ Wɪɴ: ${normalizedChoice.toUpperCase()} → ${outcome.toUpperCase()} (${payoutMultiplier}x)`,
-                description: `Cᴏɪɴ Fʟɪᴘ Gᴀᴍᴇ Wɪɴ (${normalizedChoice} → ${outcome})`,
+                remark: `Coin Flip Win: ${normalizedChoice.toUpperCase()} → ${outcome.toUpperCase()} (${payoutMultiplier}x)`,
+                description: `Coin Flip Game Win (${normalizedChoice} → ${outcome})`,
                 tx_time: new Date()
             });
 
@@ -139,8 +139,8 @@ router.post('/headtail', verifyToken, async (req, res) => {
                 amount: betAmount,
                 type: 'game_loss',
                 status: 'success',
-                remark: `Cᴏɪɴ Fʟɪᴘ Lᴏꜱꜱ: ${normalizedChoice.toUpperCase()} → ${outcome.toUpperCase()}`,
-                description: `Cᴏɪɴ Fʟɪᴘ Gᴀᴍᴇ Lᴏꜱꜱ (${normalizedChoice} → ${outcome})`,
+                remark: `Coin Flip Loss: ${normalizedChoice.toUpperCase()} → ${outcome.toUpperCase()}`,
+                description: `Coin Flip Game Loss (${normalizedChoice} → ${outcome})`,
                 tx_time: new Date()
             });
         }
@@ -154,25 +154,25 @@ router.post('/headtail', verifyToken, async (req, res) => {
             betAmount: betAmount,
             newBalance: newBalance,
             payoutMultiplier: payoutMultiplier,
-            message: isWin ? `🎉 Yᴏᴜ Wɪɴ ₹${winAmount}!` : `😢 Yᴏᴜ Lᴏꜱᴛ ₹${betAmount}!`
+            message: isWin ? `You Win ₹${winAmount}!` : `You Lost ₹${betAmount}!`
         });
 
     } catch (error) {
-        console.error('Cᴏɪɴ Fʟɪᴘ Eʀʀᴏʀ:', error);
+        console.error('Coin Flip Error:', error);
         return res.status(500).json({ 
             success: false, 
-            message: 'Gᴀᴍᴇ Pʀᴏᴄᴇꜱꜱɪɴɢ Fᴀɪʟᴇᴅ: ' + error.message 
+            message: 'Game Processing Failed: ' + error.message 
         });
     }
 });
 
 // ============================================================
-// 🎮 Rᴇᴅ / Gʀᴇᴇɴ Gᴀᴍᴇ
+// RED / GREEN GAME
 // ============================================================
 router.post('/redgreen', verifyToken, async (req, res) => {
     try {
-        console.log('📥 Red/Green Request Received');
-        console.log('📦 Request Body:', req.body);
+        console.log('Red/Green Request Received');
+        console.log('Request Body:', req.body);
         
         const user = req.user;
         const { amount, choice } = req.body;
@@ -180,7 +180,7 @@ router.post('/redgreen', verifyToken, async (req, res) => {
         if (!amount || amount <= 0) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Valid Amount Required' 
             });
         }
 
@@ -188,7 +188,7 @@ router.post('/redgreen', verifyToken, async (req, res) => {
         if (amount < minBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mɪɴɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${minBet}`
+                message: `Minimum Bet Is ₹${minBet}`
             });
         }
 
@@ -196,14 +196,14 @@ router.post('/redgreen', verifyToken, async (req, res) => {
         if (amount > maxBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mᴀxɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${maxBet}`
+                message: `Maximum Bet Is ₹${maxBet}`
             });
         }
 
         if (!choice || !['red', 'green'].includes(choice)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Pʟᴇᴀꜱᴇ Cʜᴏᴏꜱᴇ Rᴇᴅ Oʀ Gʀᴇᴇɴ' 
+                message: 'Please Choose Red Or Green' 
             });
         }
 
@@ -212,7 +212,7 @@ router.post('/redgreen', verifyToken, async (req, res) => {
         if (user.balance < betAmount) {
             return res.status(400).json({
                 success: false,
-                message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Cᴜʀʀᴇɴᴛ: ₹${user.balance.toFixed(2)}`
+                message: `Insufficient Balance. Current: ₹${user.balance.toFixed(2)}`
             });
         }
 
@@ -236,8 +236,8 @@ router.post('/redgreen', verifyToken, async (req, res) => {
                 amount: winAmount,
                 type: 'game_win',
                 status: 'success',
-                remark: `Rᴇᴅ/Gʀᴇᴇɴ Wɪɴ: ${choice.toUpperCase()} → ${outcome.toUpperCase()} (${payoutMultiplier}x)`,
-                description: `Rᴇᴅ/Gʀᴇᴇɴ Gᴀᴍᴇ Wɪɴ (${choice} → ${outcome})`,
+                remark: `Red/Green Win: ${choice.toUpperCase()} → ${outcome.toUpperCase()} (${payoutMultiplier}x)`,
+                description: `Red/Green Game Win (${choice} → ${outcome})`,
                 tx_time: new Date()
             });
 
@@ -253,8 +253,8 @@ router.post('/redgreen', verifyToken, async (req, res) => {
                 amount: betAmount,
                 type: 'game_loss',
                 status: 'success',
-                remark: `Rᴇᴅ/Gʀᴇᴇɴ Lᴏꜱꜱ: ${choice.toUpperCase()} → ${outcome.toUpperCase()}`,
-                description: `Rᴇᴅ/Gʀᴇᴇɴ Gᴀᴍᴇ Lᴏꜱꜱ (${choice} → ${outcome})`,
+                remark: `Red/Green Loss: ${choice.toUpperCase()} → ${outcome.toUpperCase()}`,
+                description: `Red/Green Game Loss (${choice} → ${outcome})`,
                 tx_time: new Date()
             });
         }
@@ -268,25 +268,25 @@ router.post('/redgreen', verifyToken, async (req, res) => {
             betAmount: betAmount,
             newBalance: newBalance,
             payoutMultiplier: payoutMultiplier,
-            message: isWin ? `🎉 Yᴏᴜ Wɪɴ ₹${winAmount}!` : `😢 Yᴏᴜ Lᴏꜱᴛ ₹${betAmount}!`
+            message: isWin ? `You Win ₹${winAmount}!` : `You Lost ₹${betAmount}!`
         });
 
     } catch (error) {
-        console.error('Rᴇᴅ/Gʀᴇᴇɴ Eʀʀᴏʀ:', error);
+        console.error('Red/Green Error:', error);
         return res.status(500).json({ 
             success: false, 
-            message: 'Gᴀᴍᴇ Pʀᴏᴄᴇꜱꜱɪɴɢ Fᴀɪʟᴇᴅ: ' + error.message 
+            message: 'Game Processing Failed: ' + error.message 
         });
     }
 });
 
 // ============================================================
-// ✈️ Aᴠɪᴀᴛᴏʀ Gᴀᴍᴇ - Pʟᴀʏ
+// AVIATOR GAME - PLAY
 // ============================================================
 router.post('/aviator/play', verifyToken, async (req, res) => {
     try {
-        console.log('📥 Aviator Play Request Received');
-        console.log('📦 Request Body:', req.body);
+        console.log('Aviator Play Request Received');
+        console.log('Request Body:', req.body);
         
         const user = req.user;
         const { amount, cashout } = req.body;
@@ -294,7 +294,7 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
         if (!amount || amount <= 0) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Valid Amount Required' 
             });
         }
 
@@ -302,7 +302,7 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
         if (amount < minBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mɪɴɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${minBet}`
+                message: `Minimum Bet Is ₹${minBet}`
             });
         }
 
@@ -310,21 +310,21 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
         if (amount > maxBet) {
             return res.status(400).json({
                 success: false,
-                message: `Mᴀxɪᴍᴜᴍ Bᴇᴛ Iꜱ ₹${maxBet}`
+                message: `Maximum Bet Is ₹${maxBet}`
             });
         }
 
         if (!cashout || cashout < 1.01) {
             return res.status(400).json({
                 success: false,
-                message: 'Cᴀsʜᴏᴜᴛ Mᴜʟᴛɪᴘʟɪᴇʀ Mɪɴ 1.01x'
+                message: 'Cashout Multiplier Min 1.01x'
             });
         }
 
         if (cashout > 100) {
             return res.status(400).json({
                 success: false,
-                message: 'Mᴀx Cᴀsʜᴏᴜᴛ Mᴜʟᴛɪᴘʟɪᴇʀ Iꜱ 100x'
+                message: 'Max Cashout Multiplier Is 100x'
             });
         }
 
@@ -333,7 +333,7 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
         if (user.balance < betAmount) {
             return res.status(400).json({
                 success: false,
-                message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Cᴜʀʀᴇɴᴛ: ₹${user.balance.toFixed(2)}`
+                message: `Insufficient Balance. Current: ₹${user.balance.toFixed(2)}`
             });
         }
 
@@ -359,8 +359,8 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
                 amount: winAmount,
                 type: 'game_win',
                 status: 'success',
-                remark: `Aᴠɪᴀᴛᴏʀ Wɪɴ: ${cashout}x (Cʀᴀsʜ: ${crashPoint.toFixed(2)}x)`,
-                description: `Aᴠɪᴀᴛᴏʀ Gᴀᴍᴇ Wɪɴ (${cashout}x)`,
+                remark: `Aviator Win: ${cashout}x (Crash: ${crashPoint.toFixed(2)}x)`,
+                description: `Aviator Game Win (${cashout}x)`,
                 tx_time: new Date()
             });
 
@@ -376,8 +376,8 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
                 amount: betAmount,
                 type: 'game_loss',
                 status: 'success',
-                remark: `Aᴠɪᴀᴛᴏʀ Lᴏꜱꜱ: Cʀᴀsʜ ᴀᴛ ${crashPoint.toFixed(2)}x (Cᴀsʜᴏᴜᴛ: ${cashout}x)`,
-                description: `Aᴠɪᴀᴛᴏʀ Gᴀᴍᴇ Lᴏꜱꜱ`,
+                remark: `Aviator Loss: Crash at ${crashPoint.toFixed(2)}x (Cashout: ${cashout}x)`,
+                description: `Aviator Game Loss`,
                 tx_time: new Date()
             });
         }
@@ -390,27 +390,27 @@ router.post('/aviator/play', verifyToken, async (req, res) => {
             winAmount: isWin ? winAmount : 0,
             betAmount: betAmount,
             newBalance: newBalance,
-            message: isWin ? `🎉 Yᴏᴜ Wɪɴ ₹${winAmount}!` : `😢 Yᴏᴜ Lᴏꜱᴛ ₹${betAmount}! Cʀᴀsʜ ᴀᴛ ${crashPoint.toFixed(2)}x`
+            message: isWin ? `You Win ₹${winAmount}!` : `You Lost ₹${betAmount}! Crash at ${crashPoint.toFixed(2)}x`
         });
 
     } catch (error) {
-        console.error('Aᴠɪᴀᴛᴏʀ Pʟᴀʏ Eʀʀᴏʀ:', error);
+        console.error('Aviator Play Error:', error);
         return res.status(500).json({ 
             success: false, 
-            message: 'Gᴀᴍᴇ Pʀᴏᴄᴇꜱꜱɪɴɢ Fᴀɪʟᴇᴅ: ' + error.message 
+            message: 'Game Processing Failed: ' + error.message 
         });
     }
 });
 
 // ============================================================
-// ✈️ Aᴠɪᴀᴛᴏʀ Gᴀᴍᴇ - Hɪꜱᴛᴏʀʏ
+// AVIATOR GAME - HISTORY
 // ============================================================
 router.get('/aviator/history', verifyToken, async (req, res) => {
     try {
         const history = await Transaction.find({
             user_id: req.user._id,
             type: { $in: ['game_win', 'game_loss'] },
-            'remark': { $regex: 'Aᴠɪᴀᴛᴏʀ', $options: 'i' }
+            'remark': { $regex: 'Aviator', $options: 'i' }
         })
         .sort({ tx_time: -1 })
         .limit(20);
@@ -430,13 +430,13 @@ router.get('/aviator/history', verifyToken, async (req, res) => {
             history: formatted
         });
     } catch (error) {
-        console.error('Aᴠɪᴀᴛᴏʀ Hɪꜱᴛᴏʀʏ Eʀʀᴏʀ:', error);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Hɪꜱᴛᴏʀʏ' });
+        console.error('Aviator History Error:', error);
+        res.status(500).json({ success: false, message: 'Failed To Fetch History' });
     }
 });
 
 // ============================================================
-// 📊 Lɪᴠᴇ Fᴇᴇᴅ - Gᴇᴛ Rᴇᴄᴇɴᴛ Gᴀᴍᴇ Aᴄᴛɪᴠɪᴛʏ
+// LIVE FEED - GET RECENT GAME ACTIVITY
 // ============================================================
 router.get('/live-feed', verifyToken, async (req, res) => {
     try {
@@ -445,14 +445,14 @@ router.get('/live-feed', verifyToken, async (req, res) => {
         })
         .sort({ tx_time: -1 })
         .limit(50)
-        .populate('user_id', 'name username');
+        .populate('user_id', 'fullName username');
 
         const formatted = activities.map(tx => {
             const user = tx.user_id || {};
             return {
                 id: tx._id,
-                user: user.name || user.username || 'User',
-                userName: user.name || user.username || 'User',
+                user: user.fullName || user.username || 'User',
+                userName: user.fullName || user.username || 'User',
                 type: tx.type,
                 amount: tx.amount,
                 betAmount: tx.amount,
@@ -467,13 +467,13 @@ router.get('/live-feed', verifyToken, async (req, res) => {
             activities: formatted
         });
     } catch (error) {
-        console.error('Lɪᴠᴇ Fᴇᴇᴅ Eʀʀᴏʀ:', error);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Lᴏᴀᴅ Fᴇᴇᴅ' });
+        console.error('Live Feed Error:', error);
+        res.status(500).json({ success: false, message: 'Failed To Load Feed' });
     }
 });
 
 // ============================================================
-// 📊 Gᴇᴛ Tᴏᴅᴀʏ's Sᴛᴀᴛꜱ
+// GET TODAY'S STATS
 // ============================================================
 router.get('/stats', verifyToken, async (req, res) => {
     try {
@@ -519,8 +519,8 @@ router.get('/stats', verifyToken, async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Gᴀᴍᴇ Sᴛᴀᴛꜱ Eʀʀᴏʀ:', error);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴛᴀᴛꜱ' });
+        console.error('Game Stats Error:', error);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Stats' });
     }
 });
 
