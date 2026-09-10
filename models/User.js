@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     mobile: { type: String, required: [true, 'Mobile number is required'], unique: true, trim: true, match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'] },
     email: { type: String, required: [true, 'Email address is required'], unique: true, trim: true, lowercase: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'] },
     telegramId: { type: String, unique: true, sparse: true, trim: true },
-    password: { type: String, required: [true, 'Password is required'], minlength: [8, 'Password must be at least 8 characters long'], maxlength: [15, 'Password cannot exceed 15 characters'] },
+    password: { type: String, required: [true, 'Password is required'], minlength: [8, 'Password must be at least 8 characters long'], maxlength: [50, 'Password cannot exceed 50 characters'] },
     pin: { type: String, default: null },
     pin_set: { type: Boolean, default: false },
     balance: { type: Number, default: 0, min: 0 },
