@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const depositSchema = new mongoose.Schema({
-    depositId: { type: String, required: true, unique: true, index: true },
+    depositId: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     amount: { type: Number, required: true, min: 1, max: 5000 },
     upiId: { type: String, required: true, default: 'admin@upi' },
@@ -13,7 +13,7 @@ const depositSchema = new mongoose.Schema({
         default: 'pending',
         index: true
     },
-    transactionRef: { type: String, default: null, index: true, sparse: true },
+    transactionRef: { type: String, default: null, sparse: true },
     verifiedAt: { type: Date, default: null },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     approvedAt: { type: Date, default: null },
@@ -141,7 +141,7 @@ depositSchema.statics.cleanupExpired = async function() {
 };
 
 // ============================================
-// INDEXES
+// INDEXES (শুধু compound index)
 // ============================================
 depositSchema.index({ depositId: 1, status: 1 });
 depositSchema.index({ userId: 1, createdAt: -1 });
