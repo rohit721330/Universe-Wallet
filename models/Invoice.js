@@ -20,18 +20,21 @@ const invoiceSchema = new mongoose.Schema({
     metadata: {
         senderMobile: String,
         senderName: String,
+        senderWalletId: String,
         receiverMobile: String,
         receiverName: String,
+        receiverWalletId: String,
         source: { type: String, enum: ['web', 'mobile', 'telegram', 'api'], default: 'web' },
         webhook: { type: String, default: null },
         txt_id: { type: String, default: null },
         expire_after: { type: Number, default: 30 },
-        apiKey: { type: String, default: null }
+        apiKey: { type: String, default: null },
+        transactionId: { type: String, default: null }
     }
 }, { timestamps: true });
 
 // ============================================
-// Iɴᴅᴇxᴇꜱ
+// INDEXES
 // ============================================
 invoiceSchema.index({ invoiceId: 1, status: 1 });
 invoiceSchema.index({ senderId: 1, createdAt: -1 });
@@ -40,7 +43,7 @@ invoiceSchema.index({ status: 1, expiresAt: 1 });
 invoiceSchema.index({ paymentRef: 1 });
 
 // ============================================
-// Pʀᴇ-Sᴀᴠᴇ: Gᴇɴᴇʀᴀᴛᴇ Iɴᴠᴏɪᴄᴇ Iᴅ & Exᴘɪʀᴇꜱ Aᴛ
+// PRE-SAVE: Generate Invoice ID & Expires At
 // ============================================
 invoiceSchema.pre('save', function(next) {
     if (!this.invoiceId) {
@@ -55,7 +58,7 @@ invoiceSchema.pre('save', function(next) {
 });
 
 // ============================================
-// Mᴇᴛʜᴏᴅꜱ
+// METHODS
 // ============================================
 invoiceSchema.methods.isExpired = function() {
     return new Date() > this.expiresAt;
@@ -83,7 +86,7 @@ invoiceSchema.methods.markAsExpired = async function() {
 
 invoiceSchema.methods.markAsCancelled = async function(reason = '') {
     this.status = 'cancelled';
-    this.notes = reason || 'Cᴀɴᴄᴇʟʟᴇᴅ Bʏ Uꜱᴇʀ';
+    this.notes = reason || 'Cancelled By User';
     await this.save();
     return this;
 };
@@ -102,7 +105,7 @@ invoiceSchema.methods.getFormattedRemainingTime = function() {
 };
 
 // ============================================
-// Sᴛᴀᴛɪᴄ Mᴇᴛʜᴏᴅꜱ
+// STATIC METHODS
 // ============================================
 invoiceSchema.statics.createInvoice = async function(senderId, receiverId, amount, note = '', metadata = {}) {
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -114,7 +117,7 @@ invoiceSchema.statics.createInvoice = async function(senderId, receiverId, amoun
         senderId: senderId,
         userId: receiverId,
         amount: amount,
-        notes: note || 'Pᴀʏᴍᴇɴᴛ Rᴇǫᴜᴇꜱᴛ',
+        notes: note || 'Payment Request',
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         metadata: {
             ...metadata,
@@ -138,7 +141,7 @@ invoiceSchema.statics.createPublicInvoice = async function(userId, adminId, amou
         senderId: adminId,
         userId: userId,
         amount: amount,
-        notes: metadata.remark || 'API Gᴇɴᴇʀᴀᴛᴇᴅ Iɴᴠᴏɪᴄᴇ',
+        notes: metadata.remark || 'API Generated Invoice',
         expiresAt: expiresAt,
         status: 'pending',
         metadata: {
@@ -203,7 +206,7 @@ invoiceSchema.statics.getStats = async function() {
 };
 
 // ============================================
-// Vɪʀᴛᴜᴀʟꜱ
+// VIRTUALS
 // ============================================
 invoiceSchema.virtual('isActive').get(function() {
     return this.status === 'pending' && !this.isExpired();
@@ -219,16 +222,16 @@ invoiceSchema.virtual('formattedAmount').get(function() {
 
 invoiceSchema.virtual('statusLabel').get(function() {
     const labels = {
-        'pending': '⏳ Pᴇɴᴅɪɴɢ',
-        'paid': '✅ Pᴀɪᴅ',
-        'expired': '⏰ Exᴘɪʀᴇᴅ',
-        'cancelled': '🚫 Cᴀɴᴄᴇʟʟᴇᴅ'
+        'pending': 'Pending',
+        'paid': 'Paid',
+        'expired': 'Expired',
+        'cancelled': 'Cancelled'
     };
     return labels[this.status] || this.status;
 });
 
 // ============================================
-// Tʀᴀɴꜱꜰᴏʀᴍ
+// TRANSFORM
 // ============================================
 invoiceSchema.set('toJSON', {
     virtuals: true,
