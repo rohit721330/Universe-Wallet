@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    tx_id: { type: String, required: true, unique: true, index: true, trim: true },
+    tx_id: { type: String, required: true, unique: true, trim: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     sender_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     receiver_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -48,7 +48,6 @@ transactionSchema.index({ user_id: 1, tx_time: -1 });
 transactionSchema.index({ sender_id: 1, tx_time: -1 });
 transactionSchema.index({ receiver_id: 1, tx_time: -1 });
 transactionSchema.index({ type: 1, status: 1 });
-transactionSchema.index({ tx_id: 1, user_id: 1 });
 
 // ============================================
 // VIRTUAL: Get formatted amount with currency
