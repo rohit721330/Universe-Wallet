@@ -12,7 +12,7 @@ const invoiceSchema = new mongoose.Schema({
         default: 'pending',
         index: true
     },
-    paymentRef: { type: String, sparse: true },
+    paymentRef: { type: String, default: null },
     expiresAt: { type: Date, required: true, index: true },
     paidAt: { type: Date },
     verifiedAt: { type: Date },
@@ -40,7 +40,7 @@ invoiceSchema.index({ invoiceId: 1, status: 1 });
 invoiceSchema.index({ senderId: 1, createdAt: -1 });
 invoiceSchema.index({ userId: 1, createdAt: -1 });
 invoiceSchema.index({ status: 1, expiresAt: 1 });
-invoiceSchema.index({ paymentRef: 1 });
+// ❌ paymentRef index সম্পূর্ণ সরানো হয়েছে — কোনো দরকার নেই
 
 // ============================================
 // PRE-SAVE: Generate Invoice ID & Expires At
