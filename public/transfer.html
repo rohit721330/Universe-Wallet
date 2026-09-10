@@ -1,1146 +1,924 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Tʀᴀɴsғᴇʀ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://unpkg.com/html5-qrcode"></script>
-<style>
-/* ============================================
-   SECTION 1: RESET & VARIABLES
-   ============================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --p1: #a855f7;
-    --p2: #6d28d9;
-    --p3: #8b5cf6;
-    --p4: #7c3aed;
-    
-    --bg-start: #f0ecfe;
-    --bg-mid: #f8f5ff;
-    --bg-end: #f5f0ff;
-    
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --card-border: #e5d9ff;
-    --card-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
-    
-    --text-primary: #1a1a2e;
-    --text-secondary: #4a4a6a;
-    --text-muted: #8a8aaa;
-    --text-white: #ffffff;
-    
-    --input-bg: #f8f5ff;
-    --input-border: #d5c4ff;
-    --input-focus: #8b5cf6;
-    
-    --nav-bg: rgba(255, 255, 255, 0.95);
-    --nav-border: #e5d9ff;
-    --nav-inactive: #8a8aaa;
-    --nav-active: #8b5cf6;
-    
-    --shadow-light: 0 4px 20px rgba(139, 92, 246, 0.08);
-    --shadow-medium: 0 8px 30px rgba(139, 92, 246, 0.15);
-    --shadow-heavy: 0 12px 40px rgba(139, 92, 246, 0.25);
-    
-    --radius-sm: 12px;
-    --radius-md: 20px;
-    --radius-lg: 28px;
-    --radius-xl: 36px;
-    
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ============================================
-   SECTION 2: DARK THEME VARIABLES
-   ============================================ */
-[data-theme="dark"] {
-    --bg-start: #0a0a1a;
-    --bg-mid: #0c1025;
-    --bg-end: #060610;
-    
-    --card-bg: rgba(10, 16, 48, 0.92);
-    --card-border: rgba(0, 240, 255, 0.25);
-    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 224, 255, 0.1);
-    
-    --text-primary: #f0f5ff;
-    --text-secondary: #b0c0e0;
-    --text-muted: #6a7a9a;
-    --text-white: #ffffff;
-    
-    --input-bg: rgba(8, 12, 28, 0.9);
-    --input-border: rgba(0, 200, 230, 0.4);
-    --input-focus: #00f0ff;
-    
-    --nav-bg: rgba(10, 16, 48, 0.95);
-    --nav-border: rgba(0, 240, 255, 0.2);
-    --nav-inactive: #6a7a9a;
-    --nav-active: #00f0ff;
-    
-    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
-    --shadow-heavy: 0 12px 40px rgba(0, 240, 255, 0.15);
-}
-
-/* ============================================
-   SECTION 3: BODY & BASE STYLES
-   ============================================ */
-body {
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    background-attachment: fixed;
-    padding-bottom: 80px;
-    transition: var(--transition);
-    color: var(--text-primary);
-}
-
-body.light {
-    background: 
-        radial-gradient(circle at 20% 30%, #d1c4fd 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, #b8a9fa 0%, transparent 40%),
-        linear-gradient(135deg, #f0ecfe, #f8f5ff);
-    background-attachment: fixed;
-}
-
-body.dark {
-    background: 
-        radial-gradient(circle at 15% 25%, #00e0ff20 0%, transparent 50%),
-        radial-gradient(circle at 85% 75%, #0088ff30 0%, transparent 50%),
-        linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
-    background-attachment: fixed;
-}
-
-/* ============================================
-   SECTION 4: HEADER STYLES
-   ============================================ */
-.header {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: var(--shadow-light);
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    border-bottom: 1px solid var(--card-border);
-    transition: var(--transition);
-}
-body.light .header {
-    background: rgba(245, 240, 255, 0.92);
-    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-}
-body.dark .header {
-    background: rgba(8, 12, 28, 0.92);
-    border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-}
-
-.back {
-    width: 40px;
-    height: 40px;
-    background: var(--input-bg);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: var(--text-secondary);
-    transition: var(--transition);
-    border: 1px solid var(--input-border);
-    font-size: 18px;
-}
-body.light .back {
-    background: rgba(139, 92, 246, 0.1);
-    color: #6d28d9;
-}
-body.dark .back {
-    background: rgba(0, 240, 255, 0.1);
-    color: #00f0ff;
-}
-
-.back:hover {
-    transform: scale(1.05);
-}
-body.light .back:hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
-}
-body.dark .back:hover {
-    border-color: #00f0ff;
-    color: #00f0ff;
-}
-
-.header h1 {
-    font-size: 1rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    transition: var(--transition);
-}
-
-.header h1 span {
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-body.dark .header h1 span {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.header-placeholder {
-    width: 40px;
-}
-
-/* ============================================
-   SECTION 5: CONTAINER
-   ============================================ */
-.container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 1.25rem;
-}
-
-/* ============================================
-   SECTION 6: WALLET CARD
-   ============================================ */
-.wallet-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 2rem;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-}
-body.light .wallet-card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .wallet-card {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-.wallet-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--p1), var(--p2));
-    transition: var(--transition);
-}
-body.dark .wallet-card::before {
-    background: linear-gradient(90deg, #00e0ff, #0088ff);
-}
-
-.wallet-label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    transition: var(--transition);
-}
-
-.wallet-amount {
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    transition: var(--transition);
-}
-body.dark .wallet-amount {
-    color: #f0f5ff;
-}
-
-/* ============================================
-   SECTION 7: FORM CARD
-   ============================================ */
-.form-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
-}
-body.light .form-card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .form-card {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-/* ============================================
-   SECTION 8: TABS
-   ============================================ */
-.tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-}
-
-.tab-btn {
-    padding: 0.6rem;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-    background: var(--input-bg);
-    color: var(--text-muted);
-    border: 1px solid var(--input-border);
-}
-body.light .tab-btn {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #94a3b8;
-}
-body.dark .tab-btn {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.3);
-    color: #6a7a9a;
-}
-
-.tab-btn.active {
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    color: white;
-    border-color: transparent;
-}
-body.dark .tab-btn.active {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    color: #0a0a1a;
-}
-
-.tab-btn i {
-    margin-right: 0.4rem;
-}
-
-.tab-panel {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-.tab-panel.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================
-   SECTION 9: INPUT FIELDS
-   ============================================ */
-.input-group {
-    margin-bottom: 1rem;
-}
-
-.input-group label {
-    display: block;
-    font-size: 0.6rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 0.4rem;
-    transition: var(--transition);
-}
-
-.input-group input {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    outline: none;
-    transition: var(--transition);
-    background: var(--input-bg);
-    border: 2px solid var(--input-border);
-    color: var(--text-primary);
-}
-body.light .input-group input {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #1a1a2e;
-}
-body.dark .input-group input {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.4);
-    color: #e0f0ff;
-}
-
-.input-group input:focus {
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-}
-body.dark .input-group input:focus {
-    border-color: #00f0ff;
-    box-shadow: 0 0 0 4px rgba(0, 240, 255, 0.15);
-}
-
-/* ============================================
-   SECTION 10: USER STATUS BADGE
-   ============================================ */
-.user-status {
-    display: none;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 2rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    transition: var(--transition);
-}
-.user-status.active {
-    display: inline-flex;
-}
-.user-status.verified {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-}
-.user-status.error {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-}
-.user-status.loading {
-    background: rgba(139, 92, 246, 0.15);
-    color: #8b5cf6;
-}
-body.dark .user-status.verified {
-    background: rgba(74, 222, 128, 0.15);
-    color: #4ade80;
-}
-body.dark .user-status.error {
-    background: rgba(248, 113, 113, 0.15);
-    color: #f87171;
-}
-body.dark .user-status.loading {
-    background: rgba(0, 240, 255, 0.15);
-    color: #00f0ff;
-}
-.user-status i {
-    font-size: 0.9rem;
-}
-
-/* ============================================
-   SECTION 11: QUICK AMOUNTS
-   ============================================ */
-.quick-amounts {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-}
-
-.quick-amt {
-    padding: 0.3rem 0.9rem;
-    border-radius: 2rem;
-    font-size: 0.65rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-family: inherit;
-    background: var(--input-bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--input-border);
-}
-body.light .quick-amt {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #1a1a2e;
-}
-body.dark .quick-amt {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.3);
-    color: #e0f0ff;
-}
-
-.quick-amt:hover {
-    transform: translateY(-2px);
-}
-body.light .quick-amt:hover {
-    border-color: #8b5cf6;
-    background: #ede7fe;
-}
-body.dark .quick-amt:hover {
-    border-color: #00f0ff;
-    background: rgba(0, 240, 255, 0.1);
-}
-
-.quick-amt:active {
-    transform: scale(0.95);
-}
-
-/* ============================================
-   SECTION 12: FEE BREAKDOWN
-   ============================================ */
-.fee-panel {
-    padding: 0.75rem;
-    border-radius: var(--radius-sm);
-    margin-top: 0.5rem;
-    display: none;
-    transition: var(--transition);
-}
-body.light .fee-panel {
-    background: #f8fafc;
-}
-body.dark .fee-panel {
-    background: rgba(10, 16, 48, 0.7);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-}
-.fee-panel.open {
-    display: block;
-    animation: fadeIn 0.2s ease;
-}
-
-.fee-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.65rem;
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-    color: var(--text-muted);
-}
-.fee-row.total-row {
-    border-top: 1px dashed var(--input-border);
-    padding-top: 0.4rem;
-    margin-top: 0.4rem;
-    font-weight: 800;
-    color: var(--text-primary);
-}
-body.dark .fee-row.total-row {
-    border-top-color: rgba(0, 240, 255, 0.3);
-    color: #e0f0ff;
-}
-.fee-row.total-row span:last-child {
-    color: var(--p3);
-}
-body.dark .fee-row.total-row span:last-child {
-    color: #00f0ff;
-}
-
-/* ============================================
-   SECTION 13: ACTION BUTTONS
-   ============================================ */
-.action-btn {
-    width: 100%;
-    padding: 1rem;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-top: 0.5rem;
-}
-body.light .action-btn {
-    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-    color: white;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-}
-body.dark .action-btn {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    color: #0a0a1a;
-    box-shadow: 0 4px 20px rgba(0, 224, 255, 0.3);
-}
-
-.action-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-.action-btn:active:not(:disabled) {
-    transform: scale(0.95);
-}
-.action-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-.action-btn.gallery-btn {
-    background: var(--input-bg);
-    color: var(--text-secondary);
-    border: 2px solid var(--input-border);
-}
-body.light .action-btn.gallery-btn {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #1a1a2e;
-}
-body.dark .action-btn.gallery-btn {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.3);
-    color: #e0f0ff;
-}
-
-/* ============================================
-   SECTION 14: SCANNER MODAL
-   ============================================ */
-.scanner-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    z-index: 100;
-    align-items: flex-end;
-    justify-content: center;
-}
-.scanner-modal.open {
-    display: flex;
-}
-
-.scanner-card-modal {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 480px;
-    animation: slideUp 0.3s ease;
-    transition: var(--transition);
-}
-body.light .scanner-card-modal {
-    background: white;
-}
-body.dark .scanner-card-modal {
-    background: #0c0f24;
-    border-top: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
-.scanner-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.scanner-header h3 {
-    font-size: 0.85rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-body.dark .scanner-header h3 {
-    color: #e0f0ff;
-}
-
-.close-scanner {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: var(--transition);
-}
-body.light .close-scanner {
-    background: #f1f5f9;
-    color: #64748b;
-}
-body.dark .close-scanner {
-    background: rgba(0, 240, 255, 0.1);
-    color: #00f0ff;
-}
-.close-scanner:active {
-    transform: scale(0.95);
-}
-
-.scanner-wrapper {
-    position: relative;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 3px solid var(--p3);
-    transition: var(--transition);
-}
-body.dark .scanner-wrapper {
-    border-color: #00f0ff;
-    box-shadow: 0 0 30px rgba(0, 224, 255, 0.2);
-}
-
-#qr-reader-area {
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: #000;
-}
-
-.scan-line {
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--p3), transparent);
-    position: absolute;
-    width: 80%;
-    left: 10%;
-    top: 0;
-    animation: scanAnim 2s infinite;
-    box-shadow: 0 0 20px var(--p3);
-    z-index: 10;
-    border-radius: 2px;
-    transition: var(--transition);
-}
-body.dark .scan-line {
-    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
-    box-shadow: 0 0 30px #00f0ff;
-}
-
-@keyframes scanAnim {
-    0% { top: 5%; }
-    50% { top: 85%; }
-    100% { top: 5%; }
-}
-
-.scanner-corner {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--p3);
-    z-index: 11;
-    transition: var(--transition);
-}
-body.dark .scanner-corner {
-    border-color: #00f0ff;
-}
-
-.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
-.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
-.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
-.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
-
-.cancel-scanner-btn {
-    width: 100%;
-    margin-top: 1rem;
-    padding: 0.75rem;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.light .cancel-scanner-btn {
-    background: #fef2f2;
-    color: #dc2626;
-}
-body.dark .cancel-scanner-btn {
-    background: rgba(220, 38, 38, 0.2);
-    color: #f87171;
-    border: 1px solid rgba(220, 38, 38, 0.3);
-}
-
-/* ============================================
-   SECTION 15: SUCCESS MODAL
-   ============================================ */
-.success-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-}
-.success-modal.open {
-    display: flex;
-}
-
-.receipt-wrapper {
-    width: 100%;
-    max-width: 380px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
-    transition: var(--transition);
-}
-@keyframes modalPopIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-}
-body.light .receipt-wrapper {
-    background: white;
-}
-body.dark .receipt-wrapper {
-    background: #0c0f24;
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-.receipt-header {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    color: white;
-    position: relative;
-}
-body.light .receipt-header {
-    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-}
-body.dark .receipt-header {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-}
-.receipt-header::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 0;
-    right: 0;
-    height: 30px;
-    border-radius: 50% / 100% 100% 0 0;
-}
-body.light .receipt-header::after {
-    background: white;
-}
-body.dark .receipt-header::after {
-    background: #0c0f24;
-}
-
-.success-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border: 2px solid white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 1.6rem;
-    animation: checkmark 0.4s ease-in-out;
-}
-@keyframes checkmark {
-    0% { transform: scale(0); opacity: 0; }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.receipt-header h2 {
-    font-size: 1.4rem;
-    font-weight: 900;
-    margin-bottom: 0.2rem;
-}
-.receipt-header p {
-    font-size: 0.65rem;
-    font-weight: 600;
-    opacity: 0.85;
-    letter-spacing: 0.05em;
-}
-
-.receipt-details {
-    padding: 1.5rem 1.5rem 1rem;
-}
-body.light .receipt-details {
-    background: white;
-}
-body.dark .receipt-details {
-    background: #0c0f24;
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.8rem;
-    padding: 0.2rem 0;
-}
-.detail-row span:first-child {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-.detail-row span:last-child {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-align: right;
-    word-break: break-all;
-    color: var(--text-primary);
-}
-body.dark .detail-row span:last-child {
-    color: #e0f0ff;
-}
-
-.receipt-footer {
-    padding: 0 1.5rem 1.5rem;
-    text-align: center;
-}
-
-.close-modal-btn {
-    width: 100%;
-    padding: 0.9rem;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.light .close-modal-btn {
-    background: #1e293b;
-    color: white;
-}
-body.dark .close-modal-btn {
-    background: #00f0ff;
-    color: #0a0a1a;
-}
-.close-modal-btn:active {
-    transform: scale(0.95);
-}
-
-/* ============================================
-   SECTION 16: BOTTOM NAVIGATION
-   ============================================ */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--nav-border);
-    display: flex;
-    justify-content: space-around;
-    padding: 0.5rem 0 0.7rem;
-    z-index: 50;
-    transition: var(--transition);
-}
-body.light .bottom-nav {
-    background: rgba(241, 239, 255, 0.95);
-    border-top: 1px solid #c4b5fd;
-}
-body.dark .bottom-nav {
-    background: rgba(8, 12, 28, 0.95);
-    border-top: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    color: var(--nav-inactive);
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    text-decoration: none;
-    flex: 1;
-    transition: var(--transition);
-    padding: 0.25rem 0;
-    position: relative;
-}
-body.light .nav-item {
-    color: #94a3b8;
-}
-body.dark .nav-item {
-    color: #6a7a9a;
-}
-
-.nav-item i {
-    font-size: 1.2rem;
-    transition: var(--transition);
-}
-
-.nav-item.active {
-    color: var(--nav-active);
-}
-body.light .nav-item.active {
-    color: #8b5cf6;
-}
-body.dark .nav-item.active {
-    color: #00f0ff;
-}
-
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 30%;
-    right: 30%;
-    height: 3px;
-    background: linear-gradient(90deg, var(--p1), var(--p2));
-    border-radius: 0 0 3px 3px;
-    transition: var(--transition);
-}
-body.dark .nav-item.active::after {
-    background: linear-gradient(90deg, #00e0ff, #0088ff);
-}
-
-.nav-item:hover {
-    color: var(--nav-active);
-}
-
-/* ============================================
-   SECTION 17: TOAST NOTIFICATION
-   ============================================ */
-.toast-notify {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    padding: 0.7rem 1.2rem;
-    border-radius: var(--radius-md);
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-align: center;
-    z-index: 200;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    max-width: 90%;
-    width: max-content;
-}
-.toast-notify.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-.toast-notify.error {
-    background: #fef2f2;
-    color: #dc2626;
-    border-left: 4px solid #dc2626;
-}
-.toast-notify.success {
-    background: #ecfdf5;
-    color: #059669;
-    border-left: 4px solid #10b981;
-}
-.toast-notify.info {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-left: 4px solid #3b82f6;
-}
-body.dark .toast-notify.error {
-    background: rgba(220, 38, 38, 0.2);
-    color: #f87171;
-    border-left-color: #f87171;
-}
-body.dark .toast-notify.success {
-    background: rgba(16, 185, 129, 0.2);
-    color: #4ade80;
-    border-left-color: #4ade80;
-}
-body.dark .toast-notify.info {
-    background: rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
-    border-left-color: #60a5fa;
-}
-
-/* ============================================
-   SECTION 18: SPINNER
-   ============================================ */
-.spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 0.6s linear infinite;
-}
-body.dark .spinner {
-    border: 3px solid rgba(10, 10, 26, 0.3);
-    border-top-color: #0a0a1a;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ============================================
-   SECTION 19: RESPONSIVE DESIGN
-   ============================================ */
-@media (max-width: 480px) {
-    .container {
-        padding: 0.8rem;
-    }
-    .wallet-card {
-        padding: 1.2rem 1.5rem;
-    }
-    .wallet-amount {
-        font-size: 1.2rem;
-    }
-    .form-card {
-        padding: 1.2rem;
-    }
-    .quick-amt {
-        padding: 0.25rem 0.7rem;
-        font-size: 0.6rem;
-    }
-    .receipt-wrapper {
-        max-width: 340px;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Transfer • Universal Wallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --bg-start: #ffffff;
+            --bg-mid: #e8f0fe;
+            --bg-end: #d4e4f7;
+            --card-bg: #ffffff;
+            --card-border: #c5d9f0;
+            --text-primary: #1a2a4a;
+            --text-secondary: #5a7a9a;
+            --text-muted: #8a9ab0;
+            --accent: #1a56db;
+            --accent-gradient: linear-gradient(135deg, #1a56db, #0088ff);
+            --input-bg: #fafcff;
+            --input-border: #c5d9f0;
+            --input-focus: #1a56db;
+            --nav-bg: rgba(255, 255, 255, 0.98);
+            --nav-border: #c5d9f0;
+            --nav-active: #1a56db;
+            --nav-inactive: #8a9ab0;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
+            padding-bottom: 80px;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 50, 100, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #c5d9f0;
+        }
+
+        .back {
+            width: 40px;
+            height: 40px;
+            background: #f0f7ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #1a56db;
+            transition: var(--transition);
+            border: 2px solid #c5d9f0;
+            font-size: 16px;
+        }
+        .back:hover { background: #e2eaf3; }
+        .back:active { transform: scale(0.95); }
+
+        .header h1 {
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .header h1 span { color: var(--accent); }
+
+        .header-placeholder { width: 40px; }
+
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           WALLET CARD
+           ============================================ */
+        .wallet-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08);
+            border: 1px solid #c5d9f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1a56db, #0088ff);
+        }
+
+        .wallet-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .wallet-amount {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        /* ============================================
+           FORM CARD
+           ============================================ */
+        .form-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08);
+            border: 1px solid #c5d9f0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ============================================
+           TABS
+           ============================================ */
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .tab-btn {
+            padding: 0.7rem;
+            border: 2px solid #c5d9f0;
+            border-radius: var(--radius-md);
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            background: #fafcff;
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+        }
+
+        .tab-btn i { margin-right: 0.4rem; }
+
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           INPUT FIELDS
+           ============================================ */
+        .input-group { margin-bottom: 1rem; }
+
+        .input-group label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+            background: #fafcff;
+            border: 2px solid #c5d9f0;
+            color: var(--text-primary);
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1);
+            background: #ffffff;
+        }
+
+        .input-group input::placeholder { color: var(--text-muted); }
+
+        /* ============================================
+           USER STATUS BADGE
+           ============================================ */
+        .user-status {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .user-status.active { display: inline-flex; }
+        .user-status.verified { background: #dcfce7; color: var(--success); }
+        .user-status.error { background: #fee2e2; color: var(--danger); }
+        .user-status.loading { background: #dbeafe; color: var(--accent); }
+
+        /* ============================================
+           QUICK AMOUNTS
+           ============================================ */
+        .quick-amounts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .quick-amt {
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #f0f7ff;
+            color: var(--accent);
+            border: 2px solid #c5d9f0;
+            font-family: inherit;
+        }
+
+        .quick-amt:hover {
+            background: #e2eaf3;
+            transform: translateY(-2px);
+        }
+        .quick-amt:active { transform: scale(0.95); }
+
+        /* ============================================
+           FEE BREAKDOWN
+           ============================================ */
+        .fee-panel {
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            margin-top: 0.75rem;
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2eaf3;
+        }
+        .fee-panel.open { display: block; animation: fadeIn 0.2s ease; }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-secondary);
+        }
+        .fee-row.total-row {
+            border-top: 1px dashed #c5d9f0;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .fee-row.total-row span:last-child { color: var(--accent); }
+
+        /* ============================================
+           ACTION BUTTONS
+           ============================================ */
+        .action-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+            background: var(--accent-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+        }
+
+        .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .action-btn:active:not(:disabled) { transform: scale(0.97); }
+        .action-btn:hover:not(:disabled) { transform: translateY(-2px); }
+
+        .action-btn.gallery-btn {
+            background: #fafcff;
+            color: var(--text-primary);
+            border: 2px solid #c5d9f0;
+            box-shadow: none;
+        }
+
+        /* ============================================
+           SPINNER
+           ============================================ */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ============================================
+           PIN MODAL
+           ============================================ */
+        .pin-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .pin-modal.open { display: flex; }
+
+        .pin-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.5rem;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2);
+            border: 1px solid #c5d9f0;
+            animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+            text-align: center;
+            position: relative;
+        }
+
+        @keyframes modalPopIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .pin-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f0f7ff;
+            border: 1px solid #c5d9f0;
+            color: #5a7a9a;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pin-close:hover { background: #fee2e2; color: var(--danger); }
+
+        .pin-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: #fff;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+        }
+
+        .pin-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pin-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .pin-step-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            background: #dbeafe;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .pin-dots {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pin-dot {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: #fafcff;
+            border: 2px solid #c5d9f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: var(--transition);
+        }
+
+        .pin-dot.filled {
+            border-color: var(--accent);
+            background: #dbeafe;
+            color: var(--accent);
+        }
+
+        .pin-dot.filled::after { content: '●'; }
+
+        .pin-dot.error {
+            border-color: var(--danger);
+            background: #fee2e2;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .pin-key {
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #fafcff;
+            border: 2px solid #c5d9f0;
+            color: var(--text-primary);
+            text-align: center;
+            font-family: inherit;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .pin-key:hover { background: #f0f7ff; }
+        .pin-key:active { transform: scale(0.95); }
+        .pin-key.del { color: var(--danger); }
+        .pin-key.go {
+            background: var(--accent-gradient);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .pin-key.go .key-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto;
+        }
+
+        .pin-key.go.loading .key-spinner { display: block; }
+        .pin-key.go.loading i { display: none; }
+
+        /* ============================================
+           QR SCANNER MODAL
+           ============================================ */
+        .scanner-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .scanner-modal.open { display: flex; }
+
+        .scanner-card-modal {
+            background: #ffffff;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 480px;
+            animation: slideUp 0.3s ease;
+            border-top: 1px solid #c5d9f0;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .scanner-header h3 {
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .close-scanner {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #f0f7ff;
+            color: #5a7a9a;
+            transition: var(--transition);
+        }
+        .close-scanner:hover { background: #fee2e2; color: var(--danger); }
+        .close-scanner:active { transform: scale(0.95); }
+
+        .scanner-wrapper {
+            position: relative;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 3px solid var(--accent);
+        }
+
+        #qr-reader-area {
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #000;
+        }
+
+        .scan-line {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            position: absolute;
+            width: 80%;
+            left: 10%;
+            top: 0;
+            animation: scanAnim 2s infinite;
+            box-shadow: 0 0 20px var(--accent);
+            z-index: 10;
+            border-radius: 2px;
+        }
+
+        @keyframes scanAnim {
+            0% { top: 5%; }
+            50% { top: 85%; }
+            100% { top: 5%; }
+        }
+
+        .scanner-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--accent);
+            z-index: 11;
+        }
+        .scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+        .scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+        .scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+        .scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+        .cancel-scanner-btn {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.85rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #fee2e2;
+            color: var(--danger);
+        }
+        .cancel-scanner-btn:active { transform: scale(0.95); }
+
+        /* ============================================
+           SUCCESS MODAL
+           ============================================ */
+        .success-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .success-modal.open { display: flex; }
+
+        .receipt-wrapper {
+            width: 100%;
+            max-width: 380px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+            background: #ffffff;
+            border: 1px solid #c5d9f0;
+        }
+
+        .receipt-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: white;
+            background: var(--accent-gradient);
+            position: relative;
+        }
+        .receipt-header::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0; right: 0;
+            height: 30px;
+            border-radius: 50% / 100% 100% 0 0;
+            background: #ffffff;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.6rem;
+            animation: checkmark 0.4s ease-in-out;
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .receipt-header h2 {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.2rem;
+        }
+        .receipt-header p {
+            font-size: 0.65rem;
+            font-weight: 600;
+            opacity: 0.85;
+            letter-spacing: 0.05em;
+        }
+
+        .receipt-details {
+            padding: 1.5rem 1.5rem 1rem;
+            background: #ffffff;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding: 0.2rem 0;
+        }
+        .detail-row span:first-child {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .detail-row span:last-child {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-align: right;
+            word-break: break-all;
+            color: var(--text-primary);
+        }
+
+        .receipt-footer {
+            padding: 0 1.5rem 1.5rem;
+            text-align: center;
+        }
+
+        .close-modal-btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            background: #1a56db;
+            color: white;
+        }
+        .close-modal-btn:active { transform: scale(0.95); }
+
+        /* ============================================
+           BOTTOM NAV
+           ============================================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #c5d9f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0 0.7rem;
+            z-index: 50;
+            box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--nav-inactive);
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            flex: 1;
+            transition: var(--transition);
+            padding: 0.25rem 0;
+            position: relative;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+
+        .nav-item.active { color: var(--nav-active); }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 30%; right: 30%;
+            height: 3px;
+            background: var(--accent-gradient);
+            border-radius: 0 0 3px 3px;
+        }
+
+        /* ============================================
+           TOAST
+           ============================================ */
+        .toast-notify {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            max-width: 90%;
+            width: max-content;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        .toast-notify.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast-notify.error {
+            background: #fee2e2;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+        .toast-notify.success {
+            background: #dcfce7;
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        .toast-notify.info {
+            background: #dbeafe;
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 480px) {
+            .container { padding: 0.8rem; }
+            .wallet-card { padding: 1rem 1.25rem; }
+            .wallet-amount { font-size: 1.2rem; }
+            .form-card { padding: 1.2rem; }
+            .quick-amt { padding: 0.35rem 0.8rem; font-size: 0.65rem; }
+            .receipt-wrapper { max-width: 340px; }
+            .pin-dot { width: 44px; height: 44px; font-size: 18px; }
+            .pin-key { padding: 12px; font-size: 18px; }
+        }
+    </style>
 </head>
 <body>
 
 <!-- ============================================
-     SECTION 20: HEADER
+     HEADER
      ============================================ -->
 <div class="header">
     <a href="/dashboard" class="back">
         <i class="fa-solid fa-arrow-left"></i>
     </a>
-    <h1>Tʀᴀɴs<span>ғᴇʀ</span></h1>
+    <h1>Trans<span>fer</span></h1>
     <div class="header-placeholder"></div>
 </div>
 
 <!-- ============================================
-     SECTION 21: MAIN CONTENT
+     MAIN CONTENT
      ============================================ -->
 <div class="container">
 
     <!-- WALLET CARD -->
     <div class="wallet-card">
         <div>
-            <div class="wallet-label"><i class="fa-solid fa-wallet"></i> Aᴠᴀɪʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+            <div class="wallet-label"><i class="fa-solid fa-wallet"></i> Available Balance</div>
         </div>
         <div class="wallet-amount">₹<span id="userBalance">0.00</span></div>
     </div>
@@ -1151,18 +929,18 @@ body.dark .spinner {
         <!-- TABS -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('number')">
-                <i class="fa-solid fa-mobile-alt"></i> Bʏ Nᴜᴍʙᴇʀ
+                <i class="fa-solid fa-mobile-alt"></i> By Number
             </button>
             <button class="tab-btn" onclick="switchTab('qr')">
-                <i class="fa-solid fa-qrcode"></i> Bʏ Qʀ Cᴏᴅᴇ
+                <i class="fa-solid fa-qrcode"></i> By QR Code
             </button>
         </div>
 
         <!-- TAB 1: BY NUMBER -->
         <div id="tabNumber" class="tab-panel active">
             <div class="input-group">
-                <label><i class="fa-solid fa-user"></i> Rᴇᴄᴇɪᴠᴇʀ's Mᴏʙɪʟᴇ</label>
-                <input type="tel" id="receiverMobile" maxlength="10" placeholder="Eɴᴛᴇʀ 10-ᴅɪɢɪᴛ ᴍᴏʙɪʟᴇ" oninput="lookupReceiver(this.value)">
+                <label><i class="fa-solid fa-user"></i> Receiver's Mobile</label>
+                <input type="tel" id="receiverMobile" maxlength="10" placeholder="Enter 10-digit mobile" oninput="lookupReceiver(this.value)">
                 <div id="userStatusBadge" class="user-status">
                     <i class="fa-solid fa-circle-check"></i>
                     <span id="userStatusText"></span>
@@ -1170,7 +948,7 @@ body.dark .spinner {
             </div>
 
             <div class="input-group">
-                <label><i class="fa-solid fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ</label>
+                <label><i class="fa-solid fa-indian-rupee-sign"></i> Amount</label>
                 <input type="number" id="transferAmount" placeholder="0.00" step="1" min="1" oninput="calculateBreakdown(this.value)">
                 <div class="quick-amounts">
                     <button class="quick-amt" onclick="setQuickAmount(100)">₹100</button>
@@ -1181,27 +959,27 @@ body.dark .spinner {
                 </div>
                 <div id="feeBreakdown" class="fee-panel">
                     <div class="fee-row">
-                        <span>Tʀᴀɴsғᴇʀ Aᴍᴏᴜɴᴛ</span>
+                        <span>Transfer Amount</span>
                         <span id="breakdownAmount">₹0.00</span>
                     </div>
                     <div class="fee-row">
-                        <span>Pʟᴀᴛꜰᴏʀᴍ Fᴇᴇ</span>
-                        <span>Fʀᴇᴇ</span>
+                        <span>Platform Fee</span>
+                        <span>Free</span>
                     </div>
                     <div class="fee-row total-row">
-                        <span>Tᴏᴛᴀʟ Dᴇʙɪᴛ</span>
+                        <span>Total Debit</span>
                         <span id="breakdownTotal">₹0.00</span>
                     </div>
                 </div>
             </div>
 
             <div class="input-group">
-                <label><i class="fa-solid fa-pen"></i> Nᴏᴛᴇ (Oᴘᴛɪᴏɴᴀʟ)</label>
-                <input type="text" id="referenceNote" placeholder="Aᴅᴅ ᴀ ɴᴏᴛᴇ...">
+                <label><i class="fa-solid fa-pen"></i> Note (Optional)</label>
+                <input type="text" id="referenceNote" placeholder="Add a note...">
             </div>
 
-            <button class="action-btn" id="transferBtn" onclick="executeTransfer()">
-                <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ Mᴏɴᴇʏ
+            <button class="action-btn" id="transferBtn" onclick="initiateTransfer()">
+                <i class="fa-solid fa-paper-plane"></i> Send Money
             </button>
         </div>
 
@@ -1209,43 +987,87 @@ body.dark .spinner {
         <div id="tabQr" class="tab-panel">
             <div style="text-align: center; padding: 1.5rem 0;">
                 <div style="margin-bottom: 1rem;">
-                    <i class="fa-solid fa-qrcode" style="font-size: 4rem; opacity: 0.6;"></i>
+                    <i class="fa-solid fa-qrcode" style="font-size: 4rem; color: #1a56db; opacity: 0.6;"></i>
                 </div>
-                <p style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">
-                    Sᴄᴀɴ oʀ ᴜᴘʟᴏᴀᴅ ʀᴇᴄɪᴘɪᴇɴᴛ's Qʀ ᴄᴏᴅᴇ
+                <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    Scan or Upload Recipient's QR Code
                 </p>
-                <p style="font-size: 0.6rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                    <i class="fa-solid fa-shield-alt"></i> Qʀ ᴄᴏᴅᴇ ᴍᴜꜱᴛ ᴄᴏɴᴛᴀɪɴ 10-ᴅɪɢɪᴛ ᴍᴏʙɪʟᴇ ɴᴜᴍʙᴇʀ
+                <p style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                    <i class="fa-solid fa-shield-alt"></i> QR code must contain 10-digit mobile number
                 </p>
 
                 <button class="action-btn gallery-btn" onclick="chooseFromGallery()">
-                    <i class="fa-solid fa-images"></i> Cʜᴏᴏꜱᴇ ꜰʀᴏᴍ Gᴀʟʟᴇʀʏ
+                    <i class="fa-solid fa-images"></i> Choose From Gallery
                 </button>
 
-                <div style="margin: 1rem 0; position: relative;">
-                    <span style="display: block; text-align: center; color: var(--text-muted); font-size: 0.65rem;">───── Oʀ ─────</span>
+                <div style="margin: 1rem 0;">
+                    <span style="color: var(--text-muted); font-size: 0.7rem; font-weight: 600;">───── Or ─────</span>
                 </div>
 
                 <button class="action-btn" onclick="openQRScanner()">
-                    <i class="fa-solid fa-camera"></i> Sᴄᴀɴ Qʀ Cᴏᴅᴇ
+                    <i class="fa-solid fa-camera"></i> Scan QR Code
                 </button>
             </div>
         </div>
 
     </div>
 
-    <div style="text-align: center; font-size: 0.55rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3em; margin-top: 0.5rem;">
-        <i class="fa-solid fa-lock" style="margin-right: 0.5rem;"></i> Sᴇᴄᴜʀᴇ Eɴᴄʀʏᴘᴛɪᴏɴ · Pʀɪᴍᴇ 𝟸𝟶𝟸𝟼
+    <div style="text-align: center; font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.2em; margin-top: 0.5rem;">
+        <i class="fa-solid fa-lock" style="margin-right: 0.5rem;"></i> Secure Encryption · Universal Wallet 2026
     </div>
 </div>
 
 <!-- ============================================
-     SECTION 22: QR SCANNER MODAL
+     PIN MODAL (SET / VERIFY)
+     ============================================ -->
+<div id="pinModal" class="pin-modal">
+    <div class="pin-card">
+        <button class="pin-close" onclick="closePinModal()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+
+        <div class="pin-icon-box" id="pinIconBox">
+            <i class="fa-solid fa-lock" id="pinIcon"></i>
+        </div>
+
+        <div class="pin-step-badge" id="pinStepBadge" style="display: none;">Step 1 of 2</div>
+        <div class="pin-title" id="pinTitle">Enter PIN</div>
+        <div class="pin-subtitle" id="pinSubtitle">Enter your 4-digit PIN to confirm transfer</div>
+
+        <div class="pin-dots">
+            <div class="pin-dot" id="pdot-0"></div>
+            <div class="pin-dot" id="pdot-1"></div>
+            <div class="pin-dot" id="pdot-2"></div>
+            <div class="pin-dot" id="pdot-3"></div>
+        </div>
+
+        <div class="pin-keypad">
+            <div class="pin-key" onclick="pinPress('1')">1</div>
+            <div class="pin-key" onclick="pinPress('2')">2</div>
+            <div class="pin-key" onclick="pinPress('3')">3</div>
+            <div class="pin-key" onclick="pinPress('4')">4</div>
+            <div class="pin-key" onclick="pinPress('5')">5</div>
+            <div class="pin-key" onclick="pinPress('6')">6</div>
+            <div class="pin-key" onclick="pinPress('7')">7</div>
+            <div class="pin-key" onclick="pinPress('8')">8</div>
+            <div class="pin-key" onclick="pinPress('9')">9</div>
+            <div class="pin-key del" onclick="pinDel()"><i class="fa-solid fa-delete-left"></i></div>
+            <div class="pin-key" onclick="pinPress('0')">0</div>
+            <div class="pin-key go" id="pinSubmitBtn" onclick="pinSubmit()">
+                <div class="key-spinner"></div>
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+     QR SCANNER MODAL
      ============================================ -->
 <div id="qrScannerModal" class="scanner-modal">
     <div class="scanner-card-modal">
         <div class="scanner-header">
-            <h3><i class="fa-solid fa-qrcode"></i> Sᴄᴀɴ Rᴇᴄɪᴘɪᴇɴᴛ Qʀ</h3>
+            <h3><i class="fa-solid fa-qrcode"></i> Scan Recipient QR</h3>
             <button class="close-scanner" onclick="closeQRScanner()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1259,387 +1081,286 @@ body.dark .spinner {
             <div class="scanner-corner br"></div>
         </div>
         <button class="cancel-scanner-btn" onclick="closeQRScanner()">
-            <i class="fa-solid fa-times"></i> Cᴀɴᴄᴇʟ
+            <i class="fa-solid fa-times"></i> Cancel
         </button>
     </div>
 </div>
 
-<!-- ============================================
-     SECTION 23: GALLERY INPUT (HIDDEN)
-     ============================================ -->
+<!-- GALLERY INPUT (HIDDEN) -->
 <input type="file" id="galleryFileInput" accept="image/*" style="display: none;" onchange="handleGalleryImage(this)">
 
 <!-- ============================================
-     SECTION 24: SUCCESS MODAL
+     SUCCESS MODAL
      ============================================ -->
 <div id="successModal" class="success-modal">
     <div class="receipt-wrapper">
         <div class="receipt-header">
             <div class="success-icon"><i class="fa-solid fa-check"></i></div>
             <h2 id="modalAmount">₹0.00</h2>
-            <p>Tʀᴀɴsғᴇʀ Cᴏᴍᴘʟᴇᴛᴇᴅ</p>
+            <p>Transfer Completed</p>
         </div>
         <div class="receipt-details">
             <div class="detail-row">
-                <span>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ</span>
+                <span>Transaction ID</span>
                 <span id="modalTxId">—</span>
             </div>
             <div class="detail-row">
-                <span>Rᴇᴄᴇɪᴠᴇʀ</span>
+                <span>Receiver</span>
                 <span id="modalReceiver">—</span>
             </div>
             <div class="detail-row">
-                <span>Aᴍᴏᴜɴᴛ</span>
+                <span>Amount</span>
                 <span id="modalAmountDisplay">—</span>
             </div>
             <div class="detail-row">
-                <span>Nᴇᴡ Bᴀʟᴀɴᴄᴇ</span>
+                <span>New Balance</span>
                 <span id="modalNewBalance">—</span>
             </div>
             <div class="detail-row">
-                <span>Nᴏᴛᴇ</span>
+                <span>Note</span>
                 <span id="modalMessage">—</span>
             </div>
             <div class="detail-row">
-                <span>Dᴀᴛᴇ &amp; Tɪᴍᴇ</span>
+                <span>Date & Time</span>
                 <span id="modalDateTime">—</span>
             </div>
         </div>
         <div class="receipt-footer">
-            <button class="close-modal-btn" onclick="dismissModal()">Dᴏɴᴇ</button>
+            <button class="close-modal-btn" onclick="dismissModal()">Done</button>
         </div>
     </div>
 </div>
 
 <!-- ============================================
-     SECTION 25: BOTTOM NAVIGATION
+     BOTTOM NAV
      ============================================ -->
 <div class="bottom-nav">
     <a href="/dashboard" class="nav-item">
-        <i class="fa-solid fa-house"></i> Hᴏᴍᴇ
+        <i class="fa-solid fa-house"></i> Home
     </a>
     <a href="/transfer" class="nav-item active">
-        <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ
+        <i class="fa-solid fa-paper-plane"></i> Send
     </a>
     <a href="/qr" class="nav-item">
-        <i class="fa-solid fa-qrcode"></i> Qʀ
+        <i class="fa-solid fa-qrcode"></i> QR
     </a>
     <a href="/deposit" class="nav-item">
-        <i class="fa-solid fa-plus-circle"></i> Aᴅᴅ
+        <i class="fa-solid fa-plus-circle"></i> Add
     </a>
     <a href="/transactions" class="nav-item">
-        <i class="fa-solid fa-receipt"></i> Hɪꜱᴛᴏʀʏ
+        <i class="fa-solid fa-receipt"></i> History
     </a>
 </div>
 
-<!-- ============================================
-     SECTION 26: JAVASCRIPT - COMPLETE
-     ============================================ -->
 <script>
-// ============================================
-// SECTION 26a: CONFIGURATION & INIT
-// ============================================
-const API_BASE_URL = '/api/transfer';
-const AUTH_TOKEN = localStorage.getItem('token');
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const API_BASE_URL = '/api/transfer';
+    const PIN_API_URL = '/api/pin';
+    const AUTH_TOKEN = localStorage.getItem('token');
 
-if (!AUTH_TOKEN) {
-    window.location.href = '/index';
-}
-
-let searchTimeout = null;
-let currentReceiverMobile = '';
-let currentReceiverName = '';
-let html5QrCode = null;
-let isVerified = false;
-
-// ============================================
-// SECTION 26b: THEME SYNC
-// ============================================
-function loadThemeFromStorage() {
-    const savedTheme = localStorage.getItem('primeTheme');
-    const body = document.body;
-    
-    if (savedTheme === 'dark') {
-        body.classList.add('dark');
-        body.classList.remove('light');
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        body.classList.add('light');
-        body.classList.remove('dark');
-        document.documentElement.setAttribute('data-theme', 'light');
+    if (!AUTH_TOKEN) {
+        window.location.href = '/';
     }
-}
 
-loadThemeFromStorage();
+    let searchTimeout = null;
+    let currentReceiverMobile = '';
+    let currentReceiverName = '';
+    let html5QrCode = null;
+    let isVerified = false;
 
-// ============================================
-// SECTION 26c: TOAST NOTIFICATION
-// ============================================
-function showToast(message, type = 'info') {
-    let toast = document.getElementById('globalToast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'globalToast';
-        toast.className = 'toast-notify';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = message;
-    toast.className = `toast-notify ${type} show`;
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-}
+    // PIN state
+    let pinMode = 'verify'; // 'verify' or 'set'
+    let pinStep = 1;
+    let pinStep1Value = '';
+    let pinCode = '';
+    let pendingTransferData = null;
 
-// ============================================
-// SECTION 26d: TAB SWITCHING
-// ============================================
-function switchTab(tab) {
-    const tabNumber = document.getElementById('tabNumber');
-    const tabQr = document.getElementById('tabQr');
-    const btnNumber = document.querySelector('.tab-btn:first-child');
-    const btnQr = document.querySelector('.tab-btn:last-child');
-    
-    if (tab === 'number') {
-        tabNumber.classList.add('active');
-        tabQr.classList.remove('active');
-        btnNumber.classList.add('active');
-        btnQr.classList.remove('active');
-    } else {
-        tabNumber.classList.remove('active');
-        tabQr.classList.add('active');
-        btnNumber.classList.remove('active');
-        btnQr.classList.add('active');
-        closeQRScanner();
-    }
-}
-
-// ============================================
-// SECTION 26e: QUICK AMOUNT
-// ============================================
-function setQuickAmount(amount) {
-    document.getElementById('transferAmount').value = amount;
-    calculateBreakdown(amount);
-    document.getElementById('transferAmount').focus();
-}
-
-// ============================================
-// SECTION 26f: QR SCANNER
-// ============================================
-function openQRScanner() {
-    const modal = document.getElementById('qrScannerModal');
-    modal.classList.add('open');
-    
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-        html5QrCode = null;
-    }
-    
-    document.getElementById('qr-reader-area').innerHTML = '';
-    
-    try {
-        html5QrCode = new Html5Qrcode('qr-reader-area');
-        html5QrCode.start(
-            { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-            onQRScanSuccess,
-            onQRScanError
-        ).catch(() => {
-            showToast('📷 Camera permission denied!', 'error');
-            closeQRScanner();
-        });
-    } catch (error) {
-        showToast('❌ Failed to initialize camera', 'error');
-        closeQRScanner();
-    }
-}
-
-function onQRScanSuccess(decodedText) {
-    console.log('✅ QR Scan Success:', decodedText);
-    
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            closeQRScanner();
-            processQRData(decodedText.trim());
-        }).catch(() => {
-            closeQRScanner();
-            processQRData(decodedText.trim());
-        });
-    } else {
-        closeQRScanner();
-        processQRData(decodedText.trim());
-    }
-}
-
-function onQRScanError(err) {
-    // Ignore - called for each scan attempt
-}
-
-function closeQRScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {}).then(() => {
-            document.getElementById('qrScannerModal').classList.remove('open');
-            html5QrCode = null;
-        });
-    } else {
-        document.getElementById('qrScannerModal').classList.remove('open');
-    }
-}
-
-// ============================================
-// SECTION 26g: GALLERY UPLOAD
-// ============================================
-function chooseFromGallery() {
-    document.getElementById('galleryFileInput').click();
-}
-
-function handleGalleryImage(input) {
-    const file = input.files[0];
-    if (!file) {
-        console.log('⚠️ No file selected');
-        return;
-    }
-    
-    console.log('📷 File selected:', file.name);
-    
-    if (!file.type.match(/image\/(jpeg|png|gif|webp|bmp)/i)) {
-        showToast('❌ Invalid file type', 'error');
-        input.value = '';
-        return;
-    }
-    
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ File too large! Max 5MB', 'error');
-        input.value = '';
-        return;
-    }
-    
-    showToast('📷 Processing image...', 'info');
-    
-    const scanner = new Html5Qrcode();
-    scanner.scanFile(file, true)
-        .then(decodedText => {
-            console.log('✅ QR Decoded from image:', decodedText);
-            processQRData(decodedText.trim());
-            input.value = '';
-        })
-        .catch((err) => {
-            console.error('❌ QR decode error:', err);
-            showToast('❌ No QR code found in the image.', 'error');
-            input.value = '';
-        });
-}
-
-// ============================================
-// SECTION 26h: PROCESS QR DATA
-// ============================================
-function processQRData(decodedText) {
-    console.log('📥 QR Data received:', decodedText);
-    
-    // Remove all non-digit characters
-    const cleanedText = decodedText.replace(/\D/g, '');
-    console.log('🔢 Cleaned text (only digits):', cleanedText);
-    
-    if (cleanedText.length >= 10) {
-        const mobileNumber = cleanedText.slice(0, 10);
-        console.log('✅ Extracted mobile number:', mobileNumber);
-        
-        // Switch to number tab
-        switchTab('number');
-        
-        // Set the mobile number in the input field
-        const mobileInput = document.getElementById('receiverMobile');
-        mobileInput.value = mobileNumber;
-        
-        // Highlight the input
-        mobileInput.style.borderColor = '#10b981';
-        mobileInput.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
+    function showToast(message, type = 'info') {
+        let toast = document.getElementById('globalToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'globalToast';
+            toast.className = 'toast-notify';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.className = `toast-notify ${type} show`;
         setTimeout(() => {
-            mobileInput.style.borderColor = '';
-            mobileInput.style.boxShadow = '';
-        }, 2000);
-        
-        // DIRECT API CALL - Fetch user details immediately
-        fetchUserDetails(mobileNumber);
-        
-        showToast('✅ QR scanned! Fetching user details...', 'success');
-    } else {
-        console.error('❌ No valid 10-digit number found');
-        showToast('❌ Invalid QR code. No 10-digit mobile number found.', 'error');
+            toast.classList.remove('show');
+        }, 3000);
     }
-}
 
-// ============================================
-// SECTION 26i: FETCH USER DETAILS
-// ============================================
-function fetchUserDetails(mobileNumber) {
-    console.log('🔍 Fetching user details for:', mobileNumber);
-    
-    // Show loading state
-    updateUserStatus('loading', 'Fetching user details...');
-    
-    fetch(API_BASE_URL + '/view?number=' + encodeURIComponent(mobileNumber), {
-        headers: { 
-            'Authorization': 'Bearer ' + AUTH_TOKEN,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => {
-        console.log('📡 Response status:', res.status);
-        if (!res.ok) {
-            return res.json().then(data => {
-                throw new Error(data.error || 'User not found');
-            });
-        }
-        return res.json();
-    })
-    .then(data => {
-        console.log('📦 User data received:', data);
-        if (data.status === 'success') {
-            currentReceiverName = data.name || data.fullName || 'Unknown User';
-            currentReceiverMobile = mobileNumber;
-            isVerified = true;
-            
-            // Update UI
-            updateUserStatus('verified', currentReceiverName);
-            
-            // Show success toast with user name
-            showToast('✅ User found: ' + currentReceiverName, 'success');
-            
-            console.log('✅ User verified:', currentReceiverName);
+    // ============================================
+    // TAB SWITCHING
+    // ============================================
+    function switchTab(tab) {
+        const tabNumber = document.getElementById('tabNumber');
+        const tabQr = document.getElementById('tabQr');
+        const btnNumber = document.querySelector('.tab-btn:first-child');
+        const btnQr = document.querySelector('.tab-btn:last-child');
+        
+        if (tab === 'number') {
+            tabNumber.classList.add('active');
+            tabQr.classList.remove('active');
+            btnNumber.classList.add('active');
+            btnQr.classList.remove('active');
         } else {
-            updateUserStatus('error', data.error || 'Account not found');
-            isVerified = false;
-            showToast('❌ ' + (data.error || 'User not found'), 'error');
+            tabNumber.classList.remove('active');
+            tabQr.classList.add('active');
+            btnNumber.classList.remove('active');
+            btnQr.classList.add('active');
+            closeQRScanner();
         }
-    })
-    .catch(err => {
-        console.error('❌ Fetch error:', err.message);
-        updateUserStatus('error', err.message || 'Network Error');
-        isVerified = false;
-        showToast('❌ ' + err.message, 'error');
-    });
-}
-
-// ============================================
-// SECTION 26j: RECEIVER LOOKUP (Manual Entry)
-// ============================================
-function lookupReceiver(mobileNumber) {
-    clearTimeout(searchTimeout);
-    updateUserStatus('', '');
-    
-    const cleanMobile = mobileNumber.toString().trim();
-    
-    if (!/^\d{10}$/.test(cleanMobile)) {
-        isVerified = false;
-        updateUserStatus('error', 'Invalid mobile number');
-        return;
     }
-    
-    currentReceiverMobile = cleanMobile;
-    updateUserStatus('loading', 'Verifying...');
-    
-    searchTimeout = setTimeout(() => {
-        fetch(API_BASE_URL + '/view?number=' + encodeURIComponent(cleanMobile), {
+
+    // ============================================
+    // QUICK AMOUNT
+    // ============================================
+    function setQuickAmount(amount) {
+        document.getElementById('transferAmount').value = amount;
+        calculateBreakdown(amount);
+        document.getElementById('transferAmount').focus();
+    }
+
+    // ============================================
+    // QR SCANNER
+    // ============================================
+    function openQRScanner() {
+        const modal = document.getElementById('qrScannerModal');
+        modal.classList.add('open');
+        
+        if (html5QrCode) {
+            html5QrCode.stop().catch(() => {});
+            html5QrCode = null;
+        }
+        
+        document.getElementById('qr-reader-area').innerHTML = '';
+        
+        try {
+            html5QrCode = new Html5Qrcode('qr-reader-area');
+            html5QrCode.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+                onQRScanSuccess,
+                onQRScanError
+            ).catch(() => {
+                showToast('Camera permission denied!', 'error');
+                closeQRScanner();
+            });
+        } catch (error) {
+            showToast('Failed to initialize camera', 'error');
+            closeQRScanner();
+        }
+    }
+
+    function onQRScanSuccess(decodedText) {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                closeQRScanner();
+                processQRData(decodedText.trim());
+            }).catch(() => {
+                closeQRScanner();
+                processQRData(decodedText.trim());
+            });
+        } else {
+            closeQRScanner();
+            processQRData(decodedText.trim());
+        }
+    }
+
+    function onQRScanError(err) {
+        // Ignore - called for each scan attempt
+    }
+
+    function closeQRScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().catch(() => {}).then(() => {
+                document.getElementById('qrScannerModal').classList.remove('open');
+                html5QrCode = null;
+            });
+        } else {
+            document.getElementById('qrScannerModal').classList.remove('open');
+        }
+    }
+
+    // ============================================
+    // GALLERY UPLOAD
+    // ============================================
+    function chooseFromGallery() {
+        document.getElementById('galleryFileInput').click();
+    }
+
+    function handleGalleryImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        if (!file.type.match(/image\/(jpeg|png|gif|webp|bmp)/i)) {
+            showToast('Invalid file type', 'error');
+            input.value = '';
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('File too large! Max 5MB', 'error');
+            input.value = '';
+            return;
+        }
+        
+        showToast('Processing image...', 'info');
+        
+        const scanner = new Html5Qrcode();
+        scanner.scanFile(file, true)
+            .then(decodedText => {
+                processQRData(decodedText.trim());
+                input.value = '';
+            })
+            .catch(() => {
+                showToast('No QR code found in the image.', 'error');
+                input.value = '';
+            });
+    }
+
+    // ============================================
+    // PROCESS QR DATA
+    // ============================================
+    function processQRData(decodedText) {
+        const cleanedText = decodedText.replace(/\D/g, '');
+        
+        if (cleanedText.length >= 10) {
+            const mobileNumber = cleanedText.slice(0, 10);
+            
+            switchTab('number');
+            
+            const mobileInput = document.getElementById('receiverMobile');
+            mobileInput.value = mobileNumber;
+            
+            mobileInput.style.borderColor = '#16a34a';
+            mobileInput.style.boxShadow = '0 0 0 3px rgba(22, 163, 74, 0.2)';
+            setTimeout(() => {
+                mobileInput.style.borderColor = '';
+                mobileInput.style.boxShadow = '';
+            }, 2000);
+            
+            fetchUserDetails(mobileNumber);
+            
+            showToast('QR scanned! Fetching user details...', 'success');
+        } else {
+            showToast('Invalid QR code. No 10-digit mobile number found.', 'error');
+        }
+    }
+
+    // ============================================
+    // FETCH USER DETAILS
+    // ============================================
+    function fetchUserDetails(mobileNumber) {
+        updateUserStatus('loading', 'Fetching user details...');
+        
+        fetch(API_BASE_URL + '/view?number=' + encodeURIComponent(mobileNumber), {
             headers: { 
                 'Authorization': 'Bearer ' + AUTH_TOKEN,
                 'Content-Type': 'application/json'
@@ -1656,218 +1377,536 @@ function lookupReceiver(mobileNumber) {
         .then(data => {
             if (data.status === 'success') {
                 currentReceiverName = data.name || data.fullName || 'Unknown User';
-                updateUserStatus('verified', currentReceiverName);
+                currentReceiverMobile = mobileNumber;
                 isVerified = true;
-                console.log('✅ User verified:', currentReceiverName);
+                
+                updateUserStatus('verified', currentReceiverName);
+                showToast('User found: ' + currentReceiverName, 'success');
             } else {
                 updateUserStatus('error', data.error || 'Account not found');
-                currentReceiverName = '';
                 isVerified = false;
+                showToast(data.error || 'User not found', 'error');
             }
         })
         .catch(err => {
             updateUserStatus('error', err.message || 'Network Error');
-            currentReceiverName = '';
             isVerified = false;
+            showToast(err.message, 'error');
         });
-    }, 500);
-}
-
-// ============================================
-// SECTION 26k: UPDATE USER STATUS
-// ============================================
-function updateUserStatus(status, message) {
-    const badge = document.getElementById('userStatusBadge');
-    const textSpan = document.getElementById('userStatusText');
-    const icon = badge.querySelector('i');
-    
-    badge.classList.remove('active', 'verified', 'error', 'loading');
-    
-    if (status === 'loading') {
-        badge.classList.add('active', 'loading');
-        icon.className = 'fa-solid fa-spinner fa-pulse';
-        textSpan.textContent = ' ' + message;
-        isVerified = false;
-    } else if (status === 'verified') {
-        badge.classList.add('active', 'verified');
-        icon.className = 'fa-solid fa-circle-check';
-        textSpan.textContent = ' ' + message;
-        isVerified = true;
-    } else if (status === 'error') {
-        badge.classList.add('active', 'error');
-        icon.className = 'fa-solid fa-circle-exclamation';
-        textSpan.textContent = ' ' + message;
-        isVerified = false;
-    } else {
-        badge.classList.remove('active');
-        textSpan.textContent = '';
-        isVerified = false;
     }
-}
 
-// ============================================
-// SECTION 26l: BALANCE
-// ============================================
-function refreshWalletBalance() {
-    fetch(API_BASE_URL + '/balance', {
-        headers: { 
-            'Authorization': 'Bearer ' + AUTH_TOKEN,
-            'Content-Type': 'application/json'
+    // ============================================
+    // RECEIVER LOOKUP (Manual Entry)
+    // ============================================
+    function lookupReceiver(mobileNumber) {
+        clearTimeout(searchTimeout);
+        updateUserStatus('', '');
+        
+        const cleanMobile = mobileNumber.toString().trim();
+        
+        if (!/^\d{10}$/.test(cleanMobile)) {
+            isVerified = false;
+            updateUserStatus('error', 'Invalid mobile number');
+            return;
         }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Server Error');
-        return res.json();
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('userBalance').textContent = parseFloat(data.balance).toFixed(2);
+        
+        currentReceiverMobile = cleanMobile;
+        updateUserStatus('loading', 'Verifying...');
+        
+        searchTimeout = setTimeout(() => {
+            fetch(API_BASE_URL + '/view?number=' + encodeURIComponent(cleanMobile), {
+                headers: { 
+                    'Authorization': 'Bearer ' + AUTH_TOKEN,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(data => {
+                        throw new Error(data.error || 'User not found');
+                    });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    currentReceiverName = data.name || data.fullName || 'Unknown User';
+                    updateUserStatus('verified', currentReceiverName);
+                    isVerified = true;
+                } else {
+                    updateUserStatus('error', data.error || 'Account not found');
+                    currentReceiverName = '';
+                    isVerified = false;
+                }
+            })
+            .catch(err => {
+                updateUserStatus('error', err.message || 'Network Error');
+                currentReceiverName = '';
+                isVerified = false;
+            });
+        }, 500);
+    }
+
+    // ============================================
+    // UPDATE USER STATUS
+    // ============================================
+    function updateUserStatus(status, message) {
+        const badge = document.getElementById('userStatusBadge');
+        const textSpan = document.getElementById('userStatusText');
+        const icon = badge.querySelector('i');
+        
+        badge.classList.remove('active', 'verified', 'error', 'loading');
+        
+        if (status === 'loading') {
+            badge.classList.add('active', 'loading');
+            icon.className = 'fa-solid fa-spinner fa-pulse';
+            textSpan.textContent = ' ' + message;
+            isVerified = false;
+        } else if (status === 'verified') {
+            badge.classList.add('active', 'verified');
+            icon.className = 'fa-solid fa-circle-check';
+            textSpan.textContent = ' ' + message;
+            isVerified = true;
+        } else if (status === 'error') {
+            badge.classList.add('active', 'error');
+            icon.className = 'fa-solid fa-circle-exclamation';
+            textSpan.textContent = ' ' + message;
+            isVerified = false;
+        } else {
+            badge.classList.remove('active');
+            textSpan.textContent = '';
+            isVerified = false;
         }
-    })
-    .catch(() => {});
-}
+    }
 
-// ============================================
-// SECTION 26m: AMOUNT BREAKDOWN
-// ============================================
-function calculateBreakdown(amountValue) {
-    const panel = document.getElementById('feeBreakdown');
-    if (!amountValue || amountValue <= 0) {
-        panel.classList.remove('open');
-        return;
+    // ============================================
+    // BALANCE
+    // ============================================
+    function refreshWalletBalance() {
+        fetch(API_BASE_URL + '/balance', {
+            headers: { 
+                'Authorization': 'Bearer ' + AUTH_TOKEN,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Server Error');
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('userBalance').textContent = parseFloat(data.balance).toFixed(2);
+            }
+        })
+        .catch(() => {});
     }
-    panel.classList.add('open');
-    const numericAmount = parseFloat(amountValue);
-    document.getElementById('breakdownAmount').textContent = '₹' + numericAmount.toFixed(2);
-    document.getElementById('breakdownTotal').textContent = '₹' + numericAmount.toFixed(2);
-}
 
-// ============================================
-// SECTION 26n: EXECUTE TRANSFER
-// ============================================
-function executeTransfer() {
-    const mobile = document.getElementById('receiverMobile').value.trim();
-    const amount = document.getElementById('transferAmount').value;
-    const note = document.getElementById('referenceNote').value.trim();
-    
-    if (!mobile || mobile.length < 10) {
-        showToast('⚠️ Enter a valid 10-digit mobile', 'error');
-        document.getElementById('receiverMobile').focus();
-        return;
+    // ============================================
+    // AMOUNT BREAKDOWN
+    // ============================================
+    function calculateBreakdown(amountValue) {
+        const panel = document.getElementById('feeBreakdown');
+        if (!amountValue || amountValue <= 0) {
+            panel.classList.remove('open');
+            return;
+        }
+        panel.classList.add('open');
+        const numericAmount = parseFloat(amountValue);
+        document.getElementById('breakdownAmount').textContent = '₹' + numericAmount.toFixed(2);
+        document.getElementById('breakdownTotal').textContent = '₹' + numericAmount.toFixed(2);
     }
-    
-    if (!isVerified) {
-        showToast('⚠️ Please wait, verifying recipient...', 'error');
-        return;
-    }
-    
-    if (!amount || amount <= 0) {
-        showToast('⚠️ Enter a valid amount', 'error');
-        document.getElementById('transferAmount').focus();
-        return;
-    }
-    
-    const currentBalance = parseFloat(document.getElementById('userBalance').textContent);
-    if (parseFloat(amount) > currentBalance) {
-        showToast(`⚠️ Insufficient balance! ₹${currentBalance.toFixed(2)} available`, 'error');
-        return;
-    }
-    
-    const transferBtn = document.getElementById('transferBtn');
-    transferBtn.disabled = true;
-    transferBtn.innerHTML = '<span class="spinner"></span> Processing...';
-    
-    fetch(API_BASE_URL + '/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + AUTH_TOKEN
-        },
-        body: JSON.stringify({
+
+    // ============================================
+    // INITIATE TRANSFER (with PIN check)
+    // ============================================
+    function initiateTransfer() {
+        const mobile = document.getElementById('receiverMobile').value.trim();
+        const amount = document.getElementById('transferAmount').value;
+        const note = document.getElementById('referenceNote').value.trim();
+        
+        if (!mobile || mobile.length < 10) {
+            showToast('Enter a valid 10-digit mobile', 'error');
+            document.getElementById('receiverMobile').focus();
+            return;
+        }
+        
+        if (!isVerified) {
+            showToast('Please wait, verifying recipient...', 'error');
+            return;
+        }
+        
+        if (!amount || amount <= 0) {
+            showToast('Enter a valid amount', 'error');
+            document.getElementById('transferAmount').focus();
+            return;
+        }
+        
+        const currentBalance = parseFloat(document.getElementById('userBalance').textContent);
+        if (parseFloat(amount) > currentBalance) {
+            showToast(`Insufficient balance! ₹${currentBalance.toFixed(2)} available`, 'error');
+            return;
+        }
+        
+        // Store transfer data temporarily
+        pendingTransferData = {
             mobile: mobile,
             amount: parseFloat(amount),
             note: note
-        })
-    })
-    .then(res => {
-        if (!res.ok) {
-            return res.json().then(data => {
-                throw new Error(data.error || 'Transfer Failed');
+        };
+        
+        // Check PIN status
+        checkPinStatus();
+    }
+
+    // ============================================
+    // CHECK PIN STATUS
+    // ============================================
+    async function checkPinStatus() {
+        try {
+            const response = await fetch(PIN_API_URL + '/check-pin-status', {
+                headers: {
+                    'Authorization': 'Bearer ' + AUTH_TOKEN,
+                    'Content-Type': 'application/json'
+                }
             });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                if (data.hasPin) {
+                    // PIN is set → Verify PIN
+                    openPinModal('verify');
+                } else {
+                    // PIN not set → Set PIN
+                    openPinModal('set');
+                }
+            } else {
+                // Fallback: check from localStorage
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.pin_set) {
+                    openPinModal('verify');
+                } else {
+                    openPinModal('set');
+                }
+            }
+        } catch (error) {
+            console.error('PIN status check error:', error);
+            // Fallback
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.pin_set) {
+                openPinModal('verify');
+            } else {
+                openPinModal('set');
+            }
         }
-        return res.json();
-    })
-    .then(data => {
-        if (data.success === true) {
-            const now = new Date();
-            const formattedDateTime = now.toLocaleString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+    }
+
+    // ============================================
+    // PIN MODAL
+    // ============================================
+    function openPinModal(mode) {
+        pinMode = mode;
+        pinStep = 1;
+        pinStep1Value = '';
+        pinCode = '';
+        
+        const modal = document.getElementById('pinModal');
+        modal.classList.add('open');
+        
+        updatePinUI();
+        updatePinDots();
+    }
+
+    function closePinModal() {
+        document.getElementById('pinModal').classList.remove('open');
+        pinCode = '';
+        pinStep1Value = '';
+        pinStep = 1;
+        pendingTransferData = null;
+    }
+
+    function updatePinUI() {
+        const badge = document.getElementById('pinStepBadge');
+        const title = document.getElementById('pinTitle');
+        const subtitle = document.getElementById('pinSubtitle');
+        const icon = document.getElementById('pinIcon');
+        
+        if (pinMode === 'set') {
+            icon.className = 'fa-solid fa-lock';
+            badge.style.display = 'inline-block';
             
-            document.getElementById('modalAmount').textContent = '-₹' + parseFloat(amount).toFixed(2);
-            document.getElementById('modalAmountDisplay').textContent = '₹' + parseFloat(amount).toFixed(2);
-            document.getElementById('modalTxId').textContent = data.txnId || 'TXN' + Date.now();
-            document.getElementById('modalReceiver').textContent = mobile + ' (' + currentReceiverName + ')';
-            document.getElementById('modalNewBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
-            document.getElementById('modalMessage').textContent = note || 'General Transfer';
-            document.getElementById('modalDateTime').textContent = formattedDateTime;
-            
-            document.getElementById('successModal').classList.add('open');
-            
-            document.getElementById('receiverMobile').value = '';
-            document.getElementById('transferAmount').value = '';
-            document.getElementById('referenceNote').value = '';
-            updateUserStatus('', '');
-            document.getElementById('feeBreakdown').classList.remove('open');
-            isVerified = false;
-            
-            showToast('✅ Transfer successful!', 'success');
-            refreshWalletBalance();
+            if (pinStep === 1) {
+                badge.textContent = 'Step 1 of 2';
+                title.textContent = 'Create PIN';
+                subtitle.textContent = 'Set a 4-digit PIN to secure your account';
+            } else {
+                badge.textContent = 'Step 2 of 2';
+                title.textContent = 'Confirm PIN';
+                subtitle.textContent = 'Re-enter the same 4-digit PIN';
+            }
         } else {
-            showToast('❌ ' + (data.message || data.error || 'Transfer Failed'), 'error');
+            icon.className = 'fa-solid fa-shield-halved';
+            badge.style.display = 'none';
+            title.textContent = 'Enter PIN';
+            subtitle.textContent = 'Enter your 4-digit PIN to confirm transfer';
+        }
+    }
+
+    function updatePinDots(isError) {
+        for (let i = 0; i < 4; i++) {
+            const dot = document.getElementById('pdot-' + i);
+            dot.classList.toggle('filled', i < pinCode.length);
+            if (isError) dot.classList.add('error');
+            else dot.classList.remove('error');
+            if (i < pinCode.length) dot.textContent = '●';
+            else dot.textContent = '';
+        }
+    }
+
+    function pinPress(n) {
+        if (pinCode.length < 4) {
+            pinCode += n;
+            updatePinDots();
+            if (pinCode.length === 4) {
+                setTimeout(() => pinSubmit(), 150);
+            }
+        }
+    }
+
+    function pinDel() {
+        pinCode = pinCode.slice(0, -1);
+        updatePinDots();
+    }
+
+    function pinDisableKeypad(on) {
+        const btn = document.getElementById('pinSubmitBtn');
+        if (on) btn.classList.add('loading');
+        else btn.classList.remove('loading');
+        
+        document.querySelectorAll('.pin-key').forEach(k => {
+            k.style.pointerEvents = on ? 'none' : '';
+            k.style.opacity = on ? '0.7' : '1';
+        });
+    }
+
+    async function pinSubmit() {
+        if (pinCode.length < 4) {
+            showToast('Please enter 4-digit PIN', 'error');
+            return;
         }
         
-        transferBtn.disabled = false;
-        transferBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Money';
-    })
-    .catch(error => {
-        showToast('❌ ' + error.message, 'error');
-        transferBtn.disabled = false;
-        transferBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Money';
+        if (pinMode === 'set') {
+            if (pinStep === 1) {
+                pinStep1Value = pinCode;
+                pinStep = 2;
+                pinCode = '';
+                updatePinUI();
+                updatePinDots();
+                showToast('Now confirm your PIN', 'info');
+            } else {
+                if (pinCode !== pinStep1Value) {
+                    showToast('PINs do not match!', 'error');
+                    updatePinDots(true);
+                    setTimeout(() => {
+                        pinStep = 1;
+                        pinStep1Value = '';
+                        pinCode = '';
+                        updatePinUI();
+                        updatePinDots();
+                    }, 800);
+                    return;
+                }
+                await callSetPin(pinCode);
+            }
+        } else {
+            await callVerifyPin(pinCode);
+        }
+    }
+
+    async function callSetPin(pin) {
+        pinDisableKeypad(true);
+        try {
+            const res = await fetch(PIN_API_URL + '/set-pin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + AUTH_TOKEN
+                },
+                body: JSON.stringify({ pin: pin })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                localStorage.setItem('pin_set', 'true');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.pin_set = true;
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                showToast('PIN set successfully!', 'success');
+                
+                // After setting PIN, proceed with transfer
+                setTimeout(() => {
+                    closePinModal();
+                    // PIN is now set, so transfer can proceed
+                    if (pendingTransferData) {
+                        executeTransferWithPin(pendingTransferData, pin);
+                    }
+                }, 800);
+            } else {
+                showToast(data.message || 'Error setting PIN', 'error');
+                pinStep = 1;
+                pinStep1Value = '';
+                pinCode = '';
+                updatePinUI();
+                updatePinDots();
+            }
+        } catch (error) {
+            showToast('Network error: ' + error.message, 'error');
+            pinStep = 1;
+            pinStep1Value = '';
+            pinCode = '';
+            updatePinUI();
+            updatePinDots();
+        } finally {
+            pinDisableKeypad(false);
+        }
+    }
+
+    async function callVerifyPin(pin) {
+        pinDisableKeypad(true);
+        try {
+            const res = await fetch(PIN_API_URL + '/verify-pin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + AUTH_TOKEN
+                },
+                body: JSON.stringify({ pin: pin })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('PIN verified!', 'success');
+                closePinModal();
+                
+                // Proceed with transfer
+                if (pendingTransferData) {
+                    executeTransferWithPin(pendingTransferData, pin);
+                }
+            } else {
+                showToast(data.message || 'Wrong PIN', 'error');
+                updatePinDots(true);
+                setTimeout(() => {
+                    pinCode = '';
+                    updatePinDots();
+                    pinDisableKeypad(false);
+                }, 600);
+            }
+        } catch (error) {
+            showToast('Network error: ' + error.message, 'error');
+            pinCode = '';
+            updatePinDots();
+            pinDisableKeypad(false);
+        }
+    }
+
+    // ============================================
+    // EXECUTE TRANSFER (After PIN verification)
+    // ============================================
+    async function executeTransferWithPin(transferData, pin) {
+        const transferBtn = document.getElementById('transferBtn');
+        transferBtn.disabled = true;
+        transferBtn.innerHTML = '<span class="spinner"></span> Processing...';
+        
+        try {
+            const response = await fetch(API_BASE_URL + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + AUTH_TOKEN
+                },
+                body: JSON.stringify({
+                    mobile: transferData.mobile,
+                    amount: transferData.amount,
+                    note: transferData.note,
+                    pin: pin
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success === true) {
+                const now = new Date();
+                const formattedDateTime = now.toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                
+                document.getElementById('modalAmount').textContent = '-₹' + transferData.amount.toFixed(2);
+                document.getElementById('modalAmountDisplay').textContent = '₹' + transferData.amount.toFixed(2);
+                document.getElementById('modalTxId').textContent = data.txnId || 'TXN' + Date.now();
+                document.getElementById('modalReceiver').textContent = transferData.mobile + ' (' + currentReceiverName + ')';
+                document.getElementById('modalNewBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
+                document.getElementById('modalMessage').textContent = transferData.note || 'General Transfer';
+                document.getElementById('modalDateTime').textContent = formattedDateTime;
+                
+                document.getElementById('successModal').classList.add('open');
+                
+                // Clear form
+                document.getElementById('receiverMobile').value = '';
+                document.getElementById('transferAmount').value = '';
+                document.getElementById('referenceNote').value = '';
+                updateUserStatus('', '');
+                document.getElementById('feeBreakdown').classList.remove('open');
+                isVerified = false;
+                pendingTransferData = null;
+                
+                showToast('Transfer successful!', 'success');
+                refreshWalletBalance();
+            } else {
+                showToast(data.message || data.error || 'Transfer Failed', 'error');
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+        } finally {
+            transferBtn.disabled = false;
+            transferBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Money';
+        }
+    }
+
+    // ============================================
+    // MODAL CONTROLS
+    // ============================================
+    function dismissModal() {
+        document.getElementById('successModal').classList.remove('open');
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    refreshWalletBalance();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillMobile = urlParams.get('to');
+    if (prefillMobile && /^\d{10}$/.test(prefillMobile)) {
+        document.getElementById('receiverMobile').value = prefillMobile;
+        lookupReceiver(prefillMobile);
+    }
+
+    document.getElementById('transferAmount').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') initiateTransfer();
     });
-}
 
-// ============================================
-// SECTION 26o: MODAL CONTROLS
-// ============================================
-function dismissModal() {
-    document.getElementById('successModal').classList.remove('open');
-}
-
-// ============================================
-// SECTION 26p: INITIALIZE
-// ============================================
-refreshWalletBalance();
-
-const urlParams = new URLSearchParams(window.location.search);
-const prefillMobile = urlParams.get('to');
-if (prefillMobile && /^\d{10}$/.test(prefillMobile)) {
-    document.getElementById('receiverMobile').value = prefillMobile;
-    lookupReceiver(prefillMobile);
-}
-
-document.getElementById('transferAmount').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') executeTransfer();
-});
-
-document.getElementById('receiverMobile').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') document.getElementById('transferAmount').focus();
-});
+    document.getElementById('receiverMobile').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') document.getElementById('transferAmount').focus();
+    });
 </script>
+
 </body>
 </html>
