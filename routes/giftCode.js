@@ -3,7 +3,7 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
-const GiftCode = require('../models/GiftCode'); // ✅ নতুন মডেল ইমপোর্ট
+const GiftCode = require('../models/GiftCode');
 const axios = require('axios');
 require('dotenv').config();
 
@@ -15,17 +15,17 @@ const ADMIN_TG = process.env.ADMIN_TG_ID;
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ success: false, message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' });
+        if (!token) return res.status(401).json({ success: false, message: 'No Token Provided' });
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
-        if (!user) return res.status(401).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' });
+        if (!user) return res.status(401).json({ success: false, message: 'User Not Found' });
         req.user = user;
         next();
     } catch (error) {
-        console.error('Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
-        if (error.name === 'JsonWebTokenError') return res.status(401).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' });
-        if (error.name === 'TokenExpiredError') return res.status(401).json({ success: false, message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' });
-        return res.status(500).json({ success: false, message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' });
+        console.error('Token Verification Error:', error.message);
+        if (error.name === 'JsonWebTokenError') return res.status(401).json({ success: false, message: 'Invalid Token. Please Login Again.' });
+        if (error.name === 'TokenExpiredError') return res.status(401).json({ success: false, message: 'Token Expired. Please Login Again.' });
+        return res.status(500).json({ success: false, message: 'Authentication Error' });
     }
 };
 
@@ -49,7 +49,7 @@ async function sendTelegramMessage(chatId, message) {
         if (response.data && response.data.ok) return { success: true };
         return { success: false, error: response.data?.description || 'Unknown Error' };
     } catch (error) {
-        console.error('Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ:', error.message);
+        console.error('Failed To Send Telegram Message:', error.message);
         return { success: false, error: error.message };
     }
 }
@@ -58,9 +58,9 @@ async function notifyAdmin(message) {
     if (!ADMIN_TG) return;
     try { 
         await sendTelegramMessage(ADMIN_TG, message); 
-        console.log('✅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ'); 
+        console.log('Admin Notification Sent'); 
     } catch (error) { 
-        console.error('Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ:', error.message); 
+        console.error('Failed To Send Admin Notification:', error.message); 
     }
 }
 
@@ -77,7 +77,7 @@ function getCurrentDateTime() {
     });
 }
 
-// ✅ গিফট কোড ভ্যালিডেশন: ১-৫০ ক্যারেক্টার (স্পেস, ইমোজি, সিম্বল অনুমোদিত)
+// Gift Code Validation: 1-50 characters (spaces, emoji, symbols allowed)
 function isValidGiftCode(code) {
     if (!code || typeof code !== 'string') return false;
     const len = code.trim().length;
@@ -97,8 +97,8 @@ router.get('/balance', verifyToken, async (req, res) => {
             fullName: user.fullName 
         });
     } catch (error) {
-        console.error('Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ status: 'error', error: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ' });
+        console.error('Balance Error:', error.message);
+        res.status(500).json({ status: 'error', error: 'Failed To Fetch Balance' });
     }
 });
 
@@ -111,50 +111,50 @@ router.post('/create', verifyToken, async (req, res) => {
         const { amount, note, giftCode } = req.body;
         const dateTime = getCurrentDateTime();
 
-        // ✅ ভ্যালিডেশন
+        // Validation
         if (!amount || amount <= 0) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Aᴍᴏᴜɴᴛ Mᴜꜱᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0' 
+                message: 'Amount Must Be Greater Than 0' 
             });
         }
 
         if (!giftCode || giftCode.trim() === '') {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Gɪꜰᴛ Cᴏᴅᴇ' 
+                message: 'Please Enter A Gift Code' 
             });
         }
 
-        const customCode = giftCode.trim().toUpperCase(); // ✅ MongoDB-তে uppercase সংরক্ষণ
+        const customCode = giftCode.trim().toUpperCase();
         
-        // ✅ ভ্যালিডেশন: ১-৫০ ক্যারেক্টার
+        // Validation: 1-50 characters
         if (!isValidGiftCode(customCode)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Cᴏᴅᴇ Mᴜꜱᴛ Bᴇ 1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ Lᴏɴɢ (Sᴘᴀᴄᴇ, Eᴍᴏᴊɪ, Sʏᴍʙᴏʟ Aʟʟᴏᴡᴇᴅ)' 
+                message: 'Code Must Be 1-50 Characters Long (Space, Emoji, Symbol Allowed)' 
             });
         }
 
-        // ✅ চেক করুন কোড আগে থেকে আছে কিনা
+        // Check if code already exists
         const existingCode = await GiftCode.findOne({ code: customCode });
         if (existingCode) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Tʜɪꜱ Gɪꜰᴛ Cᴏᴅᴇ Aʟʀᴇᴀᴅʏ Exɪꜱᴛꜱ. Pʟᴇᴀꜱᴇ Cʜᴏᴏꜱᴇ A Dɪꜰꜰᴇʀᴇɴᴛ Oɴᴇ.' 
+                message: 'This Gift Code Already Exists. Please Choose A Different One.' 
             });
         }
 
-        // ✅ ব্যালেন্স চেক
+        // Balance check
         const giftAmount = parseFloat(amount);
         if (user.balance < giftAmount) {
             return res.status(400).json({ 
                 success: false, 
-                message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Yᴏᴜʀ Cᴜʀʀᴇɴᴛ Bᴀʟᴀɴᴄᴇ Iꜱ ₹${user.balance.toFixed(2)}. Nᴇᴇᴅ ₹${giftAmount.toFixed(2)}.` 
+                message: `Insufficient Balance. Your Current Balance Is ₹${user.balance.toFixed(2)}. Need ₹${giftAmount.toFixed(2)}.` 
             });
         }
 
-        // ✅ গিফট কোড তৈরি করুন (MongoDB)
+        // Create gift code (MongoDB)
         const giftData = new GiftCode({
             code: customCode,
             amount: giftAmount,
@@ -162,16 +162,16 @@ router.post('/create', verifyToken, async (req, res) => {
             isUsed: false,
             redeemedBy: null,
             redeemedAt: null,
-            note: note || 'Gɪꜰᴛ Cᴏᴅᴇ'
+            note: note || 'Gift Code'
         });
 
         await giftData.save();
 
-        // ✅ ইউজারের ব্যালেন্স কাটুন
+        // Deduct user balance
         user.balance -= giftAmount;
         await user.save();
 
-        // ✅ ট্রানজেকশন তৈরি করুন
+        // Create transaction
         const transactionId = generateGiftTxnId();
         await Transaction.create({
             tx_id: transactionId,
@@ -181,68 +181,60 @@ router.post('/create', verifyToken, async (req, res) => {
             amount: giftAmount,
             type: 'gift',
             status: 'success',
-            remark: `Gɪꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ: ${customCode}`,
-            description: `Gɪꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ: ${customCode}`,
+            remark: `Gift Code Created: ${customCode}`,
+            description: `Gift Code Created: ${customCode}`,
             tx_time: new Date(),
             metadata: { 
                 giftCode: customCode, 
-                note: note || 'Gɪꜰᴛ Cᴏᴅᴇ',
+                note: note || 'Gift Code',
                 amount: giftAmount 
             }
         });
 
-        // ✅ টেলিগ্রাম নোটিফিকেশন (Creator)
+        // Telegram Notification (Creator)
         if (user.telegramId) {
             const creatorMessage = 
-`<b>─────────────────</b>
-<b>🎁 Gɪꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ</b>
-<b>─────────────────</b>
+`Gift Code Created Successfully
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Gɪꜰᴛ Cᴏᴅᴇ Hᴀꜱ Bᴇᴇɴ Cʀᴇᴀᴛᴇᴅ.
+Dear ${user.fullName}, Your Gift Code Has Been Created.
 
-🎫 <b>Gɪꜰᴛ Cᴏᴅᴇ:</b> <code>${customCode}</code>
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${giftAmount.toFixed(2)}
-📝 <b>Nᴏᴛᴇ:</b> ${note || 'Nᴏ Nᴏᴛᴇ'}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
+Gift Code: ${customCode}
+Amount: ₹${giftAmount.toFixed(2)}
+Note: ${note || 'No Note'}
+New Balance: ₹${user.balance.toFixed(2)}
 
-─────────────────────────
-⚠️ Iꜰ Yᴏᴜ Dɪᴅɴ'ᴛ Cʀᴇᴀᴛᴇ Tʜɪꜱ, Cᴏɴᴛᴀᴄᴛ Sᴜᴘᴘᴏʀᴛ Iᴍᴍᴇᴅɪᴀᴛᴇʟʏ.
-─────────────────────────`;
+If You Didn't Create This, Contact Support Immediately.`;
             await sendTelegramMessage(user.telegramId, creatorMessage);
         }
 
-        // ✅ অ্যাডমিন নোটিফিকেশন
+        // Admin Notification
         const adminMessage = 
-`<b>─────────────────</b>
-<b>🎁 Nᴇᴡ Gɪꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ</b>
-<b>─────────────────</b>
+`New Gift Code Created
 
-👤 <b>Cʀᴇᴀᴛᴏʀ:</b> ${user.fullName}
-📱 <b>Mᴏʙɪʟᴇ:</b> ${user.mobile}
-🤖 <b>Tᴇʟᴇɢʀᴀᴍ Iᴅ:</b> ${user.telegramId || 'N/A'}
-🆔 <b>Wᴀʟʟᴇᴛ Iᴅ:</b> ${user.walletId}
-🎫 <b>Gɪꜰᴛ Cᴏᴅᴇ:</b> <code>${customCode}</code>
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${giftAmount.toFixed(2)}
-📝 <b>Nᴏᴛᴇ:</b> ${note || 'Nᴏ Nᴏᴛᴇ'}
+Creator: ${user.fullName}
+Mobile: ${user.mobile}
+Telegram Id: ${user.telegramId || 'N/A'}
+Wallet Id: ${user.walletId}
+Gift Code: ${customCode}
+Amount: ₹${giftAmount.toFixed(2)}
+Note: ${note || 'No Note'}
 
-───────────────────────
-📊 <b>Sᴛᴀᴛᴜꜱ:</b> Aᴄᴛɪᴠᴇ
-───────────────────────`;
+Status: Active`;
         await notifyAdmin(adminMessage);
 
         res.json({
             success: true,
-            message: 'Gɪꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'Gift Code Created Successfully',
             giftCode: customCode,
             amount: giftAmount,
             newBalance: user.balance
         });
 
     } catch (error) {
-        console.error('Cʀᴇᴀᴛᴇ Gɪꜰᴛ Cᴏᴅᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Create Gift Code Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ Gɪꜰᴛ Cᴏᴅᴇ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.' 
+            message: 'Failed To Create Gift Code. Please Try Again.' 
         });
     }
 });
@@ -258,53 +250,53 @@ router.post('/redeem', verifyToken, async (req, res) => {
         if (!giftCode || giftCode.trim() === '') {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Gɪꜰᴛ Cᴏᴅᴇ Iꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Gift Code Is Required' 
             });
         }
 
-        const code = giftCode.trim().toUpperCase(); // ✅ uppercase-এ রূপান্তর
+        const code = giftCode.trim().toUpperCase();
 
-        // ✅ ভ্যালিডেশন: ১-৫০ ক্যারেক্টার
+        // Validation: 1-50 characters
         if (!isValidGiftCode(code)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Cᴏᴅᴇ Mᴜꜱᴛ Bᴇ 1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ Lᴏɴɢ' 
+                message: 'Code Must Be 1-50 Characters Long' 
             });
         }
 
-        // ✅ ডেটাবেস থেকে গিফট কোড খুঁজুন
+        // Find gift code from database
         const giftData = await GiftCode.findOne({ code: code });
         if (!giftData) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Gɪꜰᴛ Cᴏᴅᴇ' 
+                message: 'Invalid Gift Code' 
             });
         }
 
-        // ✅ চেক করুন কোড ইতিমধ্যে ব্যবহার হয়েছে কিনা
+        // Check if code already used
         if (giftData.isUsed) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Tʜɪꜱ Gɪꜰᴛ Cᴏᴅᴇ Hᴀꜱ Aʟʀᴇᴀᴅʏ Bᴇᴇɴ Uꜱᴇᴅ' 
+                message: 'This Gift Code Has Already Been Used' 
             });
         }
 
-        // ✅ চেক করুন ইউজার নিজের কোড রিডিম করছে কিনা
+        // Check if user is redeeming own code
         if (giftData.createdBy.toString() === user._id.toString()) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Yᴏᴜ Cᴀɴɴᴏᴛ Rᴇᴅᴇᴇᴍ Yᴏᴜʀ Oᴡɴ Gɪꜰᴛ Cᴏᴅᴇ' 
+                message: 'You Cannot Redeem Your Own Gift Code' 
             });
         }
 
-        // ✅ গিফট কোড ব্যবহার করুন
+        // Use gift code
         await giftData.use(user._id);
 
-        // ✅ ইউজারের ব্যালেন্স যোগ করুন
+        // Add balance to user
         user.balance += giftData.amount;
         await user.save();
 
-        // ✅ ট্রানজেকশন তৈরি করুন
+        // Create transaction
         const transactionId = generateGiftTxnId();
         await Transaction.create({
             tx_id: transactionId,
@@ -314,8 +306,8 @@ router.post('/redeem', verifyToken, async (req, res) => {
             amount: giftData.amount,
             type: 'gift',
             status: 'success',
-            remark: `Gɪꜰᴛ Cᴏᴅᴇ Rᴇᴅᴇᴇᴍᴇᴅ: ${code}`,
-            description: `Gɪꜰᴛ Cᴏᴅᴇ Rᴇᴅᴇᴇᴍᴇᴅ: ${code}`,
+            remark: `Gift Code Redeemed: ${code}`,
+            description: `Gift Code Redeemed: ${code}`,
             tx_time: new Date(),
             metadata: { 
                 giftCode: code,
@@ -323,56 +315,48 @@ router.post('/redeem', verifyToken, async (req, res) => {
             }
         });
 
-        // ✅ টেলিগ্রাম নোটিফিকেশন (Redeemer)
+        // Telegram Notification (Redeemer)
         if (user.telegramId) {
             const redeemerMessage = 
-`<b>─────────────────</b>
-<b>🎁 Gɪꜰᴛ Cᴏᴅᴇ Rᴇᴅᴇᴇᴍᴇᴅ</b>
-<b>─────────────────</b>
+`Gift Code Redeemed
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜ Hᴀᴠᴇ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Rᴇᴅᴇᴇᴍᴇᴅ Tʜᴇ Gɪꜰᴛ Cᴏᴅᴇ.
+Dear ${user.fullName}, You Have Successfully Redeemed The Gift Code.
 
-🎫 <b>Gɪꜰᴛ Cᴏᴅᴇ:</b> <code>${code}</code>
-💰 <b>Aᴍᴏᴜɴᴛ Aᴅᴅᴇᴅ:</b> ₹${giftData.amount.toFixed(2)}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
+Gift Code: ${code}
+Amount Added: ₹${giftData.amount.toFixed(2)}
+New Balance: ₹${user.balance.toFixed(2)}
 
-─────────────────────────
-✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ.
-─────────────────────────`;
+Amount Credited To Your Wallet.`;
             await sendTelegramMessage(user.telegramId, redeemerMessage);
         }
 
-        // ✅ অ্যাডমিন নোটিফিকেশন
+        // Admin Notification
         const adminMessage = 
-`<b>─────────────────</b>
-<b>🎁 Gɪꜰᴛ Cᴏᴅᴇ Rᴇᴅᴇᴇᴍᴇᴅ</b>
-<b>─────────────────</b>
+`Gift Code Redeemed
 
-👤 <b>Rᴇᴅᴇᴇᴍᴇʀ:</b> ${user.fullName}
-📱 <b>Mᴏʙɪʟᴇ:</b> ${user.mobile}
-🤖 <b>Tᴇʟᴇɢʀᴀᴍ Iᴅ:</b> ${user.telegramId || 'N/A'}
-🎫 <b>Gɪꜰᴛ Cᴏᴅᴇ:</b> <code>${code}</code>
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${giftData.amount.toFixed(2)}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
+Redeemer: ${user.fullName}
+Mobile: ${user.mobile}
+Telegram Id: ${user.telegramId || 'N/A'}
+Gift Code: ${code}
+Amount: ₹${giftData.amount.toFixed(2)}
+New Balance: ₹${user.balance.toFixed(2)}
 
-───────────────────────
-📊 <b>Sᴛᴀᴛᴜꜱ:</b> Uꜱᴇᴅ
-───────────────────────`;
+Status: Used`;
         await notifyAdmin(adminMessage);
 
         res.json({
             success: true,
-            message: 'Gɪꜰᴛ Cᴏᴅᴇ Rᴇᴅᴇᴇᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'Gift Code Redeemed Successfully',
             amount: giftData.amount,
             newBalance: user.balance,
             isUsed: true
         });
 
     } catch (error) {
-        console.error('Rᴇᴅᴇᴇᴍ Gɪꜰᴛ Cᴏᴅᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Redeem Gift Code Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Rᴇᴅᴇᴇᴍ Gɪꜰᴛ Cᴏᴅᴇ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.' 
+            message: 'Failed To Redeem Gift Code. Please Try Again.' 
         });
     }
 });
@@ -388,7 +372,7 @@ router.get('/details/:code', verifyToken, async (req, res) => {
         if (!code) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Gɪꜰᴛ Cᴏᴅᴇ Iꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Gift Code Is Required' 
             });
         }
 
@@ -396,19 +380,19 @@ router.get('/details/:code', verifyToken, async (req, res) => {
         if (!giftData) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Gɪꜰᴛ Cᴏᴅᴇ' 
+                message: 'Invalid Gift Code' 
             });
         }
 
-        // ✅ শুধু ক্রিয়েটর বা অ্যাডমিন দেখতে পারবে
+        // Only creator or admin can view
         if (giftData.createdBy.toString() !== user._id.toString() && !user.isAdmin) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Uɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ Tᴏ Vɪᴇᴡ Tʜɪꜱ Gɪꜰᴛ Cᴏᴅᴇ' 
+                message: 'Unauthorized To View This Gift Code' 
             });
         }
 
-        // ✅ ক্রিয়েটরের তথ্য আনা
+        // Fetch creator info
         const creator = await User.findById(giftData.createdBy);
         const redeemer = giftData.redeemedBy ? await User.findById(giftData.redeemedBy) : null;
 
@@ -427,10 +411,10 @@ router.get('/details/:code', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Gɪꜰᴛ Cᴏᴅᴇ Dᴇᴛᴀɪʟꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Gift Code Details Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛ Cᴏᴅᴇ Dᴇᴛᴀɪʟꜱ' 
+            message: 'Failed To Fetch Gift Code Details' 
         });
     }
 });
@@ -462,10 +446,10 @@ router.get('/my-codes', verifyToken, async (req, res) => {
             total: formattedCodes.length 
         });
     } catch (error) {
-        console.error('Mʏ Gɪꜰᴛ Cᴏᴅᴇꜱ Eʀʀᴏʀ:', error.message);
+        console.error('My Gift Codes Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛ Cᴏᴅᴇꜱ' 
+            message: 'Failed To Fetch Gift Codes' 
         });
     }
 });
@@ -479,7 +463,7 @@ router.get('/all', verifyToken, async (req, res) => {
         if (!user.isAdmin) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Aᴅᴍɪɴ Aᴄᴄᴇꜱꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Admin Access Required' 
             });
         }
 
@@ -507,10 +491,10 @@ router.get('/all', verifyToken, async (req, res) => {
             total: formattedCodes.length 
         });
     } catch (error) {
-        console.error('Aʟʟ Gɪꜰᴛ Cᴏᴅᴇꜱ Eʀʀᴏʀ:', error.message);
+        console.error('All Gift Codes Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛ Cᴏᴅᴇꜱ' 
+            message: 'Failed To Fetch Gift Codes' 
         });
     }
 });
@@ -524,7 +508,7 @@ router.delete('/:code', verifyToken, async (req, res) => {
         if (!user.isAdmin) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Aᴅᴍɪɴ Aᴄᴄᴇꜱꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Admin Access Required' 
             });
         }
 
@@ -532,7 +516,7 @@ router.delete('/:code', verifyToken, async (req, res) => {
         if (!code) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Gɪꜰᴛ Cᴏᴅᴇ Iꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                message: 'Gift Code Is Required' 
             });
         }
 
@@ -540,20 +524,20 @@ router.delete('/:code', verifyToken, async (req, res) => {
         if (!giftData) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Gɪꜰᴛ Cᴏᴅᴇ Nᴏᴛ Fᴏᴜɴᴅ' 
+                message: 'Gift Code Not Found' 
             });
         }
 
-        console.log(`✅ Gɪꜰᴛ Cᴏᴅᴇ "${code}" Dᴇʟᴇᴛᴇᴅ Bʏ Aᴅᴍɪɴ: ${user.fullName}`);
+        console.log(`Gift Code "${code}" Deleted By Admin: ${user.fullName}`);
         res.json({ 
             success: true, 
-            message: 'Gɪꜰᴛ Cᴏᴅᴇ Dᴇʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ' 
+            message: 'Gift Code Deleted Successfully' 
         });
     } catch (error) {
-        console.error('Dᴇʟᴇᴛᴇ Gɪꜰᴛ Cᴏᴅᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Delete Gift Code Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Dᴇʟᴇᴛᴇ Gɪꜰᴛ Cᴏᴅᴇ' 
+            message: 'Failed To Delete Gift Code' 
         });
     }
 });
