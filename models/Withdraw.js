@@ -22,7 +22,7 @@ const withdrawSchema = new mongoose.Schema({
         default: 'pending',
         index: true
     },
-    transactionId: { type: String, unique: true, sparse: true, index: true },
+    transactionId: { type: String, unique: true, sparse: true },
     apiKeyUsed: { type: String, default: null },
     adminNote: { type: String, default: null },
     userNote: { type: String, default: null },
@@ -58,7 +58,6 @@ withdrawSchema.pre('save', function(next) {
 withdrawSchema.index({ userId: 1, createdAt: -1 });
 withdrawSchema.index({ status: 1, createdAt: -1 });
 withdrawSchema.index({ method: 1, status: 1 });
-withdrawSchema.index({ transactionId: 1 });
 
 // ============================================
 // VIRTUALS
