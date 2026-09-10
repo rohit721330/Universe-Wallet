@@ -36,7 +36,7 @@ async function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
         const https = require('https');
         if (!BOT_TOKEN) {
-            console.warn('⚠️ BOT_TOKEN not configured');
+            console.warn('BOT_TOKEN not configured');
             resolve({ success: false, error: 'BOT_TOKEN not configured' });
             return;
         }
@@ -79,7 +79,7 @@ async function sendTelegramMessage(chatId, message) {
 async function notifyAdmin(message) {
     try {
         if (!ADMIN_TG_ID) {
-            console.warn('⚠️ ADMIN_TG_ID not configured');
+            console.warn('ADMIN_TG_ID not configured');
             return;
         }
         await sendTelegramMessage(ADMIN_TG_ID, message);
@@ -114,7 +114,7 @@ async function verifyAdminToken(req, res, next) {
         if (!token) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Tᴏ Aᴄᴄᴇꜱꜱ Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ.' 
+                message: 'No Token Provided. Please Login To Access This Resource.' 
             });
         }
         
@@ -131,32 +131,32 @@ async function verifyAdminToken(req, res, next) {
             } else {
                 return res.status(403).json({ 
                     success: false, 
-                    message: 'Aᴄᴄᴇꜱꜱ Dᴇɴɪᴇᴅ. Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ Iꜱ Rᴇꜱᴛʀɪᴄᴛᴇᴅ Tᴏ Aᴅᴍɪɴꜱ Oɴʟʏ.' 
+                    message: 'Access Denied. This Resource Is Restricted To Admins Only.' 
                 });
             }
         } catch (jwtError) {
             if (jwtError.name === 'JsonWebTokenError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ Fᴏʀᴍᴀᴛ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                    message: 'Invalid Token Format. Please Login Again.' 
                 });
             }
             if (jwtError.name === 'TokenExpiredError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Tᴏᴋᴇɴ Hᴀꜱ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                    message: 'Token Has Expired. Please Login Again.' 
                 });
             }
             return res.status(401).json({ 
                 success: false, 
-                message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ.' 
+                message: 'Authentication Failed.' 
             });
         }
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Token Verification Error:', error.message);
         return res.status(500).json({ 
             success: false, 
-            message: 'Iɴᴛᴇʀɴᴀʟ Sᴇʀᴠᴇʀ Eʀʀᴏʀ.' 
+            message: 'Internal Server Error.' 
         });
     }
 }
@@ -205,10 +205,10 @@ router.get('/', verifyAdminToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Gɪꜰᴛꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Gifts Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛꜱ.'
+            message: 'Failed To Fetch Gifts.'
         });
     }
 });
@@ -247,10 +247,10 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
             usedThisMonth
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Gɪꜰᴛ Sᴛᴀᴛꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Gift Stats Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴛᴀᴛɪꜱᴛɪᴄꜱ.'
+            message: 'Failed To Fetch Statistics.'
         });
     }
 });
@@ -265,7 +265,7 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Gɪꜰᴛ ID Fᴏʀᴍᴀᴛ.'
+                message: 'Invalid Gift ID Format.'
             });
         }
         
@@ -276,7 +276,7 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
         if (!gift) {
             return res.status(404).json({
                 success: false,
-                message: `Gɪꜰᴛ Wɪᴛʜ ID "${id}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Gift With ID "${id}" Not Found.`
             });
         }
         
@@ -285,10 +285,10 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
             gift
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Gɪꜰᴛ Eʀʀᴏʀ:', error.message);
+        console.error('Get Gift Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛ.'
+            message: 'Failed To Fetch Gift.'
         });
     }
 });
@@ -307,7 +307,7 @@ router.get('/code/:code', verifyAdminToken, async (req, res) => {
         if (!gift) {
             return res.status(404).json({
                 success: false,
-                message: `Gɪꜰᴛ Cᴏᴅᴇ "${code}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Gift Code "${code}" Not Found.`
             });
         }
         
@@ -316,10 +316,10 @@ router.get('/code/:code', verifyAdminToken, async (req, res) => {
             gift
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Gɪꜰᴛ Bʏ Cᴏᴅᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Get Gift By Code Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Gɪꜰᴛ.'
+            message: 'Failed To Fetch Gift.'
         });
     }
 });
@@ -332,29 +332,29 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         const { amount, note, quantity = 1 } = req.body;
         const dateTime = getCurrentDateTime();
         
-        // ─── Vᴀʟɪᴅᴀᴛɪᴏɴ ───
+        // ─── Validation ───
         if (!amount || amount <= 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ A Vᴀʟɪᴅ Aᴍᴏᴜɴᴛ.'
+                message: 'Please Provide A Valid Amount.'
             });
         }
         
         if (!quantity || quantity < 1) {
             return res.status(400).json({
                 success: false,
-                message: 'Qᴜᴀɴᴛɪᴛʏ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 1.'
+                message: 'Quantity Must Be At Least 1.'
             });
         }
         
         if (quantity > 100) {
             return res.status(400).json({
                 success: false,
-                message: 'Mᴀxɪᴍᴜᴍ 100 Gɪꜰᴛꜱ Cᴀɴ Bᴇ Cʀᴇᴀᴛᴇᴅ Aᴛ Oɴᴄᴇ.'
+                message: 'Maximum 100 Gifts Can Be Created At Once.'
             });
         }
         
-        // ─── Gᴇᴛ Aᴅᴍɪɴ Uꜱᴇʀ ───
+        // ─── Get Admin User ───
         let adminUser;
         try {
             adminUser = await getAdminUser();
@@ -365,7 +365,7 @@ router.post('/create', verifyAdminToken, async (req, res) => {
             });
         }
         
-        // ─── Gᴇɴᴇʀᴀᴛᴇ Gɪꜰᴛ Cᴏᴅᴇꜱ ───
+        // ─── Generate Gift Codes ───
         const gifts = [];
         const giftCodes = [];
         const noteText = note ? note.trim() : '';
@@ -388,7 +388,7 @@ router.post('/create', verifyAdminToken, async (req, res) => {
             giftCodes.push(code);
         }
         
-        // ─── Cʀᴇᴀᴛᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ ───
+        // ─── Create Transaction ───
         const totalAmount = parseFloat(amount) * quantity;
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -400,50 +400,42 @@ router.post('/create', verifyAdminToken, async (req, res) => {
             fee: 0,
             type: 'gift',
             status: 'success',
-            description: `${quantity} Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ (₹${parseFloat(amount).toFixed(2)} Eᴀᴄʜ)`,
+            description: `${quantity} Gifts Created (₹${parseFloat(amount).toFixed(2)} Each)`,
             remark: `Created ${quantity} gift codes by admin: ${adminUser.walletId}`
         });
         await transaction.save();
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ ───
+        // ─── Telegram Notification ───
         if (adminUser.telegramId && BOT_TOKEN) {
             await sendTelegramMessage(adminUser.telegramId,
-                `<b>────────────────────</b>
-<b>🎁 Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Gifts Created
 
-<b>👤 Dᴇᴀʀ ${adminUser.fullName},</b>
+Dear ${adminUser.fullName},
 
-<b>📦 Qᴜᴀɴᴛɪᴛʏ:</b> ${quantity}
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${parseFloat(amount).toFixed(2)} Eᴀᴄʜ
-<b>💵 Tᴏᴛᴀʟ:</b> ₹${totalAmount.toFixed(2)}
-<b>🆔 Fɪʀꜱᴛ Cᴏᴅᴇ:</b> ${giftCodes[0]}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Quantity: ${quantity}
+Amount: ₹${parseFloat(amount).toFixed(2)} Each
+Total: ₹${totalAmount.toFixed(2)}
+First Code: ${giftCodes[0]}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
             );
         }
         
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>🎁 Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Gifts Created
 
-<b>📦 Qᴜᴀɴᴛɪᴛʏ:</b> ${quantity}
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${parseFloat(amount).toFixed(2)} Eᴀᴄʜ
-<b>💵 Tᴏᴛᴀʟ:</b> ₹${totalAmount.toFixed(2)}
-<b>👤 Cʀᴇᴀᴛᴇᴅ Bʏ:</b> ${adminUser.fullName} (${adminUser.walletId})
-<b>🆔 Fɪʀꜱᴛ Cᴏᴅᴇ:</b> ${giftCodes[0]}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Quantity: ${quantity}
+Amount: ₹${parseFloat(amount).toFixed(2)} Each
+Total: ₹${totalAmount.toFixed(2)}
+Created By: ${adminUser.fullName} (${adminUser.walletId})
+First Code: ${giftCodes[0]}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('✅ Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ:', { 
+        console.log('Gifts Created:', { 
             quantity, 
             amount: parseFloat(amount),
             totalAmount,
@@ -453,7 +445,7 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         
         res.json({
             success: true,
-            message: `${quantity} Gɪꜰᴛꜱ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!`,
+            message: `${quantity} Gifts Created Successfully!`,
             giftsCreated: quantity,
             totalAmount: totalAmount,
             giftCodes: giftCodes,
@@ -468,18 +460,18 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Cʀᴇᴀᴛᴇ Gɪꜰᴛꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Create Gifts Error:', error.message);
         
         if (error.code === 11000) {
             return res.status(409).json({
                 success: false,
-                message: 'Dᴜᴘʟɪᴄᴀᴛᴇ Gɪꜰᴛ Cᴏᴅᴇ Dᴇᴛᴇᴄᴛᴇᴅ.'
+                message: 'Duplicate Gift Code Detected.'
             });
         }
         
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ Gɪꜰᴛꜱ.'
+            message: 'Failed To Create Gifts.'
         });
     }
 });
@@ -495,7 +487,7 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Gɪꜰᴛ ID Fᴏʀᴍᴀᴛ.'
+                message: 'Invalid Gift ID Format.'
             });
         }
         
@@ -503,14 +495,14 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         if (!gift) {
             return res.status(404).json({
                 success: false,
-                message: `Gɪꜰᴛ Wɪᴛʜ ID "${id}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Gift With ID "${id}" Not Found.`
             });
         }
         
         if (gift.isUsed) {
             return res.status(400).json({
                 success: false,
-                message: 'Cᴀɴɴᴏᴛ Dᴇʟᴇᴛᴇ Gɪꜰᴛ - Iᴛ Hᴀꜱ Aʟʀᴇᴀᴅʏ Bᴇᴇɴ Uꜱᴇᴅ.'
+                message: 'Cannot Delete Gift - It Has Already Been Used.'
             });
         }
         
@@ -523,32 +515,28 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         await GiftCode.findByIdAndDelete(id);
         
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>🗑️ Gɪꜰᴛ Dᴇʟᴇᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Gift Deleted
 
-<b>🆔 Cᴏᴅᴇ:</b> ${giftInfo.code}
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${giftInfo.amount.toFixed(2)}
-<b>👤 Cʀᴇᴀᴛᴇᴅ Bʏ:</b> ${giftInfo.createdBy ? giftInfo.createdBy.fullName : 'Unknown'}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Code: ${giftInfo.code}
+Amount: ₹${giftInfo.amount.toFixed(2)}
+Created By: ${giftInfo.createdBy ? giftInfo.createdBy.fullName : 'Unknown'}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('🗑️ Gɪꜰᴛ Dᴇʟᴇᴛᴇᴅ:', giftInfo);
+        console.log('Gift Deleted:', giftInfo);
         
         res.json({
             success: true,
-            message: `Gɪꜰᴛ Cᴏᴅᴇ "${giftInfo.code}" Dᴇʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.`
+            message: `Gift Code "${giftInfo.code}" Deleted Successfully.`
         });
         
     } catch (error) {
-        console.error('❌ Dᴇʟᴇᴛᴇ Gɪꜰᴛ Eʀʀᴏʀ:', error.message);
+        console.error('Delete Gift Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Dᴇʟᴇᴛᴇ Gɪꜰᴛ.'
+            message: 'Failed To Delete Gift.'
         });
     }
 });
@@ -564,7 +552,7 @@ router.post('/redeem', async (req, res) => {
         if (!code || !userId) {
             return res.status(400).json({
                 success: false,
-                message: 'Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ Gɪꜰᴛ Cᴏᴅᴇ Aɴᴅ Uꜱᴇʀ ID.'
+                message: 'Please Provide Gift Code And User ID.'
             });
         }
         
@@ -572,14 +560,14 @@ router.post('/redeem', async (req, res) => {
         if (!gift) {
             return res.status(404).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Gɪꜰᴛ Cᴏᴅᴇ.'
+                message: 'Invalid Gift Code.'
             });
         }
         
         if (gift.isUsed) {
             return res.status(400).json({
                 success: false,
-                message: 'Tʜɪꜱ Gɪꜰᴛ Cᴏᴅᴇ Hᴀꜱ Aʟʀᴇᴀᴅʏ Bᴇᴇɴ Uꜱᴇᴅ.'
+                message: 'This Gift Code Has Already Been Used.'
             });
         }
         
@@ -587,7 +575,7 @@ router.post('/redeem', async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ.'
+                message: 'User Not Found.'
             });
         }
         
@@ -613,61 +601,53 @@ router.post('/redeem', async (req, res) => {
             fee: 0,
             type: 'gift',
             status: 'success',
-            description: `Gɪꜰᴛ Rᴇᴅᴇᴇᴍᴇᴅ: ${gift.code}`,
+            description: `Gift Redeemed: ${gift.code}`,
             remark: `Redeemed gift code: ${gift.code}`
         });
         await transaction.save();
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Tᴏ Uꜱᴇʀ ───
+        // ─── Telegram Notification To User ───
         if (user.telegramId && BOT_TOKEN) {
             await sendTelegramMessage(user.telegramId,
-                `<b>────────────────────</b>
-<b>🎁 Gɪꜰᴛ Rᴇᴅᴇᴇᴍᴇᴅ!</b>
-<b>────────────────────</b>
+`Gift Redeemed!
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b>
+Dear ${user.fullName},
 
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${gift.amount.toFixed(2)}
-<b>💵 Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
-<b>🆔 Cᴏᴅᴇ:</b> ${gift.code}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Amount: ₹${gift.amount.toFixed(2)}
+New Balance: ₹${user.balance.toFixed(2)}
+Code: ${gift.code}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
             );
         }
         
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>🎁 Gɪꜰᴛ Rᴇᴅᴇᴇᴍᴇᴅ</b>
-<b>────────────────────</b>
+`Gift Redeemed
 
-<b>🆔 Cᴏᴅᴇ:</b> ${gift.code}
-<b>💰 Aᴍᴏᴜɴᴛ:</b> ₹${gift.amount.toFixed(2)}
-<b>👤 Rᴇᴅᴇᴇᴍᴇᴅ Bʏ:</b> ${user.fullName} (${user.walletId})
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Code: ${gift.code}
+Amount: ₹${gift.amount.toFixed(2)}
+Redeemed By: ${user.fullName} (${user.walletId})
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('🎁 Gɪꜰᴛ Rᴇᴅᴇᴇᴍᴇᴅ:', { code: gift.code, userId, amount: gift.amount });
+        console.log('Gift Redeemed:', { code: gift.code, userId, amount: gift.amount });
         
         res.json({
             success: true,
-            message: 'Gɪꜰᴛ Rᴇᴅᴇᴇᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!',
+            message: 'Gift Redeemed Successfully!',
             amount: gift.amount,
             newBalance: user.balance,
             giftCode: gift.code
         });
         
     } catch (error) {
-        console.error('❌ Rᴇᴅᴇᴇᴍ Gɪꜰᴛ Eʀʀᴏʀ:', error.message);
+        console.error('Redeem Gift Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Rᴇᴅᴇᴇᴍ Gɪꜰᴛ.'
+            message: 'Failed To Redeem Gift.'
         });
     }
 });
