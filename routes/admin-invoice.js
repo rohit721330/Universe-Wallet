@@ -9,13 +9,13 @@ const { auth } = require('../middleware/auth');
 require('dotenv').config();
 
 // ============================================
-// Tᴇʟᴇɢʀᴀᴍ Cᴏɴꜰɪɢ
+// TELEGRAM CONFIG
 // ============================================
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TELEGRAM_ID = process.env.ADMIN_TG_ID;
 
 // ============================================
-// Hᴇʟᴘᴇʀꜱ
+// HELPERS
 // ============================================
 
 function getCurrentDateTime() {
@@ -37,8 +37,8 @@ async function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
         const https = require('https');
         if (!BOT_TOKEN) {
-            console.warn('⚠️ BOT_TOKEN Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ');
-            resolve({ success: false, error: 'BOT_TOKEN Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ' });
+            console.warn('BOT_TOKEN Not Configured');
+            resolve({ success: false, error: 'BOT_TOKEN Not Configured' });
             return;
         }
         
@@ -81,14 +81,14 @@ async function notifyAdmin(message) {
     if (!ADMIN_TELEGRAM_ID) return;
     try {
         await sendTelegramMessage(ADMIN_TELEGRAM_ID, message);
-        console.log('✅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ');
+        console.log('Admin Notification Sent');
     } catch (error) {
-        console.error('❌ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ:', error.message);
+        console.error('Admin Notification Failed:', error.message);
     }
 }
 
 // ============================================
-// Vᴇʀɪꜰʏ Aᴅᴍɪɴ Tᴏᴋᴇɴ Mɪᴅᴅʟᴇᴡᴀʀᴇ
+// VERIFY ADMIN TOKEN MIDDLEWARE
 // ============================================
 async function verifyAdminToken(req, res, next) {
     try {
@@ -97,7 +97,7 @@ async function verifyAdminToken(req, res, next) {
         if (!token) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Tᴏ Aᴄᴄᴇꜱꜱ Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ.' 
+                message: 'No Token Provided. Please Login To Access This Resource.' 
             });
         }
         
@@ -126,39 +126,39 @@ async function verifyAdminToken(req, res, next) {
             } else {
                 return res.status(403).json({ 
                     success: false, 
-                    message: 'Aᴄᴄᴇꜱꜱ Dᴇɴɪᴇᴅ. Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ Iꜱ Rᴇꜱᴛʀɪᴄᴛᴇᴅ Tᴏ Aᴅᴍɪɴꜱ Oɴʟʏ.' 
+                    message: 'Access Denied. This Resource Is Restricted To Admins Only.' 
                 });
             }
         } catch (jwtError) {
             if (jwtError.name === 'JsonWebTokenError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ Fᴏʀᴍᴀᴛ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                    message: 'Invalid Token Format. Please Login Again.' 
                 });
             }
             if (jwtError.name === 'TokenExpiredError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Tᴏᴋᴇɴ Hᴀꜱ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ Tᴏ Rᴇꜰʀᴇꜱʜ Yᴏᴜʀ Sᴇꜱꜱɪᴏɴ.' 
+                    message: 'Token Has Expired. Please Login Again To Refresh Your Session.' 
                 });
             }
             return res.status(401).json({ 
                 success: false, 
-                message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ. Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ A Vᴀʟɪᴅ Tᴏᴋᴇɴ.' 
+                message: 'Authentication Failed. Please Provide A Valid Token.' 
             });
         }
         
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Token Verification Error:', error.message);
         return res.status(500).json({ 
             success: false, 
-            message: 'Iɴᴛᴇʀɴᴀʟ Sᴇʀᴠᴇʀ Eʀʀᴏʀ Dᴜʀɪɴɢ Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ.' 
+            message: 'Internal Server Error During Authentication.' 
         });
     }
 }
 
 // ============================================
-// 1. Gᴇᴛ Aʟʟ Iɴᴠᴏɪᴄᴇꜱ
+// 1. GET ALL INVOICES
 // ============================================
 router.get('/invoices', verifyAdminToken, async (req, res) => {
     try {
@@ -221,16 +221,16 @@ router.get('/invoices', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Gᴇᴛ Iɴᴠᴏɪᴄᴇꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Invoices Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Iɴᴠᴏɪᴄᴇꜱ: ' + error.message
+            message: 'Failed To Fetch Invoices: ' + error.message
         });
     }
 });
 
 // ============================================
-// 2. Gᴇᴛ Sɪɴɢʟᴇ Iɴᴠᴏɪᴄᴇ
+// 2. GET SINGLE INVOICE
 // ============================================
 router.get('/invoice/:invoiceId', verifyAdminToken, async (req, res) => {
     try {
@@ -243,7 +243,7 @@ router.get('/invoice/:invoiceId', verifyAdminToken, async (req, res) => {
         if (!invoice) {
             return res.status(404).json({
                 success: false,
-                message: 'Iɴᴠᴏɪᴄᴇ Nᴏᴛ Fᴏᴜɴᴅ'
+                message: 'Invoice Not Found'
             });
         }
         
@@ -272,16 +272,16 @@ router.get('/invoice/:invoiceId', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Gᴇᴛ Iɴᴠᴏɪᴄᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Get Invoice Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Iɴᴠᴏɪᴄᴇ: ' + error.message
+            message: 'Failed To Fetch Invoice: ' + error.message
         });
     }
 });
 
 // ============================================
-// 3. Gᴇᴛ Uꜱᴇʀ Iɴᴠᴏɪᴄᴇꜱ
+// 3. GET USER INVOICES
 // ============================================
 router.get('/user-invoices/:userId', verifyAdminToken, async (req, res) => {
     try {
@@ -292,7 +292,7 @@ router.get('/user-invoices/:userId', verifyAdminToken, async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ'
+                message: 'User Not Found'
             });
         }
         
@@ -345,39 +345,39 @@ router.get('/user-invoices/:userId', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Gᴇᴛ Uꜱᴇʀ Iɴᴠᴏɪᴄᴇꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get User Invoices Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Uꜱᴇʀ Iɴᴠᴏɪᴄᴇꜱ: ' + error.message
+            message: 'Failed To Fetch User Invoices: ' + error.message
         });
     }
 });
 
 // ============================================
-// 4. Cʟᴇᴀɴᴜᴘ Exᴘɪʀᴇᴅ Iɴᴠᴏɪᴄᴇꜱ
+// 4. CLEANUP EXPIRED INVOICES
 // ============================================
 router.post('/cleanup', verifyAdminToken, async (req, res) => {
     try {
-        console.log('🧹 Cʟᴇᴀɴɪɴɢ Uᴘ Exᴘɪʀᴇᴅ Iɴᴠᴏɪᴄᴇꜱ');
+        console.log('Cleaning Up Expired Invoices');
         
         const result = await Invoice.cleanupExpired();
         
         res.json({
             success: true,
-            message: `Cʟᴇᴀɴᴇᴅ Uᴘ ${result.modifiedCount} Exᴘɪʀᴇᴅ Iɴᴠᴏɪᴄᴇꜱ`
+            message: `Cleaned Up ${result.modifiedCount} Expired Invoices`
         });
         
     } catch (error) {
-        console.error('❌ Cʟᴇᴀɴᴜᴘ Eʀʀᴏʀ:', error.message);
+        console.error('Cleanup Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʟᴇᴀɴᴜᴘ: ' + error.message
+            message: 'Failed To Cleanup: ' + error.message
         });
     }
 });
 
 // ============================================
-// 5. Gᴇᴛ Iɴᴠᴏɪᴄᴇ Sᴛᴀᴛꜱ
+// 5. GET INVOICE STATS
 // ============================================
 router.get('/stats', verifyAdminToken, async (req, res) => {
     try {
@@ -408,37 +408,37 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Gᴇᴛ Sᴛᴀᴛꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Stats Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Gᴇᴛ Sᴛᴀᴛꜱ: ' + error.message
+            message: 'Failed To Get Stats: ' + error.message
         });
     }
 });
 
 // ============================================
-// 6. Dᴇʟᴇᴛᴇ Iɴᴠᴏɪᴄᴇ
+// 6. DELETE INVOICE
 // ============================================
 router.delete('/delete/:invoiceId', verifyAdminToken, async (req, res) => {
     try {
         const { invoiceId } = req.params;
         const dateTime = getCurrentDateTime();
         
-        console.log('🗑️ Aᴅᴍɪɴ Dᴇʟᴇᴛɪɴɢ Iɴᴠᴏɪᴄᴇ:', invoiceId);
+        console.log('Admin Deleting Invoice:', invoiceId);
         
         const invoice = await Invoice.findOne({ invoiceId });
         
         if (!invoice) {
             return res.status(404).json({
                 success: false,
-                message: 'Iɴᴠᴏɪᴄᴇ Nᴏᴛ Fᴏᴜɴᴅ'
+                message: 'Invoice Not Found'
             });
         }
         
         if (invoice.status === 'paid') {
             return res.status(400).json({
                 success: false,
-                message: 'Cᴀɴɴᴏᴛ Dᴇʟᴇᴛᴇ A Pᴀɪᴅ Iɴᴠᴏɪᴄᴇ'
+                message: 'Cannot Delete A Paid Invoice'
             });
         }
         
@@ -451,27 +451,26 @@ router.delete('/delete/:invoiceId', verifyAdminToken, async (req, res) => {
         await Invoice.findByIdAndDelete(invoice._id);
         
         const adminMessage = 
-`<b>─────────────────</b>
-<b>🗑️ Iɴᴠᴏɪᴄᴇ Dᴇʟᴇᴛᴇᴅ</b>
-<b>─────────────────</b>
-🆔 ${invoiceData.invoiceId}
-💰 ₹${invoiceData.amount.toFixed(2)}
-📊 Sᴛᴀᴛᴜꜱ: ${invoiceData.status}
-👤 Aᴅᴍɪɴ: ${req.user.fullName || 'Admin'}
-⏰ ${dateTime}`;
+`Invoice Deleted
+
+Invoice ID: ${invoiceData.invoiceId}
+Amount: ₹${invoiceData.amount.toFixed(2)}
+Status: ${invoiceData.status}
+Admin: ${req.user.fullName || 'Admin'}
+Time: ${dateTime}`;
 
         await notifyAdmin(adminMessage);
         
         res.json({
             success: true,
-            message: 'Iɴᴠᴏɪᴄᴇ Dᴇʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ'
+            message: 'Invoice Deleted Successfully'
         });
         
     } catch (error) {
-        console.error('❌ Dᴇʟᴇᴛᴇ Iɴᴠᴏɪᴄᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Delete Invoice Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Dᴇʟᴇᴛᴇ Iɴᴠᴏɪᴄᴇ: ' + error.message
+            message: 'Failed To Delete Invoice: ' + error.message
         });
     }
 });
