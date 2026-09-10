@@ -3,40 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <title>Transactions • Universal Wallet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
-            --bg-primary: #0a0e27;
-            --bg-secondary: #11162e;
-            --bg-card: #1a1f3a;
-            --text-primary: #ffffff;
-            --text-secondary: #8a8fad;
-            --text-muted: #6b6f8d;
-            --border-color: rgba(0, 240, 255, 0.12);
-            --border-soft: rgba(0, 240, 255, 0.06);
-            --accent: #00f0ff;
-            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
-            --accent-glow: rgba(0, 240, 255, 0.3);
-            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-            --nav-bg: rgba(8, 12, 28, 0.95);
-            --input-bg: #0a0e27;
-            --grid-color: rgba(0, 240, 255, 0.06);
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --anodized-glow: 0 0 30px rgba(0, 240, 255, 0.15);
-            --anodized-border: 1px solid rgba(0, 240, 255, 0.2);
-            --brand-credit: #22c55e;
-            --brand-debit: #ef4444;
-            --modal-overlay: rgba(0, 0, 0, 0.85);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0f7ff;
+            --bg-card: #ffffff;
+            --text-primary: #1a2a4a;
+            --text-secondary: #5a7a9a;
+            --text-muted: #8a9ab0;
+            --border-color: #c5d9f0;
+            --border-soft: #e8f0fe;
+            --accent: #1a56db;
+            --accent-gradient: linear-gradient(135deg, #1a56db, #0088ff);
+            --accent-glow: rgba(26, 86, 219, 0.15);
+            --shadow-card: 0 4px 20px rgba(0, 50, 100, 0.08);
+            --nav-bg: rgba(255, 255, 255, 0.95);
+            --input-bg: #fafcff;
+            --grid-color: rgba(26, 86, 219, 0.04);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --brand-credit: #16a34a;
+            --brand-debit: #dc2626;
         }
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background: var(--bg-primary);
+            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
             color: var(--text-primary);
             padding: 1rem;
             padding-bottom: 80px;
@@ -50,131 +47,259 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-image: 
+                linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
             z-index: 0;
-            animation: gridMove 8s linear infinite;
         }
-        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
-        
-        .electron-particle {
-            position: fixed;
-            bottom: -20px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            animation: riseElectron linear infinite;
-            opacity: 0;
-            box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 60px rgba(0,240,255,0.1);
-        }
-        .electron-particle.big { box-shadow: 0 0 30px rgba(0,240,255,0.6), 0 0 80px rgba(0,240,255,0.15); background: radial-gradient(circle, #00f0ff, #0088ff); }
-        .electron-particle.small { box-shadow: 0 0 15px rgba(0,240,255,0.3); background: radial-gradient(circle, #00f0ff, transparent); }
-        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
 
         .header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
         .header-left { display: flex; align-items: center; gap: 0.75rem; }
-        .back-btn { background: var(--bg-secondary); border: var(--anodized-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,240,255,0.05); }
+        .back-btn { 
+            background: #ffffff; 
+            border: 2px solid #c5d9f0; 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            color: #1a56db; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 2px 8px rgba(0, 50, 100, 0.08); 
+        }
+        .back-btn:hover { background: #f0f7ff; }
         .back-btn:active { transform: scale(0.95); }
-        .header-logo { font-size: 1.3rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .header-logo { 
+            font-size: 1.3rem; 
+            font-weight: 800; 
+            color: #1a56db; 
+            letter-spacing: 0.5px; 
+        }
         .header-right { display: flex; gap: 0.5rem; align-items: center; }
-        .header-right .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .header-right .avatar { 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            background: #1a56db; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.1rem; 
+            color: #ffffff; 
+            cursor: pointer; 
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3); 
+        }
         
         .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
-        .stat-card { background: var(--bg-card); border: var(--anodized-border); border-radius: 0.75rem; padding: 0.75rem; text-align: center; box-shadow: var(--anodized-glow); }
-        .stat-card .stat-number { font-size: 1.2rem; font-weight: 800; }
+        .stat-card { 
+            background: #ffffff; 
+            border: 1px solid #c5d9f0; 
+            border-radius: 0.75rem; 
+            padding: 0.75rem; 
+            text-align: center; 
+            box-shadow: 0 2px 8px rgba(0, 50, 100, 0.05); 
+        }
+        .stat-card .stat-number { font-size: 1.1rem; font-weight: 800; }
         .stat-card .stat-number.credit { color: var(--brand-credit); }
         .stat-card .stat-number.debit { color: var(--brand-debit); }
-        .stat-card .stat-number.balance { color: var(--accent); text-shadow: 0 0 30px rgba(0,240,255,0.2); }
-        .stat-card .stat-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); margin-top: 2px; }
-        .stat-card .stat-icon { font-size: 1.2rem; margin-bottom: 0.2rem; display: block; }
+        .stat-card .stat-number.balance { color: var(--accent); }
+        .stat-card .stat-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); margin-top: 2px; font-weight: 600; }
+        .stat-card .stat-icon { font-size: 1.1rem; margin-bottom: 0.2rem; display: block; }
         .stat-card .stat-icon.credit { color: var(--brand-credit); }
         .stat-card .stat-icon.debit { color: var(--brand-debit); }
         .stat-card .stat-icon.balance { color: var(--accent); }
 
-        .filter-section { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 0.75rem; margin-bottom: 1rem; box-shadow: var(--anodized-glow); }
+        .filter-section { 
+            background: #ffffff; 
+            border: 1px solid #c5d9f0; 
+            border-radius: 1rem; 
+            padding: 0.75rem; 
+            margin-bottom: 1rem; 
+            box-shadow: 0 2px 8px rgba(0, 50, 100, 0.05); 
+        }
         .filter-tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; }
-        .filter-tabs button { background: var(--input-bg); border: var(--anodized-border); color: var(--text-secondary); padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
-        .filter-tabs button.active { background: rgba(0,240,255,0.15); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .filter-tabs button { 
+            background: #f0f7ff; 
+            border: 1px solid #c5d9f0; 
+            color: var(--text-secondary); 
+            padding: 0.35rem 0.85rem; 
+            border-radius: 2rem; 
+            font-size: 0.65rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .filter-tabs button.active { 
+            background: #1a56db; 
+            border-color: #1a56db; 
+            color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3); 
+        }
+        .filter-tabs button:hover:not(.active) { background: #e2eaf3; }
         .filter-tabs button:active { transform: scale(0.95); }
 
         .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-        .search-bar input { flex: 1; padding: 0.5rem 0.75rem; background: var(--input-bg); border: var(--anodized-border); border-radius: 0.75rem; color: var(--text-primary); font-size: 0.85rem; outline: none; transition: all 0.3s; font-family: 'Inter', sans-serif; }
-        .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .search-bar input { 
+            flex: 1; 
+            padding: 0.6rem 0.85rem; 
+            background: #fafcff; 
+            border: 2px solid #c5d9f0; 
+            border-radius: 0.75rem; 
+            color: var(--text-primary); 
+            font-size: 0.85rem; 
+            outline: none; 
+            transition: all 0.3s; 
+            font-family: 'Inter', sans-serif; 
+        }
+        .search-bar input:focus { 
+            border-color: #1a56db; 
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1); 
+            background: #ffffff;
+        }
         .search-bar input::placeholder { color: var(--text-muted); }
-        .search-bar button { padding: 0.5rem 1rem; background: var(--accent-gradient); border: none; border-radius: 0.75rem; color: #fff; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .search-bar button { 
+            padding: 0.6rem 1rem; 
+            background: #1a56db; 
+            border: none; 
+            border-radius: 0.75rem; 
+            color: #ffffff; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-family: 'Inter', sans-serif; 
+            box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
+        }
+        .search-bar button:hover { background: #1a4ac0; }
         .search-bar button:active { transform: scale(0.95); }
 
         .transaction-item { 
-            background: var(--bg-card); 
-            border: var(--anodized-border); 
+            background: #ffffff; 
+            border: 1px solid #c5d9f0; 
             border-radius: 0.75rem; 
-            padding: 0.75rem; 
+            padding: 0.85rem; 
             margin-bottom: 0.5rem; 
             transition: all 0.2s; 
-            box-shadow: var(--anodized-glow);
+            box-shadow: 0 2px 6px rgba(0, 50, 100, 0.05);
             cursor: pointer;
         }
-        .transaction-item:hover { border-color: rgba(0,240,255,0.3); transform: translateX(2px); }
+        .transaction-item:hover { 
+            border-color: #1a56db; 
+            transform: translateX(2px); 
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.1);
+        }
         .transaction-item:active { transform: scale(0.98); }
         .transaction-item .tx-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .transaction-item .tx-left { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
-        .transaction-item .tx-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-        .transaction-item .tx-icon.credit { background: rgba(34,197,94,0.15); color: var(--brand-credit); }
-        .transaction-item .tx-icon.debit { background: rgba(239,68,68,0.15); color: var(--brand-debit); }
-        .transaction-item .tx-icon.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .transaction-item .tx-icon { 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.1rem; 
+            flex-shrink: 0; 
+        }
+        .transaction-item .tx-icon.credit { background: #dcfce7; color: var(--brand-credit); }
+        .transaction-item .tx-icon.debit { background: #fee2e2; color: var(--brand-debit); }
+        .transaction-item .tx-icon.pending { background: #fef3c7; color: var(--warning); }
         .transaction-item .tx-info { flex: 1; min-width: 0; }
-        .transaction-item .tx-title { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
-        .transaction-item .tx-sub { font-size: 0.6rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .transaction-item .tx-id { font-size: 0.55rem; color: var(--text-muted); font-family: monospace; }
-        .transaction-item .tx-amount { font-weight: 700; font-size: 0.9rem; flex-shrink: 0; text-align: right; }
+        .transaction-item .tx-title { font-weight: 700; font-size: 0.85rem; color: var(--text-primary); }
+        .transaction-item .tx-sub { font-size: 0.65rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .transaction-item .tx-id { font-size: 0.55rem; color: var(--text-muted); font-family: monospace; display: block; margin-top: 1px; }
+        .transaction-item .tx-amount { font-weight: 800; font-size: 0.95rem; flex-shrink: 0; text-align: right; }
         .transaction-item .tx-amount.credit { color: var(--brand-credit); }
         .transaction-item .tx-amount.debit { color: var(--brand-debit); }
-        .transaction-item .tx-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem; padding-left: 3.25rem; }
-        .transaction-item .tx-status { padding: 0.1rem 0.5rem; border-radius: 2rem; font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
-        .transaction-item .tx-status.success { background: rgba(34,197,94,0.15); color: var(--success); }
-        .transaction-item .tx-status.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
-        .transaction-item .tx-status.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
-        .transaction-item .tx-status.cancelled { background: rgba(107,114,128,0.15); color: var(--text-muted); }
-        .transaction-item .tx-time { font-size: 0.55rem; color: var(--text-muted); }
+        .transaction-item .tx-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; padding-left: 3.25rem; }
+        .transaction-item .tx-status { padding: 0.15rem 0.55rem; border-radius: 2rem; font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+        .transaction-item .tx-status.success { background: #dcfce7; color: var(--success); }
+        .transaction-item .tx-status.pending { background: #fef3c7; color: var(--warning); }
+        .transaction-item .tx-status.failed { background: #fee2e2; color: var(--danger); }
+        .transaction-item .tx-status.cancelled { background: #f1f5f9; color: var(--text-muted); }
+        .transaction-item .tx-time { font-size: 0.6rem; color: var(--text-muted); font-weight: 500; }
 
         .pagination { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.5rem 0; }
-        .pagination button { background: var(--bg-card); border: var(--anodized-border); color: var(--text-secondary); padding: 0.3rem 0.6rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; font-size: 0.7rem; font-family: 'Inter', sans-serif; }
-        .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination button { 
+            background: #ffffff; 
+            border: 2px solid #c5d9f0; 
+            color: #1a56db; 
+            padding: 0.4rem 0.75rem; 
+            border-radius: 0.5rem; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 0.7rem; 
+            font-weight: 700;
+            font-family: 'Inter', sans-serif; 
+        }
+        .pagination button:hover:not(:disabled) { background: #f0f7ff; }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
         .pagination button:active:not(:disabled) { transform: scale(0.95); }
-        .pagination .page-info { font-size: 0.65rem; color: var(--text-muted); padding: 0 0.5rem; }
+        .pagination .page-info { font-size: 0.7rem; color: var(--text-secondary); padding: 0 0.5rem; font-weight: 600; }
 
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 10px 18px; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: var(--anodized-border); }
+        .toast { 
+            position: fixed; 
+            top: 20px; left: 50%; 
+            transform: translateX(-50%); 
+            padding: 12px 20px; 
+            border-radius: 2rem; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            z-index: 3000; 
+            opacity: 0; 
+            transition: all 0.3s; 
+            pointer-events: none; 
+            white-space: nowrap; 
+            max-width: 90%; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
         .toast.success { background: var(--success); color: #fff; }
         .toast.error { background: var(--danger); color: #fff; }
         .toast.warning { background: var(--warning); color: #fff; }
-        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.2); }
+        .toast.info { background: #1a56db; color: #fff; }
 
         .loading-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
-        .loading-state i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 1s linear infinite; color: var(--accent); }
+        .loading-state i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 1s linear infinite; color: #1a56db; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .empty-state { text-align: center; padding: 2rem; color: var(--text-secondary); }
-        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.3; }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.3; color: #1a56db; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: var(--anodized-border); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.55rem; transition: color 0.2s; padding: 0.25rem 0.5rem; }
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            background: rgba(255, 255, 255, 0.98); 
+            border-top: 1px solid #c5d9f0; 
+            padding: 0.5rem 0 1rem 0; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            display: flex; 
+            justify-content: space-around; 
+            backdrop-filter: blur(20px); 
+            z-index: 100; 
+            box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08); 
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; gap: 2px; 
+            text-decoration: none; 
+            color: #8a9ab0; 
+            font-size: 0.55rem; 
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: color 0.2s; 
+            padding: 0.25rem 0.5rem; 
+        }
         .nav-item i { font-size: 1.2rem; }
-        .nav-item.active { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .nav-item.active { color: #1a56db; }
         .nav-item:active { transform: scale(0.95); }
 
         /* ========== MODAL / POPUP ========== */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
             z-index: 2000;
             justify-content: center;
             align-items: center;
@@ -192,21 +317,21 @@
         }
 
         .modal-content {
-            background: var(--bg-card);
-            border: var(--anodized-border);
+            background: #ffffff;
+            border: 1px solid #c5d9f0;
             border-radius: 1.5rem;
             padding: 1.5rem;
             max-width: 420px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), var(--anodized-glow);
+            box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2);
             animation: slideUp 0.3s ease;
             position: relative;
         }
         .modal-content::-webkit-scrollbar { width: 3px; }
         .modal-content::-webkit-scrollbar-track { background: transparent; }
-        .modal-content::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #1a56db; border-radius: 10px; }
 
         .modal-close {
             position: absolute;
@@ -215,9 +340,9 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: var(--input-bg);
-            border: var(--anodized-border);
-            color: var(--text-secondary);
+            background: #f0f7ff;
+            border: 1px solid #c5d9f0;
+            color: #5a7a9a;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
@@ -225,12 +350,12 @@
             align-items: center;
             justify-content: center;
         }
-        .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+        .modal-close:hover { border-color: var(--danger); color: var(--danger); background: #fee2e2; }
         .modal-close:active { transform: scale(0.9); }
 
         .modal-tx-icon {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -238,82 +363,83 @@
             font-size: 1.6rem;
             margin: 0 auto 0.5rem;
         }
-        .modal-tx-icon.credit { background: rgba(34,197,94,0.15); color: var(--brand-credit); }
-        .modal-tx-icon.debit { background: rgba(239,68,68,0.15); color: var(--brand-debit); }
-        .modal-tx-icon.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .modal-tx-icon.credit { background: #dcfce7; color: var(--brand-credit); }
+        .modal-tx-icon.debit { background: #fee2e2; color: var(--brand-debit); }
+        .modal-tx-icon.pending { background: #fef3c7; color: var(--warning); }
 
         .modal-tx-title {
             text-align: center;
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 0.2rem;
+            color: var(--text-primary);
         }
         .modal-tx-amount {
             text-align: center;
             font-size: 2.2rem;
-            font-weight: 800;
+            font-weight: 900;
             margin: 0.3rem 0 0.8rem;
         }
         .modal-tx-amount.credit { color: var(--brand-credit); }
         .modal-tx-amount.debit { color: var(--brand-debit); }
-        .modal-tx-amount .currency { font-size: 1.2rem; font-weight: 600; opacity: 0.6; }
+        .modal-tx-amount .currency { font-size: 1.2rem; font-weight: 700; opacity: 0.6; }
 
         .modal-status {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            padding: 0.2rem 0.75rem;
+            padding: 0.25rem 0.85rem;
             border-radius: 2rem;
             font-size: 0.6rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin: 0 auto 0.8rem;
         }
-        .modal-status.success { background: rgba(34,197,94,0.15); color: var(--success); }
-        .modal-status.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
-        .modal-status.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
-        .modal-status.cancelled { background: rgba(107,114,128,0.15); color: var(--text-muted); }
+        .modal-status.success { background: #dcfce7; color: var(--success); }
+        .modal-status.pending { background: #fef3c7; color: var(--warning); }
+        .modal-status.failed { background: #fee2e2; color: var(--danger); }
+        .modal-status.cancelled { background: #f1f5f9; color: var(--text-muted); }
 
         .modal-divider {
             height: 1px;
-            background: var(--border-soft);
+            background: #e8f0fe;
             margin: 0.8rem 0;
         }
 
         .modal-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border-soft);
+            padding: 0.65rem 0;
+            border-bottom: 1px solid #e8f0fe;
         }
         .modal-row:last-child { border-bottom: none; }
         .modal-label {
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            font-weight: 600;
+            font-weight: 700;
         }
         .modal-value {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--text-primary);
-            font-weight: 500;
+            font-weight: 600;
             text-align: right;
             word-break: break-all;
             max-width: 60%;
         }
-        .modal-value .highlight { color: var(--accent); font-weight: 600; }
+        .modal-value .highlight { color: var(--accent); font-weight: 700; }
         .modal-value .credit-text { color: var(--brand-credit); }
         .modal-value .debit-text { color: var(--brand-debit); }
 
         .modal-btn-copy {
-            background: var(--input-bg);
-            border: var(--anodized-border);
-            color: var(--text-secondary);
-            padding: 0.15rem 0.5rem;
+            background: #f0f7ff;
+            border: 1px solid #c5d9f0;
+            color: #5a7a9a;
+            padding: 0.2rem 0.55rem;
             border-radius: 0.4rem;
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'Inter', sans-serif;
@@ -321,16 +447,17 @@
             align-items: center;
             gap: 0.2rem;
             margin-left: 0.3rem;
+            font-weight: 600;
         }
-        .modal-btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+        .modal-btn-copy:hover { border-color: #1a56db; color: #1a56db; background: #e2eaf3; }
         .modal-btn-copy:active { transform: scale(0.95); }
 
         .modal-center { text-align: center; }
 
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .filter-tabs { gap: 0.2rem; }
-            .filter-tabs button { padding: 0.2rem 0.5rem; font-size: 0.55rem; }
+            .filter-tabs { gap: 0.25rem; }
+            .filter-tabs button { padding: 0.3rem 0.55rem; font-size: 0.55rem; }
             .tx-bottom { padding-left: 0; flex-wrap: wrap; gap: 0.3rem; }
             .tx-left { gap: 0.5rem; }
             .tx-icon { width: 34px; height: 34px; font-size: 1rem; }
@@ -341,76 +468,72 @@
 </head>
 <body>
 
-    <div id="particles"></div>
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+            <span class="header-logo">Transactions</span>
+        </div>
+        <div class="header-right">
+            <div class="avatar" onclick="goToProfile()"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
 
-    <div class="content-wrapper">
-        <header class="header">
-            <div class="header-left">
-                <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-                <span class="header-logo">Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ</span>
+    <div class="container">
+        
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <span class="stat-icon credit"><i class="fas fa-arrow-down"></i></span>
+                <div class="stat-number credit" id="totalCredit">₹0</div>
+                <div class="stat-label">Total Credit</div>
             </div>
-            <div class="header-right">
-                <div class="avatar" onclick="goToProfile()"><i class="fas fa-user"></i></div>
+            <div class="stat-card">
+                <span class="stat-icon debit"><i class="fas fa-arrow-up"></i></span>
+                <div class="stat-number debit" id="totalDebit">₹0</div>
+                <div class="stat-label">Total Debit</div>
             </div>
-        </header>
-
-        <div class="container">
-            
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <span class="stat-icon credit"><i class="fas fa-arrow-down"></i></span>
-                    <div class="stat-number credit" id="totalCredit">₹0</div>
-                    <div class="stat-label">Tᴏᴛᴀʟ Cʀᴇᴅ𝙸ᴛ</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon debit"><i class="fas fa-arrow-up"></i></span>
-                    <div class="stat-number debit" id="totalDebit">₹0</div>
-                    <div class="stat-label">Tᴏᴛᴀʟ Dᴇʙ𝙸ᴛ</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon balance"><i class="fas fa-wallet"></i></span>
-                    <div class="stat-number balance" id="currentBalance">₹0</div>
-                    <div class="stat-label">Bᴀʟᴀɴᴄᴇ</div>
-                </div>
-            </div>
-
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Sᴇᴀʀᴄʜ ʙʏ ID, UTR, ᴏʀ ʀᴇᴍᴀʀᴋ..." onkeyup="handleSearch(event)">
-                <button onclick="handleSearch()"><i class="fas fa-search"></i></button>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-tabs">
-                    <button class="active" data-filter="all" onclick="filterTransactions('all')">Aʟʟ</button>
-                    <button data-filter="credit" onclick="filterTransactions('credit')">Cʀᴇᴅ𝙸ᴛ</button>
-                    <button data-filter="debit" onclick="filterTransactions('debit')">Dᴇʙ𝙸ᴛ</button>
-                    <button data-filter="success" onclick="filterTransactions('success')">Sᴜᴄᴄᴇꜱꜱ</button>
-                    <button data-filter="pending" onclick="filterTransactions('pending')">Pᴇɴᴅ𝙸ɴɢ</button>
-                    <button data-filter="failed" onclick="filterTransactions('failed')">Fᴀ𝙸ʟᴇᴅ</button>
-                </div>
-            </div>
-
-            <div id="transactionList">
-                <div class="loading-state">
-                    <i class="fas fa-bolt"></i>
-                    <p>Lᴏᴀᴅ𝙸ɴɢ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ...</p>
-                </div>
-            </div>
-
-            <div class="pagination" id="pagination">
-                <button onclick="changePage('prev')" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
-                <span class="page-info" id="pageInfo">Pᴀɢᴇ 1 ᴏꜰ 1</span>
-                <button onclick="changePage('next')" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+            <div class="stat-card">
+                <span class="stat-icon balance"><i class="fas fa-wallet"></i></span>
+                <div class="stat-number balance" id="currentBalance">₹0</div>
+                <div class="stat-label">Balance</div>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Hᴏᴍᴇ</span></a>
-            <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
-            <a href="/transactions" class="nav-item active"><i class="fas fa-list-ul"></i><span>Lᴏɢꜱ</span></a>
-            <a href="/deposit" class="nav-item"><i class="fas fa-plus-circle"></i><span>Aᴅᴅ</span></a>
-            <a href="/profile" class="nav-item"><i class="fas fa-user"></i><span>Pʀᴏꜰ𝙸ʟᴇ</span></a>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search By ID, UTR, Or Remark..." onkeyup="handleSearch(event)">
+            <button onclick="handleSearch()"><i class="fas fa-search"></i></button>
         </div>
+
+        <div class="filter-section">
+            <div class="filter-tabs">
+                <button class="active" data-filter="all" onclick="filterTransactions('all')">All</button>
+                <button data-filter="credit" onclick="filterTransactions('credit')">Credit</button>
+                <button data-filter="debit" onclick="filterTransactions('debit')">Debit</button>
+                <button data-filter="success" onclick="filterTransactions('success')">Success</button>
+                <button data-filter="pending" onclick="filterTransactions('pending')">Pending</button>
+                <button data-filter="failed" onclick="filterTransactions('failed')">Failed</button>
+            </div>
+        </div>
+
+        <div id="transactionList">
+            <div class="loading-state">
+                <i class="fas fa-bolt"></i>
+                <p>Loading Transactions...</p>
+            </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <button onclick="changePage('prev')" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+            <span class="page-info" id="pageInfo">Page 1 of 1</span>
+            <button onclick="changePage('next')" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Send</span></a>
+        <a href="/transactions" class="nav-item active"><i class="fas fa-list-ul"></i><span>Logs</span></a>
+        <a href="/deposit" class="nav-item"><i class="fas fa-plus-circle"></i><span>Add</span></a>
+        <a href="/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
     </div>
 
     <!-- ========== MODAL / POPUP ========== -->
@@ -442,42 +565,17 @@
         };
 
         // ============================================
-        // PARTICLES
-        // ============================================
-        function createElectronParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div');
-                p.className = 'electron-particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (8 + Math.random() * 15) + 's';
-                p.style.animationDelay = Math.random() * 15 + 's';
-                const size = 2 + Math.random() * 8;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.classList.add(size > 5 ? 'big' : 'small');
-                container.appendChild(p);
-            }
-        }
-
-        // ============================================
         // AUTH
         // ============================================
-        function getToken() { 
-            const token = localStorage.getItem('token');
-            console.log('🔍 Gᴇᴛᴛ𝙸ɴɢ Tᴏᴋᴇɴ:', token ? 'Yes' : 'No');
-            return token; 
-        }
+        function getToken() { return localStorage.getItem('token'); }
 
         function checkAuth() {
             const token = getToken();
             if (!token) { 
-                console.log('❌ Nᴏ Tᴏᴋᴇɴ, Rᴇᴅ𝙸ʀᴇᴄᴛ𝙸ɴɢ Tᴏ Lᴏɢ𝙸ɴ');
-                showToast('Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ Tᴏ V𝙸ᴇᴡ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ.', 'error');
+                showToast('Please Login To View Transactions.', 'error');
                 setTimeout(() => { window.location.href = '/'; }, 1500);
                 return false; 
             }
-            console.log('✅ Tᴏᴋᴇɴ Fᴏᴜɴᴅ');
             return true;
         }
 
@@ -492,39 +590,31 @@
         // ============================================
         async function apiCall(endpoint, options = {}) {
             const token = getToken();
-            console.log('📤 Aᴘ𝙸 Cᴀʟʟ Tᴏ:', endpoint);
             if (!token) { 
-                console.log('❌ Nᴏ Tᴏᴋᴇɴ');
-                showToast('Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ Tᴏ V𝙸ᴇᴡ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ.', 'error');
+                showToast('Please Login To View Transactions.', 'error');
                 setTimeout(() => { window.location.href = '/'; }, 1500);
-                throw new Error('Nᴏᴛ ᴀᴜᴛʜᴇɴᴛ𝙸ᴄᴀᴛᴇᴅ'); 
+                throw new Error('Not authenticated'); 
             }
             const defaultOptions = { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } };
             try {
                 const response = await fetch(endpoint, { ...defaultOptions, ...options });
-                console.log('📥 Rᴇꜱᴘᴏɴꜱᴇ Sᴛᴀᴛᴜꜱ:', response.status);
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('❌ Nᴏɴ-JSON Rᴇꜱᴘᴏɴꜱᴇ:', text.substring(0, 200));
-                    throw new Error('Sᴇʀᴠᴇʀ Rᴇᴛᴜʀɴᴇᴅ Aɴ 𝙸ɴᴠᴀʟ𝙸ᴅ Rᴇꜱᴘᴏɴꜱᴇ.');
+                    throw new Error('Server Returned An Invalid Response.');
                 }
                 const data = await response.json();
-                console.log('📥 Rᴇꜱᴘᴏɴꜱᴇ Dᴀᴛᴀ:', data);
                 if (!response.ok) {
                     if (response.status === 401) {
-                        console.log('❌ Tᴏᴋᴇɴ Exᴘ𝙸ʀᴇᴅ');
                         localStorage.removeItem('token');
-                        showToast('Yᴏᴜʀ Sᴇꜱꜱ𝙸ᴏɴ Hᴀꜱ Exᴘ𝙸ʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ Aɢᴀ𝙸ɴ.', 'error');
+                        showToast('Your Session Has Expired. Please Login Again.', 'error');
                         setTimeout(() => { window.location.href = '/'; }, 1500);
-                        throw new Error('Sᴇꜱꜱ𝙸ᴏɴ ᴇxᴘ𝙸ʀᴇᴅ');
+                        throw new Error('Session expired');
                     }
-                    throw new Error(data.message || `Sᴇʀᴠᴇʀ Eʀʀᴏʀ ${response.status}.`);
+                    throw new Error(data.message || `Server Error ${response.status}.`);
                 }
                 return data;
             } catch (error) {
-                console.error('❌ API Eʀʀᴏʀ:', error.message);
-                showToast(error.message || 'Fᴀ𝙸ʟᴇᴅ Tᴏ Lᴏᴀᴅ Dᴀᴛᴀ.', 'error');
+                showToast(error.message || 'Failed To Load Data.', 'error');
                 throw error;
             }
         }
@@ -537,10 +627,9 @@
                 const data = await apiCall('/api/auth/me');
                 if (data.success && data.user) {
                     state.userId = data.user._id || data.user.id;
-                    console.log('👤 Uꜱᴇʀ 𝙸ᴅ:', state.userId);
                 }
             } catch (error) {
-                console.error('Fᴇᴛᴄʜ Uꜱᴇʀ Eʀʀᴏʀ:', error);
+                console.error('Fetch User Error:', error);
             }
         }
 
@@ -581,33 +670,25 @@
             const isCredit = isTransactionCredit(tx);
             
             if (tx.metadata && tx.metadata.transactionType) {
-                if (tx.metadata.transactionType === 'payment_received') {
-                    return 'Tʀᴀɴꜱꜰᴇʀ Rᴇᴄᴇ𝙸ᴠᴇᴅ';
-                }
-                if (tx.metadata.transactionType === 'payment_sent') {
-                    return 'Tʀᴀɴꜱꜰᴇʀ Sᴇɴᴛ';
-                }
+                if (tx.metadata.transactionType === 'payment_received') return 'Transfer Received';
+                if (tx.metadata.transactionType === 'payment_sent') return 'Transfer Sent';
             }
             
             if (tx.type === 'transfer' || tx.type === 'api') {
-                return isCredit ? 'Tʀᴀɴꜱꜰᴇʀ Rᴇᴄᴇ𝙸ᴠᴇᴅ' : 'Tʀᴀɴꜱꜰᴇʀ Sᴇɴᴛ';
+                return isCredit ? 'Transfer Received' : 'Transfer Sent';
             }
-            if (tx.type === 'deposit' || tx.type === 'credit' || tx.type === 'admin_add') {
-                return 'Bᴀʟᴀɴᴄᴇ Aᴅᴅᴇᴅ';
-            }
-            if (tx.type === 'withdrawal' || tx.type === 'withdraw' || tx.type === 'debit' || tx.type === 'admin_deduct') {
-                return 'W𝙸ᴛʜᴅʀᴀᴡᴀʟ';
-            }
-            if (tx.type === 'game_win') return 'Gᴀᴍᴇ W𝙸ɴ';
-            if (tx.type === 'game_loss') return 'Gᴀᴍᴇ Lᴏꜱꜱ';
+            if (tx.type === 'deposit' || tx.type === 'credit' || tx.type === 'admin_add') return 'Balance Added';
+            if (tx.type === 'withdrawal' || tx.type === 'withdraw' || tx.type === 'debit' || tx.type === 'admin_deduct') return 'Withdrawal';
+            if (tx.type === 'game_win') return 'Game Win';
+            if (tx.type === 'game_loss') return 'Game Loss';
             if (tx.type === 'lifafa' || tx.type === 'envelope') {
-                return isCredit ? 'L𝙸ꜰᴀꜰᴀ Cʟᴀ𝙸ᴍᴇᴅ' : 'L𝙸ꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ';
+                return isCredit ? 'Lifafa Claimed' : 'Lifafa Created';
             }
             if (tx.type === 'gift') {
-                return isCredit ? 'G𝙸ꜰᴛ Rᴇᴄᴇ𝙸ᴠᴇᴅ' : 'G𝙸ꜰᴛ Cʀᴇᴀᴛᴇᴅ';
+                return isCredit ? 'Gift Received' : 'Gift Created';
             }
-            if (tx.type === 'redeem') return 'Rᴇᴅᴇᴇᴍ';
-            return tx.type || 'Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴ';
+            if (tx.type === 'redeem') return 'Redeem';
+            return tx.type || 'Transaction';
         }
 
         // ============================================================
@@ -629,7 +710,7 @@
         }
 
         function getCounterpartyType(tx) {
-            return isTransactionCredit(tx) ? 'Fʀᴏᴍ' : 'Tᴏ';
+            return isTransactionCredit(tx) ? 'From' : 'To';
         }
 
         // ============================================================
@@ -660,7 +741,7 @@
         async function fetchTransactions() {
             if (!checkAuth()) return;
             const listEl = document.getElementById('transactionList');
-            listEl.innerHTML = `<div class="loading-state"><i class="fas fa-bolt"></i><p>Lᴏᴀᴅ𝙸ɴɢ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ...</p></div>`;
+            listEl.innerHTML = `<div class="loading-state"><i class="fas fa-bolt"></i><p>Loading Transactions...</p></div>`;
             try {
                 await fetchUserInfo();
                 let url = `/api/payment/history?page=${state.currentPage}&limit=${state.limit}`;
@@ -668,13 +749,12 @@
                 state.transactions = data.data?.transactions || [];
                 state.totalTransactions = data.data?.pagination?.total || 0;
                 state.totalPages = data.data?.pagination?.totalPages || 1;
-                console.log('📊 Tᴏᴛᴀʟ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ:', state.transactions.length);
                 applyFiltersAndSearch();
                 renderStats();
                 renderPagination();
             } catch (error) {
-                console.error('Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ Eʀʀᴏʀ:', error);
-                listEl.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Fᴀ𝙸ʟᴇᴅ Tᴏ Lᴏᴀᴅ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ</p><button onclick="fetchTransactions()" style="margin-top:0.5rem;padding:0.3rem 1rem;background:var(--bg-card);border:var(--anodized-border);border-radius:0.5rem;color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-size:0.7rem;">Rᴇᴛʀʏ</button></div>`;
+                console.error('Fetch Transactions Error:', error);
+                listEl.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed To Load Transactions</p><button onclick="fetchTransactions()" style="margin-top:0.5rem;padding:0.4rem 1rem;background:#1a56db;border:none;border-radius:0.5rem;color:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:700;">Retry</button></div>`;
             }
         }
 
@@ -735,7 +815,7 @@
             const listEl = document.getElementById('transactionList');
             const txs = state.filteredTransactions;
             if (!txs || txs.length === 0) {
-                listEl.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>${state.searchQuery ? 'Nᴏ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ Mᴀᴛᴄʜ Yᴏᴜʀ Sᴇᴀʀᴄʜ.' : 'Nᴏ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ Fᴏᴜɴᴅ.'}</p></div>`;
+                listEl.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>${state.searchQuery ? 'No Transactions Match Your Search.' : 'No Transactions Found.'}</p></div>`;
                 return;
             }
             let html = '';
@@ -752,11 +832,8 @@
                 const statusClass = status === 'success' ? 'success' : (status === 'pending' ? 'pending' : 'failed');
                 let subText = '';
                 if (tx.metadata) {
-                    if (isCredit && tx.metadata.senderName) {
-                        subText = 'Fʀᴏᴍ: ' + tx.metadata.senderName;
-                    } else if (!isCredit && tx.metadata.receiverName) {
-                        subText = 'Tᴏ: ' + tx.metadata.receiverName;
-                    }
+                    if (isCredit && tx.metadata.senderName) subText = 'From: ' + tx.metadata.senderName;
+                    else if (!isCredit && tx.metadata.receiverName) subText = 'To: ' + tx.metadata.receiverName;
                 }
                 const txnId = tx.tx_id || tx._id || 'N/A';
                 html += `
@@ -807,20 +884,20 @@
                 const response = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!response.ok) {
                     if (response.status === 401) { localStorage.removeItem('token'); return; }
-                    throw new Error('Fᴀ𝙸ʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ');
+                    throw new Error('Failed To Fetch Balance');
                 }
                 const data = await response.json();
                 if (data.success && data.user) {
                     document.getElementById('currentBalance').textContent = '₹' + (data.user.balance || 0).toFixed(2);
                 }
-            } catch (error) { console.error('Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', error); }
+            } catch (error) { console.error('Balance Error:', error); }
         }
 
         // ============================================
         // PAGINATION
         // ============================================
         function renderPagination() {
-            document.getElementById('pageInfo').textContent = `Pᴀɢᴇ ${state.currentPage} ᴏꜰ ${state.totalPages || 1}`;
+            document.getElementById('pageInfo').textContent = `Page ${state.currentPage} of ${state.totalPages || 1}`;
             document.getElementById('prevPage').disabled = state.currentPage <= 1;
             document.getElementById('nextPage').disabled = state.currentPage >= state.totalPages;
         }
@@ -833,24 +910,24 @@
         }
 
         // ============================================================
-        // ✅ MODAL / POPUP - METADATA & PREVIOUS BALANCE REMOVED
+        // MODAL / POPUP
         // ============================================================
         async function openTransactionDetails(txnId) {
             const modal = document.getElementById('modalOverlay');
             const body = document.getElementById('modalBody');
             
             modal.classList.add('active');
-            body.innerHTML = `<div style="text-align:center;padding:1rem;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--accent);"></i><p style="margin-top:0.5rem;color:var(--text-secondary);font-size:0.8rem;">Lᴏᴀᴅ𝙸ɴɢ Dᴇᴛᴀ𝙸ʟꜱ...</p></div>`;
+            body.innerHTML = `<div style="text-align:center;padding:1rem;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#1a56db;"></i><p style="margin-top:0.5rem;color:#5a7a9a;font-size:0.8rem;">Loading Details...</p></div>`;
 
             try {
                 const data = await apiCall(`/api/payment/${txnId}`);
                 if (data.status === 'success' && data.data?.transaction) {
                     renderModal(data.data.transaction);
                 } else {
-                    body.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-secondary);"><i class="fas fa-exclamation-triangle" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i><p>Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴ Nᴏᴛ Fᴏᴜɴᴅ</p></div>`;
+                    body.innerHTML = `<div style="text-align:center;padding:1.5rem;color:#5a7a9a;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i><p>Transaction Not Found</p></div>`;
                 }
             } catch (error) {
-                body.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-secondary);"><i class="fas fa-exclamation-triangle" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i><p>Fᴀ𝙸ʟᴇᴅ Tᴏ Lᴏᴀᴅ Dᴇᴛᴀ𝙸ʟꜱ</p></div>`;
+                body.innerHTML = `<div style="text-align:center;padding:1.5rem;color:#5a7a9a;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i><p>Failed To Load Details</p></div>`;
             }
         }
 
@@ -880,9 +957,6 @@
             else if (status === 'pending') statusClass = 'pending';
             else if (status === 'failed' || status === 'cancelled') statusClass = 'failed';
 
-            // ============================================================
-            // ✅ REMOVED: metadata, senderOldBalance, receiverOldBalance
-            // ============================================================
             let html = `
                 <div class="modal-center">
                     <div class="modal-tx-icon ${iconClass}">
@@ -901,7 +975,7 @@
                 <div class="modal-divider"></div>
 
                 <div class="modal-row">
-                    <span class="modal-label">Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴ 𝙸ᴅ</span>
+                    <span class="modal-label">Transaction Id</span>
                     <span class="modal-value">
                         ${txnId}
                         <button class="modal-btn-copy" onclick="copyToClipboard('${txnId}')">
@@ -916,18 +990,18 @@
                 </div>
 
                 <div class="modal-row">
-                    <span class="modal-label">Aᴍᴏᴜɴᴛ</span>
+                    <span class="modal-label">Amount</span>
                     <span class="modal-value ${amountClass}">₹${amount.toFixed(2)}</span>
                 </div>
 
                 <div class="modal-row">
-                    <span class="modal-label">Dᴀᴛᴇ & T𝙸ᴍᴇ</span>
+                    <span class="modal-label">Date & Time</span>
                     <span class="modal-value">${time}</span>
                 </div>
 
                 ${tx.remark || tx.description ? `
                 <div class="modal-row">
-                    <span class="modal-label">Nᴏᴛᴇ</span>
+                    <span class="modal-label">Note</span>
                     <span class="modal-value">${tx.remark || tx.description}</span>
                 </div>
                 ` : ''}
@@ -947,7 +1021,7 @@
         function copyToClipboard(text) {
             if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ Cᴏᴘ𝙸ᴇᴅ Tᴏ Cʟ𝙸ᴘʙᴏᴀʀᴅ', 'success');
+                showToast('Copied To Clipboard', 'success');
             }).catch(() => {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
@@ -955,7 +1029,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showToast('✅ Cᴏᴘ𝙸ᴇᴅ Tᴏ Cʟ𝙸ᴘʙᴏᴀʀᴅ', 'success');
+                showToast('Copied To Clipboard', 'success');
             });
         }
 
@@ -983,12 +1057,10 @@
         // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('⚡ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ Pᴀɢᴇ Lᴏᴀᴅ𝙸ɴɢ...');
-            createElectronParticles();
+            console.log('Transactions Page Loading...');
             if (!checkAuth()) return;
             fetchTransactions();
         });
-        console.log('⚡ Tʀᴀɴꜱᴀᴄᴛ𝙸ᴏɴꜱ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
     </script>
 </body>
 </html>
