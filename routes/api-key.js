@@ -88,7 +88,7 @@ async function verifyToken(req, res, next) {
         if (!token) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' 
+                message: 'No Token Provided' 
             });
         }
         
@@ -98,7 +98,7 @@ async function verifyToken(req, res, next) {
         if (!user) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' 
+                message: 'User Not Found' 
             });
         }
         
@@ -109,18 +109,18 @@ async function verifyToken(req, res, next) {
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                message: 'Invalid Token. Please Login Again.' 
             });
         }
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                message: 'Token Expired. Please Login Again.' 
             });
         }
         return res.status(500).json({ 
             success: false, 
-            message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' 
+            message: 'Authentication Error' 
         });
     }
 }
@@ -146,7 +146,7 @@ router.get('/', verifyToken, async (req, res) => {
             return res.json({
                 success: true,
                 apiKey: user.apiKey,
-                message: 'Aᴘɪ Kᴇʏ Gᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ'
+                message: 'API Key Generated Successfully'
             });
         }
         
@@ -158,13 +158,13 @@ router.get('/', verifyToken, async (req, res) => {
         console.error('Get API key error:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Aᴘɪ Kᴇʏ: ' + error.message 
+            message: 'Failed To Fetch API Key: ' + error.message 
         });
     }
 });
 
 // ============================================
-// REGENERATE API KEY (Only message sent when changed)
+// REGENERATE API KEY
 // ============================================
 router.post('/regenerate', verifyToken, async (req, res) => {
     try {
@@ -184,7 +184,7 @@ router.post('/regenerate', verifyToken, async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Uɴᴀʙʟᴇ Tᴏ Gᴇɴᴇʀᴀᴛᴇ UɴɪQᴜᴇ Kᴇʏ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.' 
+                message: 'Unable To Generate Unique Key. Please Try Again.' 
             });
         }
         
@@ -196,50 +196,43 @@ router.post('/regenerate', verifyToken, async (req, res) => {
         // Send notification to user only when regenerated
         if (user.telegramId) {
             const message = 
-`<b>────────────────</b>
-<b>🔄 Aᴘɪ Kᴇʏ Rᴇɢᴇɴᴇʀᴀᴛᴇᴅ</b>
-<b>────────────────</b>
+`API Key Regenerated
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Aᴘɪ Kᴇʏ Hᴀꜱ Bᴇᴇɴ Rᴇɢᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+Dear ${user.fullName}, Your API Key Has Been Regenerated Successfully.
 
-<b>🔑 Oʟᴅ Kᴇʏ:</b> <code>${oldKey || 'N/A'}</code>
-<b>🔑 Nᴇᴡ Kᴇʏ:</b> <code>${newKey}</code>
-<b>🆔 Wᴀʟʟᴇᴛ Iᴅ:</b> ${user.walletId}
-<b>⏰ Tɪᴍᴇ:</b> ${dateTime}
+Old Key: ${oldKey || 'N/A'}
+New Key: ${newKey}
+Wallet Id: ${user.walletId}
+Time: ${dateTime}
 
-───────────────────────
-🔒 Kᴇᴇᴘ Tʜɪꜱ Nᴇᴡ Kᴇʏ Sᴇᴄʀᴇᴛ. Dᴏ Nᴏᴛ Sʜᴀʀᴇ Iᴛ Wɪᴛʜ Aɴʏᴏɴᴇ.
-───────────────────────`;
+Keep This New Key Secret. Do Not Share It With Anyone.`;
             
             await sendTelegramMessage(user.telegramId, message);
         }
         
         // Notify admin
         const adminMessage = 
-`<b>─────────────────</b>
-<b>🔄 Aᴘɪ Kᴇʏ Rᴇɢᴇɴᴇʀᴀᴛᴇᴅ</b>
-<b>─────────────────</b>
+`API Key Regenerated
 
-<b>👤 Uꜱᴇʀ:</b> ${user.fullName}
-<b>📱 Mᴏʙɪʟᴇ:</b> ${user.mobile}
-<b>🆔 Wᴀʟʟᴇᴛ Iᴅ:</b> ${user.walletId}
-<b>🔑 Oʟᴅ Kᴇʏ:</b> <code>${oldKey || 'N/A'}</code>
-<b>🔑 Nᴇᴡ Kᴇʏ:</b> <code>${newKey}</code>
-<b>⏰ Tɪᴍᴇ:</b> ${dateTime}
-────────────────────`;
+User: ${user.fullName}
+Mobile: ${user.mobile}
+Wallet Id: ${user.walletId}
+Old Key: ${oldKey || 'N/A'}
+New Key: ${newKey}
+Time: ${dateTime}`;
         
         await notifyAdmin(adminMessage);
         
         res.json({
             success: true,
-            message: 'Aᴘɪ Kᴇʏ Rᴇɢᴇɴᴇʀᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ',
+            message: 'API Key Regenerated Successfully',
             apiKey: newKey
         });
     } catch (error) {
         console.error('Regenerate API key error:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Rᴇɢᴇɴᴇʀᴀᴛᴇ Aᴘɪ Kᴇʏ: ' + error.message 
+            message: 'Failed To Regenerate API Key: ' + error.message 
         });
     }
 });
@@ -254,7 +247,7 @@ router.get('/validate/:apiKey', async (req, res) => {
         if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Aᴘɪ Kᴇʏ Fᴏʀᴍᴀᴛ' 
+                message: 'Invalid API Key Format' 
             });
         }
         
@@ -263,7 +256,7 @@ router.get('/validate/:apiKey', async (req, res) => {
         if (!user) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Aᴘɪ Kᴇʏ' 
+                message: 'Invalid API Key' 
             });
         }
         
@@ -280,7 +273,7 @@ router.get('/validate/:apiKey', async (req, res) => {
         console.error('Validate API key error:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Sᴇʀᴠᴇʀ Eʀʀᴏʀ' 
+            message: 'Server Error' 
         });
     }
 });
