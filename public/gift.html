@@ -6,223 +6,616 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>G𝙸ꜰᴛ Cᴏᴅᴇ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
+    <title>Gift Code • Universal Wallet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;min-height:100vh;transition:background .4s,color .3s;padding-bottom:85px}
-        body.light{background:linear-gradient(135deg,#f5f0ff,#ede7fe);background-attachment:fixed;color:#1a1a2e}
-        body.dark{background:linear-gradient(135deg,#0a0a1a,#0c1025,#060610);background-attachment:fixed;color:#e0f0ff}
-        .app-header{backdrop-filter:blur(16px);padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;transition:all .3s}
-        body.light .app-header{background:rgba(245,240,255,.92);border-bottom:1px solid rgba(139,92,246,.2)}
-        body.dark .app-header{background:rgba(8,12,28,.92);border-bottom:1px solid rgba(0,240,255,.25)}
-        .nav-back{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:none}
-        body.light .nav-back{background:rgba(139,92,246,.1);color:#6d28d9}
-        body.dark .nav-back{background:rgba(0,240,255,.1);color:#00f0ff}
-        .nav-back:active{transform:scale(.95)}
-        .nav-back i{font-size:1.1rem}
-        .app-header h1{font-size:1.1rem;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:.5rem}
-        body.light .app-header h1{background:linear-gradient(135deg,#6d28d9,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
-        body.dark .app-header h1{background:linear-gradient(135deg,#00f0ff,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent}
-        .app-header h1 i{color:#f59e0b;-webkit-text-fill-color:#f59e0b}
-        .gift-container{max-width:500px;margin:0 auto;padding:1.25rem}
-        .wallet-card{border-radius:1.5rem;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;transition:all .3s}
-        body.light .wallet-card{background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 8px 25px rgba(139,92,246,.3)}
-        body.dark .wallet-card{background:linear-gradient(135deg,#00e0ff,#0088ff);box-shadow:0 0 20px rgba(0,240,255,.3)}
-        .wallet-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:.4rem}
-        body.light .wallet-label{color:rgba(255,255,255,.7)}
-        body.dark .wallet-label{color:rgba(10,10,26,.7)}
-        .wallet-label i{font-size:.8rem}
-        .wallet-amount{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:.2rem}
-        body.light .wallet-amount{color:#fff}
-        body.dark .wallet-amount{color:#0a0a1a}
-        .wallet-amount i{font-size:1rem}
-        .form-card{border-radius:2rem;padding:1.5rem;backdrop-filter:blur(10px);transition:all .3s}
-        body.light .form-card{background:rgba(255,255,255,.8);border:1px solid #c4b5fd;box-shadow:0 10px 30px rgba(0,0,0,.05)}
-        body.dark .form-card{background:rgba(8,12,25,.85);border:1px solid rgba(0,240,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.2)}
-        .tabs-container{margin-bottom:1.5rem}
-        .tabs{display:flex;background:rgba(139,92,246,.1);border-radius:1rem;padding:.3rem;gap:.3rem}
-        body.dark .tabs{background:rgba(0,240,255,.1)}
-        .tab-btn{flex:1;padding:.8rem;border:none;border-radius:.8rem;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .3s;background:transparent;color:#6b7280;display:flex;align-items:center;justify-content:center;gap:.5rem}
-        body.dark .tab-btn{color:#8aa0bb}
-        .tab-btn.active{background:#fff;color:#8b5cf6;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-        body.dark .tab-btn.active{background:#0c0f24;color:#00f0ff;box-shadow:0 0 10px rgba(0,240,255,.2)}
-        .tab-btn i{font-size:1rem}
-        .tab-panel{display:none;animation:fadeIn .3s}
-        .tab-panel.active{display:block}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .input-field{margin-bottom:1.25rem}
-        .field-label{display:flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;margin-left:.25rem;transition:color .3s}
-        body.light .field-label{color:#6b7280}
-        body.dark .field-label{color:#b0c0e0}
-        .field-label i{width:16px;font-size:.8rem}
-        .input-wrapper input{width:100%;padding:.9rem 1.2rem;border-radius:1.2rem;font-size:.9rem;font-weight:500;outline:none;transition:all .3s;font-family:inherit}
-        body.light .input-wrapper input{background:#f9fafb;border:2px solid #f0f0f0;color:#1a1a2e}
-        body.dark .input-wrapper input{background:rgba(8,12,28,.9);border:2px solid rgba(0,200,230,.5);color:#e0f0ff}
-        .input-wrapper input:focus{outline:none}
-        body.light .input-wrapper input:focus{border-color:#8b5cf6;background:#fff;box-shadow:0 0 0 3px rgba(139,92,246,.1)}
-        body.dark .input-wrapper input:focus{border-color:#00f0ff;background:rgba(8,12,28,1);box-shadow:0 0 0 3px rgba(0,240,255,.2)}
-        .input-wrapper input::placeholder{color:#9aa3b5;font-weight:400}
-        body.dark .input-wrapper input::placeholder{color:#5c6f8f}
-        .input-wrapper input#giftCodeInput{text-transform:none}
-        .input-wrapper input#redeemCodeInput{text-transform:none}
-        .action-btn{width:100%;padding:1rem;border:none;border-radius:1.2rem;font-size:.85rem;font-weight:800;text-transform:uppercase;cursor:pointer;transition:all .2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.5rem}
-        body.light .action-btn{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,.3)}
-        body.dark .action-btn{background:linear-gradient(135deg,#00e0ff,#0088ff);color:#0a0a1a;box-shadow:0 0 15px rgba(0,240,255,.4)}
-        .action-btn:disabled{opacity:.6;cursor:not-allowed}
-        .action-btn:active:not(:disabled){transform:scale(.98)}
-        .action-btn.redeem-btn{background:linear-gradient(135deg,#10b981,#059669)}
-        body.dark .action-btn.redeem-btn{background:linear-gradient(135deg,#34d399,#059669);color:#0a0a1a}
-        .action-btn i{font-size:1rem}
-        .bottom-bar{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:.7rem 0 1rem;z-index:50;transition:all .3s}
-        body.light .bottom-bar{background:rgba(241,239,255,.95);backdrop-filter:blur(10px);border-top:1px solid #c4b5fd}
-        body.dark .bottom-bar{background:rgba(8,12,28,.95);backdrop-filter:blur(10px);border-top:1px solid rgba(0,240,255,.3)}
-        .nav-link{display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.55rem;font-weight:700;text-transform:uppercase;text-decoration:none;flex:1;background:none;border:none;cursor:pointer;transition:color .3s}
-        body.light .nav-link{color:#94a3b8}
-        body.dark .nav-link{color:#6a7a9a}
-        body.light .nav-link.active{color:#8b5cf6}
-        body.dark .nav-link.active{color:#00f0ff}
-        .nav-link i{font-size:1.2rem}
-        .nav-link:active{transform:scale(.95)}
-        .nav-link .gift-icon{display:flex;align-items:center;gap:.3rem;background:#8b5cf6;color:#fff;padding:.2rem .8rem;border-radius:2rem;font-size:.65rem}
-        body.dark .nav-link .gift-icon{background:#00f0ff;color:#0a0a1a}
-        .nav-link .gift-icon i{font-size:.8rem}
-        .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin .6s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        @media(max-width:480px){.gift-container{padding:1rem}.form-card{padding:1.2rem}.tab-btn{padding:.6rem;font-size:.75rem}.wallet-amount{font-size:1.1rem}}
-        .star-dot{position:fixed;bottom:-20px;border-radius:50%;pointer-events:none;z-index:0;animation:riseStar linear infinite;opacity:0}
-        .star-dot.big{box-shadow:0 0 12px currentColor}
-        .star-dot.small{box-shadow:0 0 4px currentColor}
-        @keyframes riseStar{0%{transform:translateY(0) scale(1);opacity:0}5%{opacity:.8}95%{opacity:.8}100%{transform:translateY(-100vh) scale(.5);opacity:0}}
-        .toast-notify{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);padding:.8rem 1.2rem;border-radius:1rem;font-size:.75rem;font-weight:700;text-align:center;z-index:1000;backdrop-filter:blur(10px);opacity:0;transition:all .3s;pointer-events:none;max-width:90%;width:max-content;display:flex;align-items:center;gap:.5rem}
-        .toast-notify.show{opacity:1;transform:translateX(-50%) translateY(0)}
-        .toast-notify.error{background:#fef2f2;color:#dc2626;border-left:4px solid #dc2626}
-        .toast-notify.success{background:#ecfdf5;color:#059669;border-left:4px solid #10b981}
-        .toast-notify.info{background:#eff6ff;color:#3b82f6;border-left:4px solid #3b82f6}
-        body.dark .toast-notify.error{background:rgba(220,38,38,.2);color:#f87171;border-left-color:#f87171}
-        body.dark .toast-notify.success{background:rgba(16,185,129,.2);color:#4ade80;border-left-color:#4ade80}
-        body.dark .toast-notify.info{background:rgba(59,130,246,.2);color:#60a5fa;border-left-color:#60a5fa}
-        .toast-notify i{font-size:1rem}
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;animation:fadeIn .3s}
-        .modal-overlay.show{display:flex}
-        .modal-box{background:#fff;border-radius:2rem;padding:2rem;max-width:400px;width:90%;text-align:center;position:relative;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:slideUp .4s}
-        body.dark .modal-box{background:#0c1025;border:1px solid rgba(0,240,255,.3)}
-        @keyframes slideUp{from{opacity:0;transform:translateY(40px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-        .modal-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.2rem}
-        .modal-icon.success{background:#d1fae5;color:#059669}
-        body.dark .modal-icon.success{background:rgba(16,185,129,.2);color:#34d399}
-        .modal-icon.claim{background:#dbeafe;color:#3b82f6}
-        body.dark .modal-icon.claim{background:rgba(59,130,246,.2);color:#60a5fa}
-        .modal-title{font-size:1.3rem;font-weight:800;margin-bottom:.5rem}
-        body.light .modal-title{color:#1a1a2e}
-        body.dark .modal-title{color:#e0f0ff}
-        .modal-desc{font-size:.8rem;color:#6b7280;margin-bottom:1.2rem;line-height:1.5}
-        body.dark .modal-desc{color:#9aa3b5}
-        .modal-code{background:#f3f4f6;padding:.8rem;border-radius:1rem;font-size:1.1rem;font-weight:800;letter-spacing:2px;margin-bottom:.5rem;color:#8b5cf6;word-break:break-all}
-        body.dark .modal-code{background:rgba(0,240,255,.1);color:#00f0ff}
-        .modal-amount{font-size:1.5rem;font-weight:800;color:#059669;margin:.5rem 0 1rem;display:flex;align-items:center;justify-content:center;gap:.3rem}
-        body.dark .modal-amount{color:#34d399}
-        .modal-amount i{font-size:1.2rem}
-        .modal-btn{width:100%;padding:.9rem;border:none;border-radius:1.2rem;font-size:.8rem;font-weight:800;text-transform:uppercase;cursor:pointer;transition:all .2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:.5rem}
-        body.light .modal-btn{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff}
-        body.dark .modal-btn{background:linear-gradient(135deg,#00e0ff,#0088ff);color:#0a0a1a}
-        .modal-btn:active{transform:scale(.97)}
-        .modal-emoji{font-size:2.5rem;margin:.5rem 0}
-        .modal-emoji i{font-size:2.5rem}
-        .modal-divider{width:60px;height:3px;border-radius:99px;margin:.6rem auto;background:linear-gradient(90deg,#8b5cf6,#a855f7)}
-        body.dark .modal-divider{background:linear-gradient(90deg,#00f0ff,#60a5fa)}
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
+            color: #1a2a4a;
+            padding-bottom: 85px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            backdrop-filter: blur(16px);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid #c5d9f0;
+            box-shadow: 0 2px 12px rgba(0, 50, 100, 0.08);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .nav-back {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f0f7ff;
+            color: #1a56db;
+            border: 2px solid #c5d9f0;
+        }
+        .nav-back:hover { background: #e2eaf3; }
+        .nav-back:active { transform: scale(0.95); }
+        .nav-back i { font-size: 15px; }
+
+        .app-header h1 {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1a2a4a;
+            text-transform: uppercase;
+        }
+        .app-header h1 i { color: #d97706; }
+
+        /* ===== CONTAINER ===== */
+        .gift-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== WALLET CARD ===== */
+        .wallet-card {
+            border-radius: 20px;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            box-shadow: 0 8px 25px rgba(26, 86, 219, 0.3);
+        }
+
+        .wallet-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .wallet-label i { font-size: 12px; }
+
+        .wallet-amount {
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ffffff;
+        }
+        .wallet-amount i { font-size: 16px; }
+
+        /* ===== FORM CARD ===== */
+        .form-card {
+            border-radius: 24px;
+            padding: 22px;
+            background: #ffffff;
+            border: 1px solid #c5d9f0;
+            box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08);
+        }
+
+        /* ===== TABS ===== */
+        .tabs-container { margin-bottom: 22px; }
+        .tabs {
+            display: flex;
+            background: #eef3fa;
+            border-radius: 14px;
+            padding: 5px;
+            gap: 5px;
+            border: 1px solid #c5d9f0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: #5a7a9a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+        }
+        .tab-btn i { font-size: 14px; }
+        .tab-btn:active { transform: scale(0.97); }
+
+        .tab-panel { display: none; animation: fadeIn 0.3s; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== INPUT FIELDS ===== */
+        .input-field { margin-bottom: 18px; }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            margin-left: 4px;
+            color: #5a7a9a;
+        }
+        .field-label i { width: 16px; font-size: 12px; color: #1a56db; }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.3s;
+            font-family: inherit;
+            background: #fafcff;
+            border: 2px solid #c5d9f0;
+            color: #1a2a4a;
+        }
+        .input-wrapper input:focus {
+            border-color: #1a56db;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1);
+        }
+        .input-wrapper input::placeholder { color: #8a9ab0; font-weight: 500; font-size: 13px; }
+
+        #giftCodeInput, #redeemCodeInput { text-transform: none; }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .action-btn:active:not(:disabled) { transform: scale(0.98); }
+        .action-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+        .action-btn i { font-size: 15px; }
+
+        .action-btn.redeem-btn {
+            background: linear-gradient(135deg, #16a34a, #059669);
+            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+        }
+        .action-btn.redeem-btn:hover:not(:disabled) {
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4);
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 16px;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #c5d9f0;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08);
+        }
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            flex: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: #8a9ab0;
+            letter-spacing: 0.05em;
+        }
+        .nav-link.active { color: #1a56db; }
+        .nav-link i { font-size: 18px; }
+        .nav-link:active { transform: scale(0.95); }
+
+        .nav-link .gift-icon {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: #ffffff;
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-size: 10px;
+            box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
+        }
+        .nav-link .gift-icon i { font-size: 11px; }
+
+        /* ===== SPINNER ===== */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast-notify {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            max-width: 90%;
+            width: max-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .toast-notify.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-notify.error { background: #fee2e2; color: #dc2626; border-left: 4px solid #dc2626; }
+        .toast-notify.success { background: #dcfce7; color: #16a34a; border-left: 4px solid #16a34a; }
+        .toast-notify.info { background: #dbeafe; color: #1a56db; border-left: 4px solid #1a56db; }
+        .toast-notify i { font-size: 16px; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px 24px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 50, 100, 0.25);
+            border: 1px solid #c5d9f0;
+            animation: slideUp 0.4s;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 36px;
+        }
+        .modal-icon.success { background: #dcfce7; color: #16a34a; }
+        .modal-icon.claim { background: #dbeafe; color: #1a56db; }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #1a2a4a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .modal-desc {
+            font-size: 13px;
+            color: #5a7a9a;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+        .modal-code {
+            background: #f0f7ff;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #1a56db;
+            word-break: break-all;
+            border: 2px dashed #c5d9f0;
+            font-family: monospace;
+        }
+        .modal-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: #16a34a;
+            margin: 8px 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .modal-amount i { font-size: 18px; }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+        }
+        .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+        .modal-btn:active { transform: scale(0.97); }
+
+        .modal-emoji { font-size: 40px; margin: 12px 0; }
+        .modal-divider {
+            width: 60px;
+            height: 3px;
+            border-radius: 99px;
+            margin: 12px auto;
+            background: linear-gradient(90deg, #1a56db, #0088ff);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .gift-container { padding: 14px; }
+            .form-card { padding: 18px; }
+            .tab-btn { padding: 10px 6px; font-size: 11px; }
+            .wallet-amount { font-size: 18px; }
+            .app-header h1 { font-size: 15px; }
+        }
     </style>
 </head>
-<body class="light">
+<body>
 
+    <!-- HEADER -->
     <header class="app-header">
-        <button class="nav-back" onclick="goBackToDashboard()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h1><i class="fa-solid fa-gift"></i> G𝙸ꜰᴛ Cᴏᴅᴇ</h1>
+        <button class="nav-back" onclick="goBackToDashboard()">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h1><i class="fa-solid fa-gift"></i> Gift Code</h1>
     </header>
 
     <div class="gift-container">
+        <!-- WALLET CARD -->
         <div class="wallet-card">
-            <span class="wallet-label"><i class="fa-solid fa-coins"></i> Yᴏᴜʀ Bᴀʟᴀɴᴄᴇ</span>
-            <span class="wallet-amount"><i class="fa-solid fa-indian-rupee-sign"></i><span id="userBalance">0.00</span></span>
+            <span class="wallet-label">
+                <i class="fa-solid fa-coins"></i> Your Balance
+            </span>
+            <span class="wallet-amount">
+                <i class="fa-solid fa-indian-rupee-sign"></i><span id="userBalance">0.00</span>
+            </span>
         </div>
+
+        <!-- FORM CARD -->
         <div class="form-card">
+            <!-- TABS -->
             <div class="tabs-container">
                 <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('create')"><i class="fa-solid fa-plus-circle"></i> Cʀᴇᴀᴛᴇ</button>
-                    <button class="tab-btn" onclick="switchTab('claim')"><i class="fa-solid fa-gift"></i> Cʟᴀ𝙸ᴍ</button>
+                    <button class="tab-btn active" onclick="switchTab('create')">
+                        <i class="fa-solid fa-plus-circle"></i> Create
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('claim')">
+                        <i class="fa-solid fa-gift"></i> Claim
+                    </button>
                 </div>
             </div>
+
+            <!-- TAB: CREATE -->
             <div id="tabCreate" class="tab-panel active">
                 <div class="input-field">
-                    <label class="field-label"><i class="fa-solid fa-tag"></i> G𝙸ꜰᴛ Cᴏᴅᴇ</label>
-                    <div class="input-wrapper"><input type="text" id="giftCodeInput" placeholder="Eɴᴛᴇʀ Cᴜꜱᴛᴏᴍ Cᴏᴅᴇ (1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ)" maxlength="50"></div>
+                    <label class="field-label">
+                        <i class="fa-solid fa-tag"></i> Gift Code
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="giftCodeInput" placeholder="Enter Custom Code (1-50 Characters)" maxlength="50">
+                    </div>
                 </div>
+
                 <div class="input-field">
-                    <label class="field-label"><i class="fa-solid fa-users"></i> Nᴜᴍʙᴇʀ Oꜰ Uꜱᴇʀꜱ</label>
-                    <div class="input-wrapper"><input type="number" id="numberOfUsers" placeholder="Eɴᴛᴇʀ Nᴜᴍʙᴇʀ Oꜰ Uꜱᴇʀꜱ" min="1"></div>
+                    <label class="field-label">
+                        <i class="fa-solid fa-users"></i> Number Of Users
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="numberOfUsers" placeholder="Enter Number Of Users" min="1">
+                    </div>
                 </div>
+
                 <div class="input-field">
-                    <label class="field-label"><i class="fa-solid fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ Pᴇʀ Uꜱᴇʀ</label>
-                    <div class="input-wrapper"><input type="number" id="amountPerUser" placeholder="Eɴᴛᴇʀ Aᴍᴏᴜɴᴛ Pᴇʀ Uꜱᴇʀ" min="0.01" step="0.01"></div>
+                    <label class="field-label">
+                        <i class="fa-solid fa-indian-rupee-sign"></i> Amount Per User
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" id="amountPerUser" placeholder="Enter Amount Per User" min="0.01" step="0.01">
+                    </div>
                 </div>
+
                 <div class="input-field">
-                    <label class="field-label"><i class="fa-solid fa-pen"></i> Cᴏᴍᴍᴇɴᴛ (Oᴘᴛɪᴏɴᴀʟ)</label>
-                    <div class="input-wrapper"><input type="text" id="commentInput" placeholder="Aᴅᴅ A Nᴏᴛᴇ (Oᴘᴛɪᴏɴᴀʟ)"></div>
+                    <label class="field-label">
+                        <i class="fa-solid fa-pen"></i> Comment (Optional)
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="commentInput" placeholder="Add A Note (Optional)">
+                    </div>
                 </div>
-                <button class="action-btn" id="generateBtn" onclick="createGiftCode()"><i class="fa-solid fa-qrcode"></i> Gᴇɴᴇʀᴀᴛᴇ Cᴏᴅᴇ</button>
+
+                <button class="action-btn" id="generateBtn" onclick="createGiftCode()">
+                    <i class="fa-solid fa-qrcode"></i> Generate Code
+                </button>
             </div>
+
+            <!-- TAB: CLAIM -->
             <div id="tabClaim" class="tab-panel">
                 <div class="input-field">
-                    <label class="field-label"><i class="fa-solid fa-gift"></i> Rᴇᴅᴇᴇᴍ G𝙸ꜰᴛ Cᴏᴅᴇ</label>
-                    <div class="input-wrapper"><input type="text" id="redeemCodeInput" placeholder="Eɴᴛᴇʀ G𝙸ꜰᴛ Cᴏᴅᴇ (1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ)" maxlength="50"></div>
+                    <label class="field-label">
+                        <i class="fa-solid fa-gift"></i> Redeem Gift Code
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="redeemCodeInput" placeholder="Enter Gift Code (1-50 Characters)" maxlength="50">
+                    </div>
                 </div>
-                <button class="action-btn redeem-btn" id="redeemBtn" onclick="redeemGiftCode()"><i class="fa-solid fa-check-circle"></i> Rᴇᴅᴇᴇᴍ Cᴏᴅᴇ</button>
+
+                <button class="action-btn redeem-btn" id="redeemBtn" onclick="redeemGiftCode()">
+                    <i class="fa-solid fa-check-circle"></i> Redeem Code
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- BOTTOM NAV -->
     <div class="bottom-bar">
-        <a href="/dashboard" class="nav-link"><i class="fa-solid fa-house"></i><span>Hᴏᴍᴇ</span></a>
-        <a href="/transfer" class="nav-link"><i class="fa-solid fa-paper-plane"></i><span>Sᴇɴᴅ</span></a>
-        <a href="/QR" class="nav-link"><i class="fa-solid fa-qrcode"></i><span>Qʀ</span></a>
-        <a href="/deposit" class="nav-link"><i class="fa-solid fa-plus-circle"></i><span>Aᴅᴅ</span></a>
+        <a href="/dashboard" class="nav-link">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+        </a>
+        <a href="/transfer" class="nav-link">
+            <i class="fa-solid fa-paper-plane"></i><span>Send</span>
+        </a>
+        <a href="/qr" class="nav-link">
+            <i class="fa-solid fa-qrcode"></i><span>QR</span>
+        </a>
+        <a href="/deposit" class="nav-link">
+            <i class="fa-solid fa-plus-circle"></i><span>Add</span>
+        </a>
         <a href="/gift" class="nav-link active">
-            <div class="gift-icon"><i class="fa-solid fa-gift"></i> G𝙸ꜰᴛ</div>
-            <span>G𝙸ꜰᴛ</span>
+            <div class="gift-icon"><i class="fa-solid fa-gift"></i> Gift</div>
+            <span>Gift</span>
         </a>
     </div>
 
-    <!-- Modal -->
+    <!-- SUCCESS MODAL -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-box">
-            <div class="modal-icon" id="modalIcon"><i class="fa-solid fa-circle-check"></i></div>
-            <div class="modal-title" id="modalTitle">G𝙸ꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!</div>
-            <div class="modal-desc" id="modalDesc">Yᴏᴜʀ G𝙸ꜰᴛ Cᴏᴅᴇ Hᴀꜱ Bᴇᴇɴ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Aɴᴅ Iꜱ Rᴇᴀᴅʏ Tᴏ Uꜱᴇ.</div>
-            <div class="modal-code" id="modalCode">PRIMEGIFT25</div>
-            <div class="modal-amount" id="modalAmount"><i class="fa-solid fa-indian-rupee-sign"></i>100.00</div>
+            <div class="modal-icon" id="modalIcon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="modal-title" id="modalTitle">Gift Code Created Successfully!</div>
+            <div class="modal-desc" id="modalDesc">
+                Your Gift Code Has Been Created Successfully And Is Ready To Use.
+            </div>
+            <div class="modal-code" id="modalCode">UNIVERSALGIFT25</div>
+            <div class="modal-amount" id="modalAmount">
+                <i class="fa-solid fa-indian-rupee-sign"></i>100.00
+            </div>
             <div class="modal-divider"></div>
             <div class="modal-emoji"><i class="fa-solid fa-face-smile"></i></div>
-            <button class="modal-btn" onclick="closeModal()"><i class="fa-solid fa-check"></i> Aᴡᴇꜱᴏᴍᴇ!</button>
+            <button class="modal-btn" onclick="closeModal()">
+                <i class="fa-solid fa-check"></i> Awesome!
+            </button>
         </div>
     </div>
 
     <script>
         // ============================================
-        // G𝙸ꜰᴛ Cᴏᴅᴇ - Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ
+        // GIFT CODE - UNIVERSAL WALLET
         // ============================================
 
         const API_BASE_URL = '/api/gift';
         const AUTH_TOKEN = localStorage.getItem('token');
 
         if (!AUTH_TOKEN) {
-            window.location.href = '/index';
+            window.location.href = '/';
         }
 
         // ============================================
         // TOAST NOTIFICATION
         // ============================================
-
         function showToast(message, type = 'info') {
             let toast = document.getElementById('globalToast');
             if (!toast) {
@@ -231,7 +624,7 @@
                 toast.className = 'toast-notify';
                 document.body.appendChild(toast);
             }
-            let icon = type === 'success' ? '<i class="fa-solid fa-circle-check"></i> ' :
+            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check"></i> ' :
                 type === 'error' ? '<i class="fa-solid fa-circle-xmark"></i> ' :
                 '<i class="fa-solid fa-circle-info"></i> ';
             toast.innerHTML = icon + message;
@@ -243,32 +636,32 @@
         // ============================================
         // MODAL
         // ============================================
-
         function showModal(type, code, amount) {
-            const m = document.getElementById('successModal'),
-                ic = document.getElementById('modalIcon'),
-                t = document.getElementById('modalTitle'),
-                d = document.getElementById('modalDesc'),
-                c = document.getElementById('modalCode'),
-                a = document.getElementById('modalAmount'),
-                e = document.querySelector('.modal-emoji'),
-                b = document.querySelector('.modal-btn');
+            const m = document.getElementById('successModal');
+            const ic = document.getElementById('modalIcon');
+            const t = document.getElementById('modalTitle');
+            const d = document.getElementById('modalDesc');
+            const c = document.getElementById('modalCode');
+            const a = document.getElementById('modalAmount');
+            const e = document.querySelector('.modal-emoji');
+            const b = document.querySelector('.modal-btn');
+
             if (type === 'create') {
                 ic.className = 'modal-icon success';
                 ic.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-                t.textContent = 'G𝙸ꜰᴛ Cᴏᴅᴇ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!';
-                d.textContent = 'Yᴏᴜʀ G𝙸ꜰᴛ Cᴏᴅᴇ Hᴀꜱ Bᴇᴇɴ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Aɴᴅ Iꜱ Rᴇᴀᴅʏ Tᴏ Uꜱᴇ.';
+                t.textContent = 'Gift Code Created Successfully!';
+                d.textContent = 'Your Gift Code Has Been Created Successfully And Is Ready To Use.';
                 e.innerHTML = '<i class="fa-solid fa-face-smile"></i>';
-                b.innerHTML = '<i class="fa-solid fa-check"></i> Aᴡᴇꜱᴏᴍᴇ!';
+                b.innerHTML = '<i class="fa-solid fa-check"></i> Awesome!';
             } else {
                 ic.className = 'modal-icon claim';
                 ic.innerHTML = '<i class="fa-solid fa-gift"></i>';
-                t.textContent = 'G𝙸ꜰᴛ Cᴏᴅᴇ Cʟᴀɪᴍᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!';
-                d.textContent = 'Yᴏᴜ Hᴀᴠᴇ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Cʟᴀɪᴍᴇᴅ Tʜᴇ G𝙸ꜰᴛ Cᴏᴅᴇ Aɴᴅ Tʜᴇ Aᴍᴏᴜɴᴛ Hᴀꜱ Bᴇᴇɴ Aᴅᴅᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ.';
+                t.textContent = 'Gift Code Claimed Successfully!';
+                d.textContent = 'You Have Successfully Claimed The Gift Code And The Amount Has Been Added To Your Wallet.';
                 e.innerHTML = '<i class="fa-solid fa-face-grin-stars"></i>';
-                b.innerHTML = '<i class="fa-solid fa-check"></i> Gʀᴇᴀᴛ!';
+                b.innerHTML = '<i class="fa-solid fa-check"></i> Great!';
             }
-            c.textContent = code || 'PRIMEGIFT25';
+            c.textContent = code || 'UNIVERSALGIFT25';
             a.innerHTML = '<i class="fa-solid fa-indian-rupee-sign"></i>' + parseFloat(amount || 0).toFixed(2);
             m.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -278,6 +671,7 @@
             document.getElementById('successModal').classList.remove('show');
             document.body.style.overflow = 'auto';
         }
+
         document.getElementById('successModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
@@ -285,12 +679,12 @@
         // ============================================
         // TAB SWITCHING
         // ============================================
-
         function switchTab(tab) {
-            const tc = document.getElementById('tabCreate'),
-                tl = document.getElementById('tabClaim'),
-                bc = document.querySelector('.tab-btn:first-child'),
-                bl = document.querySelector('.tab-btn:last-child');
+            const tc = document.getElementById('tabCreate');
+            const tl = document.getElementById('tabClaim');
+            const bc = document.querySelector('.tab-btn:first-child');
+            const bl = document.querySelector('.tab-btn:last-child');
+
             if (tab === 'create') {
                 tc.classList.add('active');
                 tl.classList.remove('active');
@@ -305,83 +699,51 @@
         }
 
         // ============================================
-        // THEME FUNCTIONS
-        // ============================================
-
-        function loadTheme() {
-            const s = localStorage.getItem('primeTheme');
-            document.body.className = s === 'dark' ? 'dark' : 'light';
-        }
-
-        function createStarDots() {
-            document.querySelectorAll('.star-dot').forEach(s => s.remove());
-            for (let i = 0; i < 25; i++) {
-                const d = document.createElement('div');
-                d.className = 'star-dot';
-                Object.assign(d.style, {
-                    position: 'fixed',
-                    bottom: '-20px',
-                    borderRadius: '50%',
-                    pointerEvents: 'none',
-                    zIndex: '0',
-                    left: Math.random() * 100 + '%',
-                    animationDuration: (6 + Math.random() * 12) + 's',
-                    animationDelay: Math.random() * 12 + 's'
-                });
-                const s = 2 + Math.random() * 6;
-                d.style.width = s + 'px';
-                d.style.height = s + 'px';
-                if (s > 4) d.classList.add('big');
-                else d.classList.add('small');
-                document.body.appendChild(d);
-            }
-        }
-
-        // ============================================
         // BALANCE
         // ============================================
-
         function refreshWalletBalance() {
             fetch(API_BASE_URL + '/balance', {
-                    headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN, 'Content-Type': 'application/json' }
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.status === 'success') document.getElementById('userBalance').textContent = parseFloat(d.balance)
-                        .toFixed(2);
-                })
-                .catch(() => {});
+                headers: {
+                    'Authorization': 'Bearer ' + AUTH_TOKEN,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    document.getElementById('userBalance').textContent = parseFloat(d.balance).toFixed(2);
+                }
+            })
+            .catch(() => {});
         }
 
         // ============================================
-        // CREATE GIFT CODE (স্পেস, ইমোজি, সিম্বল অনুমোদিত)
+        // CREATE GIFT CODE
         // ============================================
-
         async function createGiftCode() {
             const btn = document.getElementById('generateBtn');
             const code = document.getElementById('giftCodeInput').value.trim();
             const users = parseInt(document.getElementById('numberOfUsers').value) || 0;
             const amt = parseFloat(document.getElementById('amountPerUser').value) || 0;
-            const cmt = document.getElementById('commentInput').value.trim() || 'G𝙸ꜰᴛ Cᴏᴅᴇ';
+            const cmt = document.getElementById('commentInput').value.trim() || 'Gift Code';
 
-            // ✅ শুধু দৈর্ঘ্য চেক (৪-২০ ক্যারেক্টার)
             if (!code) {
-                showToast('Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A G𝙸ꜰᴛ Cᴏᴅᴇ', 'error');
+                showToast('Please Enter A Gift Code', 'error');
                 document.getElementById('giftCodeInput').focus();
                 return;
             }
             if (code.length < 1 || code.length > 50) {
-                showToast('Cᴏᴅᴇ Mᴜꜱᴛ Bᴇ 1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ', 'error');
+                showToast('Code Must Be 1-50 Characters', 'error');
                 document.getElementById('giftCodeInput').focus();
                 return;
             }
             if (amt <= 0) {
-                showToast('Aᴍᴏᴜɴᴛ Mᴜꜱᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0', 'error');
+                showToast('Amount Must Be Greater Than 0', 'error');
                 document.getElementById('amountPerUser').focus();
                 return;
             }
             if (users < 1) {
-                showToast('Mɪɴɪᴍᴜᴍ 1 Uꜱᴇʀ Rᴇǫᴜɪʀᴇᴅ', 'error');
+                showToast('Minimum 1 User Required', 'error');
                 document.getElementById('numberOfUsers').focus();
                 return;
             }
@@ -389,13 +751,13 @@
             const total = amt * users;
             const bal = parseFloat(document.getElementById('userBalance').textContent);
             if (total > bal) {
-                showToast('Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ! Nᴇᴇᴅ ₹' + total.toFixed(2) + ', Hᴀᴠᴇ ₹' + bal.toFixed(2), 'error');
+                showToast('Insufficient Balance! Need ₹' + total.toFixed(2) + ', Have ₹' + bal.toFixed(2), 'error');
                 return;
             }
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<div class="spinner"></div> Pʀᴏᴄᴇꜱꜱɪɴɢ...';
+                btn.innerHTML = '<div class="spinner"></div> Processing...';
 
                 const r = await fetch(API_BASE_URL + '/create', {
                     method: 'POST',
@@ -424,36 +786,34 @@
                     showToast(d.message, 'error');
                 }
             } catch (e) {
-                showToast('Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ G𝙸ꜰᴛ Cᴏᴅᴇ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.', 'error');
+                showToast('Failed To Create Gift Code. Please Try Again.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Gᴇɴᴇʀᴀᴛᴇ Cᴏᴅᴇ';
+                btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Generate Code';
             }
         }
 
         // ============================================
-        // REDEEM GIFT CODE (স্পেস, ইমোজি, সিম্বল অনুমোদিত)
+        // REDEEM GIFT CODE
         // ============================================
-
         async function redeemGiftCode() {
             const btn = document.getElementById('redeemBtn');
             const code = document.getElementById('redeemCodeInput').value.trim();
 
-            // ✅ শুধু দৈর্ঘ্য চেক (১-৫০ ক্যারেক্টার)
             if (!code) {
-                showToast('Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A G𝙸ꜰᴛ Cᴏᴅᴇ', 'error');
+                showToast('Please Enter A Gift Code', 'error');
                 document.getElementById('redeemCodeInput').focus();
                 return;
             }
             if (code.length < 1 || code.length > 50) {
-                showToast('Cᴏᴅᴇ Mᴜꜱᴛ Bᴇ 1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ', 'error');
+                showToast('Code Must Be 1-50 Characters', 'error');
                 document.getElementById('redeemCodeInput').focus();
                 return;
             }
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<div class="spinner"></div> Rᴇᴅᴇᴇᴍɪɴɢ...';
+                btn.innerHTML = '<div class="spinner"></div> Redeeming...';
 
                 const r = await fetch(API_BASE_URL + '/redeem', {
                     method: 'POST',
@@ -474,17 +834,16 @@
                     showToast(d.message, 'error');
                 }
             } catch (e) {
-                showToast('Fᴀɪʟᴇᴅ Tᴏ Rᴇᴅᴇᴇᴍ G𝙸ꜰᴛ Cᴏᴅᴇ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.', 'error');
+                showToast('Failed To Redeem Gift Code. Please Try Again.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Rᴇᴅᴇᴇᴍ Cᴏᴅᴇ';
+                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Redeem Code';
             }
         }
 
         // ============================================
         // NAVIGATION
         // ============================================
-
         function goBackToDashboard() {
             window.location.href = '/dashboard';
         }
@@ -492,7 +851,6 @@
         // ============================================
         // KEYBOARD SHORTCUTS
         // ============================================
-
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && document.getElementById('tabCreate').classList.contains('active')) {
                 const el = document.activeElement;
@@ -507,17 +865,13 @@
         // ============================================
         // INITIALIZATION
         // ============================================
-
-        loadTheme();
-        createStarDots();
         refreshWalletBalance();
 
-        // ✅ রিডিম ইনপুটে uppercase করছে না (ইমোজি/স্পেস/সিম্বল রাখবে)
         document.getElementById('giftCodeInput').addEventListener('input', function() {});
         document.getElementById('redeemCodeInput').addEventListener('input', function() {});
 
-        console.log('✅ Pʀ𝙸ᴍᴇ G𝙸ꜰᴛ Cᴏᴅᴇ Sʏꜱᴛᴇᴍ Lᴏᴀᴅᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ 🎁');
-        console.log('📌 Cʀᴇᴀᴛᴇ/Cʟᴀɪᴍ: Sᴘᴀᴄᴇ, Eᴍᴏᴊɪ, Sʏᴍʙᴏʟ Aʟʟᴏᴡᴇᴅ (1-50 Cʜᴀʀᴀᴄᴛᴇʀꜱ)');
+        console.log('Gift Code System Loaded Successfully');
+        console.log('Create/Claim: Space, Emoji, Symbol Allowed (1-50 Characters)');
     </script>
 
 </body>
