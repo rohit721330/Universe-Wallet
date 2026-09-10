@@ -20,57 +20,98 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // ============================================
-// NO PASSWORD HASHING — Plain text storage
+// HELPER: Generate Wallet ID
 // ============================================
+function generateWalletId() {
+    const prefix = 'UW';
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let letterPart = '';
+    for (let i = 0; i < 2; i++) {
+        letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    let numberPart = '';
+    for (let i = 0; i < 6; i++) {
+        numberPart += Math.floor(Math.random() * 10).toString();
+    }
+    return prefix + letterPart + numberPart;
+}
 
-// Pre-save: Generate wallet ID
+// ============================================
+// HELPER: Generate API Key
+// ============================================
+function generateApiKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = '';
+    for (let i = 0; i < 10; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
+}
+
+// ============================================
+// Pre-save: Wallet ID + API Key (with retry)
+// ============================================
 userSchema.pre('save', async function(next) {
-    if (this.walletId) return next();
     try {
-        const prefix = 'UW';
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        let letterPart = '';
-        for (let i = 0; i < 2; i++) letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
-        let numberPart = '';
-        for (let i = 0; i < 6; i++) numberPart += Math.floor(Math.random() * 10).toString();
-        this.walletId = prefix + letterPart + numberPart;
+        // ✅ Wallet ID generate (retry সহ unique নিশ্চিত করা)
+        if (!this.walletId) {
+            const User = this.constructor;
+            let attempts = 0;
+            const maxAttempts = 10;
+            let newId;
+            let exists = true;
+
+            while (exists && attempts < maxAttempts) {
+                newId = generateWalletId();
+                exists = await User.exists({ walletId: newId });
+                attempts++;
+            }
+
+            if (exists) {
+                return next(new Error('Failed to generate unique Wallet ID. Please try again.'));
+            }
+            this.walletId = newId;
+        }
+
+        // ✅ API Key generate (retry সহ)
+        if (!this.apiKey) {
+            const User = this.constructor;
+            let attempts = 0;
+            const maxAttempts = 10;
+            let newKey;
+            let exists = true;
+
+            while (exists && attempts < maxAttempts) {
+                newKey = generateApiKey();
+                exists = await User.exists({ apiKey: newKey });
+                attempts++;
+            }
+
+            if (exists) {
+                return next(new Error('Failed to generate unique API Key. Please try again.'));
+            }
+            this.apiKey = newKey;
+        }
+
         next();
     } catch (error) {
         next(error);
     }
 });
 
-// Pre-save: Generate API Key
-userSchema.pre('save', async function(next) {
-    if (this.apiKey) return next();
-    try {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let key = '';
-        for (let i = 0; i < 10; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-        this.apiKey = key;
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
-
 // ============================================
-// COMPARE METHODS — Plain text comparison
+// COMPARE METHODS — Plain text
 // ============================================
-
-// Compare password (plain text)
 userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!candidatePassword) return false;
     return candidatePassword === this.password;
 };
 
-// Compare PIN (plain text)
 userSchema.methods.comparePin = async function(candidatePin) {
     if (!this.pin || !candidatePin) return false;
     return candidatePin === this.pin;
 };
 
-// Check if PIN is set
 userSchema.methods.hasPin = function() {
     return this.pin !== null && this.pin_set === true;
 };
