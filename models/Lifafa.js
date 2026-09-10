@@ -2,7 +2,7 @@
 const Mongoose = require('mongoose');
 
 const LifafaSchema = new Mongoose.Schema({
-    lifafaId: { type: String, required: true, unique: true, index: true },
+    lifafaId: { type: String, required: true, unique: true },
     userId: { type: Mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     title: { type: String, required: true, trim: true },
     type: { type: String, enum: ['normal', 'dice', 'toss', 'scratch'], default: 'normal' },
