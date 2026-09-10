@@ -1,1057 +1,742 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Qʀ • Pʀɪᴍᴇ Wᴀʟʟᴇᴛ</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-/* ============================================
-   SECTION 1: RESET & VARIABLES
-   ============================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QR • Universal Wallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-:root {
-    --p1: #a855f7;
-    --p2: #6d28d9;
-    --p3: #8b5cf6;
-    --p4: #7c3aed;
-    
-    --bg-start: #f0ecfe;
-    --bg-mid: #f8f5ff;
-    --bg-end: #f5f0ff;
-    
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --card-border: #e5d9ff;
-    --card-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
-    
-    --text-primary: #1a1a2e;
-    --text-secondary: #4a4a6a;
-    --text-muted: #8a8aaa;
-    --text-white: #ffffff;
-    
-    --input-bg: #f8f5ff;
-    --input-border: #d5c4ff;
-    --input-focus: #8b5cf6;
-    
-    --nav-bg: rgba(255, 255, 255, 0.95);
-    --nav-border: #e5d9ff;
-    --nav-inactive: #8a8aaa;
-    --nav-active: #8b5cf6;
-    
-    --shadow-light: 0 4px 20px rgba(139, 92, 246, 0.08);
-    --shadow-medium: 0 8px 30px rgba(139, 92, 246, 0.15);
-    --shadow-heavy: 0 12px 40px rgba(139, 92, 246, 0.25);
-    
-    --radius-sm: 12px;
-    --radius-md: 20px;
-    --radius-lg: 28px;
-    --radius-xl: 36px;
-    
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
+            background-attachment: fixed;
+            color: #1a2a4a;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-/* ============================================
-   SECTION 2: DARK THEME VARIABLES
-   ============================================ */
-[data-theme="dark"] {
-    --bg-start: #0a0a1a;
-    --bg-mid: #0c1025;
-    --bg-end: #060610;
-    
-    --card-bg: rgba(10, 16, 48, 0.92);
-    --card-border: rgba(0, 240, 255, 0.25);
-    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 224, 255, 0.1);
-    
-    --text-primary: #f0f5ff;
-    --text-secondary: #b0c0e0;
-    --text-muted: #6a7a9a;
-    --text-white: #ffffff;
-    
-    --input-bg: rgba(8, 12, 28, 0.9);
-    --input-border: rgba(0, 200, 230, 0.4);
-    --input-focus: #00f0ff;
-    
-    --nav-bg: rgba(10, 16, 48, 0.95);
-    --nav-border: rgba(0, 240, 255, 0.2);
-    --nav-inactive: #6a7a9a;
-    --nav-active: #00f0ff;
-    
-    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
-    --shadow-heavy: 0 12px 40px rgba(0, 240, 255, 0.15);
-}
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-/* ============================================
-   SECTION 3: BODY & BASE STYLES
-   ============================================ */
-body {
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    background: 
-        radial-gradient(circle at 20% 30%, var(--p1)15 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, var(--p2)15 0%, transparent 40%),
-        linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
-    background-attachment: fixed;
-    padding-bottom: 80px;
-    transition: var(--transition);
-    color: var(--text-primary);
-}
+        /* ============================================
+           HEADER
+           ============================================ */
+        .header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 50, 100, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #c5d9f0;
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-body.light {
-    background: 
-        radial-gradient(circle at 20% 30%, #d1c4fd 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, #b8a9fa 0%, transparent 40%),
-        linear-gradient(135deg, #f0ecfe, #f8f5ff);
-    background-attachment: fixed;
-}
+        .back {
+            width: 40px; height: 40px;
+            background: #f0f7ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #1a56db;
+            transition: all 0.3s;
+            border: 2px solid #c5d9f0;
+            font-size: 16px;
+        }
+        .back:hover { background: #e2eaf3; }
+        .back:active { transform: scale(0.95); }
 
-body.dark {
-    background: 
-        radial-gradient(circle at 15% 25%, #00e0ff20 0%, transparent 50%),
-        radial-gradient(circle at 85% 75%, #0088ff30 0%, transparent 50%),
-        linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
-    background-attachment: fixed;
-}
+        .header h1 {
+            font-size: 17px;
+            font-weight: 900;
+            color: #1a2a4a;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .header h1 span { color: #1a56db; }
 
-/* ============================================
-   SECTION 4: HEADER STYLES
-   ============================================ */
-.header {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: var(--shadow-light);
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    border-bottom: 1px solid var(--card-border);
-    transition: var(--transition);
-}
-body.light .header {
-    background: rgba(245, 240, 255, 0.92);
-    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-}
-body.dark .header {
-    background: rgba(8, 12, 28, 0.92);
-    border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-}
+        .header-placeholder { width: 40px; }
 
-.back {
-    width: 40px;
-    height: 40px;
-    background: var(--input-bg);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: var(--text-secondary);
-    transition: var(--transition);
-    border: 1px solid var(--input-border);
-    font-size: 18px;
-}
-body.light .back {
-    background: rgba(139, 92, 246, 0.1);
-    color: #6d28d9;
-}
-body.dark .back {
-    background: rgba(0, 240, 255, 0.1);
-    color: #00f0ff;
-}
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-.back:hover {
-    transform: scale(1.05);
-}
-body.light .back:hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
-}
-body.dark .back:hover {
-    border-color: #00f0ff;
-    color: #00f0ff;
-}
+        /* ============================================
+           QR CARD
+           ============================================ */
+        .qr-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08);
+            border: 1px solid #c5d9f0;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-.header h1 {
-    font-size: 1rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    transition: var(--transition);
-}
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1a56db, #0088ff);
+        }
 
-.header h1 span {
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-body.dark .header h1 span {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
+        .my-qr-badge {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 5px 14px;
+            border-radius: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
+        }
 
-.header-placeholder {
-    width: 40px;
-}
+        .qr-wrap {
+            width: 190px; height: 190px;
+            margin: 0 auto 20px;
+            padding: 8px;
+            border: 2px dashed #c5d9f0;
+            border-radius: 20px;
+            background: #fafcff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-wrap img {
+            width: 100%; height: 100%;
+            border-radius: 12px;
+            object-fit: contain;
+        }
 
-/* ============================================
-   SECTION 5: CONTAINER
-   ============================================ */
-.container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 1.25rem;
-}
+        .user-name {
+            font-size: 18px;
+            font-weight: 900;
+            color: #1a2a4a;
+            margin-bottom: 4px;
+        }
 
-/* ============================================
-   SECTION 6: QR CARD
-   ============================================ */
-.qr-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-    text-align: center;
-    margin-bottom: 1.25rem;
-    position: relative;
-    overflow: hidden;
-    transition: var(--transition);
-}
-body.light .qr-card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .qr-card {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
+        .user-mobile {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a56db;
+        }
 
-.qr-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--p1), var(--p2));
-    transition: var(--transition);
-}
-body.dark .qr-card::before {
-    background: linear-gradient(90deg, #00e0ff, #0088ff);
-}
+        .download-btn {
+            margin-top: 18px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+        .download-btn:active { transform: scale(0.95); }
 
-.my-qr-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    color: white;
-    font-size: 0.55rem;
-    font-weight: 800;
-    padding: 0.3rem 0.9rem;
-    border-radius: 2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: var(--transition);
-}
-body.dark .my-qr-badge {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
-}
+        /* ============================================
+           SCANNER CARD
+           ============================================ */
+        .scanner-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08);
+            border: 1px solid #c5d9f0;
+            margin-bottom: 20px;
+            display: none;
+        }
 
-.qr-wrap {
-    width: 190px;
-    height: 190px;
-    margin: 0 auto 1.25rem;
-    padding: 8px;
-    border: 2px dashed var(--input-border);
-    border-radius: var(--radius-md);
-    background: var(--input-bg);
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .scanner-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #1a56db;
+            box-shadow: 0 0 30px rgba(26, 86, 219, 0.2);
+        }
 
-.qr-wrap img {
-    width: 100%;
-    height: 100%;
-    border-radius: var(--radius-sm);
-    object-fit: contain;
-}
+        #reader {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
 
-.user-name {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-    transition: var(--transition);
-}
+        .scan-line {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #1a56db, transparent);
+            position: absolute;
+            width: 80%;
+            left: 10%;
+            top: 0;
+            animation: scanAnim 2s infinite;
+            box-shadow: 0 0 20px #1a56db;
+            z-index: 10;
+            border-radius: 2px;
+        }
 
-.user-mobile {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--p3);
-    transition: var(--transition);
-}
-body.dark .user-mobile {
-    color: #00f0ff;
-}
+        @keyframes scanAnim {
+            0% { top: 5%; }
+            50% { top: 85%; }
+            100% { top: 5%; }
+        }
 
-.download-btn {
-    margin-top: 1rem;
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    border: none;
-    color: white;
-    padding: 0.6rem 1.8rem;
-    border-radius: var(--radius-md);
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.dark .download-btn {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    box-shadow: 0 4px 15px rgba(0, 224, 255, 0.3);
-}
+        .scanner-corner {
+            position: absolute;
+            width: 30px; height: 30px;
+            border: 3px solid #1a56db;
+            z-index: 11;
+        }
+        .scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+        .scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+        .scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+        .scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
 
-.download-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
+        .stop-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background: #fee2e2;
+            border: none;
+            color: #dc2626;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .stop-btn:hover { background: #fecaca; }
 
-.download-btn:active {
-    transform: scale(0.95);
-}
+        /* ============================================
+           RESULT CARD
+           ============================================ */
+        .result-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08);
+            border: 1px solid #c5d9f0;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
 
-.download-btn i {
-    margin-right: 0.5rem;
-}
+        .result-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+        }
 
-/* ============================================
-   SECTION 7: SCANNER CARD
-   ============================================ */
-.scanner-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-    margin-bottom: 1.25rem;
-    display: none;
-    transition: var(--transition);
-}
-body.light .scanner-card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .scanner-card {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
+        .result-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #5a7a9a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
 
-.scanner-wrapper {
-    position: relative;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 3px solid var(--p3);
-    transition: var(--transition);
-}
-body.dark .scanner-wrapper {
-    border-color: #00f0ff;
-    box-shadow: 0 0 30px rgba(0, 224, 255, 0.2);
-}
+        .result-mobile {
+            font-size: 22px;
+            font-weight: 900;
+            color: #1a2a4a;
+            margin-bottom: 4px;
+        }
 
-#reader {
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: #000;
-}
+        .result-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a56db;
+            margin-bottom: 20px;
+        }
 
-.scan-line {
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--p3), transparent);
-    position: absolute;
-    width: 80%;
-    left: 10%;
-    top: 0;
-    animation: scanAnim 2s infinite;
-    box-shadow: 0 0 20px var(--p3);
-    z-index: 10;
-    border-radius: 2px;
-    transition: var(--transition);
-}
-body.dark .scan-line {
-    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
-    box-shadow: 0 0 30px #00f0ff;
-}
+        .pay-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
+        }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+        .pay-btn:active { transform: scale(0.95); }
 
-@keyframes scanAnim {
-    0% { top: 5%; }
-    50% { top: 85%; }
-    100% { top: 5%; }
-}
+        .scan-again-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f0f7ff;
+            border: 2px solid #c5d9f0;
+            color: #5a7a9a;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .scan-again-btn:hover { background: #e2eaf3; }
 
-.scanner-corner {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--p3);
-    z-index: 11;
-    transition: var(--transition);
-}
-body.dark .scanner-corner {
-    border-color: #00f0ff;
-}
+        /* ============================================
+           ACTION BUTTONS
+           ============================================ */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
-.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
-.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
-.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+        .action-btn {
+            border-radius: 24px;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-btn:active { transform: scale(0.95); }
 
-.stop-btn {
-    width: 100%;
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: #fee2e2;
-    border: none;
-    color: #dc2626;
-    border-radius: var(--radius-md);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.dark .stop-btn {
-    background: rgba(220, 38, 38, 0.2);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-}
+        .action-btn.primary {
+            background: linear-gradient(135deg, #1a56db, #0088ff);
+            color: white;
+            box-shadow: 0 8px 25px rgba(26, 86, 219, 0.3);
+        }
+        .action-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(26, 86, 219, 0.4); }
 
-/* ============================================
-   SECTION 8: RESULT CARD
-   ============================================ */
-.result-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-lg);
-    padding: 1.75rem;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-    margin-bottom: 1.25rem;
-    display: none;
-    text-align: center;
-    transition: var(--transition);
-}
-body.light .result-card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .result-card {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
+        .action-btn.secondary {
+            background: #ffffff;
+            color: #1a2a4a;
+            box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08);
+            border: 2px solid #c5d9f0;
+        }
+        .action-btn.secondary:hover { background: #f0f7ff; transform: translateY(-2px); border-color: #1a56db; }
 
-.result-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #16a34a, #22c55e);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 28px;
-    color: white;
-}
+        .action-btn.secondary i { color: #1a56db; }
+        .action-btn i { font-size: 26px; }
 
-.result-title {
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-    transition: var(--transition);
-}
+        .action-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
-.result-mobile {
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-    transition: var(--transition);
-}
+        /* ============================================
+           FOOTER TEXT
+           ============================================ */
+        .footer-text {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #8a9ab0;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-top: 16px;
+        }
+        .footer-text i { color: #1a56db; margin-right: 6px; }
 
-.result-name {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--p3);
-    margin-bottom: 1.25rem;
-    transition: var(--transition);
-}
-body.dark .result-name {
-    color: #00f0ff;
-}
+        /* ============================================
+           BOTTOM NAVIGATION
+           ============================================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #c5d9f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 16px;
+            z-index: 50;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08);
+        }
 
-.pay-btn {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.dark .pay-btn {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    box-shadow: 0 4px 20px rgba(0, 224, 255, 0.3);
-}
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: #8a9ab0;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            flex: 1;
+            transition: all 0.3s;
+            padding: 4px 0;
+            position: relative;
+            letter-spacing: 0.05em;
+        }
 
-.pay-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
+        .nav-item i { font-size: 19px; }
+        .nav-item.active { color: #1a56db; }
 
-.pay-btn:active {
-    transform: scale(0.95);
-}
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 30%; right: 30%;
+            height: 3px;
+            background: linear-gradient(90deg, #1a56db, #0088ff);
+            border-radius: 0 0 3px 3px;
+        }
 
-.scan-again-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    color: var(--text-secondary);
-    border-radius: var(--radius-md);
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    margin-top: 0.5rem;
-    transition: var(--transition);
-    letter-spacing: 0.05em;
-}
-body.light .scan-again-btn {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #1a1a2e;
-}
-body.dark .scan-again-btn {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.5);
-    color: #e0f0ff;
-}
+        .nav-item:hover { color: #1a56db; }
+        .nav-item:active { transform: scale(0.95); }
 
-/* ============================================
-   SECTION 9: ACTION BUTTONS
-   ============================================ */
-.action-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-}
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 480px) {
+            .container { padding: 14px; }
+            .qr-card { padding: 24px 18px; }
+            .qr-wrap { width: 160px; height: 160px; }
+            .action-grid { gap: 8px; }
+            .action-btn { padding: 20px 12px; }
+            .result-mobile { font-size: 18px; }
+            .header h1 { font-size: 15px; }
+        }
 
-.action-btn {
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    font-family: inherit;
-    position: relative;
-    overflow: hidden;
-}
+        @media (max-width: 380px) {
+            .qr-wrap { width: 140px; height: 140px; }
+            .user-name { font-size: 15px; }
+            .action-btn i { font-size: 22px; }
+            .action-label { font-size: 9px; }
+        }
+    </style>
+</head>
+<body>
 
-.action-btn:active {
-    transform: scale(0.95);
-}
-
-.action-btn.primary {
-    background: linear-gradient(135deg, var(--p1), var(--p2));
-    color: white;
-    box-shadow: var(--shadow-medium);
-}
-body.dark .action-btn.primary {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    box-shadow: 0 8px 30px rgba(0, 224, 255, 0.3);
-}
-
-.action-btn.primary::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-    opacity: 0;
-    transition: var(--transition);
-}
-
-.action-btn.primary:hover::before {
-    opacity: 1;
-}
-
-.action-btn.secondary {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--card-border);
-}
-body.light .action-btn.secondary {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid #c4b5fd;
-}
-body.dark .action-btn.secondary {
-    background: rgba(8, 12, 25, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-.action-btn.secondary i {
-    color: var(--p3);
-    transition: var(--transition);
-}
-body.dark .action-btn.secondary i {
-    color: #00f0ff;
-}
-
-.action-btn i {
-    font-size: 1.6rem;
-    transition: var(--transition);
-}
-
-.action-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* ============================================
-   SECTION 10: FOOTER
-   ============================================ */
-.footer-text {
-    text-align: center;
-    font-size: 0.6rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    margin-top: 1rem;
-    transition: var(--transition);
-}
-
-/* ============================================
-   SECTION 11: BOTTOM NAVIGATION
-   ============================================ */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--nav-border);
-    display: flex;
-    justify-content: space-around;
-    padding: 0.5rem 0 0.7rem;
-    z-index: 50;
-    transition: var(--transition);
-}
-body.light .bottom-nav {
-    background: rgba(241, 239, 255, 0.95);
-    border-top: 1px solid #c4b5fd;
-}
-body.dark .bottom-nav {
-    background: rgba(8, 12, 28, 0.95);
-    border-top: 1px solid rgba(0, 240, 255, 0.3);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    color: var(--nav-inactive);
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    text-decoration: none;
-    flex: 1;
-    transition: var(--transition);
-    padding: 0.25rem 0;
-    position: relative;
-}
-body.light .nav-item {
-    color: #94a3b8;
-}
-body.dark .nav-item {
-    color: #6a7a9a;
-}
-
-.nav-item i {
-    font-size: 1.2rem;
-    transition: var(--transition);
-}
-
-.nav-item.active {
-    color: var(--nav-active);
-}
-body.light .nav-item.active {
-    color: #8b5cf6;
-}
-body.dark .nav-item.active {
-    color: #00f0ff;
-}
-
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 30%;
-    right: 30%;
-    height: 3px;
-    background: linear-gradient(90deg, var(--p1), var(--p2));
-    border-radius: 0 0 3px 3px;
-    transition: var(--transition);
-}
-body.dark .nav-item.active::after {
-    background: linear-gradient(90deg, #00e0ff, #0088ff);
-}
-
-.nav-item:hover {
-    color: var(--nav-active);
-}
-
-/* ============================================
-   SECTION 12: RESPONSIVE DESIGN
-   ============================================ */
-@media (max-width: 480px) {
-    .container {
-        padding: 0.8rem;
-    }
-    
-    .qr-card {
-        padding: 1.5rem;
-    }
-    
-    .qr-wrap {
-        width: 160px;
-        height: 160px;
-    }
-    
-    .action-grid {
-        gap: 0.5rem;
-    }
-    
-    .action-btn {
-        padding: 1.2rem 0.8rem;
-    }
-    
-    .result-mobile {
-        font-size: 1.2rem;
-    }
-    
-    .header h1 {
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 380px) {
-    .qr-wrap {
-        width: 140px;
-        height: 140px;
-    }
-    
-    .user-name {
-        font-size: 0.95rem;
-    }
-    
-    .action-btn i {
-        font-size: 1.3rem;
-    }
-    
-    .action-label {
-        font-size: 0.55rem;
-    }
-}
-</style>
- </head>
- <body>
-  <!-- ============================================
-     SECTION 13: HEADER
-     ============================================ -->
-  <div class="header">
-   <a href="/dashboard" class="back"> <i class="fa-solid fa-arrow-left"></i> </a>
-   <h1>Pʀɪᴍᴇ <span>Qʀ</span></h1>
-   <div class="header-placeholder"></div>
-  </div><!-- ============================================
-     SECTION 14: MAIN CONTENT
-     ============================================ -->
-  <div class="container">
-   <!-- MY QR CARD -->
-   <div class="qr-card">
-    <div class="my-qr-badge">
-     <i class="fa-solid fa-qrcode"></i> Mʏ Qʀ
+    <!-- ============================================
+         HEADER
+         ============================================ -->
+    <div class="header">
+        <a href="/dashboard" class="back">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1>UNIVERSAL <span>QR</span></h1>
+        <div class="header-placeholder"></div>
     </div>
-    <div class="qr-wrap">
-     <img id="qr-img" src="" alt="Your QR Code">
+
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
+    <div class="container">
+        <!-- MY QR CARD -->
+        <div class="qr-card">
+            <div class="my-qr-badge">
+                <i class="fa-solid fa-qrcode"></i> My QR
+            </div>
+            <div class="qr-wrap">
+                <img id="qr-img" src="" alt="Your QR Code">
+            </div>
+            <div class="user-name" id="qr-name">
+                Loading...
+            </div>
+            <div class="user-mobile" id="qr-mobile"></div>
+            <button class="download-btn" onclick="downloadQR()">
+                <i class="fa-solid fa-download"></i> Download QR
+            </button>
+        </div>
+
+        <!-- SCANNER -->
+        <div class="scanner-card" id="scanner-card">
+            <div class="scanner-wrapper">
+                <div id="reader"></div>
+                <div class="scan-line"></div>
+                <div class="scanner-corner tl"></div>
+                <div class="scanner-corner tr"></div>
+                <div class="scanner-corner bl"></div>
+                <div class="scanner-corner br"></div>
+            </div>
+            <button class="stop-btn" onclick="stopScanner()">
+                <i class="fa-solid fa-xmark"></i> Cancel Scan
+            </button>
+        </div>
+
+        <!-- SCAN RESULT -->
+        <div class="result-card" id="result-card">
+            <div class="result-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="result-title">
+                QR Scanned!
+            </div>
+            <div class="result-mobile" id="result-mobile"></div>
+            <div class="result-name" id="result-name"></div>
+            <button class="pay-btn" onclick="goToTransfer()">
+                <i class="fa-solid fa-paper-plane"></i> Send Money
+            </button>
+            <button class="scan-again-btn" onclick="scanAgain()">
+                <i class="fa-solid fa-rotate-right"></i> Scan Again
+            </button>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-grid" id="action-buttons">
+            <button class="action-btn primary" onclick="startScanner()">
+                <i class="fa-solid fa-qrcode"></i>
+                <span class="action-label">Scan QR</span>
+            </button>
+            <label class="action-btn secondary">
+                <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)">
+                <i class="fa-solid fa-image"></i>
+                <span class="action-label">From Gallery</span>
+            </label>
+        </div>
+
+        <div class="footer-text">
+            <i class="fa-solid fa-lock"></i> Secure Encryption · Universal Wallet 2026
+        </div>
     </div>
-    <div class="user-name" id="qr-name">
-     Lᴏᴀᴅɪɴɢ...
+
+    <!-- ============================================
+         BOTTOM NAVIGATION
+         ============================================ -->
+    <div class="bottom-nav">
+        <a href="/dashboard" class="nav-item">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+        <a href="/transfer" class="nav-item">
+            <i class="fa-solid fa-paper-plane"></i> Send
+        </a>
+        <a href="/qr" class="nav-item active">
+            <i class="fa-solid fa-qrcode"></i> QR
+        </a>
+        <a href="/deposit" class="nav-item">
+            <i class="fa-solid fa-plus-circle"></i> Add
+        </a>
+        <a href="/transactions" class="nav-item">
+            <i class="fa-solid fa-receipt"></i> History
+        </a>
     </div>
-    <div class="user-mobile" id="qr-mobile"></div><button class="download-btn" onclick="downloadQR()"> <i class="fa-solid fa-download"></i> Dᴏᴡɴʟᴏᴀᴅ Qʀ </button>
-   </div><!-- SCANNER -->
-   <div class="scanner-card" id="scanner-card">
-    <div class="scanner-wrapper">
-     <div id="reader"></div>
-     <div class="scan-line"></div>
-     <div class="scanner-corner tl"></div>
-     <div class="scanner-corner tr"></div>
-     <div class="scanner-corner bl"></div>
-     <div class="scanner-corner br"></div>
-    </div><button class="stop-btn" onclick="stopScanner()"> <i class="fa-solid fa-xmark"></i> Cᴀɴᴄᴇʟ Sᴄᴀɴ </button>
-   </div><!-- SCAN RESULT -->
-   <div class="result-card" id="result-card">
-    <div class="result-icon">
-     <i class="fa-solid fa-circle-check"></i>
-    </div>
-    <div class="result-title">
-     Qʀ Sᴄᴀɴɴᴇᴅ!
-    </div>
-    <div class="result-mobile" id="result-mobile"></div>
-    <div class="result-name" id="result-name"></div><button class="pay-btn" onclick="goToTransfer()"> <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ Mᴏɴᴇʏ </button> <button class="scan-again-btn" onclick="scanAgain()"> <i class="fa-solid fa-rotate-right"></i> Sᴄᴀɴ Aɢᴀɪɴ </button>
-   </div><!-- ACTION BUTTONS -->
-   <div class="action-grid" id="action-buttons">
-    <button class="action-btn primary" onclick="startScanner()"> <i class="fa-solid fa-qrcode"></i> <span class="action-label">Sᴄᴀɴ Qʀ</span> </button> <label class="action-btn secondary"> <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)"> <i class="fa-solid fa-image"></i> <span class="action-label">Fʀᴏᴍ Gᴀʟʟᴇʀʏ</span> </label>
-   </div>
-   <div class="footer-text">
-    <i class="fa-solid fa-lock" style="margin-right:0.5rem"></i> Sᴇᴄᴜʀᴇ Eɴᴄʀʏᴘᴛɪᴏɴ · Pʀɪᴍᴇ 𝟸𝟶𝟸𝟼
-   </div>
-  </div><!-- ============================================
-     SECTION 15: BOTTOM NAVIGATION
-     ============================================ -->
-  <div class="bottom-nav">
-   <a href="/dashboard" class="nav-item"> <i class="fa-solid fa-house"></i> Hᴏᴍᴇ </a> <a href="/transfer" class="nav-item"> <i class="fa-solid fa-paper-plane"></i> Sᴇɴᴅ </a> <a href="/qr" class="nav-item active"> <i class="fa-solid fa-qrcode"></i> Qʀ </a> <a href="/deposit" class="nav-item"> <i class="fa-solid fa-plus-circle"></i> Aᴅᴅ </a> <a href="/transactions" class="nav-item"> <i class="fa-solid fa-receipt"></i> Hɪꜱᴛᴏʀʏ </a>
-  </div><!-- ============================================
-     SECTION 16: JAVASCRIPT
-     ============================================ -->
-  <script>
-// ============================================
-// SECTION 16a: CONFIGURATION & INIT
-// ============================================
-const API = '/api';
-const token = localStorage.getItem('token');
-const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-if (!token) {
-    window.location.href = '/index';
-}
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        const API = '/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-let scannedMobile = '';
-let scannedUserData = null;
-let html5QrCode = null;
+        if (!token) {
+            window.location.href = '/';
+        }
 
-// ============================================
-// SECTION 16b: THEME SYNC WITH DASHBOARD
-// ============================================
-function loadThemeFromStorage() {
-    const savedTheme = localStorage.getItem('primeTheme');
-    const body = document.body;
-    
-    if (savedTheme === 'dark') {
-        body.classList.add('dark');
-        body.classList.remove('light');
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        body.classList.add('light');
-        body.classList.remove('dark');
-        document.documentElement.setAttribute('data-theme', 'light');
-    }
-}
+        let scannedMobile = '';
+        let scannedUserData = null;
+        let html5QrCode = null;
 
-// Initialize theme on page load
-loadThemeFromStorage();
+        // ============================================
+        // LOAD QR CODE
+        // ============================================
+        function loadQR() {
+            const mobile = user.mobile || '';
+            const name = user.fullName || user.name || 'User';
 
-// ============================================
-// SECTION 16c: LOAD QR CODE
-// ============================================
-function loadQR() {
-    const mobile = user.mobile || '';
-    const name = user.fullName || user.name || 'Uꜱᴇʀ';
-    
-    document.getElementById('qr-name').textContent = name;
-    document.getElementById('qr-mobile').textContent = mobile;
-    
-    const qrData = mobile || 'prime-user';
-    document.getElementById('qr-img').src = 
-        `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=8b5cf6&margin=10`;
-}
+            document.getElementById('qr-name').textContent = name;
+            document.getElementById('qr-mobile').textContent = mobile;
 
-// ============================================
-// SECTION 16d: DOWNLOAD QR CODE
-// ============================================
-function downloadQR() {
-    const link = document.createElement('a');
-    link.href = document.getElementById('qr-img').src;
-    link.download = `PRIME_QR_${user.mobile || 'user'}.png`;
-    link.click();
-}
+            const qrData = mobile || 'universal-user';
+            document.getElementById('qr-img').src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1a56db&margin=10`;
+        }
 
-// ============================================
-// SECTION 16e: START SCANNER
-// ============================================
-function startScanner() {
-    document.getElementById('scanner-card').style.display = 'block';
-    document.getElementById('action-buttons').style.display = 'none';
-    document.getElementById('result-card').style.display = 'none';
+        // ============================================
+        // DOWNLOAD QR CODE
+        // ============================================
+        function downloadQR() {
+            const link = document.createElement('a');
+            link.href = document.getElementById('qr-img').src;
+            link.download = `UNIVERSAL_QR_${user.mobile || 'user'}.png`;
+            link.click();
+        }
 
-    html5QrCode = new Html5Qrcode('reader');
-    html5QrCode.start(
-        { facingMode: 'environment' },
-        { 
-            fps: 10, 
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1
-        },
-        onScanSuccess
-    ).catch(() => {
-        alert('Cᴀᴍᴇʀᴀ ᴘᴇʀᴍɪꜱꜱɪᴏɴ ᴅᴇɴɪᴇᴅ!');
-        stopScanner();
-    });
-}
+        // ============================================
+        // START SCANNER
+        // ============================================
+        function startScanner() {
+            document.getElementById('scanner-card').style.display = 'block';
+            document.getElementById('action-buttons').style.display = 'none';
+            document.getElementById('result-card').style.display = 'none';
 
-// ============================================
-// SECTION 16f: STOP SCANNER
-// ============================================
-function stopScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            document.getElementById('scanner-card').style.display = 'none';
-            document.getElementById('action-buttons').style.display = 'grid';
-            html5QrCode = null;
-        });
-    } else {
-        document.getElementById('scanner-card').style.display = 'none';
-        document.getElementById('action-buttons').style.display = 'grid';
-    }
-}
-
-// ============================================
-// SECTION 16g: SCAN SUCCESS HANDLER - FETCH USER DETAILS
-// ============================================
-async function onScanSuccess(decodedText) {
-    if (html5QrCode) {
-        await html5QrCode.stop();
-        html5QrCode = null;
-    }
-    
-    document.getElementById('scanner-card').style.display = 'none';
-    document.getElementById('action-buttons').style.display = 'none';
-
-    const mobile = decodedText.trim();
-    
-    // Validate if it's a 10-digit number
-    if (!/^\d{10}$/.test(mobile)) {
-        alert('Iɴᴠᴀʟɪᴅ Qʀ Cᴏᴅᴇ! Mᴜꜱᴛ ᴄᴏɴᴛᴀɪɴ 10-ᴅɪɢɪᴛ ᴍᴏʙɪʟᴇ ɴᴜᴍʙᴇʀ');
-        scanAgain();
-        return;
-    }
-
-    scannedMobile = mobile;
-    document.getElementById('result-mobile').textContent = mobile;
-    document.getElementById('result-name').textContent = '🔍 Fᴇᴛᴄʜɪɴɢ ᴜꜱᴇʀ ᴅᴇᴛᴀɪʟꜱ...';
-    document.getElementById('result-card').style.display = 'block';
-
-    // Fetch user details from the server
-    try {
-        // Try using the /api/view endpoint which returns full user details
-        const response = await fetch(`${API}/view?number=${mobile}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const data = await response.json();
-        
-        if (data.status === 'success' && data.name) {
-            scannedUserData = data;
-            // Display user's full name
-            document.getElementById('result-name').textContent = data.name;
-            
-            // Optional: You can also display wallet ID or other details
-            // document.getElementById('result-name').textContent = `${data.name} (${data.wallet_id})`;
-        } else {
-            // Fallback: Try the transfer/lookup endpoint
-            const lookupResponse = await fetch(`${API}/transfer/lookup/${mobile}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            html5QrCode = new Html5Qrcode('reader');
+            html5QrCode.start(
+                { facingMode: 'environment' },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1
+                },
+                onScanSuccess
+            ).catch(() => {
+                alert('Camera permission denied!');
+                stopScanner();
             });
-            const lookupData = await lookupResponse.json();
-            
-            if (lookupData.status === 'success' && lookupData.name) {
-                scannedUserData = lookupData;
-                document.getElementById('result-name').textContent = lookupData.name;
+        }
+
+        // ============================================
+        // STOP SCANNER
+        // ============================================
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-card').style.display = 'none';
+                    document.getElementById('action-buttons').style.display = 'grid';
+                    html5QrCode = null;
+                });
             } else {
-                document.getElementById('result-name').textContent = '👤 Uꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ';
+                document.getElementById('scanner-card').style.display = 'none';
+                document.getElementById('action-buttons').style.display = 'grid';
+            }
+        }
+
+        // ============================================
+        // SCAN SUCCESS HANDLER
+        // ============================================
+        async function onScanSuccess(decodedText) {
+            if (html5QrCode) {
+                await html5QrCode.stop();
+                html5QrCode = null;
+            }
+
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'none';
+
+            const mobile = decodedText.trim();
+
+            if (!/^\d{10}$/.test(mobile)) {
+                alert('Invalid QR Code! Must contain 10-digit mobile number');
+                scanAgain();
+                return;
+            }
+
+            scannedMobile = mobile;
+            document.getElementById('result-mobile').textContent = mobile;
+            document.getElementById('result-name').textContent = 'Fetching user details...';
+            document.getElementById('result-card').style.display = 'block';
+
+            try {
+                const response = await fetch(`${API}/view?number=${mobile}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (data.status === 'success' && data.name) {
+                    scannedUserData = data;
+                    document.getElementById('result-name').textContent = data.name;
+                } else {
+                    const lookupResponse = await fetch(`${API}/transfer/lookup/${mobile}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const lookupData = await lookupResponse.json();
+
+                    if (lookupData.status === 'success' && lookupData.name) {
+                        scannedUserData = lookupData;
+                        document.getElementById('result-name').textContent = lookupData.name;
+                    } else {
+                        document.getElementById('result-name').textContent = 'User not found';
+                        scannedUserData = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+                document.getElementById('result-name').textContent = 'Error fetching user';
                 scannedUserData = null;
             }
         }
-    } catch (error) {
-        console.error('Error fetching user:', error);
-        document.getElementById('result-name').textContent = '🌐 Eʀʀᴏʀ ꜰᴇᴛᴄʜɪɴɢ ᴜꜱᴇʀ';
-        scannedUserData = null;
-    }
-}
 
-// ============================================
-// SECTION 16h: UPLOAD QR FROM GALLERY
-// ============================================
-function uploadQR(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                // Use html5-qrcode to decode the image
+        // ============================================
+        // UPLOAD QR FROM GALLERY
+        // ============================================
+        function uploadQR(input) {
+            if (input.files && input.files[0]) {
                 const qrScanner = new Html5Qrcode('reader');
                 qrScanner.scanFile(input.files[0], true)
                     .then(decoded => {
@@ -1059,41 +744,37 @@ function uploadQR(input) {
                         input.value = '';
                     })
                     .catch(() => {
-                        alert('Nᴏ ᴠᴀʟɪᴅ Qʀ ᴄᴏᴅᴇ ꜰᴏᴜɴᴅ ɪɴ ᴛʜᴇ ɪᴍᴀɢᴇ!');
+                        alert('No valid QR code found in the image!');
                         input.value = '';
                     });
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+            }
+        }
 
-// ============================================
-// SECTION 16i: GO TO TRANSFER
-// ============================================
-function goToTransfer() {
-    if (scannedMobile) {
-        window.location.href = `/transfer?to=${scannedMobile}`;
-    } else {
-        alert('Nᴏ ᴜꜱᴇʀ ꜱᴄᴀɴɴᴇᴅ. Pʟᴇᴀꜱᴇ ꜱᴄᴀɴ ᴀ Qʀ ᴄᴏᴅᴇ ꜰɪʀꜱᴛ.');
-    }
-}
+        // ============================================
+        // GO TO TRANSFER
+        // ============================================
+        function goToTransfer() {
+            if (scannedMobile) {
+                window.location.href = `/transfer?to=${scannedMobile}`;
+            } else {
+                alert('No user scanned. Please scan a QR code first.');
+            }
+        }
 
-// ============================================
-// SECTION 16j: SCAN AGAIN
-// ============================================
-function scanAgain() {
-    scannedMobile = '';
-    scannedUserData = null;
-    document.getElementById('result-card').style.display = 'none';
-    document.getElementById('action-buttons').style.display = 'grid';
-}
+        // ============================================
+        // SCAN AGAIN
+        // ============================================
+        function scanAgain() {
+            scannedMobile = '';
+            scannedUserData = null;
+            document.getElementById('result-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+        }
 
-// ============================================
-// SECTION 16k: INITIALIZE
-// ============================================
-loadQR();
-</script>
- </body>
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        loadQR();
+    </script>
+</body>
 </html>
