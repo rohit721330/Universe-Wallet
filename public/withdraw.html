@@ -3,50 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>W𝙸ᴛʜᴅʀᴀᴡ • Pʀ𝙸ᴍᴇ Wᴀʟʟᴇᴛ</title>
-
-<!-- Page Icon (Favicon) -->
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/prime_wallet_logo.png">
-<link rel="shortcut icon" type="image/png" href="https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/prime_wallet_logo.png">
+<title>Withdraw • Universal Wallet</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-    --p1: #a855f7;
-    --p2: #6d28d9;
-    --card-light: rgba(241, 239, 255, 0.9);
-    --input-light: #ebe9ff;
-    --border-soft: #555555;
-    --red: #dc2626;
-    --green: #16a34a;
-    --neon-blue: #00f0ff;
-    --dark-bg-start: #0a0a1a;
-    --dark-bg-mid: #0c1022;
-    --glass-dark: rgba(8, 12, 25, 0.85);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    background-attachment: fixed;
-    transition: background 0.4s ease, color 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
+    color: #1a2a4a;
     padding-bottom: 85px;
     overflow-x: hidden;
+    position: relative;
 }
 
-body.light {
-    background: linear-gradient(135deg, #f5f0ff 0%, #ede7fe 100%);
-    background-attachment: fixed;
-    color: #1a1a2e;
-}
-
-body.dark {
-    background: linear-gradient(135deg, #0a0a1a, #0c1025, #060610);
-    background-attachment: fixed;
-    color: #e0f0ff;
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .container { max-width: 500px; margin: 0 auto; position: relative; min-height: 100vh; z-index: 1; }
@@ -58,18 +42,19 @@ body.dark {
     margin-bottom: 20px;
     text-align: center;
     margin-top: 10px;
+    color: #1a56db;
+    letter-spacing: 0.5px;
 }
-body.light .page-title { background: linear-gradient(135deg, #6d28d9, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
-body.dark .page-title { background: linear-gradient(135deg, #00f0ff, #60a5fa); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 .card {
-    border-radius: 34px;
+    border-radius: 24px;
     overflow: hidden;
     padding: 24px;
     margin-bottom: 20px;
+    background: #ffffff;
+    border: 1px solid #c5d9f0;
+    box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08);
 }
-body.light .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid #c4b5fd; }
-body.dark .card { background: var(--glass-dark); backdrop-filter: blur(20px); border: 1px solid rgba(0, 240, 255, 0.3); }
 
 .card-title {
     font-size: 12px;
@@ -77,27 +62,45 @@ body.dark .card { background: var(--glass-dark); backdrop-filter: blur(20px); bo
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 12px;
+    color: #1a56db;
 }
-body.light .card-title { color: #6d28d9; }
-body.dark .card-title { color: #00f0ff; text-shadow: 0 0 2px rgba(0, 240, 255, 0.3); }
+.card-title i { margin-right: 6px; }
 
 .balance-display {
     text-align: center;
-    padding: 16px;
+    padding: 20px;
     border-radius: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, #1a56db, #0088ff);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(26, 86, 219, 0.25);
 }
-body.light .balance-display { background: rgba(139, 92, 246, 0.08); }
-body.dark .balance-display { background: rgba(0, 240, 255, 0.08); }
-.balance-display .label { font-size: 11px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
-.balance-display .amount { font-size: 28px; font-weight: 800; }
-body.light .balance-display .amount { color: #6d28d9; }
-body.dark .balance-display .amount { color: #00f0ff; }
+.balance-display .label {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+.balance-display .amount {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-top: 4px;
+}
 
 .input-group { margin-bottom: 16px; }
-.input-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-body.light .input-group label { color: #6b7280; }
-body.dark .input-group label { color: #8aa0bb; }
+.input-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    color: #5a7a9a;
+}
+.input-group label i { margin-right: 4px; color: #1a56db; }
 
 .input-group input, .input-group select {
     width: 100%;
@@ -108,25 +111,15 @@ body.dark .input-group label { color: #8aa0bb; }
     outline: none;
     font-family: 'Inter', sans-serif;
     transition: all 0.3s ease;
+    background: #fafcff;
+    border: 2px solid #c5d9f0;
+    color: #1a2a4a;
 }
-body.light .input-group input, body.light .input-group select {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #1a1a2e;
-}
-body.dark .input-group input, body.dark .input-group select {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.5);
-    color: #e0f0ff;
-}
-.input-group input:focus, .input-group select:focus { outline: none; }
-body.light .input-group input:focus, body.light .input-group select:focus {
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-body.dark .input-group input:focus, body.dark .input-group select:focus {
-    border-color: #00f0ff;
-    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+.input-group input::placeholder { color: #8a9ab0; }
+.input-group input:focus, .input-group select:focus {
+    border-color: #1a56db;
+    box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1);
+    background: #ffffff;
 }
 
 .method-tabs {
@@ -136,38 +129,29 @@ body.dark .input-group input:focus, body.dark .input-group select:focus {
 }
 .method-tab {
     flex: 1;
-    padding: 10px;
-    border: none;
+    padding: 12px 10px;
     border-radius: 12px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     text-align: center;
     transition: all 0.3s ease;
-}
-body.light .method-tab {
-    background: #f9fafb;
-    border: 2px solid #f0f0f0;
-    color: #6b7280;
-}
-body.dark .method-tab {
-    background: rgba(8, 12, 28, 0.9);
-    border: 2px solid rgba(0, 200, 230, 0.5);
-    color: #8aa0bb;
+    background: #f0f7ff;
+    border: 2px solid #c5d9f0;
+    color: #5a7a9a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .method-tab.active {
-    border-color: #8b5cf6;
-    color: #6d28d9;
-}
-body.dark .method-tab.active {
-    border-color: #00f0ff;
-    color: #00f0ff;
+    background: linear-gradient(135deg, #1a56db, #0088ff);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
 }
 .method-tab:active { transform: scale(0.97); }
 .method-tab i { margin-right: 6px; }
 
-/* ✅ Fee Display Styles - Always Visible */
 .fee-display {
     border-radius: 12px;
     padding: 14px 16px;
@@ -176,24 +160,18 @@ body.dark .method-tab.active {
     justify-content: space-between;
     align-items: center;
     font-size: 13px;
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-}
-body.dark .fee-display {
-    background: rgba(0, 240, 255, 0.06);
-    border: 1px solid rgba(0, 240, 255, 0.15);
+    background: #ede9fe;
+    border: 1px solid #ddd6fe;
 }
 .fee-display .label {
-    font-weight: 600;
-    opacity: 0.7;
+    font-weight: 700;
+    color: #5a7a9a;
 }
 .fee-display .value {
-    font-weight: 700;
+    font-weight: 800;
+    color: #8b5cf6;
 }
-body.light .fee-display .value { color: #6d28d9; }
-body.dark .fee-display .value { color: #00f0ff; }
 
-/* ✅ Total Deduction Display - Always Visible */
 .total-display {
     border-radius: 12px;
     padding: 14px 16px;
@@ -203,35 +181,30 @@ body.dark .fee-display .value { color: #00f0ff; }
     align-items: center;
     font-size: 14px;
     font-weight: 700;
-    background: rgba(22, 163, 74, 0.08);
-    border: 1px solid rgba(22, 163, 74, 0.15);
-}
-body.dark .total-display {
-    background: rgba(0, 240, 255, 0.06);
-    border: 1px solid rgba(0, 240, 255, 0.15);
+    background: #dcfce7;
+    border: 1px solid #86efac;
 }
 .total-display .label {
-    font-weight: 600;
-    opacity: 0.7;
+    font-weight: 700;
+    color: #5a7a9a;
 }
 .total-display .value {
-    font-weight: 700;
+    font-weight: 800;
+    color: #16a34a;
 }
-body.light .total-display .value { color: #16a34a; }
-body.dark .total-display .value { color: #00f0ff; }
 
 .btn {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     border: none;
-    border-radius: 24px;
+    border-radius: 20px;
     font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     transition: all 0.2s;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -241,14 +214,13 @@ body.dark .total-display .value { color: #00f0ff; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-primary {
-    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-    color: white;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, #1a56db, #0088ff);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
 }
-body.dark .btn-primary {
-    background: linear-gradient(135deg, #00e0ff, #0088ff);
-    color: #0a0a1a;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4);
 }
 
 .toast-message {
@@ -259,17 +231,17 @@ body.dark .btn-primary {
     padding: 12px 24px;
     border-radius: 60px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     z-index: 10000;
-    backdrop-filter: blur(8px);
     animation: fadeInUp 0.3s ease;
     max-width: 90%;
     text-align: center;
+    background: #1a56db;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
-body.light .toast-message { background: #1e293b; color: white; }
-body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
-.toast-message.error { background: #dc2626 !important; color: white !important; }
-.toast-message.success { background: #16a34a !important; color: white !important; }
+.toast-message.error { background: #dc2626 !important; color: #ffffff !important; }
+.toast-message.success { background: #16a34a !important; color: #ffffff !important; }
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateX(-50%) translateY(20px); }
     to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -284,176 +256,184 @@ body.dark .toast-message { background: #00f0ff; color: #0a0a1a; }
     border-top-color: white;
     animation: spin 0.8s linear infinite;
 }
-body.dark .spinner {
-    border: 2px solid rgba(10, 10, 26, 0.3);
-    border-top-color: #0a0a1a;
-}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    display: flex; justify-content: space-around; padding: 10px 0 20px;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 20px;
     z-index: 50;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid #c5d9f0;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08);
 }
-body.light .bottom-nav { background: rgba(241, 239, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #c4b5fd; }
-body.dark .bottom-nav { background: rgba(8, 12, 28, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0, 240, 255, 0.3); }
 
 .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    cursor: pointer; text-decoration: none; flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    flex: 1;
+    color: #8a9ab0;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
 }
 .nav-item i { font-size: 20px; }
-body.light .nav-item { color: #94a3b8; }
-body.dark .nav-item { color: #6a7a9a; }
-body.light .nav-item.active { color: #8b5cf6; }
-body.dark .nav-item.active { color: #00f0ff; }
+.nav-item.active { color: #1a56db; }
+.nav-item:active { transform: scale(0.95); }
 
 .limit-info {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
     margin-top: 4px;
-    opacity: 0.6;
+    color: #8a9ab0;
+    font-weight: 600;
 }
-body.light .limit-info { color: #6b7280; }
-body.dark .limit-info { color: #8aa0bb; }
 
 .settings-status {
     text-align: center;
     font-size: 12px;
-    padding: 8px;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 .settings-status.enabled {
     color: #16a34a;
-    background: rgba(22, 163, 74, 0.1);
+    background: #dcfce7;
+    border: 1px solid #86efac;
 }
 .settings-status.disabled {
     color: #dc2626;
-    background: rgba(220, 38, 38, 0.1);
+    background: #fee2e2;
+    border: 1px solid #fecaca;
 }
 .settings-status i {
     margin-right: 6px;
-}
-
-/* ✅ Fee Info Badge */
-.fee-info {
-    font-size: 10px;
-    opacity: 0.5;
-    margin-top: 2px;
-    text-align: center;
 }
 
 @media (max-width: 480px) {
     .wrapper { padding: 30px 16px 80px; }
     .page-title { font-size: 24px; }
     .card { padding: 18px; }
+    .balance-display .amount { font-size: 24px; }
+    .method-tab { font-size: 11px; padding: 10px 8px; }
 }
 </style>
 </head>
-<body class="light">
+<body>
 
 <div class="container">
     <div class="wrapper">
         
-        <h1 class="page-title"><i class="fa-solid fa-arrow-up"></i> W𝙸ᴛʜᴅʀᴀᴡ</h1>
+        <h1 class="page-title"><i class="fa-solid fa-arrow-up"></i> Withdraw</h1>
         
         <div class="card">
             <div class="balance-display">
-                <div class="label"><i class="fa-solid fa-wallet"></i> Aᴠᴀ𝙸ʟᴀʙʟᴇ Bᴀʟᴀɴᴄᴇ</div>
+                <div class="label"><i class="fa-solid fa-wallet"></i> Available Balance</div>
                 <div class="amount">₹<span id="balance">0.00</span></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><i class="fa-solid fa-circle-info"></i> W𝙸ᴛʜᴅʀᴀᴡ Dᴇᴛᴀ𝙸ʟꜱ</div>
+            <div class="card-title"><i class="fa-solid fa-circle-info"></i> Withdraw Details</div>
             
             <!-- Settings Status -->
             <div id="settingsStatus" class="settings-status enabled">
-                <i class="fa-solid fa-circle-check"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Eɴᴀʙʟᴇᴅ
+                <i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled
             </div>
             
             <div class="method-tabs">
                 <button class="method-tab active" onclick="switchMethod('upi')">
-                    <i class="fa-solid fa-mobile-screen-button"></i> Uᴘ𝙸
+                    <i class="fa-solid fa-mobile-screen-button"></i> UPI
                 </button>
                 <button class="method-tab" onclick="switchMethod('bank')">
-                    <i class="fa-solid fa-building-columns"></i> Bᴀɴᴋ
+                    <i class="fa-solid fa-building-columns"></i> Bank
                 </button>
             </div>
 
             <!-- UPI Method -->
             <div id="upiMethod">
                 <div class="input-group">
-                    <label><i class="fa-solid fa-mobile-screen-button"></i> Uᴘ𝙸 Iᴅ *</label>
-                    <input type="text" id="upiId" placeholder="Eɴᴛᴇʀ Uᴘ𝙸 Iᴅ (ᴇ.ɢ. ɴᴀᴍᴇ@ᴜᴘ𝙸)">
+                    <label><i class="fa-solid fa-mobile-screen-button"></i> UPI ID *</label>
+                    <input type="text" id="upiId" placeholder="Enter UPI ID (e.g. name@upi)">
                 </div>
             </div>
 
             <!-- Bank Method -->
             <div id="bankMethod" style="display: none;">
                 <div class="input-group">
-                    <label><i class="fa-solid fa-building"></i> Bᴀɴᴋ Nᴀᴍᴇ *</label>
-                    <input type="text" id="bankName" placeholder="Eɴᴛᴇʀ Bᴀɴᴋ Nᴀᴍᴇ">
+                    <label><i class="fa-solid fa-building"></i> Bank Name *</label>
+                    <input type="text" id="bankName" placeholder="Enter Bank Name">
                 </div>
                 
                 <div class="input-group">
-                    <label><i class="fa-solid fa-user"></i> Aᴄᴄᴏᴜɴᴛ Hᴏʟᴅᴇʀ Nᴀᴍᴇ *</label>
-                    <input type="text" id="accountHolderName" placeholder="Eɴᴛᴇʀ Hᴏʟᴅᴇʀ Nᴀᴍᴇ">
+                    <label><i class="fa-solid fa-user"></i> Account Holder Name *</label>
+                    <input type="text" id="accountHolderName" placeholder="Enter Holder Name">
                 </div>
                 
                 <div class="input-group">
-                    <label><i class="fa-solid fa-credit-card"></i> Aᴄᴄᴏᴜɴᴛ Nᴜᴍʙᴇʀ *</label>
-                    <input type="text" id="accountNumber" placeholder="Eɴᴛᴇʀ Aᴄᴄᴏᴜɴᴛ Nᴜᴍʙᴇʀ">
+                    <label><i class="fa-solid fa-credit-card"></i> Account Number *</label>
+                    <input type="text" id="accountNumber" placeholder="Enter Account Number">
                 </div>
                 
                 <div class="input-group">
-                    <label><i class="fa-solid fa-code"></i> Iꜰꜱᴄ Cᴏᴅᴇ *</label>
-                    <input type="text" id="ifscCode" placeholder="Eɴᴛᴇʀ IFSC Cᴏᴅᴇ">
+                    <label><i class="fa-solid fa-code"></i> IFSC Code *</label>
+                    <input type="text" id="ifscCode" placeholder="Enter IFSC Code">
                 </div>
             </div>
 
             <div class="input-group">
-                <label><i class="fa-solid fa-indian-rupee-sign"></i> Aᴍᴏᴜɴᴛ (₹) *</label>
-                <input type="number" id="amount" placeholder="Eɴᴛᴇʀ ᴀᴍᴏᴜɴᴛ ᴛᴏ ᴡ𝙸ᴛʜᴅʀᴀᴡ" step="1" min="1">
+                <label><i class="fa-solid fa-indian-rupee-sign"></i> Amount (₹) *</label>
+                <input type="number" id="amount" placeholder="Enter amount to withdraw" step="1" min="1">
                 <div class="limit-info">
-                    <span>M𝙸ɴ: ₹<span id="minLimit">0</span></span>
-                    <span>Mᴀx: ₹<span id="maxLimit">0</span></span>
+                    <span>Min: ₹<span id="minLimit">0</span></span>
+                    <span>Max: ₹<span id="maxLimit">0</span></span>
                 </div>
             </div>
 
-            <!-- ✅ Fee Display - Always Visible -->
+            <!-- Fee Display -->
             <div class="fee-display" id="feeDisplay">
-                <span class="label"><i class="fa-solid fa-percent"></i> Wɪᴛʜᴅʀᴀᴡ Fᴇᴇ</span>
-                <span class="value" id="feeValue">₹0.00 (Nᴏ Fᴇᴇ)</span>
+                <span class="label"><i class="fa-solid fa-percent"></i> Withdraw Fee</span>
+                <span class="value" id="feeValue">₹0.00 (No Fee)</span>
             </div>
 
-            <!-- ✅ Total Deduction Display - Always Visible -->
+            <!-- Total Display -->
             <div class="total-display" id="totalDisplay">
-                <span class="label"><i class="fa-solid fa-hand-holding-dollar"></i> Yᴏᴜ Wɪʟʟ Rᴇᴄᴇɪᴠᴇ</span>
+                <span class="label"><i class="fa-solid fa-hand-holding-dollar"></i> You Will Receive</span>
                 <span class="value" id="totalValue">₹0.00</span>
             </div>
 
             <button class="btn btn-primary" id="withdrawBtn" onclick="submitWithdraw()">
-                <i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ
+                <i class="fa-solid fa-arrow-up"></i> Submit Withdraw
             </button>
         </div>
     </div>
 </div>
 
 <div class="bottom-nav">
-    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Hᴏᴍᴇ</a>
-    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Sᴇɴᴅ</a>
-    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i>Qʀ</a>
-    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Aᴅᴅ</a>
-    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>Lᴏɢꜱ</a>
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Home</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Send</a>
+    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i>QR</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Add</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>Logs</a>
 </div>
 
 <script>
 // ============================================
-// Cᴏɴꜰ𝙸ɢᴜʀᴀᴛ𝙸ᴏɴ
+// CONFIGURATION
 // ============================================
 let currentMethod = 'upi';
 let settings = {
@@ -471,23 +451,7 @@ let settings = {
 };
 
 // ============================================
-// Tʜᴇᴍᴇ Fᴜɴᴄᴛ𝙸ᴏɴꜱ
-// ============================================
-function loadTheme() {
-    const saved = localStorage.getItem('primeTheme');
-    const body = document.body;
-    if (saved === 'dark') {
-        body.classList.add('dark');
-        body.classList.remove('light');
-    } else {
-        body.classList.add('light');
-        body.classList.remove('dark');
-    }
-}
-loadTheme();
-
-// ============================================
-// Tᴏᴀꜱᴛ
+// TOAST
 // ============================================
 function showToast(message, type = '') {
     const toast = document.createElement('div');
@@ -503,7 +467,7 @@ function showToast(message, type = '') {
 }
 
 // ============================================
-// Mᴇᴛʜᴏᴅ Sᴡ𝙸ᴛᴄʜ𝙸ɴɢ
+// METHOD SWITCHING
 // ============================================
 function switchMethod(method) {
     currentMethod = method;
@@ -522,7 +486,7 @@ function switchMethod(method) {
 }
 
 // ============================================
-// ✅ Update Fee and Total Display - Always Updates
+// UPDATE FEE DISPLAY
 // ============================================
 function updateFeeDisplay() {
     const amountInput = document.getElementById('amount');
@@ -540,26 +504,23 @@ function updateFeeDisplay() {
             feeText = `${feeRate}% (₹${feeAmount.toFixed(2)})`;
         } else if (feeType === 'fixed') {
             feeAmount = feeRate;
-            feeText = `₹${feeRate.toFixed(2)} (Fɪxᴇᴅ)`;
+            feeText = `₹${feeRate.toFixed(2)} (Fixed)`;
         }
     } else {
-        feeText = '₹0.00 (Nᴏ Fᴇᴇ)';
+        feeText = '₹0.00 (No Fee)';
     }
     
-    // Calculate what user will receive
     const userReceives = Math.round((amount - feeAmount) * 100) / 100;
     
-    // Update fee display
     document.getElementById('feeValue').textContent = feeText;
     
-    // Update total display
     const totalEl = document.getElementById('totalValue');
     if (amount > 0) {
         totalEl.textContent = `₹${userReceives.toFixed(2)}`;
         if (userReceives > 0) {
             totalEl.style.color = '#16a34a';
         } else if (userReceives === 0) {
-            totalEl.style.color = '#f59e0b';
+            totalEl.style.color = '#d97706';
         } else {
             totalEl.style.color = '#dc2626';
         }
@@ -570,7 +531,7 @@ function updateFeeDisplay() {
 }
 
 // ============================================
-// Lᴏᴀᴅ Sᴇᴛᴛ𝙸ɴɢꜱ
+// LOAD SETTINGS
 // ============================================
 async function loadSettings() {
     try {
@@ -601,17 +562,17 @@ async function loadSettings() {
             updateFeeDisplay();
         } else {
             useDefaultSettings();
-            showToast('⚠️ Uꜱɪɴɢ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ', 'error');
+            showToast('Using Default Settings', 'error');
         }
     } catch (error) {
-        console.error('❌ Lᴏᴀᴅ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Load Settings Error:', error.message);
         useDefaultSettings();
-        showToast('⚠️ Cᴏɴɴᴇᴄᴛɪᴏɴ Eʀʀᴏʀ - Uꜱɪɴɢ Dᴇꜰᴀᴜʟᴛꜱ', 'error');
+        showToast('Connection Error - Using Defaults', 'error');
     }
 }
 
 // ============================================
-// Uꜱᴇ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ
+// USE DEFAULT SETTINGS
 // ============================================
 function useDefaultSettings() {
     settings = {
@@ -632,7 +593,7 @@ function useDefaultSettings() {
 }
 
 // ============================================
-// Uᴘᴅᴀᴛᴇ Sᴇᴛᴛɪɴɢꜱ UI
+// UPDATE SETTINGS UI
 // ============================================
 function updateSettingsUI() {
     const minLimit = document.getElementById('minLimit');
@@ -654,20 +615,20 @@ function updateSettingsUI() {
         
         if (isEnabled) {
             statusEl.className = 'settings-status enabled';
-            statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Eɴᴀʙʟᴇᴅ';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled';
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+            btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
         } else {
             statusEl.className = 'settings-status disabled';
-            statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Cᴜʀʀᴇɴᴛʟʏ D𝙸ꜱᴀʙʟᴇᴅ';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Withdraw Is Currently Disabled';
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ D𝙸ꜱᴀʙʟᴇᴅ';
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
         }
     }
 }
 
 // ============================================
-// Lᴏᴀᴅ Uꜱᴇʀ Dᴀᴛᴀ
+// LOAD USER DATA
 // ============================================
 async function loadUserData() {
     try {
@@ -687,7 +648,7 @@ async function loadUserData() {
                 window.location.href = '/';
                 return;
             }
-            throw new Error('Fᴀ𝙸ʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Uꜱᴇʀ Dᴀᴛᴀ');
+            throw new Error('Failed To Fetch User Data');
         }
         
         const data = await response.json();
@@ -695,23 +656,23 @@ async function loadUserData() {
             document.getElementById('balance').textContent = data.user.balance.toFixed(2);
         }
     } catch (error) {
-        console.error('❌ Lᴏᴀᴅ Eʀʀᴏʀ:', error);
-        showToast('<i class="fa-solid fa-circle-xmark"></i> ' + error.message, 'error');
+        console.error('Load Error:', error);
+        showToast(error.message, 'error');
     }
 }
 
 // ============================================
-// Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ
+// SUBMIT WITHDRAW
 // ============================================
 async function submitWithdraw() {
     const token = localStorage.getItem('token');
     if (!token) {
-        showToast('<i class="fa-solid fa-circle-xmark"></i> Pʟᴇᴀꜱᴇ Lᴏɢ𝙸ɴ F𝙸ʀꜱᴛ', 'error');
+        showToast('Please Login First', 'error');
         return;
     }
 
     if (!settings.enabled) {
-        showToast('<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ Iꜱ Cᴜʀʀᴇɴᴛʟʏ D𝙸ꜱᴀʙʟᴇᴅ', 'error');
+        showToast('Withdraw Is Currently Disabled', 'error');
         return;
     }
 
@@ -719,35 +680,34 @@ async function submitWithdraw() {
     const amount = parseFloat(amountInput.value);
 
     if (!amount || amount <= 0) {
-        showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Aᴍᴏᴜɴᴛ', 'error');
+        showToast('Please Enter A Valid Amount', 'error');
         return;
     }
 
     const currentBalance = parseFloat(document.getElementById('balance').textContent);
 
     if (amount < settings.minAmount) {
-        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> M𝙸ɴ𝙸ᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.minAmount}`, 'error');
+        showToast(`Minimum Amount Is ₹${settings.minAmount}`, 'error');
         return;
     }
 
     if (amount > settings.maxAmount) {
-        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> Mᴀx𝙸ᴍᴜᴍ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.maxAmount}`, 'error');
+        showToast(`Maximum Amount Is ₹${settings.maxAmount}`, 'error');
         return;
     }
 
-    // Calculate fee
     const feeAmount = settings.fee > 0 ? 
         (settings.feeType === 'percentage' ? (amount * settings.fee) / 100 : settings.fee) : 0;
     const userReceives = Math.round((amount - feeAmount) * 100) / 100;
 
     if (amount > currentBalance) {
-        showToast(`<i class="fa-solid fa-triangle-exclamation"></i> Iɴꜱᴜꜰꜰ𝙸ᴄ𝙸ᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Rᴇǫᴜɪʀᴇᴅ: ₹${amount.toFixed(2)}. Aᴠᴀ𝙸ʟᴀʙʟᴇ: ₹${currentBalance.toFixed(2)}`, 'error');
+        showToast(`Insufficient Balance. Required: ₹${amount.toFixed(2)}. Available: ₹${currentBalance.toFixed(2)}`, 'error');
         return;
     }
 
     const btn = document.getElementById('withdrawBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Pʀᴏᴄᴇꜱꜱ𝙸ɴɢ...';
+    btn.innerHTML = '<span class="spinner"></span> Processing...';
 
     try {
         let endpoint = '';
@@ -756,15 +716,15 @@ async function submitWithdraw() {
         if (currentMethod === 'upi') {
             const upiId = document.getElementById('upiId').value.trim();
             if (!upiId) {
-                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ Uᴘ𝙸 Iᴅ', 'error');
+                showToast('Please Enter UPI ID', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
                 return;
             }
             if (!upiId.includes('@')) {
-                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ Uᴘ𝙸 Iᴅ', 'error');
+                showToast('Please Enter A Valid UPI ID', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
                 return;
             }
             
@@ -778,16 +738,16 @@ async function submitWithdraw() {
             const ifscCode = document.getElementById('ifscCode').value.trim().toUpperCase();
 
             if (!bankName || !accountHolderName || !accountNumber || !ifscCode) {
-                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ F𝙸ʟʟ Aʟʟ Bᴀɴᴋ Dᴇᴛᴀ𝙸ʟꜱ', 'error');
+                showToast('Please Fill All Bank Details', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
                 return;
             }
 
             if (ifscCode.length < 7) {
-                showToast('<i class="fa-solid fa-triangle-exclamation"></i> Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟ𝙸ᴅ IFSC Cᴏᴅᴇ', 'error');
+                showToast('Please Enter A Valid IFSC Code', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
                 return;
             }
 
@@ -799,7 +759,7 @@ async function submitWithdraw() {
             requestBody.note = 'Bank Withdrawal';
         }
 
-        console.log('📤 Sᴜʙᴍ𝙸ᴛᴛ𝙸ɴɢ W𝙸ᴛʜᴅʀᴀᴡᴀʟ:', { endpoint, requestBody });
+        console.log('Submitting Withdrawal:', { endpoint, requestBody });
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -811,12 +771,12 @@ async function submitWithdraw() {
         });
 
         const data = await response.json();
-        console.log('📥 Rᴇꜱᴘᴏɴꜱᴇ Dᴀᴛᴀ:', data);
+        console.log('Response Data:', data);
 
         if (data.success) {
             const methodText = currentMethod === 'upi' ? 'UPI' : 'Bank';
-            const feeText = data.fee > 0 ? ` (Fᴇᴇ: ₹${data.fee.toFixed(2)})` : '';
-            showToast(`<i class="fa-solid fa-circle-check"></i> ${methodText} W𝙸ᴛʜᴅʀᴀᴡᴀʟ Sᴜʙᴍ𝙸ᴛᴛᴇᴅ!${feeText}`, 'success');
+            const feeText = data.fee > 0 ? ` (Fee: ₹${data.fee.toFixed(2)})` : '';
+            showToast(`${methodText} Withdrawal Submitted!${feeText}`, 'success');
             
             if (data.newBalance !== undefined) {
                 document.getElementById('balance').textContent = data.newBalance.toFixed(2);
@@ -836,27 +796,27 @@ async function submitWithdraw() {
                 document.getElementById('ifscCode').value = '';
             }
         } else {
-            showToast('<i class="fa-solid fa-circle-xmark"></i> ' + (data.message || 'W𝙸ᴛʜᴅʀᴀᴡ Fᴀ𝙸ʟᴇᴅ'), 'error');
+            showToast(data.message || 'Withdraw Failed', 'error');
         }
     } catch (error) {
-        console.error('❌ W𝙸ᴛʜᴅʀᴀᴡ Eʀʀᴏʀ:', error);
-        showToast('<i class="fa-solid fa-globe"></i> ' + (error.message || 'Nᴇᴛᴡᴏʀᴋ Eʀʀᴏʀ'), 'error');
+        console.error('Withdraw Error:', error);
+        showToast(error.message || 'Network Error', 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Sᴜʙᴍ𝙸ᴛ W𝙸ᴛʜᴅʀᴀᴡ';
+        btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
         
         if (!settings.enabled) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-ban"></i> W𝙸ᴛʜᴅʀᴀᴡ D𝙸ꜱᴀʙʟᴇᴅ';
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
         }
     }
 }
 
 // ============================================
-// Iɴ𝙸ᴛ𝙸ᴀʟ𝙸ᴢᴇ
+// INITIALIZE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('⚡ W𝙸ᴛʜᴅʀᴀᴡ Pᴀɢᴇ Lᴏᴀᴅᴇᴅ');
+    console.log('Withdraw Page Loaded');
     
     loadSettings();
     loadUserData();
