@@ -20,11 +20,11 @@ async function getWithdrawSettings() {
         if (!settings) {
             settings = new WithdrawSettings();
             await settings.save();
-            console.log('✅ Dᴇꜰᴀᴜʟᴛ Sᴇᴛᴛɪɴɢꜱ Cʀᴇᴀᴛᴇᴅ');
+            console.log('Default Settings Created');
         }
         return settings;
     } catch (error) {
-        console.error('❌ Gᴇᴛ Sᴇᴛᴛɪɴɢꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Settings Error:', error.message);
         return WithdrawSettings.getDefaults();
     }
 }
@@ -55,7 +55,16 @@ function generateWithdrawTxnId() {
 // ============================================
 function getCurrentDateTime() {
     const now = new Date();
-    const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const options = { 
+        timeZone: 'Asia/Kolkata', 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: true 
+    };
     return now.toLocaleString('en-IN', options);
 }
 
@@ -64,28 +73,37 @@ function getCurrentDateTime() {
 // ============================================
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) {
-        console.log('⚠️ Bᴏᴛ Tᴏᴋᴇɴ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ');
+        console.log('Bot Token Not Configured');
         return { success: false, error: 'BOT_TOKEN not configured' };
     }
     return new Promise((resolve) => {
         const https = require('https');
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
         const data = JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' });
-        const request = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
+        const request = https.request(url, { 
+            method: 'POST', 
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Content-Length': Buffer.byteLength(data) 
+            } 
+        }, (res) => {
             let responseData = '';
             res.on('data', (chunk) => responseData += chunk);
             res.on('end', () => {
                 try {
                     const result = JSON.parse(responseData);
-                    result.ok ? console.log('✅ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ') : console.error('❌ Tᴇʟᴇɢʀᴀᴍ Eʀʀᴏʀ:', result.description);
+                    result.ok ? console.log('Telegram Message Sent') : console.error('Telegram Error:', result.description);
                     resolve({ success: result.ok, error: result.description });
                 } catch (e) {
-                    console.error('❌ Pᴀʀꜱᴇ Eʀʀᴏʀ:', e.message);
+                    console.error('Parse Error:', e.message);
                     resolve({ success: false, error: e.message });
                 }
             });
         });
-        request.on('error', (error) => { console.error('❌ Rᴇǫᴜᴇꜱᴛ Eʀʀᴏʀ:', error.message); resolve({ success: false, error: error.message }); });
+        request.on('error', (error) => { 
+            console.error('Request Error:', error.message); 
+            resolve({ success: false, error: error.message }); 
+        });
         request.write(data);
         request.end();
     });
@@ -95,9 +113,16 @@ async function sendTelegramMessage(chatId, message) {
 // HELPER: Send Notification to Admin
 // ============================================
 async function notifyAdmin(message) {
-    if (!ADMIN_TG) { console.log('⚠️ Aᴅᴍɪɴ Tᴇʟᴇɢʀᴀᴍ Iᴅ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ'); return; }
-    try { await sendTelegramMessage(ADMIN_TG, message); console.log('✅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ'); } 
-    catch (error) { console.error('❌ Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ:', error.message); }
+    if (!ADMIN_TG) { 
+        console.log('Admin Telegram Id Not Configured'); 
+        return; 
+    }
+    try { 
+        await sendTelegramMessage(ADMIN_TG, message); 
+        console.log('Admin Notification Sent'); 
+    } catch (error) { 
+        console.error('Failed To Send Admin Notification:', error.message); 
+    }
 }
 
 // ============================================
@@ -106,13 +131,13 @@ async function notifyAdmin(message) {
 async function checkWithdrawSettings(amount) {
     const settings = await getWithdrawSettings();
     if (!settings.enabled) {
-        return { allowed: false, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Iꜱ Cᴜʀʀᴇɴᴛʟʏ Dɪꜱᴀʙʟᴇᴅ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.' };
+        return { allowed: false, message: 'Withdrawal Is Currently Disabled. Please Try Again Later.' };
     }
     if (amount < settings.minAmount) {
-        return { allowed: false, message: `Mɪɴɪᴍᴜᴍ Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.minAmount}. Yᴏᴜʀ Aᴍᴏᴜɴᴛ: ₹${amount}` };
+        return { allowed: false, message: `Minimum Withdrawal Amount Is ₹${settings.minAmount}. Your Amount: ₹${amount}` };
     }
     if (amount > settings.maxAmount) {
-        return { allowed: false, message: `Mᴀxɪᴍᴜᴍ Wɪᴛʜᴅʀᴀᴡᴀʟ Aᴍᴏᴜɴᴛ Iꜱ ₹${settings.maxAmount}. Yᴏᴜʀ Aᴍᴏᴜɴᴛ: ₹${amount}` };
+        return { allowed: false, message: `Maximum Withdrawal Amount Is ₹${settings.maxAmount}. Your Amount: ₹${amount}` };
     }
     return { allowed: true, settings };
 }
@@ -124,27 +149,27 @@ async function verifyToken(req, res, next) {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
-            return res.status(401).json({ success: false, message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' });
+            return res.status(401).json({ success: false, message: 'No Token Provided' });
         }
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
         if (!user) {
-            return res.status(401).json({ success: false, message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' });
+            return res.status(401).json({ success: false, message: 'User Not Found' });
         }
         if (user.isBlocked) {
-            return res.status(403).json({ success: false, message: 'Yᴏᴜʀ Aᴄᴄᴏᴜɴᴛ Iꜱ Bʟᴏᴄᴋᴇᴅ' });
+            return res.status(403).json({ success: false, message: 'Your Account Is Blocked' });
         }
         req.user = user;
         next();
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Token Verification Error:', error.message);
         if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ success: false, message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' });
+            return res.status(401).json({ success: false, message: 'Invalid Token. Please Login Again.' });
         }
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ success: false, message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' });
+            return res.status(401).json({ success: false, message: 'Token Expired. Please Login Again.' });
         }
-        return res.status(500).json({ success: false, message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' });
+        return res.status(500).json({ success: false, message: 'Authentication Error' });
     }
 }
 
@@ -157,7 +182,7 @@ router.post('/upi', verifyToken, async (req, res) => {
         const user = req.user;
         const dateTime = getCurrentDateTime();
         
-        console.log('📤 UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ:', { Uꜱᴇʀ: user.mobile, Aᴍᴏᴜɴᴛ: amount, UPI: upiId });
+        console.log('UPI Withdrawal Request:', { User: user.mobile, Amount: amount, UPI: upiId });
         
         const settingsCheck = await checkWithdrawSettings(amount);
         if (!settingsCheck.allowed) {
@@ -165,58 +190,61 @@ router.post('/upi', verifyToken, async (req, res) => {
         }
         const settings = settingsCheck.settings;
         
-        // ✅ Calculate Fee (Tax)
+        // Calculate Fee (Tax)
         const feeAmount = calculateWithdrawFee(amount, settings.fee, settings.feeType);
-        // ✅ User will receive: amount - fee
+        // User will receive: amount - fee
         const userReceives = Math.round((amount - feeAmount) * 100) / 100;
         
-        console.log('💰 Fᴇᴇ Cᴀʟᴄᴜʟᴀᴛɪᴏɴ:', { 
-            WɪᴛʜᴅʀᴀᴡAᴍᴏᴜɴᴛ: amount, 
-            FᴇᴇRᴀᴛᴇ: settings.fee, 
-            FᴇᴇTʏᴘᴇ: settings.feeType, 
-            FᴇᴇAᴍᴏᴜɴᴛ: feeAmount, 
-            UꜱᴇʀRᴇᴄᴇɪᴠᴇꜱ: userReceives 
+        console.log('Fee Calculation:', { 
+            WithdrawAmount: amount, 
+            FeeRate: settings.fee, 
+            FeeType: settings.feeType, 
+            FeeAmount: feeAmount, 
+            UserReceives: userReceives 
         });
         
         if (!upiId || !upiId.includes('@')) {
-            return res.status(400).json({ success: false, message: 'Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟɪᴅ UPI ID (ᴇ.ɢ. ɴᴀᴍᴇ@ᴜᴘɪ)' });
+            return res.status(400).json({ success: false, message: 'Please Enter A Valid UPI ID (e.g. name@upi)' });
         }
         
-        // ✅ Check Balance (only withdrawal amount, not including fee)
+        // Check Balance (only withdrawal amount, not including fee)
         if (user.balance < amount) {
-            return res.status(400).json({ success: false, message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Rᴇǫᴜɪʀᴇᴅ: ₹${amount.toFixed(2)}. Yᴏᴜʀ Bᴀʟᴀɴᴄᴇ: ₹${user.balance.toFixed(2)}` });
+            return res.status(400).json({ success: false, message: `Insufficient Balance. Required: ₹${amount.toFixed(2)}. Your Balance: ₹${user.balance.toFixed(2)}` });
         }
         
         if (settings.maxDailyWithdrawals > 0) {
-            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const today = new Date(); 
+            today.setHours(0, 0, 0, 0);
             const todayCount = await Withdrawal.countDocuments({ userId: user._id, createdAt: { $gte: today } });
             if (todayCount >= settings.maxDailyWithdrawals) {
-                return res.status(400).json({ success: false, message: `Yᴏᴜ Hᴀᴠᴇ Rᴇᴀᴄʜᴇᴅ Yᴏᴜʀ Dᴀɪʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟ Lɪᴍɪᴛ (${settings.maxDailyWithdrawals}). Pʟᴇᴀꜱᴇ Tʀʏ Tᴏᴍᴏʀʀᴏᴡ.` });
+                return res.status(400).json({ success: false, message: `You Have Reached Your Daily Withdrawal Limit (${settings.maxDailyWithdrawals}). Please Try Tomorrow.` });
             }
         }
         
         if (settings.maxMonthlyWithdrawals > 0) {
-            const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+            const monthStart = new Date(); 
+            monthStart.setDate(1); 
+            monthStart.setHours(0, 0, 0, 0);
             const monthCount = await Withdrawal.countDocuments({ userId: user._id, createdAt: { $gte: monthStart } });
             if (monthCount >= settings.maxMonthlyWithdrawals) {
-                return res.status(400).json({ success: false, message: `Yᴏᴜ Hᴀᴠᴇ Rᴇᴀᴄʜᴇᴅ Yᴏᴜʀ Mᴏɴᴛʜʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟ Lɪᴍɪᴛ (${settings.maxMonthlyWithdrawals}). Pʟᴇᴀꜱᴇ Tʀʏ Nᴇxᴛ Mᴏɴᴛʜ.` });
+                return res.status(400).json({ success: false, message: `You Have Reached Your Monthly Withdrawal Limit (${settings.maxMonthlyWithdrawals}). Please Try Next Month.` });
             }
         }
         
         const transactionId = generateWithdrawTxnId();
         const oldBalance = user.balance;
-        // ✅ Deduct only the withdrawal amount (not fee)
+        // Deduct only the withdrawal amount (not fee)
         user.balance = Math.round((user.balance - amount) * 100) / 100;
         await user.save();
         
         const withdrawal = new Withdrawal({
             userId: user._id,
             walletId: user.walletId,
-            amount: amount, // Withdrawal amount
-            fee: feeAmount, // Fee charged
+            amount: amount,
+            fee: feeAmount,
             feeType: settings.feeType,
             feeRate: settings.fee,
-            userReceives: userReceives, // Amount user will receive after fee
+            userReceives: userReceives,
             method: 'upi',
             upiId: upiId,
             status: 'pending',
@@ -253,58 +281,52 @@ router.post('/upi', verifyToken, async (req, res) => {
         });
         await transaction.save();
         
-        console.log('✅ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Cʀᴇᴀᴛᴇᴅ:', transactionId);
+        console.log('UPI Withdrawal Created:', transactionId);
         
-        const feeText = feeAmount > 0 ? `\n💸 Fᴇᴇ (${settings.feeType}): ₹${feeAmount.toFixed(2)}` : '';
-        const receiveText = feeAmount > 0 ? `\n💵 Yᴏᴜ Rᴇᴄᴇɪᴠᴇ: ₹${userReceives.toFixed(2)}` : '';
+        const feeText = feeAmount > 0 ? `\nFee (${settings.feeType}): ₹${feeAmount.toFixed(2)}` : '';
+        const receiveText = feeAmount > 0 ? `\nYou Receive: ₹${userReceives.toFixed(2)}` : '';
         
         await notifyAdmin(
-`<b>─────────────────</b>
-<b>📩 Nᴇᴡ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ</b>
-<b>─────────────────</b>
+`New UPI Withdrawal Request
 
-<b>👤 Uꜱᴇʀ Iɴꜰᴏʀᴍᴀᴛɪᴏɴ</b>
-👤 Nᴀᴍᴇ: ${user.fullName}
-📱 Mᴏʙɪʟᴇ: ${user.mobile}
-🆔 Wᴀʟʟᴇᴛ Iᴅ: ${user.walletId}
+User Information
+Name: ${user.fullName}
+Mobile: ${user.mobile}
+Wallet ID: ${user.walletId}
 
-<b>💰 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ</b>
-💵 Aᴍᴏᴜɴᴛ: <b>₹${amount.toFixed(2)}</b>${feeText}${receiveText}
+Transaction Details
+Amount: ₹${amount.toFixed(2)}${feeText}${receiveText}
 
-📱 Mᴇᴛʜᴏᴅ: UPI
-🆔 UPI Iᴅ: ${upiId}
-🆔 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ: ${transactionId}
-📝 Nᴏᴛᴇ: ${note || 'Nᴏ Cᴏᴍᴍᴇɴᴛ'}
-📅 <code>${dateTime}</code>
+Method: UPI
+UPI ID: ${upiId}
+Transaction ID: ${transactionId}
+Note: ${note || 'No Comment'}
+Date: ${dateTime}
 
-───────────────────────
-📊 Sᴛᴀᴛᴜꜱ: ⏳ Pᴇɴᴅɪɴɢ Aᴘᴘʀᴏᴠᴀʟ
-⚠️ Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Rᴇǫᴜɪʀᴇᴅ
-───────────────────────`);
+Status: Pending Approval
+Admin Action Required`);
         
         if (user.telegramId) {
-            const userFeeText = feeAmount > 0 ? `\n💸 <b>Fᴇᴇ Cʜᴀʀɢᴇᴅ:</b> ₹${feeAmount.toFixed(2)}\n💵 <b>Yᴏᴜ Rᴇᴄᴇɪᴠᴇ:</b> ₹${userReceives.toFixed(2)}` : '';
+            const userFeeText = feeAmount > 0 ? `\nFee Charged: ₹${feeAmount.toFixed(2)}\nYou Receive: ₹${userReceives.toFixed(2)}` : '';
             await sendTelegramMessage(user.telegramId,
-`<b>─────────────────</b>
-<b>⏳ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Sᴜʙᴍɪᴛᴛᴇᴅ</b>
-<b>─────────────────</b>
+`UPI Withdrawal Submitted
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ Hᴀꜱ Bᴇᴇɴ Sᴜʙᴍɪᴛᴛᴇᴅ.
+Dear ${user.fullName},
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount.toFixed(2)}
-📱 <b>UPI Iᴅ:</b> ${upiId}${userFeeText}
-🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${transactionId}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
-📅 <code>${dateTime}</code>
+Your UPI withdrawal request has been submitted.
 
-───────────────────────
-⏳ Pʟᴇᴀꜱᴇ Wᴀɪᴛ Fᴏʀ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ.
-───────────────────────`);
+Amount: ₹${amount.toFixed(2)}
+UPI ID: ${upiId}${userFeeText}
+Transaction ID: ${transactionId}
+New Balance: ₹${user.balance.toFixed(2)}
+Date: ${dateTime}
+
+Please wait for admin approval.`);
         }
         
         res.json({
             success: true,
-            message: `✅ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ Sᴜʙᴍɪᴛᴛᴇᴅ! ₹${amount.toFixed(2)} Hᴀꜱ Bᴇᴇɴ Dᴇᴅᴜᴄᴛᴇᴅ. Yᴏᴜ Wɪʟʟ Rᴇᴄᴇɪᴠᴇ ₹${userReceives.toFixed(2)} Aꜰᴛᴇʀ Fᴇᴇ. Wᴀɪᴛɪɴɢ Fᴏʀ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ.`,
+            message: `UPI Withdrawal Request Submitted! ₹${amount.toFixed(2)} Has Been Deducted. You Will Receive ₹${userReceives.toFixed(2)} After Fee. Waiting For Admin Approval.`,
             transactionId: transactionId,
             amount: amount,
             fee: feeAmount,
@@ -317,8 +339,8 @@ router.post('/upi', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'UPI Wɪᴛʜᴅʀᴀᴡᴀʟ Fᴀɪʟᴇᴅ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.' });
+        console.error('UPI Withdrawal Error:', error.message);
+        res.status(500).json({ success: false, message: error.message || 'UPI Withdrawal Failed. Please Try Again.' });
     }
 });
 
@@ -331,7 +353,7 @@ router.post('/bank', verifyToken, async (req, res) => {
         const user = req.user;
         const dateTime = getCurrentDateTime();
         
-        console.log('📤 Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ:', { Uꜱᴇʀ: user.mobile, Aᴍᴏᴜɴᴛ: amount, Bᴀɴᴋ: bankName });
+        console.log('Bank Withdrawal Request:', { User: user.mobile, Amount: amount, Bank: bankName });
         
         const settingsCheck = await checkWithdrawSettings(amount);
         if (!settingsCheck.allowed) {
@@ -339,47 +361,50 @@ router.post('/bank', verifyToken, async (req, res) => {
         }
         const settings = settingsCheck.settings;
         
-        // ✅ Calculate Fee (Tax)
+        // Calculate Fee (Tax)
         const feeAmount = calculateWithdrawFee(amount, settings.fee, settings.feeType);
-        // ✅ User will receive: amount - fee
+        // User will receive: amount - fee
         const userReceives = Math.round((amount - feeAmount) * 100) / 100;
         
-        console.log('💰 Fᴇᴇ Cᴀʟᴄᴜʟᴀᴛɪᴏɴ:', { 
-            WɪᴛʜᴅʀᴀᴡAᴍᴏᴜɴᴛ: amount, 
-            FᴇᴇRᴀᴛᴇ: settings.fee, 
-            FᴇᴇTʏᴘᴇ: settings.feeType, 
-            FᴇᴇAᴍᴏᴜɴᴛ: feeAmount, 
-            UꜱᴇʀRᴇᴄᴇɪᴠᴇꜱ: userReceives 
+        console.log('Fee Calculation:', { 
+            WithdrawAmount: amount, 
+            FeeRate: settings.fee, 
+            FeeType: settings.feeType, 
+            FeeAmount: feeAmount, 
+            UserReceives: userReceives 
         });
         
         if (!bankName || !accountNumber || !accountHolderName || !ifscCode) {
-            return res.status(400).json({ success: false, message: 'Pʟᴇᴀꜱᴇ Fɪʟʟ Aʟʟ Bᴀɴᴋ Dᴇᴛᴀɪʟꜱ' });
+            return res.status(400).json({ success: false, message: 'Please Fill All Bank Details' });
         }
         
-        // ✅ Check Balance (only withdrawal amount, not including fee)
+        // Check Balance (only withdrawal amount, not including fee)
         if (user.balance < amount) {
-            return res.status(400).json({ success: false, message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Rᴇǫᴜɪʀᴇᴅ: ₹${amount.toFixed(2)}. Yᴏᴜʀ Bᴀʟᴀɴᴄᴇ: ₹${user.balance.toFixed(2)}` });
+            return res.status(400).json({ success: false, message: `Insufficient Balance. Required: ₹${amount.toFixed(2)}. Your Balance: ₹${user.balance.toFixed(2)}` });
         }
         
         if (settings.maxDailyWithdrawals > 0) {
-            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const today = new Date(); 
+            today.setHours(0, 0, 0, 0);
             const todayCount = await Withdrawal.countDocuments({ userId: user._id, createdAt: { $gte: today } });
             if (todayCount >= settings.maxDailyWithdrawals) {
-                return res.status(400).json({ success: false, message: `Yᴏᴜ Hᴀᴠᴇ Rᴇᴀᴄʜᴇᴅ Yᴏᴜʀ Dᴀɪʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟ Lɪᴍɪᴛ (${settings.maxDailyWithdrawals}). Pʟᴇᴀꜱᴇ Tʀʏ Tᴏᴍᴏʀʀᴏᴡ.` });
+                return res.status(400).json({ success: false, message: `You Have Reached Your Daily Withdrawal Limit (${settings.maxDailyWithdrawals}). Please Try Tomorrow.` });
             }
         }
         
         if (settings.maxMonthlyWithdrawals > 0) {
-            const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+            const monthStart = new Date(); 
+            monthStart.setDate(1); 
+            monthStart.setHours(0, 0, 0, 0);
             const monthCount = await Withdrawal.countDocuments({ userId: user._id, createdAt: { $gte: monthStart } });
             if (monthCount >= settings.maxMonthlyWithdrawals) {
-                return res.status(400).json({ success: false, message: `Yᴏᴜ Hᴀᴠᴇ Rᴇᴀᴄʜᴇᴅ Yᴏᴜʀ Mᴏɴᴛʜʟʏ Wɪᴛʜᴅʀᴀᴡᴀʟ Lɪᴍɪᴛ (${settings.maxMonthlyWithdrawals}). Pʟᴇᴀꜱᴇ Tʀʏ Nᴇxᴛ Mᴏɴᴛʜ.` });
+                return res.status(400).json({ success: false, message: `You Have Reached Your Monthly Withdrawal Limit (${settings.maxMonthlyWithdrawals}). Please Try Next Month.` });
             }
         }
         
         const transactionId = generateWithdrawTxnId();
         const oldBalance = user.balance;
-        // ✅ Deduct only the withdrawal amount (not fee)
+        // Deduct only the withdrawal amount (not fee)
         user.balance = Math.round((user.balance - amount) * 100) / 100;
         await user.save();
         
@@ -431,62 +456,56 @@ router.post('/bank', verifyToken, async (req, res) => {
         });
         await transaction.save();
         
-        console.log('✅ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Cʀᴇᴀᴛᴇᴅ:', transactionId);
+        console.log('Bank Withdrawal Created:', transactionId);
         
-        const feeText = feeAmount > 0 ? `\n💸 Fᴇᴇ (${settings.feeType}): ₹${feeAmount.toFixed(2)}` : '';
-        const receiveText = feeAmount > 0 ? `\n💵 Yᴏᴜ Rᴇᴄᴇɪᴠᴇ: ₹${userReceives.toFixed(2)}` : '';
+        const feeText = feeAmount > 0 ? `\nFee (${settings.feeType}): ₹${feeAmount.toFixed(2)}` : '';
+        const receiveText = feeAmount > 0 ? `\nYou Receive: ₹${userReceives.toFixed(2)}` : '';
         
         await notifyAdmin(
-`<b>─────────────────</b>
-<b>📩 Nᴇᴡ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ</b>
-<b>─────────────────</b>
+`New Bank Withdrawal Request
 
-<b>👤 Uꜱᴇʀ Iɴꜰᴏʀᴍᴀᴛɪᴏɴ</b>
-👤 Nᴀᴍᴇ: ${user.fullName}
-📱 Mᴏʙɪʟᴇ: ${user.mobile}
-🆔 Wᴀʟʟᴇᴛ Iᴅ: ${user.walletId}
+User Information
+Name: ${user.fullName}
+Mobile: ${user.mobile}
+Wallet ID: ${user.walletId}
 
-<b>💰 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ</b>
-💵 Aᴍᴏᴜɴᴛ: <b>₹${amount.toFixed(2)}</b>${feeText}${receiveText}
+Transaction Details
+Amount: ₹${amount.toFixed(2)}${feeText}${receiveText}
 
-🏦 Mᴇᴛʜᴏᴅ: Bᴀɴᴋ
-🏛️ Bᴀɴᴋ: ${bankName}
-👤 Hᴏʟᴅᴇʀ: ${accountHolderName}
-🔢 Aᴄᴄᴏᴜɴᴛ: ${accountNumber}
-🔑 IFSC: ${ifscCode.toUpperCase()}
-🆔 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ: ${transactionId}
-📝 Nᴏᴛᴇ: ${note || 'Nᴏ Cᴏᴍᴍᴇɴᴛ'}
-📅 <code>${dateTime}</code>
+Method: Bank
+Bank: ${bankName}
+Holder: ${accountHolderName}
+Account: ${accountNumber}
+IFSC: ${ifscCode.toUpperCase()}
+Transaction ID: ${transactionId}
+Note: ${note || 'No Comment'}
+Date: ${dateTime}
 
-───────────────────────
-📊 Sᴛᴀᴛᴜꜱ: ⏳ Pᴇɴᴅɪɴɢ Aᴘᴘʀᴏᴠᴀʟ
-⚠️ Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Rᴇǫᴜɪʀᴇᴅ
-───────────────────────`);
+Status: Pending Approval
+Admin Action Required`);
         
         if (user.telegramId) {
-            const userFeeText = feeAmount > 0 ? `\n💸 <b>Fᴇᴇ Cʜᴀʀɢᴇᴅ:</b> ₹${feeAmount.toFixed(2)}\n💵 <b>Yᴏᴜ Rᴇᴄᴇɪᴠᴇ:</b> ₹${userReceives.toFixed(2)}` : '';
+            const userFeeText = feeAmount > 0 ? `\nFee Charged: ₹${feeAmount.toFixed(2)}\nYou Receive: ₹${userReceives.toFixed(2)}` : '';
             await sendTelegramMessage(user.telegramId,
-`<b>─────────────────</b>
-<b>⏳ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Sᴜʙᴍɪᴛᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Bank Withdrawal Submitted
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ Hᴀꜱ Bᴇᴇɴ Sᴜʙᴍɪᴛᴛᴇᴅ.
+Dear ${user.fullName},
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${amount.toFixed(2)}
-🏦 <b>Bᴀɴᴋ:</b> ${bankName}
-🔢 <b>Aᴄᴄᴏᴜɴᴛ:</b> ${accountNumber}${userFeeText}
-🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${transactionId}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${user.balance.toFixed(2)}
-📅 <code>${dateTime}</code>
+Your bank withdrawal request has been submitted.
 
-───────────────────────
-⏳ Pʟᴇᴀꜱᴇ Wᴀɪᴛ Fᴏʀ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ.
-───────────────────────`);
+Amount: ₹${amount.toFixed(2)}
+Bank: ${bankName}
+Account: ${accountNumber}${userFeeText}
+Transaction ID: ${transactionId}
+New Balance: ₹${user.balance.toFixed(2)}
+Date: ${dateTime}
+
+Please wait for admin approval.`);
         }
         
         res.json({
             success: true,
-            message: `✅ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Rᴇǫᴜᴇꜱᴛ Sᴜʙᴍɪᴛᴛᴇᴅ! ₹${amount.toFixed(2)} Hᴀꜱ Bᴇᴇɴ Dᴇᴅᴜᴄᴛᴇᴅ. Yᴏᴜ Wɪʟʟ Rᴇᴄᴇɪᴠᴇ ₹${userReceives.toFixed(2)} Aꜰᴛᴇʀ Fᴇᴇ. Wᴀɪᴛɪɴɢ Fᴏʀ Aᴅᴍɪɴ Aᴘᴘʀᴏᴠᴀʟ.`,
+            message: `Bank Withdrawal Request Submitted! ₹${amount.toFixed(2)} Has Been Deducted. You Will Receive ₹${userReceives.toFixed(2)} After Fee. Waiting For Admin Approval.`,
             transactionId: transactionId,
             amount: amount,
             fee: feeAmount,
@@ -499,8 +518,8 @@ router.post('/bank', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'Bᴀɴᴋ Wɪᴛʜᴅʀᴀᴡᴀʟ Fᴀɪʟᴇᴅ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.' });
+        console.error('Bank Withdrawal Error:', error.message);
+        res.status(500).json({ success: false, message: error.message || 'Bank Withdrawal Failed. Please Try Again.' });
     }
 });
 
@@ -514,10 +533,19 @@ router.get('/history', verifyToken, async (req, res) => {
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const withdrawals = await Withdrawal.find({ userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
         const total = await Withdrawal.countDocuments({ userId: user._id });
-        res.json({ success: true, withdrawals: withdrawals, pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / parseInt(limit)) } });
+        res.json({ 
+            success: true, 
+            withdrawals: withdrawals, 
+            pagination: { 
+                total, 
+                page: parseInt(page), 
+                limit: parseInt(limit), 
+                pages: Math.ceil(total / parseInt(limit)) 
+            } 
+        });
     } catch (error) {
-        console.error('❌ Hɪꜱᴛᴏʀʏ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Hɪꜱᴛᴏʀʏ' });
+        console.error('History Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch History' });
     }
 });
 
@@ -530,12 +558,12 @@ router.get('/:id', verifyToken, async (req, res) => {
         const user = req.user;
         const withdrawal = await Withdrawal.findOne({ _id: id, userId: user._id });
         if (!withdrawal) {
-            return res.status(404).json({ success: false, message: 'Wɪᴛʜᴅʀᴀᴡᴀʟ Nᴏᴛ Fᴏᴜɴᴅ' });
+            return res.status(404).json({ success: false, message: 'Withdrawal Not Found' });
         }
         res.json({ success: true, withdrawal: withdrawal });
     } catch (error) {
-        console.error('❌ Dᴇᴛᴀɪʟꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Dᴇᴛᴀɪʟꜱ' });
+        console.error('Details Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Details' });
     }
 });
 
@@ -547,8 +575,8 @@ router.get('/balance', verifyToken, async (req, res) => {
         const user = req.user;
         res.json({ success: true, balance: user.balance, name: user.fullName, walletId: user.walletId });
     } catch (error) {
-        console.error('❌ Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ success: false, message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ' });
+        console.error('Balance Error:', error.message);
+        res.status(500).json({ success: false, message: 'Failed To Fetch Balance' });
     }
 });
 
