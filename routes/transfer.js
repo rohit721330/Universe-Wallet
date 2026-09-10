@@ -32,7 +32,7 @@ async function generateUniqueTransactionId() {
         }
         
         attempts++;
-        console.log(`⚠️ Dᴜᴘʟɪᴄᴀᴛᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ Fᴏᴜɴᴅ: ${result}, Rᴇᴛʀʏɪɴɢ...`);
+        console.log(`Duplicate Transaction ID Found: ${result}, Retrying...`);
     }
     
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -47,10 +47,10 @@ const verifyToken = async (req, res, next) => {
         const token = req.headers.authorization?.split(' ')[1];
         
         if (!token) {
-            console.log('❌ Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ');
+            console.log('No Token Provided');
             return res.status(401).json({ 
                 success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' 
+                message: 'No Token Provided' 
             });
         }
         
@@ -58,32 +58,32 @@ const verifyToken = async (req, res, next) => {
         const user = await User.findById(decoded.userId);
         
         if (!user) {
-            console.log('❌ Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ');
+            console.log('User Not Found');
             return res.status(401).json({ 
                 success: false, 
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' 
+                message: 'User Not Found' 
             });
         }
         
         req.user = user;
         next();
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Token Verification Error:', error.message);
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                message: 'Invalid Token. Please Login Again.' 
             });
         }
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                message: 'Token Expired. Please Login Again.' 
             });
         }
         return res.status(500).json({ 
             success: false, 
-            message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' 
+            message: 'Authentication Error' 
         });
     }
 };
@@ -93,14 +93,14 @@ const verifyToken = async (req, res, next) => {
 // ============================================
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) {
-        console.log('⚠️ Bᴏᴛ Tᴏᴋᴇɴ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ');
+        console.log('Bot Token Not Configured');
         return { success: false, error: 'BOT_TOKEN not configured' };
     }
 
     try {
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
         
-        console.log('📤 Sᴇɴᴅɪɴɢ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Tᴏ Cʜᴀᴛ:', chatId);
+        console.log('Sending Telegram Message To Chat:', chatId);
         
         const response = await axios.post(url, {
             chat_id: chatId,
@@ -114,19 +114,19 @@ async function sendTelegramMessage(chatId, message) {
         });
 
         if (response.data && response.data.ok) {
-            console.log('✅ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ Tᴏ Cʜᴀᴛ:', chatId);
+            console.log('Telegram Message Sent Successfully To Chat:', chatId);
             return { success: true };
         } else {
-            console.error('❌ Tᴇʟᴇɢʀᴀᴍ API Rᴇꜱᴘᴏɴꜱᴇ:', response.data?.description || 'Uɴᴋɴᴏᴡɴ Eʀʀᴏʀ');
-            return { success: false, error: response.data?.description || 'Uɴᴋɴᴏᴡɴ Eʀʀᴏʀ' };
+            console.error('Telegram API Response:', response.data?.description || 'Unknown Error');
+            return { success: false, error: response.data?.description || 'Unknown Error' };
         }
     } catch (error) {
-        console.error('❌ Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Tᴇʟᴇɢʀᴀᴍ Mᴇꜱꜱᴀɢᴇ:', error.message);
+        console.error('Failed To Send Telegram Message:', error.message);
         if (error.response) {
-            console.error('Tᴇʟᴇɢʀᴀᴍ API Rᴇꜱᴘᴏɴꜱᴇ:', error.response.data);
+            console.error('Telegram API Response:', error.response.data);
         }
         if (error.code === 'ECONNABORTED') {
-            return { success: false, error: 'Tᴇʟᴇɢʀᴀᴍ API Tɪᴍᴇ Oᴜᴛ' };
+            return { success: false, error: 'Telegram API Time Out' };
         }
         return { success: false, error: error.message };
     }
@@ -137,14 +137,14 @@ async function sendTelegramMessage(chatId, message) {
 // ============================================
 async function notifyAdmin(message) {
     if (!ADMIN_TG) {
-        console.log('⚠️ Aᴅᴍɪɴ Tᴇʟᴇɢʀᴀᴍ Iᴅ Nᴏᴛ Cᴏɴꜰɪɢᴜʀᴇᴅ');
+        console.log('Admin Telegram Id Not Configured');
         return;
     }
     try {
         await sendTelegramMessage(ADMIN_TG, message);
-        console.log('✅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+        console.log('Admin Notification Sent Successfully');
     } catch (error) {
-        console.error('❌ Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Aᴅᴍɪɴ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ:', error.message);
+        console.error('Failed To Send Admin Notification:', error.message);
     }
 }
 
@@ -155,9 +155,9 @@ async function notifyUser(chatId, message) {
     if (!chatId) return;
     try {
         await sendTelegramMessage(chatId, message);
-        console.log('✅ Uꜱᴇʀ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ');
+        console.log('User Notification Sent Successfully');
     } catch (error) {
-        console.error('❌ Fᴀɪʟᴇᴅ Tᴏ Sᴇɴᴅ Uꜱᴇʀ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ:', error.message);
+        console.error('Failed To Send User Notification:', error.message);
     }
 }
 
@@ -198,50 +198,50 @@ router.get('/view', verifyToken, async (req, res) => {
         const { number } = req.query;
         const currentUser = req.user;
         
-        console.log('🔍 Uꜱᴇʀ Lᴏᴏᴋᴜᴘ Rᴇǫᴜᴇꜱᴛ:', number);
+        console.log('User Lookup Request:', number);
         
         if (!number) {
-            console.log('❌ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ Rᴇǫᴜɪʀᴇᴅ');
+            console.log('Mobile Number Required');
             return res.status(400).json({
                 status: 'error',
-                error: 'Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ Iꜱ Rᴇǫᴜɪʀᴇᴅ'
+                error: 'Mobile Number Is Required'
             });
         }
         
         if (!/^\d{10}$/.test(number)) {
-            console.log('❌ Iɴᴠᴀʟɪᴅ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ');
+            console.log('Invalid Mobile Number');
             return res.status(400).json({
                 status: 'error',
-                error: 'Iɴᴠᴀʟɪᴅ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ. Mᴜꜱᴛ Bᴇ 10 Dɪɢɪᴛꜱ.'
+                error: 'Invalid Mobile Number. Must Be 10 Digits.'
             });
         }
         
         if (currentUser.mobile === number) {
-            console.log('❌ Sᴇʟꜰ Lᴏᴏᴋᴜᴘ Aᴛᴛᴇᴍᴘᴛ');
+            console.log('Self Lookup Attempt');
             return res.status(400).json({
                 status: 'error',
-                error: 'Yᴏᴜ Cᴀɴɴᴏᴛ Vɪᴇᴡ Yᴏᴜʀ Oᴡɴ Dᴇᴛᴀɪʟꜱ Hᴇʀᴇ'
+                error: 'You Cannot View Your Own Details Here'
             });
         }
         
         const user = await User.findOne({ mobile: number });
         if (!user) {
-            console.log('❌ Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ:', number);
+            console.log('User Not Found:', number);
             return res.status(404).json({
                 status: 'error',
-                error: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ'
+                error: 'User Not Found'
             });
         }
         
         if (user.isBlocked) {
-            console.log('❌ Uꜱᴇʀ Aᴄᴄᴏᴜɴᴛ Bʟᴏᴄᴋᴇᴅ');
+            console.log('User Account Blocked');
             return res.status(403).json({
                 status: 'error',
-                error: 'Tʜɪꜱ Uꜱᴇʀ Aᴄᴄᴏᴜɴᴛ Iꜱ Bʟᴏᴄᴋᴇᴅ'
+                error: 'This User Account Is Blocked'
             });
         }
         
-        console.log('✅ Uꜱᴇʀ Fᴏᴜɴᴅ:', user.fullName);
+        console.log('User Found:', user.fullName);
         
         res.json({
             status: 'success',
@@ -252,10 +252,10 @@ router.get('/view', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Vɪᴇᴡ Uꜱᴇʀ Eʀʀᴏʀ:', error.message);
+        console.error('View User Error:', error.message);
         res.status(500).json({
             status: 'error',
-            error: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Uꜱᴇʀ Dᴇᴛᴀɪʟꜱ'
+            error: 'Failed To Fetch User Details'
         });
     }
 });
@@ -267,7 +267,7 @@ router.get('/balance', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         
-        console.log('💰 Bᴀʟᴀɴᴄᴇ Cʜᴇᴄᴋ Fᴏʀ:', user.mobile);
+        console.log('Balance Check For:', user.mobile);
         
         res.json({
             status: 'success',
@@ -277,10 +277,10 @@ router.get('/balance', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Bᴀʟᴀɴᴄᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Balance Error:', error.message);
         res.status(500).json({
             status: 'error',
-            error: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ'
+            error: 'Failed To Fetch Balance'
         });
     }
 });
@@ -295,79 +295,79 @@ router.post('/', verifyToken, async (req, res) => {
         const dateTime = getCurrentDateTime();
         const clientIp = getClientIp(req);
         
-        console.log('📤 Tʀᴀɴꜱꜰᴇʀ Rᴇǫᴜᴇꜱᴛ:', { 
-            Sᴇɴᴅᴇʀ: sender.mobile, 
-            Rᴇᴄᴇɪᴠᴇʀ: mobile, 
-            Aᴍᴏᴜɴᴛ: amount 
+        console.log('Transfer Request:', { 
+            Sender: sender.mobile, 
+            Receiver: mobile, 
+            Amount: amount 
         });
         
         // Validation
         if (!mobile || !mobile.toString().trim()) {
-            console.log('❌ Rᴇᴄᴇɪᴠᴇʀ Mᴏʙɪʟᴇ Rᴇǫᴜɪʀᴇᴅ');
+            console.log('Receiver Mobile Required');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Rᴇᴄᴇɪᴠᴇʀ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ Iꜱ Rᴇǫᴜɪʀᴇᴅ' 
+                error: 'Receiver Mobile Number Is Required' 
             });
         }
         
         const mobileNumber = mobile.toString().trim();
         
         if (mobileNumber.length !== 10 || !/^\d{10}$/.test(mobileNumber)) {
-            console.log('❌ Iɴᴠᴀʟɪᴅ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ');
+            console.log('Invalid Mobile Number');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Pʟᴇᴀꜱᴇ Eɴᴛᴇʀ A Vᴀʟɪᴅ 10-Dɪɢɪᴛ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ' 
+                error: 'Please Enter A Valid 10-Digit Mobile Number' 
             });
         }
         
         const transferAmount = parseFloat(amount);
         if (isNaN(transferAmount) || transferAmount < 1) {
-            console.log('❌ Iɴᴠᴀʟɪᴅ Aᴍᴏᴜɴᴛ');
+            console.log('Invalid Amount');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Mɪɴɪᴍᴜᴍ Tʀᴀɴꜱꜰᴇʀ Aᴍᴏᴜɴᴛ Iꜱ ₹1' 
+                error: 'Minimum Transfer Amount Is ₹1' 
             });
         }
         
         if (transferAmount > 5000) {
-            console.log('❌ Mᴀxɪᴍᴜᴍ Aᴍᴏᴜɴᴛ Exᴄᴇᴇᴅᴇᴅ');
+            console.log('Maximum Amount Exceeded');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Mᴀxɪᴍᴜᴍ Tʀᴀɴꜱꜰᴇʀ Aᴍᴏᴜɴᴛ Iꜱ ₹5,000' 
+                error: 'Maximum Transfer Amount Is ₹5,000' 
             });
         }
         
         if (sender.mobile === mobileNumber) {
-            console.log('❌ Sᴇʟꜰ Tʀᴀɴꜱꜰᴇʀ Aᴛᴛᴇᴍᴘᴛ');
+            console.log('Self Transfer Attempt');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Yᴏᴜ Cᴀɴɴᴏᴛ Sᴇɴᴅ Mᴏɴᴇʏ Tᴏ Yᴏᴜʀꜱᴇʟꜰ' 
+                error: 'You Cannot Send Money To Yourself' 
             });
         }
         
         const receiver = await User.findOne({ mobile: mobileNumber });
         
         if (!receiver) {
-            console.log('❌ Rᴇᴄᴇɪᴠᴇʀ Nᴏᴛ Fᴏᴜɴᴅ:', mobileNumber);
+            console.log('Receiver Not Found:', mobileNumber);
             return res.status(404).json({ 
                 success: false, 
-                error: 'Rᴇᴄᴇɪᴠᴇʀ Nᴏᴛ Fᴏᴜɴᴅ. Pʟᴇᴀꜱᴇ Vᴇʀɪꜰʏ Tʜᴇ Mᴏʙɪʟᴇ Nᴜᴍʙᴇʀ' 
+                error: 'Receiver Not Found. Please Verify The Mobile Number' 
             });
         }
         
         if (receiver.isBlocked) {
-            console.log('❌ Rᴇᴄᴇɪᴠᴇʀ Aᴄᴄᴏᴜɴᴛ Bʟᴏᴄᴋᴇᴅ');
+            console.log('Receiver Account Blocked');
             return res.status(403).json({ 
                 success: false, 
-                error: 'Rᴇᴄᴇɪᴠᴇʀ Aᴄᴄᴏᴜɴᴛ Iꜱ Bʟᴏᴄᴋᴇᴅ' 
+                error: 'Receiver Account Is Blocked' 
             });
         }
         
         if (sender.balance < transferAmount) {
-            console.log('❌ Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ:', sender.balance);
+            console.log('Insufficient Balance:', sender.balance);
             return res.status(400).json({ 
                 success: false, 
-                error: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Yᴏᴜʀ Cᴜʀʀᴇɴᴛ Bᴀʟᴀɴᴄᴇ Iꜱ ₹${sender.balance.toFixed(2)}` 
+                error: `Insufficient Balance. Your Current Balance Is ₹${sender.balance.toFixed(2)}` 
             });
         }
         
@@ -376,7 +376,7 @@ router.post('/', verifyToken, async (req, res) => {
         session.startTransaction();
         
         try {
-            console.log('🔄 Pʀᴏᴄᴇꜱꜱɪɴɢ Tʀᴀɴꜱꜰᴇʀ...');
+            console.log('Processing Transfer...');
             
             sender.balance -= transferAmount;
             receiver.balance += transferAmount;
@@ -384,8 +384,8 @@ router.post('/', verifyToken, async (req, res) => {
             await sender.save({ session });
             await receiver.save({ session });
             
-            console.log('✅ Sᴇɴᴅᴇʀ Bᴀʟᴀɴᴄᴇ Uᴘᴅᴀᴛᴇᴅ:', sender.balance);
-            console.log('✅ Rᴇᴄᴇɪᴠᴇʀ Bᴀʟᴀɴᴄᴇ Uᴘᴅᴀᴛᴇᴅ:', receiver.balance);
+            console.log('Sender Balance Updated:', sender.balance);
+            console.log('Receiver Balance Updated:', receiver.balance);
             
             const transactionId = await generateUniqueTransactionId();
             
@@ -398,8 +398,8 @@ router.post('/', verifyToken, async (req, res) => {
                 amount: transferAmount,
                 type: 'transfer_send',
                 status: 'success',
-                remark: note || 'Mᴏɴᴇʏ Tʀᴀɴꜱꜰᴇʀ',
-                description: note || 'Mᴏɴᴇʏ Tʀᴀɴꜱꜰᴇʀ',
+                remark: note || 'Money Transfer',
+                description: note || 'Money Transfer',
                 tx_time: new Date(),
                 metadata: {
                     senderMobile: sender.mobile,
@@ -421,8 +421,8 @@ router.post('/', verifyToken, async (req, res) => {
                 amount: transferAmount,
                 type: 'transfer_receive',
                 status: 'success',
-                remark: note || 'Mᴏɴᴇʏ Rᴇᴄᴇɪᴠᴇᴅ',
-                description: note || 'Mᴏɴᴇʏ Rᴇᴄᴇɪᴠᴇᴅ',
+                remark: note || 'Money Received',
+                description: note || 'Money Received',
                 tx_time: new Date(),
                 metadata: {
                     senderMobile: sender.mobile,
@@ -438,79 +438,71 @@ router.post('/', verifyToken, async (req, res) => {
             await session.commitTransaction();
             session.endSession();
             
-            console.log('✅ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Cʀᴇᴀᴛᴇᴅ:', transactionId);
+            console.log('Transaction Created:', transactionId);
             
             // ==================== SEND TELEGRAM NOTIFICATIONS ====================
             
             // Notify Receiver
             if (receiver.telegramId) {
                 const receiverMessage = 
-`<b>─────────────────</b>
-<b>💰 Nᴇᴡ Pᴀʏᴍᴇɴᴛ Rᴇᴄᴇɪᴠᴇᴅ</b>
-<b>─────────────────</b>
+`Money Received
 
-<b>👤 Dᴇᴀʀ ${receiver.fullName || receiver.username},</b> Yᴏᴜ Hᴀᴠᴇ Jᴜꜱᴛ Rᴇᴄᴇɪᴠᴇᴅ A Pᴀʏᴍᴇɴᴛ Iɴ Yᴏᴜʀ Wᴀʟʟᴇᴛ.
+Dear ${receiver.fullName || receiver.username},
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${transferAmount.toFixed(2)}
-👤 <b>Fʀᴏᴍ:</b> ${sender.fullName || sender.username}
-🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${transactionId}
-📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
-📅 <code>${dateTime}</code>
+You have just received a payment in your wallet.
 
-───────────────────────
-✅ Aᴍᴏᴜɴᴛ Cʀᴇᴅɪᴛᴇᴅ Tᴏ Yᴏᴜʀ Wᴀʟʟᴇᴛ
-───────────────────────`;
+Amount: ₹${transferAmount.toFixed(2)}
+From: ${sender.fullName || sender.username}
+Transaction ID: ${transactionId}
+Note: ${note || 'N/A'}
+Date: ${dateTime}
+
+Amount credited to your wallet.`;
                 
                 await notifyUser(receiver.telegramId, receiverMessage);
-                console.log('✅ Rᴇᴄᴇɪᴠᴇʀ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ');
+                console.log('Receiver Notification Sent');
             }
             
             // Notify Sender
             if (sender.telegramId) {
                 const senderMessage = 
-`<b>─────────────────</b>
-<b>💸 Pᴀʏᴍᴇɴᴛ Cᴏᴍᴘʟᴇᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Payment Completed
 
-<b>👤 Dᴇᴀʀ ${sender.fullName || sender.username},</b> Yᴏᴜʀ Pᴀʏᴍᴇɴᴛ Hᴀꜱ Bᴇᴇɴ Pʀᴏᴄᴇꜱꜱᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.
+Dear ${sender.fullName || sender.username},
 
-💰 <b>Aᴍᴏᴜɴᴛ:</b> ₹${transferAmount.toFixed(2)}
-👤 <b>Tᴏ:</b> ${receiver.fullName || receiver.username} (${receiver.mobile})
-🆔 <b>Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ:</b> ${transactionId}
-💳 <b>Nᴇᴡ Bᴀʟᴀɴᴄᴇ:</b> ₹${sender.balance.toFixed(2)}
-📝 <b>Nᴏᴛᴇ:</b> ${note || 'N/A'}
+Your payment has been processed successfully.
 
-───────────────────────
-✅ Tʀᴀɴꜱꜰᴇʀ Cᴏᴍᴘʟᴇᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ
-───────────────────────`;
+Amount: ₹${transferAmount.toFixed(2)}
+To: ${receiver.fullName || receiver.username} (${receiver.mobile})
+Transaction ID: ${transactionId}
+New Balance: ₹${sender.balance.toFixed(2)}
+Note: ${note || 'N/A'}
+
+Transfer completed successfully.`;
                 
                 await notifyUser(sender.telegramId, senderMessage);
-                console.log('✅ Sᴇɴᴅᴇʀ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Sᴇɴᴛ');
+                console.log('Sender Notification Sent');
             }
             
             // Notify Admin
             const adminMessage = 
-`<b>─────────────────</b>
-<b>💸 Tʀᴀɴꜱꜰᴇʀ Cᴏᴍᴘʟᴇᴛᴇᴅ</b>
-<b>─────────────────</b>
+`Transfer Completed
 
-👤 Sᴇɴᴅᴇʀ Nᴀᴍᴇ: <code>${sender.fullName || sender.username}</code>
-📱 Sᴇɴᴅᴇʀ Mᴏʙɪʟᴇ: <code>${sender.mobile}</code>
-👤 Rᴇᴄᴇɪᴠᴇʀ Nᴀᴍᴇ: <code>${receiver.fullName || receiver.username}</code>
-📱 Rᴇᴄᴇɪᴠᴇʀ Mᴏʙɪʟᴇ: <code>${receiver.mobile}</code>
-💵 Aᴍᴏᴜɴᴛ: <b>₹${transferAmount.toFixed(2)}</b>
-🆔 Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Iᴅ: <code>${transactionId}</code>
-📝 Nᴏᴛᴇ: ${note || 'Nᴏ Cᴏᴍᴍᴇɴᴛ'}
+Sender Name: ${sender.fullName || sender.username}
+Sender Mobile: ${sender.mobile}
+Receiver Name: ${receiver.fullName || receiver.username}
+Receiver Mobile: ${receiver.mobile}
+Amount: ₹${transferAmount.toFixed(2)}
+Transaction ID: ${transactionId}
+Note: ${note || 'No Comment'}
 
-───────────────────────
-📅 <code>${dateTime}</code>
-───────────────────────`;
+Date: ${dateTime}`;
             
             await notifyAdmin(adminMessage);
             
             res.json({
                 success: true,
-                message: `✅ Tʀᴀɴꜱꜰᴇʀ Sᴜᴄᴄᴇꜱꜱꜰᴜʟ! ₹${transferAmount.toFixed(2)} Sᴇɴᴛ Tᴏ ${receiver.fullName || receiver.username}`,
+                message: `Transfer Successful! ₹${transferAmount.toFixed(2)} Sent To ${receiver.fullName || receiver.username}`,
                 txnId: transactionId,
                 amount: transferAmount,
                 newBalance: sender.balance
@@ -519,15 +511,15 @@ router.post('/', verifyToken, async (req, res) => {
         } catch (error) {
             await session.abortTransaction();
             session.endSession();
-            console.error('❌ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:', error.message);
+            console.error('Transaction Failed:', error.message);
             throw error;
         }
         
     } catch (error) {
-        console.error('❌ Tʀᴀɴꜱꜰᴇʀ Eʀʀᴏʀ:', error.message);
+        console.error('Transfer Error:', error.message);
         res.status(500).json({ 
             success: false, 
-            error: error.message || 'Tʀᴀɴꜱꜰᴇʀ Fᴀɪʟᴇᴅ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ' 
+            error: error.message || 'Transfer Failed. Please Try Again' 
         });
     }
 });
@@ -541,7 +533,7 @@ router.get('/history', verifyToken, async (req, res) => {
         const { limit = 50, page = 1 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         
-        console.log('📋 Fᴇᴛᴄʜɪɴɢ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Hɪꜱᴛᴏʀʏ Fᴏʀ:', user.mobile);
+        console.log('Fetching Transaction History For:', user.mobile);
         
         const transactions = await Transaction.find({
             $or: [
@@ -562,7 +554,7 @@ router.get('/history', verifyToken, async (req, res) => {
             ]
         });
         
-        console.log('✅ Fᴏᴜɴᴅ', transactions.length, 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ');
+        console.log('Found', transactions.length, 'Transactions');
         
         res.json({
             status: 'success',
@@ -575,10 +567,10 @@ router.get('/history', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Hɪꜱᴛᴏʀʏ Eʀʀᴏʀ:', error.message);
+        console.error('Transaction History Error:', error.message);
         res.status(500).json({ 
             status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Hɪꜱᴛᴏʀʏ' 
+            message: 'Failed To Fetch Transaction History' 
         });
     }
 });
@@ -591,7 +583,7 @@ router.get('/transaction/:txnId', verifyToken, async (req, res) => {
         const { txnId } = req.params;
         const user = req.user;
         
-        console.log('🔍 Fᴇᴛᴄʜɪɴɢ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ:', txnId);
+        console.log('Fetching Transaction Details:', txnId);
         
         const transaction = await Transaction.findOne({ tx_id: txnId })
             .populate('sender_id', 'fullName username mobile walletId')
@@ -599,10 +591,10 @@ router.get('/transaction/:txnId', verifyToken, async (req, res) => {
             .populate('user_id', 'fullName username mobile walletId');
         
         if (!transaction) {
-            console.log('❌ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Nᴏᴛ Fᴏᴜɴᴅ:', txnId);
+            console.log('Transaction Not Found:', txnId);
             return res.status(404).json({ 
                 status: 'error', 
-                message: 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Nᴏᴛ Fᴏᴜɴᴅ' 
+                message: 'Transaction Not Found' 
             });
         }
         
@@ -613,14 +605,14 @@ router.get('/transaction/:txnId', verifyToken, async (req, res) => {
             transaction.user_id?._id?.toString() === user._id.toString();
         
         if (!isAuthorized) {
-            console.log('❌ Uɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ Aᴄᴄᴇꜱꜱ Tᴏ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ');
+            console.log('Unauthorized Access To Transaction');
             return res.status(403).json({ 
                 status: 'error', 
-                message: 'Uɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ Tᴏ Vɪᴇᴡ Tʜɪꜱ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ' 
+                message: 'Unauthorized To View This Transaction' 
             });
         }
         
-        console.log('✅ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Fᴏᴜɴᴅ');
+        console.log('Transaction Found');
         
         res.json({
             status: 'success',
@@ -628,10 +620,10 @@ router.get('/transaction/:txnId', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Transaction Details Error:', error.message);
         res.status(500).json({ 
             status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ' 
+            message: 'Failed To Fetch Transaction Details' 
         });
     }
 });
@@ -643,7 +635,7 @@ router.get('/public/transaction/:txnId', async (req, res) => {
     try {
         const { txnId } = req.params;
         
-        console.log('🔍 Pᴜʙʟɪᴄ Fᴇᴛᴄʜɪɴɢ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ:', txnId);
+        console.log('Public Fetching Transaction:', txnId);
         
         const transaction = await Transaction.findOne({ tx_id: txnId })
             .populate('sender_id', 'fullName username walletId')
@@ -653,7 +645,7 @@ router.get('/public/transaction/:txnId', async (req, res) => {
         if (!transaction) {
             return res.status(200).json({
                 success: false,
-                message: 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Nᴏᴛ Fᴏᴜɴᴅ'
+                message: 'Transaction Not Found'
             });
         }
         
@@ -661,7 +653,7 @@ router.get('/public/transaction/:txnId', async (req, res) => {
         delete txnObj.metadata?.senderApiKey;
         delete txnObj.metadata?.receiverApiKey;
         
-        console.log('✅ Pᴜʙʟɪᴄ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Fᴏᴜɴᴅ');
+        console.log('Public Transaction Found');
         
         res.status(200).json({
             success: true,
@@ -669,10 +661,10 @@ router.get('/public/transaction/:txnId', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Pᴜʙʟɪᴄ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Public Transaction Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴇᴛᴀɪʟꜱ'
+            message: 'Failed To Fetch Transaction Details'
         });
     }
 });
@@ -687,7 +679,7 @@ router.get('/my-apikey', verifyToken, async (req, res) => {
         if (!user.apiKey) {
             return res.status(404).json({
                 success: false,
-                message: 'API Kᴇʏ Nᴏᴛ Fᴏᴜɴᴅ'
+                message: 'API Key Not Found'
             });
         }
         
@@ -700,10 +692,10 @@ router.get('/my-apikey', verifyToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Gᴇᴛ API Kᴇʏ Eʀʀᴏʀ:', error.message);
+        console.error('Get API Key Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ API Kᴇʏ'
+            message: 'Failed To Fetch API Key'
         });
     }
 });
