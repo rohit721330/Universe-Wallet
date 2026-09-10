@@ -4,81 +4,58 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
-// CONSTANTS
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==================== VERIFY TOKEN MIDDLEWARE ====================
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-        
         if (!token) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ' 
-            });
+            return res.status(401).json({ success: false, message: 'No Token Provided' });
         }
-        
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
-        
         if (!user) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Uꜱᴇʀ Nᴏᴛ Fᴏᴜɴᴅ' 
-            });
+            return res.status(401).json({ success: false, message: 'User Not Found' });
         }
-        
         req.user = user;
         next();
     } catch (error) {
         console.error('Token verification error:', error);
         if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
-            });
+            return res.status(401).json({ success: false, message: 'Invalid Token. Please Login Again.' });
         }
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Tᴏᴋᴇɴ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
-            });
+            return res.status(401).json({ success: false, message: 'Token Expired. Please Login Again.' });
         }
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ' 
-        });
+        return res.status(500).json({ success: false, message: 'Authentication Error' });
     }
 };
 
 // ============================================
-// GET WALLET BALANCE (FIXED)
+// GET WALLET BALANCE
 // ============================================
 router.get('/balance', verifyToken, async (req, res) => {
     try {
         const user = req.user;
-        
         res.json({
             status: 'success',
             data: {
                 balance: user.balance || 0,
                 walletId: user.walletId,
                 fullName: user.fullName,
-                mobile: user.mobile
+                mobile: user.mobile,
+                email: user.email
             }
         });
     } catch (error) {
         console.error('Get balance error:', error);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Bᴀʟᴀɴᴄᴇ' 
-        });
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Balance' });
     }
 });
 
 // ============================================
-// CREATE TRANSACTION - POST (For games)
+// CREATE TRANSACTION (For Games)
 // ============================================
 router.post('/transaction', verifyToken, async (req, res) => {
     try {
@@ -89,10 +66,7 @@ router.post('/transaction', verifyToken, async (req, res) => {
         console.log('💰 User balance before:', user.balance);
         
         if (!type || !amount || amount <= 0) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Iɴᴠᴀʟɪᴅ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Dᴀᴛᴀ'
-            });
+            return res.status(400).json({ status: 'error', message: 'Invalid Transaction Data' });
         }
         
         let newBalance = parseFloat(user.balance) || 0;
@@ -144,15 +118,12 @@ router.post('/transaction', verifyToken, async (req, res) => {
         
     } catch (error) {
         console.error('❌ Create transaction error:', error);
-        res.status(500).json({
-            status: 'error',
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ: ' + error.message
-        });
+        res.status(500).json({ status: 'error', message: 'Failed To Create Transaction: ' + error.message });
     }
 });
 
 // ============================================
-// GET TRANSACTIONS - DASHBOARD & TRANSACTIONS PAGE
+// GET TRANSACTIONS
 // ============================================
 router.get('/transactions', verifyToken, async (req, res) => {
     try {
@@ -171,22 +142,21 @@ router.get('/transactions', verifyToken, async (req, res) => {
         if (type) query.type = type;
         if (status) query.status = status;
         
-        console.log('🔍 Fᴇᴛᴄʜɪɴɢ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Fᴏʀ Uꜱᴇʀ:', user._id);
+        console.log('🔍 Fetching Transactions For User:', user._id);
         
         const transactions = await Transaction.find(query)
-            .populate('sender_id', 'fullName username mobile walletId')
-            .populate('receiver_id', 'fullName username mobile walletId')
+            .populate('sender_id', 'fullName username mobile walletId email')
+            .populate('receiver_id', 'fullName username mobile walletId email')
             .sort({ tx_time: -1 })
             .skip(parseInt(skip))
             .limit(parseInt(limit));
         
         const total = await Transaction.countDocuments(query);
         
-        console.log('✅ Fᴏᴜɴᴅ', transactions.length, 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ');
+        console.log('✅ Found', transactions.length, 'Transactions');
         
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
-            
             let transactionType = txObj.type || 'unknown';
             
             const isSender = txObj.sender_id && txObj.sender_id._id && 
@@ -238,11 +208,8 @@ router.get('/transactions', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ: ' + error.message
-        });
+        console.error('❌ Get Transactions Error:', error.message);
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Transactions: ' + error.message });
     }
 });
 
@@ -256,31 +223,19 @@ router.get('/transaction/:id', verifyToken, async (req, res) => {
         
         const transaction = await Transaction.findOne({
             _id: id,
-            $or: [
-                { sender_id: user._id },
-                { receiver_id: user._id }
-            ]
+            $or: [{ sender_id: user._id }, { receiver_id: user._id }]
         })
-        .populate('sender_id', 'fullName username mobile walletId')
-        .populate('receiver_id', 'fullName username mobile walletId');
+        .populate('sender_id', 'fullName username mobile walletId email')
+        .populate('receiver_id', 'fullName username mobile walletId email');
         
         if (!transaction) {
-            return res.status(404).json({
-                status: 'error',
-                message: 'Tʀᴀɴꜱᴀᴄᴛɪᴏɴ Nᴏᴛ Fᴏᴜɴᴅ'
-            });
+            return res.status(404).json({ status: 'error', message: 'Transaction Not Found' });
         }
         
-        res.json({
-            status: 'success',
-            transaction
-        });
+        res.json({ status: 'success', transaction });
     } catch (error) {
         console.error('Get transaction error:', error);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ' 
-        });
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Transaction' });
     }
 });
 
@@ -301,14 +256,13 @@ router.get('/recent', verifyToken, async (req, res) => {
         };
         
         const transactions = await Transaction.find(query)
-            .populate('sender_id', 'fullName username mobile walletId')
-            .populate('receiver_id', 'fullName username mobile walletId')
+            .populate('sender_id', 'fullName username mobile walletId email')
+            .populate('receiver_id', 'fullName username mobile walletId email')
             .sort({ tx_time: -1 })
             .limit(parseInt(limit));
         
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
-            
             let transactionType = txObj.type || 'unknown';
             
             const isSender = txObj.sender_id && txObj.sender_id._id && 
@@ -348,16 +302,10 @@ router.get('/recent', verifyToken, async (req, res) => {
             };
         });
         
-        res.json({
-            status: 'success',
-            transactions: transformedTransactions
-        });
+        res.json({ status: 'success', transactions: transformedTransactions });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ Eʀʀᴏʀ:', error.message);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Rᴇᴄᴇɴᴛ Tʀᴀɴꜱᴀᴄᴛɪᴏɴꜱ' 
-        });
+        console.error('❌ Get Recent Transactions Error:', error.message);
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Recent Transactions' });
     }
 });
 
