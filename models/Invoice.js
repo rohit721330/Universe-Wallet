@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema({
-    invoiceId: { type: String, required: true, unique: true, index: true },
+    invoiceId: { type: String, required: true, unique: true },
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     amount: { type: Number, required: true, min: 1 },
@@ -12,7 +12,7 @@ const invoiceSchema = new mongoose.Schema({
         default: 'pending',
         index: true
     },
-    paymentRef: { type: String, index: true, sparse: true },
+    paymentRef: { type: String, sparse: true },
     expiresAt: { type: Date, required: true, index: true },
     paidAt: { type: Date },
     verifiedAt: { type: Date },
