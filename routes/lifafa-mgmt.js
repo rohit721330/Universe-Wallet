@@ -36,7 +36,7 @@ async function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
         const https = require('https');
         if (!BOT_TOKEN) {
-            console.warn('⚠️ BOT_TOKEN not configured');
+            console.warn('BOT_TOKEN not configured');
             resolve({ success: false, error: 'BOT_TOKEN not configured' });
             return;
         }
@@ -79,7 +79,7 @@ async function sendTelegramMessage(chatId, message) {
 async function notifyAdmin(message) {
     try {
         if (!ADMIN_TG_ID) {
-            console.warn('⚠️ ADMIN_TG_ID not configured');
+            console.warn('ADMIN_TG_ID not configured');
             return;
         }
         await sendTelegramMessage(ADMIN_TG_ID, message);
@@ -114,7 +114,7 @@ async function verifyAdminToken(req, res, next) {
         if (!token) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Nᴏ Tᴏᴋᴇɴ Pʀᴏᴠɪᴅᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Tᴏ Aᴄᴄᴇꜱꜱ Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ.' 
+                message: 'No Token Provided. Please Login To Access This Resource.' 
             });
         }
         
@@ -131,32 +131,32 @@ async function verifyAdminToken(req, res, next) {
             } else {
                 return res.status(403).json({ 
                     success: false, 
-                    message: 'Aᴄᴄᴇꜱꜱ Dᴇɴɪᴇᴅ. Tʜɪꜱ Rᴇꜱᴏᴜʀᴄᴇ Iꜱ Rᴇꜱᴛʀɪᴄᴛᴇᴅ Tᴏ Aᴅᴍɪɴꜱ Oɴʟʏ.' 
+                    message: 'Access Denied. This Resource Is Restricted To Admins Only.' 
                 });
             }
         } catch (jwtError) {
             if (jwtError.name === 'JsonWebTokenError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Iɴᴠᴀʟɪᴅ Tᴏᴋᴇɴ Fᴏʀᴍᴀᴛ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                    message: 'Invalid Token Format. Please Login Again.' 
                 });
             }
             if (jwtError.name === 'TokenExpiredError') {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Tᴏᴋᴇɴ Hᴀꜱ Exᴘɪʀᴇᴅ. Pʟᴇᴀꜱᴇ Lᴏɢɪɴ Aɢᴀɪɴ.' 
+                    message: 'Token Has Expired. Please Login Again.' 
                 });
             }
             return res.status(401).json({ 
                 success: false, 
-                message: 'Aᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ.' 
+                message: 'Authentication Failed.' 
             });
         }
     } catch (error) {
-        console.error('❌ Tᴏᴋᴇɴ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ Eʀʀᴏʀ:', error.message);
+        console.error('Token Verification Error:', error.message);
         return res.status(500).json({ 
             success: false, 
-            message: 'Iɴᴛᴇʀɴᴀʟ Sᴇʀᴠᴇʀ Eʀʀᴏʀ.' 
+            message: 'Internal Server Error.' 
         });
     }
 }
@@ -205,10 +205,10 @@ router.get('/', verifyAdminToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Lɪꜰᴀꜰᴀꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Lifafas Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Lɪꜰᴀꜰᴀꜱ.'
+            message: 'Failed To Fetch Lifafas.'
         });
     }
 });
@@ -241,10 +241,10 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
             totalClaims
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Lɪꜰᴀꜰᴀ Sᴛᴀᴛꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Get Lifafa Stats Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Sᴛᴀᴛɪꜱᴛɪᴄꜱ.'
+            message: 'Failed To Fetch Statistics.'
         });
     }
 });
@@ -259,7 +259,7 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Lɪꜰᴀꜰᴀ ID Fᴏʀᴍᴀᴛ.'
+                message: 'Invalid Lifafa ID Format.'
             });
         }
         
@@ -271,7 +271,7 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
         if (!lifafa) {
             return res.status(404).json({
                 success: false,
-                message: `Lɪꜰᴀꜰᴀ Wɪᴛʜ ID "${id}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Lifafa With ID "${id}" Not Found.`
             });
         }
         
@@ -280,10 +280,10 @@ router.get('/:id', verifyAdminToken, async (req, res) => {
             lifafa
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', error.message);
+        console.error('Get Lifafa Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Lɪꜰᴀꜰᴀ.'
+            message: 'Failed To Fetch Lifafa.'
         });
     }
 });
@@ -303,7 +303,7 @@ router.get('/code/:code', verifyAdminToken, async (req, res) => {
         if (!lifafa) {
             return res.status(404).json({
                 success: false,
-                message: `Lɪꜰᴀꜰᴀ Wɪᴛʜ Cᴏᴅᴇ "${code}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Lifafa With Code "${code}" Not Found.`
             });
         }
         
@@ -312,10 +312,10 @@ router.get('/code/:code', verifyAdminToken, async (req, res) => {
             lifafa
         });
     } catch (error) {
-        console.error('❌ Gᴇᴛ Lɪꜰᴀꜰᴀ Bʏ Cᴏᴅᴇ Eʀʀᴏʀ:', error.message);
+        console.error('Get Lifafa By Code Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Fᴇᴛᴄʜ Lɪꜰᴀꜰᴀ.'
+            message: 'Failed To Fetch Lifafa.'
         });
     }
 });
@@ -347,7 +347,7 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         
         const dateTime = getCurrentDateTime();
         
-        // ─── Gᴇᴛ Aᴅᴍɪɴ Uꜱᴇʀ ───
+        // ─── Get Admin User ───
         let adminUser;
         try {
             adminUser = await getAdminUser();
@@ -358,45 +358,45 @@ router.post('/create', verifyAdminToken, async (req, res) => {
             });
         }
         
-        // ─── Vᴀʟɪᴅᴀᴛɪᴏɴ ───
+        // ─── Validation ───
         if (!title || title.trim().length < 2) {
             return res.status(400).json({
                 success: false,
-                message: 'Tɪᴛʟᴇ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 2 Cʜᴀʀᴀᴄᴛᴇʀꜱ Lᴏɴɢ.'
+                message: 'Title Must Be At Least 2 Characters Long.'
             });
         }
         
         if (!totalUsers || totalUsers < 1) {
             return res.status(400).json({
                 success: false,
-                message: 'Tᴏᴛᴀʟ Uꜱᴇʀꜱ Mᴜꜱᴛ Bᴇ Aᴛ Lᴇᴀꜱᴛ 1.'
+                message: 'Total Users Must Be At Least 1.'
             });
         }
         
         if (!perUser || perUser <= 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Pᴇʀ Uꜱᴇʀ Aᴍᴏᴜɴᴛ Mᴜꜱᴛ Bᴇ Gʀᴇᴀᴛᴇʀ Tʜᴀɴ 0.'
+                message: 'Per User Amount Must Be Greater Than 0.'
             });
         }
         
-        // ─── Cʜᴇᴄᴋ Iꜰ Aᴅᴍɪɴ Hᴀꜱ Eɴᴏᴜɢʜ Bᴀʟᴀɴᴄᴇ ───
+        // ─── Check If Admin Has Enough Balance ───
         const totalAmount = totalUsers * perUser;
         if (adminUser.balance < totalAmount) {
             return res.status(400).json({
                 success: false,
-                message: `Iɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ. Nᴇᴇᴅᴇᴅ: ₹${totalAmount.toFixed(2)}, Aᴠᴀɪʟᴀʙʟᴇ: ₹${adminUser.balance.toFixed(2)}`
+                message: `Insufficient Balance. Needed: ₹${totalAmount.toFixed(2)}, Available: ₹${adminUser.balance.toFixed(2)}`
             });
         }
         
-        // ─── Dᴇᴅᴜᴄᴛ Bᴀʟᴀɴᴄᴇ Fʀᴏᴍ Aᴅᴍɪɴ ───
+        // ─── Deduct Balance From Admin ───
         adminUser.balance -= totalAmount;
         await adminUser.save();
         
-        // ─── Gᴇɴᴇʀᴀᴛᴇ Lɪꜰᴀꜰᴀ ID ───
+        // ─── Generate Lifafa ID ───
         const lifafaId = generateLifafaId();
         
-        // ─── Cʀᴇᴀᴛᴇ Lɪꜰᴀꜰᴀ ───
+        // ─── Create Lifafa ───
         const lifafa = new Lifafa({
             lifafaId,
             userId: adminUser._id,
@@ -425,7 +425,7 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         
         await lifafa.save();
         
-        // ─── Cʀᴇᴀᴛᴇ Tʀᴀɴꜱᴀᴄᴛɪᴏɴ ───
+        // ─── Create Transaction ───
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = Math.random().toString(36).substring(2, 8).toUpperCase();
         
@@ -436,57 +436,49 @@ router.post('/create', verifyAdminToken, async (req, res) => {
             fee: 0,
             type: 'lifafa',
             status: 'success',
-            description: `Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ: ${title.trim()} - ${lifafaId}`,
+            description: `Lifafa Created: ${title.trim()} - ${lifafaId}`,
             remark: `Lifafa created by admin: ${adminUser.walletId}`
         });
         await transaction.save();
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ ───
+        // ─── Telegram Notification ───
         if (adminUser.telegramId && BOT_TOKEN) {
             await sendTelegramMessage(adminUser.telegramId,
-                `<b>────────────────────</b>
-<b>📨 Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Lifafa Created
 
-<b>👤 Dᴇᴀʀ ${adminUser.fullName},</b>
+Dear ${adminUser.fullName},
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${title.trim()}
-<b>💰 Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${totalAmount.toFixed(2)}
-<b>👥 Tᴏᴛᴀʟ Uꜱᴇʀꜱ:</b> ${totalUsers}
-<b>💵 Pᴇʀ Uꜱᴇʀ:</b> ₹${perUser.toFixed(2)}
-<b>📅 Cʀᴇᴀᴛᴇᴅ:</b> ${dateTime}
+Lifafa ID: ${lifafaId}
+Title: ${title.trim()}
+Total Amount: ₹${totalAmount.toFixed(2)}
+Total Users: ${totalUsers}
+Per User: ₹${perUser.toFixed(2)}
+Created: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
             );
         }
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ Tᴏ Aᴅᴍɪɴ ───
+        // ─── Telegram Notification To Admin ───
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>📨 Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Lifafa Created
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${title.trim()}
-<b>👤 Cʀᴇᴀᴛᴇᴅ Bʏ:</b> ${adminUser.fullName} (${adminUser.walletId})
-<b>💰 Tᴏᴛᴀʟ Aᴍᴏᴜɴᴛ:</b> ₹${totalAmount.toFixed(2)}
-<b>👥 Tᴏᴛᴀʟ Uꜱᴇʀꜱ:</b> ${totalUsers}
-<b>💵 Pᴇʀ Uꜱᴇʀ:</b> ₹${perUser.toFixed(2)}
-<b>📅 Cʀᴇᴀᴛᴇᴅ:</b> ${dateTime}
+Lifafa ID: ${lifafaId}
+Title: ${title.trim()}
+Created By: ${adminUser.fullName} (${adminUser.walletId})
+Total Amount: ₹${totalAmount.toFixed(2)}
+Total Users: ${totalUsers}
+Per User: ₹${perUser.toFixed(2)}
+Created: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('✅ Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ:', { lifafaId, title, totalAmount, totalUsers, adminWalletId: adminUser.walletId });
+        console.log('Lifafa Created:', { lifafaId, title, totalAmount, totalUsers, adminWalletId: adminUser.walletId });
         
         res.json({
             success: true,
-            message: 'Lɪꜰᴀꜰᴀ Cʀᴇᴀᴛᴇᴅ Sᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!',
+            message: 'Lifafa Created Successfully!',
             lifafa: {
                 _id: lifafa._id,
                 lifafaId: lifafa.lifafaId,
@@ -500,18 +492,18 @@ router.post('/create', verifyAdminToken, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Cʀᴇᴀᴛᴇ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', error.message);
+        console.error('Create Lifafa Error:', error.message);
         
         if (error.code === 11000) {
             return res.status(409).json({
                 success: false,
-                message: 'Dᴜᴘʟɪᴄᴀᴛᴇ Lɪꜰᴀꜰᴀ ID Dᴇᴛᴇᴄᴛᴇᴅ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ.'
+                message: 'Duplicate Lifafa ID Detected. Please Try Again.'
             });
         }
         
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Cʀᴇᴀᴛᴇ Lɪꜰᴀꜰᴀ. Pʟᴇᴀꜱᴇ Tʀʏ Aɢᴀɪɴ Lᴀᴛᴇʀ.'
+            message: 'Failed To Create Lifafa. Please Try Again Later.'
         });
     }
 });
@@ -527,7 +519,7 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Lɪꜰᴀꜰᴀ ID Fᴏʀᴍᴀᴛ.'
+                message: 'Invalid Lifafa ID Format.'
             });
         }
         
@@ -535,14 +527,14 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         if (!lifafa) {
             return res.status(404).json({
                 success: false,
-                message: `Lɪꜰᴀꜰᴀ Wɪᴛʜ ID "${id}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Lifafa With ID "${id}" Not Found.`
             });
         }
         
         if (lifafa.claimedUsers.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: `Cᴀɴɴᴏᴛ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ - Iᴛ Hᴀꜱ Bᴇᴇɴ Cʟᴀɪᴍᴇᴅ Bʏ ${lifafa.claimedUsers.length} Uꜱᴇʀꜱ.`
+                message: `Cannot Delete Lifafa - It Has Been Claimed By ${lifafa.claimedUsers.length} Users.`
             });
         }
         
@@ -562,7 +554,7 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
                 fee: 0,
                 type: 'admin_add',
                 status: 'success',
-                description: `Lɪꜰᴀꜰᴀ Rᴇꜰᴜɴᴅ: ${lifafa.title} (${lifafa.lifafaId})`,
+                description: `Lifafa Refund: ${lifafa.title} (${lifafa.lifafaId})`,
                 remark: `Refund for deleted lifafa: ${lifafa.lifafaId}`
             });
             await transaction.save();
@@ -576,54 +568,46 @@ router.delete('/delete/:id', verifyAdminToken, async (req, res) => {
         
         await Lifafa.findByIdAndDelete(id);
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ ───
+        // ─── Telegram Notification ───
         if (user && user.telegramId && BOT_TOKEN) {
             await sendTelegramMessage(user.telegramId,
-                `<b>────────────────────</b>
-<b>🗑️ Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Lifafa Deleted
 
-<b>👤 Dᴇᴀʀ ${user.fullName},</b> Yᴏᴜʀ Lɪꜰᴀꜰᴀ Hᴀꜱ Bᴇᴇɴ Dᴇʟᴇᴛᴇᴅ.
+Dear ${user.fullName}, Your Lifafa Has Been Deleted.
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafaInfo.lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${lifafaInfo.title}
-<b>💰 Rᴇꜰᴜɴᴅ:</b> ₹${lifafaInfo.totalAmount.toFixed(2)}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Lifafa ID: ${lifafaInfo.lifafaId}
+Title: ${lifafaInfo.title}
+Refund: ₹${lifafaInfo.totalAmount.toFixed(2)}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
             );
         }
         
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>🗑️ Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Lifafa Deleted
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafaInfo.lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${lifafaInfo.title}
-<b>👤 Uꜱᴇʀ:</b> ${user ? user.fullName : 'Unknown'} (${user ? user.walletId : 'N/A'})
-<b>💰 Rᴇꜰᴜɴᴅ:</b> ₹${lifafaInfo.totalAmount.toFixed(2)}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Lifafa ID: ${lifafaInfo.lifafaId}
+Title: ${lifafaInfo.title}
+User: ${user ? user.fullName : 'Unknown'} (${user ? user.walletId : 'N/A'})
+Refund: ₹${lifafaInfo.totalAmount.toFixed(2)}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('🗑️ Lɪꜰᴀꜰᴀ Dᴇʟᴇᴛᴇᴅ:', lifafaInfo);
+        console.log('Lifafa Deleted:', lifafaInfo);
         
         res.json({
             success: true,
-            message: `Lɪꜰᴀꜰᴀ "${lifafaInfo.title}" Dᴇʟᴇᴛᴇᴅ. Rᴇꜰᴜɴᴅ: ₹${lifafaInfo.totalAmount.toFixed(2)}`
+            message: `Lifafa "${lifafaInfo.title}" Deleted. Refund: ₹${lifafaInfo.totalAmount.toFixed(2)}`
         });
         
     } catch (error) {
-        console.error('❌ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ Eʀʀᴏʀ:', error.message);
+        console.error('Delete Lifafa Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Dᴇʟᴇᴛᴇ Lɪꜰᴀꜰᴀ.'
+            message: 'Failed To Delete Lifafa.'
         });
     }
 });
@@ -640,14 +624,14 @@ router.put('/update-status/:id', verifyAdminToken, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Lɪꜰᴀꜰᴀ ID Fᴏʀᴍᴀᴛ.'
+                message: 'Invalid Lifafa ID Format.'
             });
         }
         
         if (!['active', 'completed', 'expired', 'cancelled'].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: 'Iɴᴠᴀʟɪᴅ Sᴛᴀᴛᴜꜱ.'
+                message: 'Invalid Status.'
             });
         }
         
@@ -655,7 +639,7 @@ router.put('/update-status/:id', verifyAdminToken, async (req, res) => {
         if (!lifafa) {
             return res.status(404).json({
                 success: false,
-                message: `Lɪꜰᴀꜰᴀ Wɪᴛʜ ID "${id}" Nᴏᴛ Fᴏᴜɴᴅ.`
+                message: `Lifafa With ID "${id}" Not Found.`
             });
         }
         
@@ -678,7 +662,7 @@ router.put('/update-status/:id', verifyAdminToken, async (req, res) => {
                         fee: 0,
                         type: 'admin_add',
                         status: 'success',
-                        description: `Lɪꜰᴀꜰᴀ Cᴀɴᴄᴇʟʟᴀᴛɪᴏɴ Rᴇꜰᴜɴᴅ: ${lifafa.title}`,
+                        description: `Lifafa Cancellation Refund: ${lifafa.title}`,
                         remark: `Refund for cancelled lifafa: ${lifafa.lifafaId}`
                     });
                     await transaction.save();
@@ -689,52 +673,43 @@ router.put('/update-status/:id', verifyAdminToken, async (req, res) => {
         lifafa.status = status;
         await lifafa.save();
         
-        // ─── Tᴇʟᴇɢʀᴀᴍ Nᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ ───
+        // ─── Telegram Notification ───
         if (lifafa.userId && lifafa.userId.telegramId && BOT_TOKEN) {
-            const statusEmoji = status === 'cancelled' ? '❌' : '🔄';
             const statusText = status.charAt(0).toUpperCase() + status.slice(1);
             
             await sendTelegramMessage(lifafa.userId.telegramId,
-                `<b>────────────────────</b>
-<b>${statusEmoji} Lɪꜰᴀꜰᴀ ${statusText}</b>
-<b>────────────────────</b>
+`Lifafa ${statusText}
 
-<b>👤 Dᴇᴀʀ ${lifafa.userId.fullName},</b>
+Dear ${lifafa.userId.fullName},
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafa.lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${lifafa.title}
-<b>📊 Nᴇᴡ Sᴛᴀᴛᴜꜱ:</b> ${statusText}
-${refundAmount > 0 ? `<b>💰 Rᴇꜰᴜɴᴅ:</b> ₹${refundAmount.toFixed(2)}` : ''}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Lifafa ID: ${lifafa.lifafaId}
+Title: ${lifafa.title}
+New Status: ${statusText}
+${refundAmount > 0 ? `Refund: ₹${refundAmount.toFixed(2)}` : ''}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
             );
         }
         
         await notifyAdmin(
-            `<b>────────────────────</b>
-<b>🔄 Lɪꜰᴀꜰᴀ Sᴛᴀᴛᴜꜱ Uᴘᴅᴀᴛᴇᴅ</b>
-<b>────────────────────</b>
+`Lifafa Status Updated
 
-<b>🆔 Lɪꜰᴀꜰᴀ Iᴅ:</b> ${lifafa.lifafaId}
-<b>📝 Tɪᴛʟᴇ:</b> ${lifafa.title}
-<b>👤 Uꜱᴇʀ:</b> ${lifafa.userId ? lifafa.userId.fullName : 'Unknown'}
-<b>📊 Nᴇᴡ Sᴛᴀᴛᴜꜱ:</b> ${statusText}
-${refundAmount > 0 ? `<b>💰 Rᴇꜰᴜɴᴅ:</b> ₹${refundAmount.toFixed(2)}` : ''}
-<b>📅 Tɪᴍᴇ:</b> ${dateTime}
+Lifafa ID: ${lifafa.lifafaId}
+Title: ${lifafa.title}
+User: ${lifafa.userId ? lifafa.userId.fullName : 'Unknown'}
+New Status: ${statusText}
+${refundAmount > 0 ? `Refund: ₹${refundAmount.toFixed(2)}` : ''}
+Time: ${dateTime}
 
-───────────────────────
-🛡️ Tᴇᴀᴍ Pʀɪᴍᴇ Wᴀʟʟᴇᴛ
-───────────────────────`
+Team Universal Wallet`
         );
         
-        console.log('🔄 Lɪꜰᴀꜰᴀ Sᴛᴀᴛᴜꜱ Uᴘᴅᴀᴛᴇᴅ:', { lifafaId: lifafa.lifafaId, status, refundAmount });
+        console.log('Lifafa Status Updated:', { lifafaId: lifafa.lifafaId, status, refundAmount });
         
         res.json({
             success: true,
-            message: `Lɪꜰᴀꜰᴀ Sᴛᴀᴛᴜꜱ Uᴘᴅᴀᴛᴇᴅ Tᴏ "${status}".`,
+            message: `Lifafa Status Updated To "${status}".`,
             lifafa: {
                 _id: lifafa._id,
                 lifafaId: lifafa.lifafaId,
@@ -745,10 +720,10 @@ ${refundAmount > 0 ? `<b>💰 Rᴇꜰᴜɴᴅ:</b> ₹${refundAmount.toFixed(2)}
         });
         
     } catch (error) {
-        console.error('❌ Uᴘᴅᴀᴛᴇ Lɪꜰᴀꜰᴀ Sᴛᴀᴛᴜꜱ Eʀʀᴏʀ:', error.message);
+        console.error('Update Lifafa Status Error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'Fᴀɪʟᴇᴅ Tᴏ Uᴘᴅᴀᴛᴇ Lɪꜰᴀꜰᴀ Sᴛᴀᴛᴜꜱ.'
+            message: 'Failed To Update Lifafa Status.'
         });
     }
 });
