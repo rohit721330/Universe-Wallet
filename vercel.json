@@ -66,7 +66,7 @@
       }
     },
     {
-      "src": "/(a|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|terms|qr|invoice|invoice-pay|txn)(/?)",
+      "src": "/(a|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|terms|qr|invoice|invoice-pay|txn)(/?)",
       "dest": "/server.js",
       "headers": {
         "Access-Control-Allow-Origin": "*"
