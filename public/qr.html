@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>QR • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); background-attachment: fixed; color: #1a2a4a; padding-bottom: 80px; position: relative; overflow-x: hidden; }
+body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+.header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0, 50, 100, 0.08); position: sticky; top: 0; z-index: 40; border-bottom: 1px solid #c5d9f0; max-width: 500px; margin: 0 auto; }
+.back { width: 40px; height: 40px; background: #f0f7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #1a56db; transition: all 0.3s; border: 2px solid #c5d9f0; font-size: 16px; }
+.back:hover { background: #e2eaf3; }
+.back:active { transform: scale(0.95); }
+.header h1 { font-size: 17px; font-weight: 900; color: #1a2a4a; text-transform: uppercase; letter-spacing: 0.08em; }
+.header h1 span { color: #1a56db; }
+.header-placeholder { width: 40px; }
+.container { max-width: 480px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+.qr-card { background: #ffffff; border-radius: 24px; padding: 32px 24px; box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08); border: 1px solid #c5d9f0; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
+.qr-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #1a56db, #0088ff); }
+.my-qr-badge { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #1a56db, #0088ff); color: white; font-size: 10px; font-weight: 800; padding: 5px 14px; border-radius: 40px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3); }
+.qr-wrap { width: 190px; height: 190px; margin: 0 auto 20px; padding: 8px; border: 2px dashed #c5d9f0; border-radius: 20px; background: #fafcff; display: flex; align-items: center; justify-content: center; }
+.qr-wrap img { width: 100%; height: 100%; border-radius: 12px; object-fit: contain; }
+.user-name { font-size: 18px; font-weight: 900; color: #1a2a4a; margin-bottom: 4px; }
+.user-mobile { font-size: 14px; font-weight: 700; color: #1a56db; }
+.download-btn { margin-top: 18px; background: linear-gradient(135deg, #1a56db, #0088ff); border: none; color: white; padding: 12px 30px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.3s; letter-spacing: 0.05em; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: inline-flex; align-items: center; gap: 8px; }
+.download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+.download-btn:active { transform: scale(0.95); }
+.scanner-card { background: #ffffff; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08); border: 1px solid #c5d9f0; margin-bottom: 20px; display: none; }
+.scanner-wrapper { position: relative; border-radius: 20px; overflow: hidden; border: 3px solid #1a56db; box-shadow: 0 0 30px rgba(26, 86, 219, 0.2); }
+#reader { border-radius: 12px; overflow: hidden; background: #000; }
+.scan-line { height: 3px; background: linear-gradient(90deg, transparent, #1a56db, transparent); position: absolute; width: 80%; left: 10%; top: 0; animation: scanAnim 2s infinite; box-shadow: 0 0 20px #1a56db; z-index: 10; border-radius: 2px; }
+@keyframes scanAnim { 0% { top: 5%; } 50% { top: 85%; } 100% { top: 5%; } }
+.scanner-corner { position: absolute; width: 30px; height: 30px; border: 3px solid #1a56db; z-index: 11; }
+.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+.stop-btn { width: 100%; margin-top: 16px; padding: 12px; background: #fee2e2; border: none; color: #dc2626; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.3s; letter-spacing: 0.05em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.stop-btn:hover { background: #fecaca; }
+.result-card { background: #ffffff; border-radius: 24px; padding: 28px; box-shadow: 0 4px 20px rgba(0, 50, 100, 0.08); border: 1px solid #c5d9f0; margin-bottom: 20px; display: none; text-align: center; }
+.result-icon { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #16a34a, #22c55e); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; color: white; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); }
+.result-title { font-size: 11px; font-weight: 800; color: #5a7a9a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.result-mobile { font-size: 22px; font-weight: 900; color: #1a2a4a; margin-bottom: 4px; }
+.result-name { font-size: 14px; font-weight: 700; color: #1a56db; margin-bottom: 20px; }
+.pay-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #1a56db, #0088ff); color: white; border: none; border-radius: 20px; font-size: 14px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; letter-spacing: 0.05em; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
+.pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+.pay-btn:active { transform: scale(0.95); }
+.scan-again-btn { width: 100%; padding: 12px; background: #f0f7ff; border: 2px solid #c5d9f0; color: #5a7a9a; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; margin-top: 10px; transition: all 0.3s; letter-spacing: 0.05em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.scan-again-btn:hover { background: #e2eaf3; }
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.action-btn { border-radius: 24px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s; border: none; font-family: inherit; position: relative; overflow: hidden; }
+.action-btn:active { transform: scale(0.95); }
+.action-btn.primary { background: linear-gradient(135deg, #1a56db, #0088ff); color: white; box-shadow: 0 8px 25px rgba(26, 86, 219, 0.3); }
+.action-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(26, 86, 219, 0.4); }
+.action-btn.secondary { background: #ffffff; color: #1a2a4a; box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08); border: 2px solid #c5d9f0; }
+.action-btn.secondary:hover { background: #f0f7ff; transform: translateY(-2px); border-color: #1a56db; }
+.action-btn.secondary i { color: #1a56db; }
+.action-btn i { font-size: 26px; }
+.action-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-text { text-align: center; font-size: 10px; font-weight: 700; color: #8a9ab0; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 16px; }
+.footer-text i { color: #1a56db; margin-right: 6px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); border-top: 1px solid #c5d9f0; display: flex; justify-content: space-around; padding: 8px 0 16px; z-index: 50; max-width: 500px; margin: 0 auto; box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8a9ab0; font-size: 9px; font-weight: 800; text-transform: uppercase; text-decoration: none; flex: 1; transition: all 0.3s; padding: 4px 0; position: relative; letter-spacing: 0.05em; }
+.nav-item i { font-size: 19px; }
+.nav-item.active { color: #1a56db; }
+.nav-item.active::after { content: ''; position: absolute; top: -1px; left: 30%; right: 30%; height: 3px; background: linear-gradient(90deg, #1a56db, #0088ff); border-radius: 0 0 3px 3px; }
+.nav-item:hover { color: #1a56db; }
+.nav-item:active { transform: scale(0.95); }
+
+/* ============================================
+   BLOCKED / DELETED / DEACTIVATED OVERLAY
+   ============================================ */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: blockedIn 0.4s ease-out; }
+@keyframes blockedIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { background: #1a4ac0; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.blocked-btn:active { transform: scale(0.98); }
+
+@media (max-width: 480px) {
+    .container { padding: 14px; }
+    .qr-card { padding: 24px 18px; }
+    .qr-wrap { width: 160px; height: 160px; }
+    .action-grid { gap: 8px; }
+    .action-btn { padding: 20px 12px; }
+    .result-mobile { font-size: 18px; }
+    .header h1 { font-size: 15px; }
+}
+@media (max-width: 380px) {
+    .qr-wrap { width: 140px; height: 140px; }
+    .user-name { font-size: 15px; }
+    .action-btn i { font-size: 22px; }
+    .action-label { font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+    <a href="/dashboard" class="back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1>UNIVERSAL <span>QR</span></h1>
+    <div class="header-placeholder"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+    <!-- MY QR CARD -->
+    <div class="qr-card">
+        <div class="my-qr-badge"><i class="fa-solid fa-qrcode"></i> My QR</div>
+        <div class="qr-wrap">
+            <img id="qr-img" src="" alt="Your QR Code">
+        </div>
+        <div class="user-name" id="qr-name">Loading...</div>
+        <div class="user-mobile" id="qr-mobile"></div>
+        <button class="download-btn" onclick="downloadQR()">
+            <i class="fa-solid fa-download"></i> Download QR
+        </button>
+    </div>
+
+    <!-- SCANNER -->
+    <div class="scanner-card" id="scanner-card">
+        <div class="scanner-wrapper">
+            <div id="reader"></div>
+            <div class="scan-line"></div>
+            <div class="scanner-corner tl"></div>
+            <div class="scanner-corner tr"></div>
+            <div class="scanner-corner bl"></div>
+            <div class="scanner-corner br"></div>
+        </div>
+        <button class="stop-btn" onclick="stopScanner()">
+            <i class="fa-solid fa-xmark"></i> Cancel Scan
+        </button>
+    </div>
+
+    <!-- SCAN RESULT -->
+    <div class="result-card" id="result-card">
+        <div class="result-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="result-title">QR Scanned!</div>
+        <div class="result-mobile" id="result-mobile"></div>
+        <div class="result-name" id="result-name"></div>
+        <button class="pay-btn" onclick="goToTransfer()">
+            <i class="fa-solid fa-paper-plane"></i> Send Money
+        </button>
+        <button class="scan-again-btn" onclick="scanAgain()">
+            <i class="fa-solid fa-rotate-right"></i> Scan Again
+        </button>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-grid" id="action-buttons">
+        <button class="action-btn primary" onclick="startScanner()">
+            <i class="fa-solid fa-qrcode"></i>
+            <span class="action-label">Scan QR</span>
+        </button>
+        <label class="action-btn secondary">
+            <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)">
+            <i class="fa-solid fa-image"></i>
+            <span class="action-label">From Gallery</span>
+        </label>
+    </div>
+
+    <div class="footer-text">
+        <i class="fa-solid fa-lock"></i> Secure Encryption · Universal Wallet 2026
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Home</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i> Send</a>
+    <a href="/qr" class="nav-item active"><i class="fa-solid fa-qrcode"></i> QR</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i> Add</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i> History</a>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+let user = JSON.parse(localStorage.getItem('user') || '{}');
+let isAccountBlocked = false;
+
+if (!token) { window.location.href = '/'; }
+
+let scannedMobile = '';
+let scannedUserData = null;
+let html5QrCode = null;
+
+// ============================================
+// ACCOUNT STATE PROTECTION
+// ============================================
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    // Stop scanner if running
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+// ============================================
+// SAFE FETCH
+// ============================================
+async function safeFetch(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        let data = {};
+        try { data = await response.json(); } catch (e) { data = {}; }
+
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            throw new Error('Account deleted');
+        }
+        return { response, data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+// ============================================
+// VERIFY USER STATE
+// ============================================
+async function verifyUserState() {
+    const t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        const res = await fetch(API + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            return false;
+        }
+
+        const u = data.user || data.data || data;
+        if (!u || (!u.id && !u._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+        if (u.isBlocked === true) {
+            showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (u.isDeleted === true || u.deletedAt) {
+            showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+            return false;
+        }
+        if (u.isActive === false) {
+            showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+            return false;
+        }
+
+        user = u;
+        localStorage.setItem('user', JSON.stringify(u));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+// ============================================
+// LOAD QR CODE
+// ============================================
+function loadQR() {
+    if (isAccountBlocked) return;
+    const mobile = user.mobile || '';
+    const name = user.fullName || user.name || 'User';
+
+    document.getElementById('qr-name').textContent = name;
+    document.getElementById('qr-mobile').textContent = mobile;
+
+    const qrData = mobile || 'universal-user';
+    document.getElementById('qr-img').src =
+        `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1a56db&margin=10`;
+}
+
+// ============================================
+// DOWNLOAD QR
+// ============================================
+function downloadQR() {
+    if (isAccountBlocked) return;
+    const link = document.createElement('a');
+    link.href = document.getElementById('qr-img').src;
+    link.download = `UNIVERSAL_QR_${user.mobile || 'user'}.png`;
+    link.click();
+}
+
+// ============================================
+// START SCANNER
+// ============================================
+function startScanner() {
+    if (isAccountBlocked) return;
+    document.getElementById('scanner-card').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'none';
+    document.getElementById('result-card').style.display = 'none';
+
+    html5QrCode = new Html5Qrcode('reader');
+    html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
+        onScanSuccess
+    ).catch(() => {
+        alert('Camera permission denied!');
+        stopScanner();
+    });
+}
+
+// ============================================
+// STOP SCANNER
+// ============================================
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+            html5QrCode = null;
+        }).catch(() => {
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+            html5QrCode = null;
+        });
+    } else {
+        document.getElementById('scanner-card').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'grid';
+    }
+}
+
+// ============================================
+// SCAN SUCCESS
+// ============================================
+async function onScanSuccess(decodedText) {
+    if (isAccountBlocked) return;
+    if (html5QrCode) {
+        await html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+    }
+
+    document.getElementById('scanner-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
+
+    const mobile = decodedText.trim();
+
+    if (!/^\d{10}$/.test(mobile)) {
+        alert('Invalid QR Code! Must contain 10-digit mobile number');
+        scanAgain();
+        return;
+    }
+
+    scannedMobile = mobile;
+    document.getElementById('result-mobile').textContent = mobile;
+    document.getElementById('result-name').textContent = 'Fetching user details...';
+    document.getElementById('result-card').style.display = 'block';
+
+    try {
+        const { response, data } = await safeFetch(`${API}/view?number=${mobile}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (isAccountBlocked) return;
+
+        if (data.status === 'success' && data.name) {
+            scannedUserData = data;
+            document.getElementById('result-name').textContent = data.name;
+        } else {
+            const lookupRes = await safeFetch(`${API}/transfer/lookup/${mobile}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (isAccountBlocked) return;
+
+            if (lookupRes.data.status === 'success' && lookupRes.data.name) {
+                scannedUserData = lookupRes.data;
+                document.getElementById('result-name').textContent = lookupRes.data.name;
+            } else {
+                document.getElementById('result-name').textContent = 'User not found';
+                scannedUserData = null;
+            }
+        }
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Error fetching user:', error);
+            document.getElementById('result-name').textContent = 'Error fetching user';
+            scannedUserData = null;
+        }
+    }
+}
+
+// ============================================
+// UPLOAD QR FROM GALLERY
+// ============================================
+function uploadQR(input) {
+    if (isAccountBlocked) { input.value = ''; return; }
+    if (input.files && input.files[0]) {
+        const qrScanner = new Html5Qrcode('reader');
+        qrScanner.scanFile(input.files[0], true)
+            .then(decoded => {
+                onScanSuccess(decoded);
+                input.value = '';
+            })
+            .catch(() => {
+                alert('No valid QR code found in the image!');
+                input.value = '';
+            });
+    }
+}
+
+// ============================================
+// GO TO TRANSFER
+// ============================================
+function goToTransfer() {
+    if (isAccountBlocked) return;
+    if (scannedMobile) {
+        window.location.href = `/transfer?to=${scannedMobile}`;
+    } else {
+        alert('No user scanned. Please scan a QR code first.');
+    }
+}
+
+// ============================================
+// SCAN AGAIN
+// ============================================
+function scanAgain() {
+    if (isAccountBlocked) return;
+    scannedMobile = '';
+    scannedUserData = null;
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'grid';
+}
+
+// ============================================
+// INITIALIZE
+// ============================================
+document.addEventListener('DOMContentLoaded', async function() {
+    const isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+    loadQR();
+});
+</script>
+</body>
+</html>
