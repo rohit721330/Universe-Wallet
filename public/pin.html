@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>PIN • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.container { width: 100%; max-width: 480px; background: #ffffff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0, 50, 100, 0.15); padding: 35px 30px 30px; border: 1px solid #c5d9f0; position: relative; }
+.header { text-align: center; margin-bottom: 30px; }
+.logo { width: 70px; height: 70px; background: #1a56db; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #fff; font-size: 34px; box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3); }
+.title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #1a3a6b; text-transform: uppercase; }
+.title span { color: #1a56db; }
+.subtitle { font-size: 11px; letter-spacing: 3px; color: #5a7a9a; margin-top: 6px; font-weight: 600; text-transform: uppercase; }
+.subtitle i { margin: 0 4px; color: #1a56db; }
+.step-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 30px; margin-bottom: 12px; letter-spacing: 1px; background: #f0f7ff; color: #1a56db; border: 1px solid #c5d9f0; text-transform: uppercase; }
+.pin-display { display: flex; gap: 16px; justify-content: center; margin: 30px 0; }
+.pin-dot { width: 60px; height: 60px; border-radius: 18px; background: #fafcff; border: 2px solid #c5d9f0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; position: relative; }
+.pin-dot.filled { border-color: #1a56db; background: rgba(26, 86, 219, 0.1); }
+.pin-dot.filled::after { content: '●'; font-size: 32px; color: #1a56db; }
+.pin-dot.error { animation: shake 0.3s ease-in-out; border-color: #dc2626; background: #fee2e2; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.key { padding: 16px; border-radius: 18px; font-size: 22px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #fafcff; border: 2px solid #c5d9f0; color: #1a2a4a; font-family: 'Inter', sans-serif; }
+.key:active { transform: scale(0.95); }
+.key:hover { background: #f0f7ff; }
+.key.del { color: #dc2626; }
+.key.go { background: #1a56db; color: #ffffff; border-color: #1a56db; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
+.key.go:hover { background: #1a4ac0; }
+.key.loading .fa-arrow-right { display: none; }
+.key.loading .key-spinner { display: block; }
+.key-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .8s linear infinite; display: none; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.act-btn { padding: 10px; border-radius: 30px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; background: #f0f7ff; border: 1px solid #c5d9f0; color: #1a3a6b; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Inter', sans-serif; }
+.act-btn:hover { background: #e2eaf3; transform: translateY(-1px); }
+.act-btn i { color: #1a56db; }
+.top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.back-button { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 18px; background: #f0f7ff; border: 1px solid #c5d9f0; color: #1a56db; }
+.back-button:hover { background: #e2eaf3; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 24px; border-radius: 60px; font-size: 13px; font-weight: 700; z-index: 10000; max-width: 90%; text-align: center; pointer-events: none; opacity: 0; transition: all 0.3s ease; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-transform: uppercase; letter-spacing: 0.5px; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.green { background: #16a34a; color: #ffffff; }
+.toast.red { background: #dc2626; color: #ffffff; }
+.overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.overlay.open { display: flex; }
+.modal { background: #ffffff; border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 420px; position: relative; animation: modalIn 0.3s ease-out; max-height: 90vh; overflow-y: auto; border: 1px solid #c5d9f0; box-shadow: 0 25px 45px -12px rgba(0,0,0,0.15); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-close { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.3s ease; background: #f0f7ff; border: 1px solid #c5d9f0; color: #1a3a6b; }
+.modal-close:hover { background: #e2eaf3; }
+.modal-icon { width: 80px; height: 80px; border-radius: 25px; background: #1a56db; display: flex; align-items: center; justify-content: center; color: white; font-size: 38px; margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
+.modal-title { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 8px; color: #1a3a6b; text-transform: uppercase; letter-spacing: 1px; }
+.modal-sub { font-size: 13px; text-align: center; margin-bottom: 25px; color: #5a7a9a; font-weight: 500; }
+.input-group { margin-bottom: 20px; text-align: left; }
+.input-group label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; margin-left: 5px; color: #1a3a6b; text-transform: uppercase; }
+.input-group input { width: 100%; padding: 15px 18px; border-radius: 20px; font-size: 15px; font-weight: 500; outline: none; font-family: 'Inter', sans-serif; background: #fafcff; border: 2px solid #c5d9f0; color: #1a2a4a; transition: all 0.3s ease; }
+.input-group input:focus { border-color: #1a56db; box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1); background: #ffffff; }
+.tg-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; margin-bottom: 20px; }
+.tg-row .input-group { margin-bottom: 0; }
+.get-id-btn { padding: 15px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; height: 55px; display: flex; align-items: center; white-space: nowrap; text-decoration: none; gap: 8px; transition: all 0.3s ease; background: #f0fdf4; border: 1px solid #86efac; color: #16a34a; font-family: 'Inter', sans-serif; }
+.get-id-btn:hover { background: #dcfce7; }
+.btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 30px; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; font-family: 'Inter', sans-serif; background: #1a56db; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); text-transform: uppercase; letter-spacing: 1px; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn.loading .spinner { display: block; }
+.btn.loading span:not(.spinner) { display: none; }
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .8s linear infinite; display: none; }
+.step-badge-modal { display: inline-block; font-size: 11px; font-weight: 700; padding: 5px 14px; border-radius: 30px; margin-bottom: 15px; letter-spacing: 1px; background: #f0f7ff; color: #1a56db; border: 1px solid #c5d9f0; text-transform: uppercase; }
+.otp-banner { display: none; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; font-weight: 600; background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+.footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2eaf3; font-size: 12px; font-weight: 600; color: #5a7a9a; letter-spacing: 0.5px; text-transform: uppercase; }
+.footer span { color: #1a56db; font-weight: 800; }
+.footer i { margin: 0 4px; color: #1a56db; }
+
+/* ============================================
+   BLOCKED / DELETED / DEACTIVATED OVERLAY
+   ============================================ */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: blockedIn 0.4s ease-out; }
+@keyframes blockedIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { background: #1a4ac0; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.blocked-btn:active { transform: scale(0.98); }
+
+@media (max-width: 480px) {
+    .container { padding: 25px 18px 20px; }
+    .title { font-size: 22px; }
+    .logo { width: 60px; height: 60px; font-size: 28px; }
+    .pin-dot { width: 50px; height: 50px; }
+    .key { padding: 14px; font-size: 18px; }
+    .modal { padding: 25px 20px; max-width: 350px; }
+    .modal-icon { width: 65px; height: 65px; font-size: 32px; }
+    .modal-title { font-size: 20px; }
+    .action-btns { gap: 8px; }
+    .act-btn { font-size: 11px; padding: 8px; }
+    .input-group input { padding: 12px 15px; }
+    .get-id-btn { padding: 12px 15px; height: 50px; }
+    .back-button { width: 36px; height: 36px; font-size: 16px; }
+    .tg-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="top-nav">
+        <div class="back-button" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+    </div>
+
+    <div class="header">
+        <div class="logo"><i class="fas fa-wallet"></i></div>
+        <div class="title">UNIVERSAL <span>WALLET</span></div>
+        <div class="subtitle"><i class="fas fa-shield-alt"></i> SECURE YOUR ACCOUNT <i class="fas fa-shield-alt"></i></div>
+    </div>
+
+    <div class="step-badge" id="stepBadge" style="display: none;">STEP 1 OF 2</div>
+
+    <div style="text-align: center; margin-bottom: 8px;">
+        <div style="font-size: 13px; font-weight: 600; color: #5a7a9a; text-transform: uppercase; letter-spacing: 0.5px;" id="mainSubtitle">
+            <i class="fas fa-key"></i> ENTER YOUR 4-DIGIT PIN
+        </div>
+    </div>
+
+    <div class="pin-display">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+    </div>
+
+    <div class="keypad">
+        <div class="key" onclick="press('1')">1</div>
+        <div class="key" onclick="press('2')">2</div>
+        <div class="key" onclick="press('3')">3</div>
+        <div class="key" onclick="press('4')">4</div>
+        <div class="key" onclick="press('5')">5</div>
+        <div class="key" onclick="press('6')">6</div>
+        <div class="key" onclick="press('7')">7</div>
+        <div class="key" onclick="press('8')">8</div>
+        <div class="key" onclick="press('9')">9</div>
+        <div class="key del" onclick="del()"><i class="fa-solid fa-delete-left"></i></div>
+        <div class="key" onclick="press('0')">0</div>
+        <button class="key go" id="submitBtn" onclick="submit()">
+            <div class="key-spinner"></div>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="action-btns" id="actionBtns">
+        <div class="act-btn" onclick="openForgotModal()">
+            <i class="fa-solid fa-key"></i> FORGOT PIN
+        </div>
+        <div class="act-btn" onclick="openChange()">
+            <i class="fa-solid fa-pen-to-square"></i> CHANGE PIN
+        </div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-bolt"></i> POWERED BY <span><i class="fas fa-wallet"></i> UNIVERSAL WALLET</span> <i class="fas fa-shield-heart"></i>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FORGOT PIN MODAL -->
+<div class="overlay" id="forgotPinOverlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeForgotModal()"><i class="fa-solid fa-xmark"></i></button>
+
+        <div id="forgotStepTelegram">
+            <div class="modal-icon"><i class="fa-brands fa-telegram"></i></div>
+            <div class="modal-title">FORGOT PIN</div>
+            <div class="modal-sub">Enter your Telegram ID to receive OTP</div>
+            <div class="tg-row">
+                <div class="input-group">
+                    <label>TELEGRAM ID</label>
+                    <input type="number" id="forgotTgId" placeholder="Enter your Telegram ID" oninput="onForgotTgInput()">
+                </div>
+                <a href="https://t.me/Universal_Wallet_iBot?start=getid" target="_blank" class="get-id-btn">
+                    <i class="fa-solid fa-id-badge"></i> FETCH ID
+                </a>
+            </div>
+            <button class="btn" id="forgotSendOtpBtn" onclick="sendForgotOTP()" disabled>
+                <div class="spinner"></div>
+                <span><i class="fa-regular fa-paper-plane"></i> SEND OTP</span>
+            </button>
+        </div>
+
+        <div id="forgotStepOtp" style="display:none">
+            <div class="modal-icon"><i class="fa-solid fa-key"></i></div>
+            <div class="modal-title">ENTER OTP</div>
+            <div class="modal-sub">Please enter the 6-digit OTP sent to your Telegram</div>
+            <div class="otp-banner" id="otpBanner">
+                <i class="fa-solid fa-circle-check"></i> OTP SENT! CHECK @Universal_Wallet_iBot
+            </div>
+            <div class="input-group">
+                <label>OTP CODE</label>
+                <input type="number" id="forgotOtp" placeholder="Enter 6-digit OTP" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+            </div>
+            <button class="btn" id="forgotVerifyBtn" onclick="verifyForgotOTP()">
+                <div class="spinner"></div>
+                <span><i class="fa-solid fa-check"></i> VERIFY</span>
+            </button>
+        </div>
+
+        <div id="forgotStepNewpin" style="display:none">
+            <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+            <div class="modal-title">NEW PIN</div>
+            <div class="modal-sub">Enter your new 4-digit PIN</div>
+            <div class="input-group">
+                <label>NEW PIN</label>
+                <input type="text" id="forgotNewPin1" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+            </div>
+            <div class="input-group">
+                <label>CONFIRM PIN</label>
+                <input type="text" id="forgotNewPin2" placeholder="Enter PIN again" maxlength="4" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+            </div>
+            <button class="btn" id="forgotResetBtn" onclick="resetPinFinal()">
+                <div class="spinner"></div>
+                <span><i class="fa-solid fa-save"></i> SAVE</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CHANGE PIN MODAL -->
+<div class="overlay" id="changeOverlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('changeOverlay')"><i class="fa-solid fa-xmark"></i></button>
+
+        <div id="cStepOldpin">
+            <div class="modal-icon"><i class="fa-solid fa-lock-open"></i></div>
+            <div class="modal-title">CHANGE PIN</div>
+            <div class="modal-sub">First verify your current PIN</div>
+            <div class="input-group">
+                <label>CURRENT PIN</label>
+                <input type="password" id="cOldpin" placeholder="4-digit current PIN" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+            </div>
+            <button class="btn" id="cOldpinBtn" onclick="verifyOldPIN()">
+                <div class="spinner"></div>
+                <span>VERIFY PIN</span>
+            </button>
+        </div>
+
+        <div id="cStepNewpin1" style="display:none">
+            <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+            <div class="step-badge-modal">STEP 1 OF 2</div>
+            <div class="modal-title">NEW PIN</div>
+            <div class="modal-sub">Enter your new 4-digit PIN</div>
+            <div class="input-group">
+                <label>NEW PIN</label>
+                <input type="password" id="cNewpin1" placeholder="4-digit PIN" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+            </div>
+            <button class="btn" id="cNewpin1Btn" onclick="goToConfirmChangePIN()">
+                <div class="spinner"></div>
+                <span>CONTINUE <i class="fa-solid fa-arrow-right"></i></span>
+            </button>
+        </div>
+
+        <div id="cStepNewpin2" style="display:none">
+            <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+            <div class="step-badge-modal">STEP 2 OF 2</div>
+            <div class="modal-title">CONFIRM PIN</div>
+            <div class="modal-sub">Re-enter your new PIN to confirm</div>
+            <div class="input-group">
+                <label>CONFIRM PIN</label>
+                <input type="password" id="cNewpin2" placeholder="Re-enter PIN" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+            </div>
+            <button class="btn" id="cConfirmBtn" onclick="saveChangedPIN()">
+                <div class="spinner"></div>
+                <span><i class="fa-solid fa-check"></i> SAVE NEW PIN</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE_URL = '/api';
+
+let token = localStorage.getItem('token');
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let isAccountBlocked = false;
+
+if (!token) {
+    toast('SESSION EXPIRED. PLEASE LOGIN AGAIN.', 'red');
+    setTimeout(() => { window.location.href = '/'; }, 1500);
+}
+
+const pinSet = userData.pin_set === true || localStorage.getItem('pin_set') === 'true';
+let mode = pinSet ? 'verify' : 'set';
+let step1Pin = '';
+let step = 1;
+let code = '';
+
+let forgotTGID = userData.telegramId || '';
+let changeNewPin1 = '';
+let otpVerified = false;
+
+// ============================================
+// ACCOUNT STATE PROTECTION
+// ============================================
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    closeModal('changeOverlay');
+    closeModal('forgotPinOverlay');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+// ============================================
+// SAFE FETCH
+// ============================================
+async function safeFetch(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        let data = {};
+        try { data = await response.json(); } catch (e) { data = {}; }
+
+        if (response.status === 401) {
+            logout();
+            throw new Error('Session expired');
+        }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            throw new Error('Account deleted');
+        }
+        return { response, data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+// ============================================
+// VERIFY USER STATE BEFORE PAGE LOAD
+// ============================================
+async function verifyUserState() {
+    const t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        const res = await fetch(API_BASE_URL + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            return false;
+        }
+
+        const user = data.user || data.data || data;
+        if (!user || (!user.id && !user._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+        if (user.isBlocked === true) {
+            showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (user.isDeleted === true || user.deletedAt) {
+            showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+            return false;
+        }
+        if (user.isActive === false) {
+            showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+            return false;
+        }
+
+        // Update local user data
+        userData = user;
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+// ============================================
+// UI INIT
+// ============================================
+function goBack() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+function initUI() {
+    const stepBadge = document.getElementById('stepBadge');
+    const subtitle = document.getElementById('mainSubtitle');
+    const actionBtns = document.getElementById('actionBtns');
+
+    if (mode === 'set') {
+        stepBadge.style.display = 'inline-block';
+        actionBtns.style.display = 'none';
+        subtitle.innerHTML = '<i class="fas fa-key"></i> SET A 4-DIGIT PIN';
+        setStep(1);
+    } else {
+        stepBadge.style.display = 'none';
+        actionBtns.style.display = 'grid';
+        subtitle.innerHTML = '<i class="fas fa-key"></i> ENTER YOUR 4-DIGIT PIN';
+    }
+}
+
+function setStep(n) {
+    step = n;
+    code = '';
+    updateDots();
+    const stepBadge = document.getElementById('stepBadge');
+    const subtitle = document.getElementById('mainSubtitle');
+
+    if (mode === 'set') {
+        if (n === 1) {
+            stepBadge.textContent = 'STEP 1 OF 2';
+            subtitle.innerHTML = '<i class="fas fa-key"></i> ENTER A 4-DIGIT PIN';
+        } else {
+            stepBadge.textContent = 'STEP 2 OF 2';
+            subtitle.innerHTML = '<i class="fas fa-key"></i> RE-ENTER THE SAME PIN';
+        }
+    }
+}
+
+function press(n) {
+    if (isAccountBlocked) return;
+    if (code.length < 4) {
+        code += n;
+        updateDots();
+        if (code.length === 4) {
+            setTimeout(() => submit(), 100);
+        }
+    }
+}
+
+function del() {
+    if (isAccountBlocked) return;
+    code = code.slice(0, -1);
+    updateDots();
+}
+
+function updateDots(isError = false) {
+    for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        dot.classList.toggle('filled', i < code.length);
+        if (isError) dot.classList.add('error');
+        else dot.classList.remove('error');
+    }
+}
+
+function toast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function openModal(id) {
+    if (isAccountBlocked) return;
+    document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+
+function disableKeypad(on) {
+    const goBtn = document.getElementById('submitBtn');
+    if (on) goBtn.classList.add('loading');
+    else goBtn.classList.remove('loading');
+    document.querySelectorAll('.key').forEach(k => {
+        k.style.pointerEvents = on ? 'none' : '';
+        k.style.opacity = on ? '0.7' : '1';
+    });
+}
+
+function btnLoad(btn, on) {
+    if (on) { btn.classList.add('loading'); btn.disabled = true; }
+    else { btn.classList.remove('loading'); btn.disabled = false; }
+}
+
+// ============================================
+// SUBMIT PIN
+// ============================================
+async function submit() {
+    if (isAccountBlocked) return;
+    if (code.length < 4) { toast('PLEASE ENTER 4-DIGIT PIN!', 'red'); return; }
+
+    if (mode === 'set') {
+        await handleSetPinFlow();
+    } else {
+        await handleVerifyPin();
+    }
+}
+
+async function handleSetPinFlow() {
+    if (isAccountBlocked) return;
+    if (step === 1) {
+        step1Pin = code;
+        setStep(2);
+        code = '';
+        updateDots();
+        toast('NOW CONFIRM YOUR PIN', 'green');
+    } else {
+        if (code !== step1Pin) {
+            toast('PINS DO NOT MATCH!', 'red');
+            updateDots(true);
+            setTimeout(() => {
+                setStep(1);
+                step1Pin = '';
+                code = '';
+                updateDots();
+            }, 800);
+            return;
+        }
+        await callSetPin(code);
+    }
+}
+
+async function handleVerifyPin() {
+    if (isAccountBlocked) return;
+    disableKeypad(true);
+    try {
+        const currentToken = localStorage.getItem('token');
+        if (!currentToken) { toast('SESSION EXPIRED. PLEASE LOGIN AGAIN.', 'red'); setTimeout(() => { window.location.href = '/'; }, 1500); return; }
+
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/verify-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ pin: code })
+        });
+
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            toast('PIN VERIFIED!', 'green');
+            localStorage.setItem('pin_verified', 'true');
+            setTimeout(() => window.location.href = '/dashboard', 700);
+            return;
+        }
+
+        toast(data.message || 'WRONG PIN!', 'red');
+        updateDots(true);
+        setTimeout(() => {
+            code = '';
+            updateDots();
+            disableKeypad(false);
+        }, 600);
+
+    } catch (e) {
+        if (!isAccountBlocked) {
+            toast('NETWORK ERROR: ' + e.message, 'red');
+            code = '';
+            updateDots();
+            disableKeypad(false);
+        }
+    }
+}
+
+async function callSetPin(pin) {
+    if (isAccountBlocked) return;
+    disableKeypad(true);
+    try {
+        const currentToken = localStorage.getItem('token');
+        if (!currentToken) { toast('SESSION EXPIRED. PLEASE LOGIN AGAIN.', 'red'); setTimeout(() => { window.location.href = '/'; }, 1500); return; }
+
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/set-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ pin })
+        });
+
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            localStorage.setItem('pin_set', 'true');
+            userData.pin_set = true;
+            localStorage.setItem('user', JSON.stringify(userData));
+            toast('PIN SET SUCCESSFULLY!', 'green');
+            setTimeout(() => window.location.href = '/dashboard', 1000);
+        } else {
+            toast(data.message || 'ERROR SETTING PIN', 'red');
+            setStep(1);
+            step1Pin = '';
+        }
+    } catch (e) {
+        if (!isAccountBlocked) {
+            toast('NETWORK ERROR: ' + e.message, 'red');
+            setStep(1);
+            step1Pin = '';
+        }
+    } finally {
+        disableKeypad(false);
+    }
+}
+
+// ============================================
+// FORGOT PIN
+// ============================================
+function openForgotModal() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    document.getElementById('forgotTgId').value = '';
+    document.getElementById('forgotOtp').value = '';
+    document.getElementById('forgotNewPin1').value = '';
+    document.getElementById('forgotNewPin2').value = '';
+    otpVerified = false;
+
+    const sendBtn = document.getElementById('forgotSendOtpBtn');
+    if (sendBtn) sendBtn.disabled = true;
+
+    showForgotStep('telegram');
+    openModal('forgotPinOverlay');
+}
+
+function closeForgotModal() { closeModal('forgotPinOverlay'); }
+
+function showForgotStep(step) {
+    const steps = ['telegram', 'otp', 'newpin'];
+    steps.forEach(s => {
+        const el = document.getElementById(`forgotStep${s.charAt(0).toUpperCase() + s.slice(1)}`);
+        if (el) el.style.display = s === step ? 'block' : 'none';
+    });
+}
+
+function onForgotTgInput() {
+    const val = document.getElementById('forgotTgId').value.trim();
+    const sendBtn = document.getElementById('forgotSendOtpBtn');
+    if (sendBtn) sendBtn.disabled = val.length < 5;
+}
+
+async function sendForgotOTP() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    const tgid = document.getElementById('forgotTgId').value.trim();
+    if (!tgid || tgid.length < 5) { toast('PLEASE ENTER VALID TELEGRAM ID', 'red'); return; }
+
+    forgotTGID = tgid;
+    const btn = document.getElementById('forgotSendOtpBtn');
+    btnLoad(btn, true);
+    try {
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/forgot-pin-send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ tg_id: tgid })
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            toast('OTP SENT SUCCESSFULLY!', 'green');
+            showForgotStep('otp');
+            setTimeout(() => {
+                const banner = document.getElementById('otpBanner');
+                if (banner) banner.style.display = 'flex';
+                setTimeout(() => { if (banner) banner.style.display = 'none'; }, 5000);
+            }, 100);
+        } else {
+            toast(data.message || 'FAILED TO SEND OTP', 'red');
+        }
+    } catch (e) {
+        if (!isAccountBlocked) toast('NETWORK ERROR: ' + e.message, 'red');
+    } finally {
+        btnLoad(btn, false);
+    }
+}
+
+async function verifyForgotOTP() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    const otp = document.getElementById('forgotOtp').value.trim();
+    if (!otp || otp.length !== 6) { toast('PLEASE ENTER 6-DIGIT OTP', 'red'); return; }
+
+    const btn = document.getElementById('forgotVerifyBtn');
+    btnLoad(btn, true);
+    try {
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/forgot-pin-verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ otp })
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            toast('OTP VERIFIED!', 'green');
+            otpVerified = true;
+            showForgotStep('newpin');
+        } else {
+            toast(data.message || 'WRONG OTP', 'red');
+            document.getElementById('forgotOtp').value = '';
+            otpVerified = false;
+        }
+    } catch (e) {
+        if (!isAccountBlocked) { toast('NETWORK ERROR: ' + e.message, 'red'); otpVerified = false; }
+    } finally {
+        btnLoad(btn, false);
+    }
+}
+
+async function resetPinFinal() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    const newPin = document.getElementById('forgotNewPin1').value.trim();
+    const confirmPin = document.getElementById('forgotNewPin2').value.trim();
+
+    if (newPin.length !== 4) { toast('PLEASE ENTER 4-DIGIT PIN', 'red'); return; }
+    if (newPin !== confirmPin) { toast('PINS DO NOT MATCH!', 'red'); document.getElementById('forgotNewPin2').value = ''; return; }
+
+    const btn = document.getElementById('forgotResetBtn');
+    btnLoad(btn, true);
+    try {
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/forgot-pin-reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ new_pin: newPin })
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            localStorage.setItem('pin_set', 'true');
+            userData.pin_set = true;
+            localStorage.setItem('user', JSON.stringify(userData));
+            toast('PIN RESET SUCCESSFULLY!', 'green');
+            closeForgotModal();
+            otpVerified = false;
+            mode = 'verify';
+            initUI();
+            code = '';
+            updateDots();
+        } else {
+            toast(data.message || 'ERROR RESETTING PIN', 'red');
+        }
+    } catch (e) {
+        if (!isAccountBlocked) toast('NETWORK ERROR: ' + e.message, 'red');
+    } finally {
+        btnLoad(btn, false);
+    }
+}
+
+// ============================================
+// CHANGE PIN
+// ============================================
+function openChange() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    ['cOldpin', 'cNewpin1', 'cNewpin2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    changeNewPin1 = '';
+    showChangeStep('oldpin');
+    openModal('changeOverlay');
+}
+
+function showChangeStep(s) {
+    const steps = ['oldpin', 'newpin1', 'newpin2'];
+    steps.forEach(x => {
+        const el = document.getElementById(`cStep${x.charAt(0).toUpperCase() + x.slice(1)}`);
+        if (el) el.style.display = x === s ? 'block' : 'none';
+    });
+}
+
+async function verifyOldPIN() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    const pin = document.getElementById('cOldpin').value.trim();
+    if (pin.length !== 4) return toast('4-DIGIT PIN REQUIRED', 'red');
+
+    const btn = document.getElementById('cOldpinBtn');
+    btnLoad(btn, true);
+    try {
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/verify-change-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ current_pin: pin })
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            toast('PIN VERIFIED!', 'green');
+            step1Pin = pin;
+            showChangeStep('newpin1');
+        } else {
+            toast(data.message || 'WRONG PIN', 'red');
+            document.getElementById('cOldpin').value = '';
+        }
+    } catch (e) {
+        if (!isAccountBlocked) toast('NETWORK ERROR: ' + e.message, 'red');
+    } finally {
+        btnLoad(btn, false);
+    }
+}
+
+function goToConfirmChangePIN() {
+    if (isAccountBlocked) return;
+    const pin = document.getElementById('cNewpin1').value.trim();
+    if (pin.length !== 4) return toast('4-DIGIT PIN REQUIRED', 'red');
+    changeNewPin1 = pin;
+    showChangeStep('newpin2');
+}
+
+async function saveChangedPIN() {
+    if (isAccountBlocked) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) { toast('PLEASE LOGIN FIRST', 'red'); return; }
+
+    const pin = document.getElementById('cNewpin2').value.trim();
+    if (pin.length !== 4) return toast('4-DIGIT PIN REQUIRED', 'red');
+    if (pin !== changeNewPin1) { toast('PINS DO NOT MATCH!', 'red'); document.getElementById('cNewpin2').value = ''; return; }
+
+    const btn = document.getElementById('cConfirmBtn');
+    btnLoad(btn, true);
+    try {
+        const { response, data } = await safeFetch(API_BASE_URL + '/pin/change-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+            body: JSON.stringify({ current_pin: document.getElementById('cOldpin').value, new_pin: pin })
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            localStorage.setItem('pin_set', 'true');
+            userData.pin_set = true;
+            localStorage.setItem('user', JSON.stringify(userData));
+            toast('PIN CHANGED SUCCESSFULLY!', 'green');
+            closeModal('changeOverlay');
+            mode = 'verify';
+            initUI();
+            code = '';
+            updateDots();
+        } else {
+            toast(data.message || 'ERROR', 'red');
+        }
+    } catch (e) {
+        if (!isAccountBlocked) toast('NETWORK ERROR: ' + e.message, 'red');
+    } finally {
+        btnLoad(btn, false);
+    }
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', async function() {
+    const isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    // Update pinSet status from fresh user data
+    const freshPinSet = userData.pin_set === true || localStorage.getItem('pin_set') === 'true';
+    mode = freshPinSet ? 'verify' : 'set';
+    forgotTGID = userData.telegramId || '';
+
+    initUI();
+});
+</script>
+</body>
+</html>
