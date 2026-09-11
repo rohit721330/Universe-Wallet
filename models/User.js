@@ -16,7 +16,15 @@ const userSchema = new mongoose.Schema({
     apiKey: { type: String, unique: true, sparse: true, default: null },
     profilePicture: { type: String, default: null },
     walletId: { type: String, unique: true, required: true, uppercase: true },
-    lastOTPTime: { type: Number, default: 0 }
+    lastOTPTime: { type: Number, default: 0 },
+
+    // ✅ NEW FIELDS — Deletion / Deactivation Support
+    isDeleted: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
+    blockReason: { type: String, default: null },
+    blockedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 // ============================================
@@ -53,7 +61,7 @@ function generateApiKey() {
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
-        // ✅ Wallet ID generate (retry সহ unique নিশ্চিত করা)
+        // Wallet ID generate (retry সহ unique নিশ্চিত করা)
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -73,7 +81,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // ✅ API Key generate (retry সহ)
+        // API Key generate (retry সহ)
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -117,7 +125,58 @@ userSchema.methods.hasPin = function() {
 };
 
 // ============================================
-// STATIC METHODS
+// INSTANCE METHODS — Account Status Checks
+// ============================================
+userSchema.methods.isAccountActive = function() {
+    return !this.isBlocked && !this.isDeleted && this.isActive === true;
+};
+
+userSchema.methods.canLogin = function() {
+    if (this.isDeleted) return { canLogin: false, reason: 'Account Deleted' };
+    if (this.isBlocked) return { canLogin: false, reason: 'Account Blocked' };
+    if (this.isActive === false) return { canLogin: false, reason: 'Account Deactivated' };
+    return { canLogin: true };
+};
+
+// ============================================
+// INSTANCE METHODS — Soft Delete / Restore
+// ============================================
+userSchema.methods.softDelete = async function(adminName = 'Admin') {
+    this.isDeleted = true;
+    this.isActive = false;
+    this.isBlocked = true;
+    this.deletedAt = new Date();
+    this.deletedBy = adminName;
+    return await this.save();
+};
+
+userSchema.methods.restore = async function() {
+    this.isDeleted = false;
+    this.isActive = true;
+    this.isBlocked = false;
+    this.deletedAt = null;
+    this.deletedBy = null;
+    this.blockReason = null;
+    this.blockedAt = null;
+    return await this.save();
+};
+
+userSchema.methods.blockAccount = async function(reason = 'Blocked by admin') {
+    this.isBlocked = true;
+    this.blockReason = reason;
+    this.blockedAt = new Date();
+    return await this.save();
+};
+
+userSchema.methods.unblockAccount = async function() {
+    this.isBlocked = false;
+    this.blockReason = null;
+    this.blockedAt = null;
+    return await this.save();
+};
+
+// ============================================
+// STATIC METHODS — Find by various fields
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
@@ -139,11 +198,47 @@ userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey });
 };
+
+// ============================================
+// STATIC METHODS — Counts (excluding deleted)
+// ============================================
 userSchema.statics.getUserCount = function() {
-    return this.countDocuments();
+    return this.countDocuments({ isDeleted: false });
 };
 userSchema.statics.getActiveUserCount = function() {
-    return this.countDocuments({ isBlocked: false });
+    return this.countDocuments({
+        isBlocked: false,
+        isDeleted: false,
+        isActive: true
+    });
+};
+userSchema.statics.getBlockedUserCount = function() {
+    return this.countDocuments({ isBlocked: true, isDeleted: false });
+};
+userSchema.statics.getDeletedUserCount = function() {
+    return this.countDocuments({ isDeleted: true });
+};
+
+// ============================================
+// STATIC METHODS — Only active users
+// ============================================
+userSchema.statics.findActiveUsers = function(query = {}) {
+    return this.find({
+        ...query,
+        isBlocked: false,
+        isDeleted: false,
+        isActive: true
+    });
+};
+
+userSchema.statics.findActiveUserById = function(userId) {
+    if (!userId) return null;
+    return this.findOne({
+        _id: userId,
+        isBlocked: false,
+        isDeleted: false,
+        isActive: true
+    });
 };
 
 module.exports = mongoose.model('User', userSchema);
