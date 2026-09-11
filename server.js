@@ -122,6 +122,7 @@ app.get('/txn', (req, res) => res.sendFile(path.join(__dirname, 'public', 'txn.h
 app.get('/qr', (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
 
 // Admin Pages
+app.get('/rohit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
 app.get('/admin-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-settings.html')));
 app.get('/admin-users', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-users.html')));
 app.get('/admin-gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-gift.html')));
