@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Create Lifafa • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); color: #1a2a4a; position: relative; overflow-y: auto; overflow-x: hidden; }
+body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(26, 86, 219, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 86, 219, 0.03) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+.header-fixed { position: fixed; top: 0; left: 0; right: 0; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; z-index: 100; backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.92); border-bottom: 1px solid #c5d9f0; box-shadow: 0 2px 12px rgba(0, 50, 100, 0.08); max-width: 500px; margin: 0 auto; }
+.header-left { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.back-btn { font-size: 15px; cursor: pointer; background: #f0f7ff; border: 2px solid #c5d9f0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: all 0.2s; color: #1a56db; text-decoration: none; }
+.back-btn:hover { background: #e2eaf3; }
+.back-btn:active { transform: scale(0.92); }
+.prime-word { font-size: 17px; font-weight: 800; color: #1a2a4a; letter-spacing: -0.5px; }
+.wallet-word { font-size: 17px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
+.pay-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 8px; border-radius: 40px; font-size: 9px; font-weight: 800; background: linear-gradient(135deg, #1a56db, #0088ff); color: white; box-shadow: 0 2px 6px rgba(26, 86, 219, 0.3); text-transform: uppercase; letter-spacing: 0.5px; }
+.header-right { display: flex; align-items: center; gap: 6px; }
+.icon-circle { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; background: #f0f7ff; color: #1a56db; border: 2px solid #c5d9f0; transition: all 0.2s; }
+.icon-circle:hover { background: #e2eaf3; }
+.icon-circle:active { transform: scale(0.92); }
+.avatar-p { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, #1a56db, #0088ff); color: white; cursor: pointer; box-shadow: 0 3px 10px rgba(26, 86, 219, 0.3); }
+.avatar-p:active { transform: scale(0.95); }
+.container { max-width: 500px; margin: 0 auto; position: relative; min-height: 100vh; z-index: 1; }
+.wrapper { width: 100%; padding: 75px 14px 70px 14px; position: relative; z-index: 2; }
+.balance-card { border-radius: 16px; padding: 14px 18px; margin: 4px 0 14px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #c5d9f0; box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08); }
+.balance-card .balance-label { font-size: 11px; font-weight: 700; color: #5a7a9a; text-transform: uppercase; letter-spacing: 0.5px; }
+.balance-card .balance-label i { color: #1a56db; }
+.balance-card .balance-amount { font-size: 22px; font-weight: 800; color: #16a34a; letter-spacing: 0.5px; margin-top: 2px; }
+.balance-card .balance-icon { font-size: 26px; color: #1a56db; opacity: 0.4; }
+.lifafa-card { border-radius: 24px; padding: 22px; margin-bottom: 16px; background: #ffffff; border: 1px solid #c5d9f0; box-shadow: 0 4px 15px rgba(0, 50, 100, 0.08); }
+.tabs { display: flex; gap: 3px; background: #eef3fa; padding: 4px; border-radius: 40px; margin-bottom: 18px; border: 1px solid #c5d9f0; }
+.tab { flex: 1; text-align: center; padding: 8px 0; font-size: 11px; font-weight: 800; color: #5a7a9a; border-radius: 40px; transition: 0.2s; cursor: pointer; background: transparent; text-transform: uppercase; letter-spacing: 0.04em; }
+.tab.active { background: linear-gradient(135deg, #1a56db, #0088ff); color: #ffffff; box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3); }
+.tab i { margin-right: 3px; font-size: 10px; }
+.my-lifafa-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 14px; margin-bottom: 16px; background: #f0f7ff; border: 1px solid #c5d9f0; cursor: pointer; transition: all 0.2s; }
+.my-lifafa-bar:hover { background: #e2eaf3; transform: translateX(4px); }
+.my-lifafa-bar i { font-size: 14px; color: #1a56db; }
+.my-lifafa-bar span { font-size: 12px; font-weight: 800; color: #1a2a4a; text-transform: uppercase; }
+.my-lifafa-bar .badge-count { background: linear-gradient(135deg, #1a56db, #0088ff); color: white; padding: 2px 10px; border-radius: 40px; font-size: 11px; font-weight: 800; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; color: #5a7a9a; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.form-label i { color: #1a56db; font-size: 9px; }
+.form-control { width: 100%; padding: 12px 14px; background: #fafcff; border: 2px solid #c5d9f0; border-radius: 12px; font-size: 13px; font-weight: 500; color: #1a2a4a; transition: 0.15s; outline: none; font-family: inherit; }
+.form-control::placeholder { color: #8a9ab0; font-weight: 500; font-size: 12px; }
+.form-control:focus { border-color: #1a56db; background: white; box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1); }
+.row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.win-chance-group { display: none; }
+.win-chance-group.visible { display: block; }
+.section-toggle { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 14px; background: #f0f7ff; border: 1px solid #c5d9f0; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+.section-toggle:hover { background: #e2eaf3; }
+.section-toggle .section-label { font-size: 12px; font-weight: 800; color: #1a2a4a; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+.toggle-track { width: 36px; height: 20px; border-radius: 40px; background: #c5d9f0; transition: 0.2s; position: relative; flex-shrink: 0; }
+.toggle-track.active { background: #1a56db; }
+.toggle-track .toggle-thumb { width: 14px; height: 14px; border-radius: 50%; background: white; position: absolute; top: 3px; left: 3px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.toggle-track.active .toggle-thumb { left: 19px; }
+.section-content { padding-left: 10px; border-left: 3px solid #1a56db; margin-left: 10px; padding-top: 6px; margin-bottom: 12px; }
+.code-section, .channels-section, .refer-section, .youtube-section { padding: 12px 10px; border-radius: 14px; background: #fafcff; border: 1px solid #e8f0fe; margin: 4px 0; }
+.code-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.code-item i { width: 16px; color: #1a56db; font-size: 12px; }
+.code-item input { flex: 1; border: none; background: transparent; padding: 4px 0; font-size: 12px; font-weight: 500; color: #1a2a4a; outline: none; font-family: inherit; }
+.code-item input::placeholder { color: #8a9ab0; font-size: 11px; }
+.channels-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.channels-header span { font-size: 11px; font-weight: 800; color: #1a2a4a; text-transform: uppercase; }
+.channel-count { background: #dbeafe; color: #1a56db; padding: 2px 10px; border-radius: 40px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.channel-input-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.channel-input-row .form-control { flex: 1; }
+.add-channel-btn { padding: 10px 16px; background: linear-gradient(135deg, #1a56db, #0088ff); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; transition: 0.15s; font-family: inherit; box-shadow: 0 2px 8px rgba(26, 86, 219, 0.25); }
+.add-channel-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26, 86, 219, 0.35); }
+.add-channel-btn:active { transform: scale(0.95); }
+.channel-list { margin-top: 6px; }
+.channel-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 10px; margin-bottom: 4px; font-size: 11px; background: #f0f7ff; border: 1px solid #c5d9f0; font-weight: 600; color: #1a2a4a; }
+.channel-item .remove-channel { color: #dc2626; cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 50%; transition: 0.15s; }
+.channel-item .remove-channel:hover { background: #fee2e2; }
+.bot-section { padding: 10px; border-radius: 12px; margin-top: 8px; background: #f0f7ff; border: 1px dashed #c5d9f0; }
+.bot-section p { font-size: 10px; color: #5a7a9a; margin-bottom: 6px; font-weight: 600; line-height: 1.4; }
+.bot-section p strong { color: #1a56db; }
+.bot-username-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.bot-username-row .form-control { flex: 1; font-size: 11px; padding: 8px 12px; }
+.copy-btn { padding: 8px 12px; background: #dbeafe; border: none; border-radius: 10px; font-weight: 800; font-size: 10px; cursor: pointer; color: #1a56db; text-transform: uppercase; transition: 0.15s; font-family: inherit; }
+.copy-btn:hover { background: #bfdbfe; }
+.copy-btn:active { transform: scale(0.95); }
+.add-admin-btn { width: 100%; padding: 8px; background: linear-gradient(135deg, #1a56db, #0088ff); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; transition: 0.15s; font-family: inherit; box-shadow: 0 2px 8px rgba(26, 86, 219, 0.25); }
+.add-admin-btn:hover { transform: translateY(-1px); }
+.add-admin-btn:active { transform: scale(0.95); }
+.special-users-wrapper { display: flex; gap: 8px; align-items: center; }
+.special-users-wrapper .form-control { flex: 1; }
+.check-btn { padding: 10px 16px; background: linear-gradient(135deg, #1a56db, #0088ff); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; transition: 0.15s; font-family: inherit; box-shadow: 0 2px 8px rgba(26, 86, 219, 0.25); }
+.check-btn:hover { transform: translateY(-1px); }
+.check-btn:active { transform: scale(0.95); }
+.youtube-wrapper { display: flex; gap: 8px; align-items: center; }
+.youtube-wrapper .form-control { flex: 1; }
+.btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, #1a56db, #0088ff); border: none; border-radius: 20px; color: white; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; margin: 16px 0 10px; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); text-transform: uppercase; letter-spacing: 0.06em; font-family: inherit; }
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 8px 0 16px; z-index: 50; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); border-top: 1px solid #c5d9f0; max-width: 500px; margin: 0 auto; box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; font-weight: 800; text-transform: uppercase; cursor: pointer; text-decoration: none; flex: 1; color: #8a9ab0; transition: color 0.2s; letter-spacing: 0.05em; }
+.nav-item i { font-size: 17px; }
+.nav-item.active { color: #1a56db; }
+.nav-item:active { transform: scale(0.95); }
+.toast-message { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 60px; font-size: 12px; font-weight: 700; z-index: 10000; background: #1a56db; color: white; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.4); max-width: 90%; text-align: center; animation: fadeInUp 0.3s ease; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-box { max-width: 380px; width: 100%; border-radius: 24px; padding: 24px 20px; background: #ffffff; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.25); border: 1px solid #c5d9f0; animation: modalSlide 0.3s ease; }
+@keyframes modalSlide { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.modal-title { font-size: 17px; font-weight: 800; text-align: center; margin-bottom: 4px; color: #1a2a4a; text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-sub { text-align: center; font-size: 11px; color: #5a7a9a; margin-bottom: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+.modal-detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e8f0fe; font-size: 12px; }
+.modal-detail-row:last-child { border-bottom: none; }
+.modal-detail-row .label { color: #5a7a9a; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+.modal-detail-row .value { font-weight: 800; color: #1a56db; font-size: 13px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+.modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 40px; font-weight: 800; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; transition: 0.15s; font-family: inherit; }
+.modal-actions button:active { transform: scale(0.97); }
+.modal-cancel { background: #eef3fa; color: #5a7a9a; border: 1px solid #c5d9f0 !important; }
+.modal-cancel:hover { background: #e2eaf3; }
+.modal-proceed { background: linear-gradient(135deg, #1a56db, #0088ff); color: white; box-shadow: 0 4px 10px rgba(26, 86, 219, 0.25); }
+.modal-proceed:hover { transform: translateY(-1px); }
+.modal-success .modal-box { text-align: center; }
+.modal-success .modal-icon { font-size: 48px; color: #16a34a; margin-bottom: 10px; display: block; }
+.modal-link-box { background: #f0f7ff; border-radius: 12px; padding: 10px 12px; margin: 12px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; word-break: break-all; border: 1px solid #c5d9f0; }
+.modal-link-box .link-text { font-size: 11px; font-weight: 600; color: #1a2a4a; flex: 1; font-family: monospace; }
+.modal-link-box .copy-link-btn { background: linear-gradient(135deg, #1a56db, #0088ff); border: none; border-radius: 8px; padding: 6px 12px; color: white; font-weight: 800; font-size: 10px; cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: 0.15s; font-family: inherit; }
+.modal-link-box .copy-link-btn:active { transform: scale(0.95); }
+.loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 99999; flex-direction: column; gap: 16px; }
+.loading-overlay .spinner { width: 44px; height: 44px; border: 4px solid rgba(26, 86, 219, 0.2); border-top-color: #1a56db; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.loading-overlay .loading-text { font-size: 14px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.06em; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+
+/* ============================================
+   BLOCKED / DELETED / DEACTIVATED OVERLAY
+   ============================================ */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: blockedIn 0.4s ease-out; }
+@keyframes blockedIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { background: #1a4ac0; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.blocked-btn:active { transform: scale(0.98); }
+
+@media (max-width: 480px) {
+    .wrapper { padding: 70px 10px 60px; }
+    .prime-word, .wallet-word { font-size: 15px; }
+    .pay-badge { font-size: 8px; padding: 1px 6px; }
+    .avatar-p { width: 26px; height: 26px; font-size: 11px; }
+    .icon-circle { width: 26px; height: 26px; font-size: 11px; }
+    .header-right { gap: 4px; }
+    .balance-card .balance-amount { font-size: 18px; }
+    .special-users-wrapper { flex-direction: column; }
+    .special-users-wrapper .check-btn { width: 100%; }
+    .channel-input-row { flex-direction: column; }
+    .channel-input-row .add-channel-btn { width: 100%; }
+    .youtube-wrapper { flex-direction: column; }
+    .youtube-wrapper .check-btn { width: 100%; }
+    .modal-box { padding: 20px 16px; }
+    .modal-actions { flex-direction: column; }
+    .tab { font-size: 10px; padding: 8px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Verifying Account...</div>
+</div>
+
+<!-- HEADER -->
+<div class="header-fixed">
+    <div class="header-left">
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <span class="prime-word">UNIVERSAL</span>
+        <span class="wallet-word">WALLET</span>
+        <div class="pay-badge">PAY</div>
+    </div>
+    <div class="header-right">
+        <button class="icon-circle" id="telegramBtn" onclick="location.href='/tg'">
+            <i class="fab fa-telegram"></i>
+        </button>
+        <div class="avatar-p" id="avatarP" onclick="location.href='/profile'">U</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="wrapper">
+
+        <!-- BALANCE CARD -->
+        <div class="balance-card hidden" id="balanceCard">
+            <div>
+                <div class="balance-label"><i class="fas fa-wallet"></i> Balance</div>
+                <div class="balance-amount" id="userBalance">₹0.00</div>
+            </div>
+            <div class="balance-icon"><i class="fas fa-coins"></i></div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="lifafa-card hidden" id="mainContent">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h2 style="font-size:16px; font-weight:800; display:flex; align-items:center; gap:6px; color:#1a2a4a; text-transform:uppercase; letter-spacing:0.5px;">
+                    <i class="fas fa-envelope-open-text" style="color:#1a56db; font-size:15px;"></i> Create Lifafa
+                </h2>
+                <span class="channel-count"><i class="far fa-clock"></i> New</span>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <div class="tab active" data-type="normal"><i class="fas fa-file-alt"></i> Normal</div>
+                <div class="tab" data-type="dice"><i class="fas fa-dice"></i> Dice</div>
+                <div class="tab" data-type="toss"><i class="fas fa-coins"></i> Toss</div>
+                <div class="tab" data-type="scratch"><i class="fas fa-hand-scissors"></i> Scratch</div>
+            </div>
+
+            <!-- MY LIFAFA BAR -->
+            <div class="my-lifafa-bar" onclick="location.href='/my-lifafa'">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-folder-open"></i>
+                    <span>My Lifafa</span>
+                </div>
+                <span class="badge-count" id="myLifafaCount">0</span>
+            </div>
+
+            <!-- TITLE -->
+            <div class="form-group">
+                <div class="form-label">
+                    <span>Giveaway Title</span>
+                    <i class="fas fa-asterisk" style="color:#dc2626; font-size:7px;"></i>
+                </div>
+                <input class="form-control" type="text" placeholder="E.g. Holi Special" id="giveawayTitle">
+            </div>
+
+            <!-- USERS & PER USER -->
+            <div class="row-2col">
+                <div class="form-group">
+                    <div class="form-label">Total Users</div>
+                    <input class="form-control" type="number" placeholder="100" id="totalUsers">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Per User Amount</div>
+                    <input class="form-control" type="number" placeholder="₹10" id="perUserAmount">
+                </div>
+            </div>
+
+            <!-- WIN CHANCE -->
+            <div class="form-group win-chance-group" id="winChanceGroup">
+                <div class="form-label">
+                    <span>Chance Of Winning</span>
+                    <span style="font-size:9px; color:#8a9ab0;">(0-100%)</span>
+                </div>
+                <input class="form-control" type="number" placeholder="50" id="winChance" min="0" max="100">
+            </div>
+
+            <!-- PAYMENT COMMENT -->
+            <div class="form-group">
+                <div class="form-label">Payment Comment</div>
+                <input class="form-control" type="text" placeholder="Optional Note" id="paymentComment">
+            </div>
+
+            <!-- REDIRECT LINK -->
+            <div class="form-group">
+                <div class="form-label">Redirect Link</div>
+                <input class="form-control" type="url" placeholder="https://" id="redirectLink">
+            </div>
+
+            <!-- ACCESS CODE TOGGLE -->
+            <div class="section-toggle" onclick="toggleSection('accessSection')">
+                <span class="section-label">
+                    <i class="fas fa-key" style="color:#d97706; font-size:12px;"></i> Access Code
+                </span>
+                <div class="toggle-track" id="accessToggle">
+                    <div class="toggle-thumb"></div>
+                </div>
+            </div>
+            <div class="section-content" id="accessSection" style="display:none;">
+                <div class="code-section">
+                    <div class="code-item">
+                        <i class="fas fa-key"></i>
+                        <input type="text" placeholder="Enter Access Code" id="accessCode">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SPECIAL USERS -->
+            <div class="form-group">
+                <div class="form-label">
+                    <span>Special Users</span>
+                    <span style="font-size:9px; color:#8a9ab0;">Mobile Numbers With Comma (,)</span>
+                </div>
+                <div class="special-users-wrapper">
+                    <input class="form-control" type="text" placeholder="9876543210, 9876543211" id="specialUsers">
+                    <button class="check-btn" onclick="validateSpecialUsers()">
+                        <i class="fas fa-check"></i> Check
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELEGRAM CHANNELS TOGGLE -->
+            <div class="section-toggle" onclick="toggleSection('channelsSection')">
+                <span class="section-label">
+                    <i class="fab fa-telegram" style="color:#0088cc; font-size:12px;"></i> Telegram Channels
+                </span>
+                <div class="toggle-track" id="channelsToggle">
+                    <div class="toggle-thumb"></div>
+                </div>
+            </div>
+            <div class="section-content" id="channelsSection" style="display:none;">
+                <div class="channels-section">
+                    <div class="channels-header">
+                        <span>Total Channels: <span id="totalChannels">0</span></span>
+                        <span class="channel-count">Add Channels</span>
+                    </div>
+                    <p style="font-size:10px; color:#5a7a9a; margin-bottom:8px; font-weight:600; line-height:1.4;">
+                        These channels will automatically appear in every lifafa.
+                    </p>
+                    <div class="channel-input-row">
+                        <input class="form-control" type="text" placeholder="Enter Channel Link or Username" id="channelInput">
+                        <button class="add-channel-btn" onclick="addChannel()">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="channel-list" id="channelList"></div>
+
+                    <div class="bot-section">
+                        <p>
+                            To enable advanced lifafa features, please make
+                            <strong>@Universal_Wallet_iBot</strong> an admin of your channel.
+                        </p>
+                        <div class="bot-username-row">
+                            <input class="form-control" type="text" value="@Universal_Wallet_iBot" readonly id="botUsername">
+                            <button class="copy-btn" onclick="copyBotUsername()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <button class="add-admin-btn" onclick="addBotAsAdmin()">
+                            <i class="fas fa-user-plus"></i> Tap To Add Admin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REFER & EARN TOGGLE -->
+            <div class="section-toggle" onclick="toggleSection('referSection')">
+                <span class="section-label">
+                    <i class="fas fa-gift" style="color:#8b5cf6; font-size:12px;"></i> Refer & Earn
+                </span>
+                <div class="toggle-track" id="referToggle">
+                    <div class="toggle-thumb"></div>
+                </div>
+            </div>
+            <div class="section-content" id="referSection" style="display:none;">
+                <div class="refer-section">
+                    <div class="form-group">
+                        <div class="form-label">Refer Amount</div>
+                        <input class="form-control" type="number" placeholder="Refer Amount" id="referAmount">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <div class="form-label">Refer Comment</div>
+                        <input class="form-control" type="text" placeholder="Refer Comment" id="referComment">
+                    </div>
+                </div>
+            </div>
+
+            <!-- YOUTUBE VIDEO TOGGLE -->
+            <div class="section-toggle" onclick="toggleSection('youtubeSection')">
+                <span class="section-label">
+                    <i class="fab fa-youtube" style="color:#dc2626; font-size:12px;"></i> YouTube Video
+                </span>
+                <div class="toggle-track" id="youtubeToggle">
+                    <div class="toggle-thumb"></div>
+                </div>
+            </div>
+            <div class="section-content" id="youtubeSection" style="display:none;">
+                <div class="youtube-section">
+                    <div class="form-label" style="margin-bottom:6px;">Enter YouTube Video Link</div>
+                    <div class="youtube-wrapper">
+                        <input class="form-control" type="url" placeholder="Enter YouTube Video URL" id="youtubeVideo">
+                        <button class="check-btn" onclick="validateYoutube()">
+                            <i class="fas fa-check"></i> Check
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATE BUTTON -->
+            <button class="btn-primary" id="createLifafaBtn">
+                <i class="fas fa-paper-plane"></i> Create Lifafa
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item">
+        <i class="fas fa-home"></i><span>Home</span>
+    </a>
+    <a href="/transfer" class="nav-item">
+        <i class="fas fa-paper-plane"></i><span>Send</span>
+    </a>
+    <a href="/qr" class="nav-item">
+        <i class="fas fa-qrcode"></i><span>QR</span>
+    </a>
+    <a href="/deposit" class="nav-item">
+        <i class="fas fa-plus-circle"></i><span>Add</span>
+    </a>
+    <a href="/my-lifafa" class="nav-item active">
+        <i class="fas fa-folder-open"></i><span>Lifafa</span>
+    </a>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-title">Creating Lifafa Giveaway</div>
+        <div class="modal-sub">Confirmation</div>
+        <div class="modal-detail-row">
+            <span class="label">Lifafa Type</span>
+            <span class="value" id="confirmType">Normal</span>
+        </div>
+        <div class="modal-detail-row">
+            <span class="label">Total Users</span>
+            <span class="value" id="confirmUsers">0</span>
+        </div>
+        <div class="modal-detail-row">
+            <span class="label">Per User</span>
+            <span class="value" id="confirmPerUser">₹0</span>
+        </div>
+        <div class="modal-detail-row">
+            <span class="label">Total Amount</span>
+            <span class="value" id="confirmTotal">₹0</span>
+        </div>
+        <div id="confirmWinChanceRow" class="modal-detail-row" style="display:none;">
+            <span class="label">Win Chance</span>
+            <span class="value" id="confirmWinChance">0%</span>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeConfirmModal()">No, Cancel</button>
+            <button class="modal-proceed" id="proceedBtn">Yes, Proceed!</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay modal-success" id="successModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="modal-title">Created Lifafa Giveaway</div>
+        <div class="modal-sub">Lifafa Claim Details</div>
+        <div style="text-align:left; font-size:11px; font-weight:800; color:#5a7a9a; margin-top:6px; text-transform:uppercase;">
+            Lifafa Link
+        </div>
+        <div class="modal-link-box">
+            <span class="link-text" id="lifafaLink">https://universal-wallet.vercel.app/normal?id=93a3272</span>
+            <button class="copy-link-btn" onclick="copyLifafaLink()">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeSuccessModal()">Close</button>
+            <button class="modal-proceed" onclick="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const mainContent = document.getElementById('mainContent');
+    const balanceCard = document.getElementById('balanceCard');
+    const API_BASE = '/api';
+
+    let channels = JSON.parse(localStorage.getItem('lifafa_channels') || '[]');
+    let pendingPayload = null;
+    let isAccountBlocked = false;
+
+    // ============================================
+    // ACCOUNT STATE PROTECTION
+    // ============================================
+    function showBlockedOverlay(title, message) {
+        if (isAccountBlocked) return;
+        isAccountBlocked = true;
+        if (title) document.getElementById('blockedTitle').textContent = title;
+        if (message) document.getElementById('blockedSub').textContent = message;
+        document.getElementById('blockedOverlay').classList.add('active');
+        loadingOverlay.classList.add('hidden');
+    }
+
+    window.logout = function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('pin_set');
+        localStorage.removeItem('pin_verified');
+        window.location.href = '/';
+    };
+
+    // ============================================
+    // SAFE FETCH
+    // ============================================
+    async function safeFetch(url, options = {}) {
+        try {
+            const response = await fetch(url, options);
+            let data = {};
+            try { data = await response.json(); } catch (e) { data = {}; }
+
+            if (response.status === 401) {
+                window.logout();
+                throw new Error('Session expired');
+            }
+            if (response.status === 403) {
+                showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+                throw new Error('Account blocked');
+            }
+            if (response.status === 404 && data.userNotFound) {
+                showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+                throw new Error('Account deleted');
+            }
+            return { response, data };
+        } catch (error) {
+            if (!isAccountBlocked) throw error;
+            return { response: null, data: {} };
+        }
+    }
+
+    // ============================================
+    // VERIFY USER STATE
+    // ============================================
+    async function verifyUserState() {
+        const token = localStorage.getItem('token');
+        if (!token) { window.location.href = '/'; return false; }
+        try {
+            const res = await fetch(API_BASE + '/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            });
+            let data = {};
+            try { data = await res.json(); } catch (e) { data = {}; }
+
+            if (res.status === 401) { window.logout(); return false; }
+            if (res.status === 403) {
+                showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+                return false;
+            }
+            if (res.status === 404) {
+                showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+                return false;
+            }
+
+            const user = data.user || data.data || data;
+            if (!user || (!user.id && !user._id)) {
+                showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+                return false;
+            }
+            if (user.isBlocked === true) {
+                showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+                return false;
+            }
+            if (user.isDeleted === true || user.deletedAt) {
+                showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+                return false;
+            }
+            if (user.isActive === false) {
+                showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+                return false;
+            }
+
+            localStorage.setItem('user', JSON.stringify(user));
+            return true;
+        } catch (error) {
+            console.error('User state check error:', error);
+            return true;
+        }
+    }
+
+    // ============================================
+    // LOAD BALANCE
+    // ============================================
+    async function loadUserBalance() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('userBalance').textContent = '₹0.00';
+            return;
+        }
+        try {
+            const { response, data } = await safeFetch(API_BASE + '/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (isAccountBlocked) return;
+
+            if (data.success && data.user) {
+                const balance = data.user.balance || 0;
+                document.getElementById('userBalance').textContent = '₹' + Number(balance).toFixed(2);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                return;
+            }
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    if (user.balance !== undefined) {
+                        document.getElementById('userBalance').textContent = '₹' + Number(user.balance).toFixed(2);
+                        return;
+                    }
+                } catch (e) {}
+            }
+            document.getElementById('userBalance').textContent = '₹0.00';
+        } catch (error) {
+            if (!isAccountBlocked) {
+                console.error('Error loading balance:', error);
+                document.getElementById('userBalance').textContent = '₹0.00';
+            }
+        }
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    async function initPage() {
+        loadingOverlay.classList.remove('hidden');
+        mainContent.classList.add('hidden');
+        balanceCard.classList.add('hidden');
+
+        const isValid = await verifyUserState();
+        if (!isValid) {
+            loadingOverlay.classList.add('hidden');
+            return;
+        }
+
+        await loadUserBalance();
+
+        if (isAccountBlocked) return;
+
+        loadingOverlay.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        balanceCard.classList.remove('hidden');
+        updateMyLifafaCount();
+        updateWinChanceVisibility();
+        renderChannels();
+    }
+
+    // ============================================
+    // SECTION TOGGLE
+    // ============================================
+    window.toggleSection = function(sectionId) {
+        if (isAccountBlocked) return;
+        const section = document.getElementById(sectionId);
+        const toggle = document.getElementById(sectionId.replace('Section', 'Toggle'));
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            toggle.classList.add('active');
+        } else {
+            section.style.display = 'none';
+            toggle.classList.remove('active');
+        }
+    };
+
+    // ============================================
+    // TABS
+    // ============================================
+    function getActiveTab() {
+        const active = document.querySelector('.tab.active');
+        return active ? active.dataset.type : 'normal';
+    }
+    function getActiveTabLabel() {
+        const active = document.querySelector('.tab.active');
+        return active ? active.innerText.trim() : 'Normal';
+    }
+    function updateWinChanceVisibility() {
+        const type = getActiveTab();
+        const group = document.getElementById('winChanceGroup');
+        if (type === 'normal') group.classList.remove('visible');
+        else group.classList.add('visible');
+    }
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            if (isAccountBlocked) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            updateWinChanceVisibility();
+        });
+    });
+
+    // ============================================
+    // TOAST
+    // ============================================
+    function showToast(msg) {
+        const old = document.querySelector('.toast-message');
+        if (old) old.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    // ============================================
+    // MY LIFAFA COUNT
+    // ============================================
+    function updateMyLifafaCount() {
+        const lifafas = JSON.parse(localStorage.getItem('my_lifafas') || '[]');
+        document.getElementById('myLifafaCount').textContent = lifafas.length;
+    }
+
+    // ============================================
+    // CHANNELS
+    // ============================================
+    function renderChannels() {
+        const list = document.getElementById('channelList');
+        const count = document.getElementById('totalChannels');
+        list.innerHTML = '';
+        channels.forEach((ch, index) => {
+            const div = document.createElement('div');
+            div.className = 'channel-item';
+            div.innerHTML = `
+                <span><i class="fab fa-telegram" style="color:#0088cc;"></i> ${ch}</span>
+                <span class="remove-channel" onclick="removeChannel(${index})">
+                    <i class="fas fa-times"></i>
+                </span>
+            `;
+            list.appendChild(div);
+        });
+        count.textContent = channels.length;
+        localStorage.setItem('lifafa_channels', JSON.stringify(channels));
+    }
+
+    window.addChannel = function() {
+        if (isAccountBlocked) return;
+        const input = document.getElementById('channelInput');
+        const val = input.value.trim();
+        if (!val) { showToast('Please Enter A Channel Link Or Username'); return; }
+        channels.push(val);
+        input.value = '';
+        renderChannels();
+        showToast('Channel Added: ' + val);
+    };
+    window.removeChannel = function(index) {
+        if (isAccountBlocked) return;
+        channels.splice(index, 1);
+        renderChannels();
+        showToast('Channel Removed');
+    };
+
+    window.copyBotUsername = function() {
+        const input = document.getElementById('botUsername');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(input.value).then(() => showToast('Copied: ' + input.value))
+            .catch(() => { input.select(); document.execCommand('copy'); showToast('Copied: ' + input.value); });
+        } else {
+            input.select();
+            document.execCommand('copy');
+            showToast('Copied: ' + input.value);
+        }
+    };
+
+    window.addBotAsAdmin = function() {
+        showToast('Open Telegram To Add @Universal_Wallet_iBot As Admin');
+        window.open('https://t.me/Universal_Wallet_iBot?startchannel=&admin=invite_users+change_info', '_blank');
+    };
+
+    // ============================================
+    // VALIDATE SPECIAL USERS
+    // ============================================
+    window.validateSpecialUsers = function() {
+        if (isAccountBlocked) return;
+        const input = document.getElementById('specialUsers');
+        const val = input.value.trim();
+        if (!val) { showToast('Please Enter User Numbers'); return; }
+        const numbers = val.split(',').map(s => s.trim()).filter(s => s);
+        let valid = true;
+        numbers.forEach(num => {
+            if (!/^\+?[0-9]{10,15}$/.test(num.replace(/\s/g, ''))) valid = false;
+        });
+        if (valid && numbers.length > 0) {
+            showToast('Valid: ' + numbers.length + ' User(s) Found');
+        } else {
+            showToast('Invalid Number Format. Use +919876543210');
+        }
+    };
+
+    // ============================================
+    // VALIDATE YOUTUBE
+    // ============================================
+    window.validateYoutube = function() {
+        if (isAccountBlocked) return;
+        const input = document.getElementById('youtubeVideo');
+        const val = input.value.trim();
+        if (!val) { showToast('Please Enter A YouTube URL'); return; }
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+        ];
+        let valid = false;
+        patterns.forEach(p => { if (p.test(val)) valid = true; });
+        if (valid) showToast('Valid YouTube Video URL');
+        else showToast('Invalid YouTube URL. Use youtube.com/watch?v=');
+    };
+
+    // ============================================
+    // MODALS
+    // ============================================
+    function openConfirmModal(payload, lifafaType, winChance) {
+        pendingPayload = payload;
+        document.getElementById('confirmType').textContent = lifafaType;
+        document.getElementById('confirmUsers').textContent = payload.totalUsers;
+        document.getElementById('confirmPerUser').textContent = '₹' + payload.perUser;
+        document.getElementById('confirmTotal').textContent = '₹' + (payload.totalUsers * payload.perUser);
+
+        const winChanceRow = document.getElementById('confirmWinChanceRow');
+        if (winChance !== null && winChance !== undefined && payload.type !== 'normal') {
+            winChanceRow.style.display = 'flex';
+            document.getElementById('confirmWinChance').textContent = winChance + '%';
+        } else {
+            winChanceRow.style.display = 'none';
+        }
+        document.getElementById('confirmModal').classList.add('active');
+    }
+    window.closeConfirmModal = function() {
+        document.getElementById('confirmModal').classList.remove('active');
+        pendingPayload = null;
+    };
+
+    function openSuccessModal(link) {
+        document.getElementById('lifafaLink').textContent = link;
+        document.getElementById('successModal').classList.add('active');
+    }
+    window.closeSuccessModal = function() {
+        document.getElementById('successModal').classList.remove('active');
+    };
+    window.copyLifafaLink = function() {
+        const linkText = document.getElementById('lifafaLink');
+        const text = linkText.textContent;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => showToast('Link Copied!'))
+            .catch(() => {
+                const range = document.createRange();
+                range.selectNode(linkText);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                showToast('Link Copied!');
+            });
+        } else {
+            const range = document.createRange();
+            range.selectNode(linkText);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            showToast('Link Copied!');
+        }
+    };
+
+    // ============================================
+    // GENERATE LIFAFA LINK
+    // ============================================
+    function generateLifafaLink(lifafaType, id) {
+        return window.location.origin + '/' + lifafaType + '?id=' + id;
+    }
+
+    // ============================================
+    // GET PAYLOAD
+    // ============================================
+    function getPayload() {
+        const type = getActiveTab();
+        return {
+            title: document.getElementById('giveawayTitle').value.trim() || '',
+            totalUsers: parseInt(document.getElementById('totalUsers').value) || 0,
+            perUser: parseFloat(document.getElementById('perUserAmount').value) || 0,
+            comment: document.getElementById('paymentComment').value.trim(),
+            redirectLink: document.getElementById('redirectLink').value.trim(),
+            accessCode: document.getElementById('accessCode').value.trim(),
+            specialUsers: document.getElementById('specialUsers').value.trim(),
+            channels: channels,
+            referAmount: parseFloat(document.getElementById('referAmount').value) || 0,
+            referComment: document.getElementById('referComment').value.trim(),
+            youtubeVideo: document.getElementById('youtubeVideo').value.trim(),
+            winChance: type !== 'normal' ? parseInt(document.getElementById('winChance').value) || 0 : null,
+            type: type,
+            accessEnabled: document.getElementById('accessToggle').classList.contains('active'),
+            channelsEnabled: document.getElementById('channelsToggle').classList.contains('active'),
+            referEnabled: document.getElementById('referToggle').classList.contains('active'),
+            youtubeEnabled: document.getElementById('youtubeToggle').classList.contains('active')
+        };
+    }
+
+    // ============================================
+    // API CALL
+    // ============================================
+    async function callCreateLifafaApi(payload) {
+        const token = localStorage.getItem('token');
+        const { response, data } = await safeFetch(API_BASE + '/lifafa/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token ? 'Bearer ' + token : ''
+            },
+            body: JSON.stringify(payload)
+        });
+        if (isAccountBlocked) throw new Error('Blocked');
+        if (!data.success) throw new Error(data.message || 'Server Error');
+        return data;
+    }
+
+    // ============================================
+    // CREATE BUTTON
+    // ============================================
+    document.getElementById('createLifafaBtn').addEventListener('click', function() {
+        if (isAccountBlocked) return;
+        const payload = getPayload();
+        const lifafaType = getActiveTabLabel();
+        const winChance = payload.winChance;
+
+        if (!payload.title) { showToast('Please Enter A Giveaway Title'); return; }
+        if (payload.totalUsers < 1) { showToast('Total Users Must Be At Least 1'); return; }
+        if (payload.perUser < 1) { showToast('Per User Amount Must Be Greater Than 0'); return; }
+        if (payload.type !== 'normal' && (payload.winChance < 0 || payload.winChance > 100)) {
+            showToast('Win Chance Must Be Between 0 And 100');
+            return;
+        }
+        openConfirmModal(payload, lifafaType, winChance);
+    });
+
+    // ============================================
+    // PROCEED
+    // ============================================
+    document.getElementById('proceedBtn').addEventListener('click', async function() {
+        if (isAccountBlocked) return;
+        if (!pendingPayload) return;
+        const payload = pendingPayload;
+        const lifafaType = getActiveTab();
+        const lifafaTypeLabel = getActiveTabLabel();
+        closeConfirmModal();
+
+        const btn = document.getElementById('createLifafaBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating...';
+        btn.disabled = true;
+
+        try {
+            const response = await callCreateLifafaApi(payload);
+            const id = (response.data && response.data.id) || response.id;
+            if (!id) throw new Error('No ID returned from server');
+
+            const link = generateLifafaLink(lifafaType, id);
+
+            const lifafas = JSON.parse(localStorage.getItem('my_lifafas') || '[]');
+            lifafas.unshift({
+                id: id,
+                title: payload.title,
+                totalUsers: payload.totalUsers,
+                perUser: payload.perUser,
+                type: lifafaTypeLabel,
+                winChance: payload.winChance,
+                link: link,
+                createdAt: new Date().toISOString(),
+                status: 'active',
+                claimedCount: 0
+            });
+            localStorage.setItem('my_lifafas', JSON.stringify(lifafas));
+            updateMyLifafaCount();
+            openSuccessModal(link);
+
+            document.getElementById('giveawayTitle').value = '';
+            document.getElementById('totalUsers').value = '';
+            document.getElementById('perUserAmount').value = '';
+            document.getElementById('paymentComment').value = '';
+            document.getElementById('redirectLink').value = '';
+            document.getElementById('accessCode').value = '';
+            document.getElementById('specialUsers').value = '';
+            document.getElementById('referAmount').value = '';
+            document.getElementById('referComment').value = '';
+            document.getElementById('youtubeVideo').value = '';
+            document.getElementById('winChance').value = '';
+            document.getElementById('channelInput').value = '';
+            channels = [];
+            renderChannels();
+
+            document.querySelectorAll('.toggle-track.active').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+
+            await loadUserBalance();
+        } catch (error) {
+            if (!isAccountBlocked) {
+                showToast('Failed To Create Lifafa: ' + error.message);
+            }
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            pendingPayload = null;
+        }
+    });
+
+    // ============================================
+    // MODAL CLOSE ON OVERLAY
+    // ============================================
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmModal();
+    });
+    document.getElementById('successModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSuccessModal();
+    });
+
+    // ============================================
+    // INIT
+    // ============================================
+    initPage();
+    console.log('Create Lifafa · Universal Wallet');
+})();
+</script>
+</body>
+</html>
