@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Deposit • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root { --bg-primary: #ffffff; --bg-secondary: #ffffff; --bg-card: #ffffff; --text-primary: #1a2a4a; --text-secondary: #5a7a9a; --text-muted: #8a9ab0; --border-color: #c5d9f0; --border-soft: #e8f0fe; --accent: #1a56db; --accent-gradient: linear-gradient(135deg, #1a56db, #0088ff); --accent-glow: rgba(26, 86, 219, 0.15); --shadow-card: 0 4px 20px rgba(0, 50, 100, 0.08); --balance-gradient: linear-gradient(135deg, #1a56db, #0088ff); --nav-bg: rgba(255, 255, 255, 0.98); --input-bg: #fafcff; --grid-color: rgba(26, 86, 219, 0.04); --success: #16a34a; --danger: #dc2626; --warning: #d97706; --manual-color: #8b5cf6; --cancelled: #6b7280; --pending-approval: #d97706; }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); color: var(--text-primary); padding: 1rem; padding-bottom: 80px; position: relative; overflow-x: hidden; }
+body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+.header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+.back-btn { background: #ffffff; border: 2px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; color: var(--accent); font-size: 1.1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 50, 100, 0.08); }
+.back-btn:hover { background: #f0f7ff; }
+.back-btn:active { transform: scale(0.95); }
+.header-logo { font-size: 1.3rem; font-weight: 800; color: var(--accent); letter-spacing: 0.5px; }
+.header-right { width: 40px; }
+.container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+.balance-card { background: var(--balance-gradient); border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(26, 86, 219, 0.25); position: relative; overflow: hidden; }
+.balance-card::after { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 70%); pointer-events: none; }
+.balance-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9); margin-bottom: 0.5rem; position: relative; z-index: 1; font-weight: 600; }
+.balance-amount { font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem; position: relative; z-index: 1; }
+.wallet-badge { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; color: #ffffff; margin-top: 0.5rem; position: relative; z-index: 1; font-weight: 700; }
+.card { background: #ffffff; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0, 50, 100, 0.06); }
+.card-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 700; }
+.card-title i { color: var(--accent); }
+.amount-input { width: 100%; background: var(--input-bg); border: 2px solid var(--border-color); border-radius: 1rem; padding: 1rem; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-align: center; outline: none; font-family: monospace; transition: border-color 0.3s ease; }
+.amount-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1); background: #ffffff; }
+.amount-sublabel { font-size: 0.7rem; color: var(--text-secondary); text-align: center; margin-top: 0.5rem; font-weight: 600; }
+.quick-amounts { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.quick-amount { flex: 1; background: #f0f7ff; border: 2px solid var(--border-color); border-radius: 0.75rem; padding: 0.6rem; font-size: 0.85rem; font-weight: 800; color: var(--accent); cursor: pointer; transition: all 0.2s; text-align: center; min-width: 60px; font-family: inherit; }
+.quick-amount:hover { background: #e2eaf3; }
+.quick-amount:active { transform: scale(0.96); background: var(--accent); border-color: var(--accent); color: #ffffff; }
+.method-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-soft); }
+.method-row:last-child { border-bottom: none; }
+.method-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+.method-value { font-size: 0.85rem; font-weight: 700; color: var(--accent); }
+.method-value i { margin-right: 0.3rem; }
+.proceed-btn { width: 100%; background: var(--accent-gradient); border: none; border-radius: 1rem; padding: 1rem; font-size: 1rem; font-weight: 800; color: #ffffff; cursor: pointer; margin-top: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.proceed-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4); }
+.proceed-btn:active { transform: scale(0.98); opacity: 0.9; }
+.proceed-btn.manual { background: var(--manual-color); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+.proceed-btn.manual:hover { box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
+.pending-deposit-item { background: #fafcff; border: 1px solid var(--border-color); border-radius: 1rem; padding: 1rem; margin-bottom: 0.75rem; transition: all 0.2s; }
+.pending-deposit-item:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(26, 86, 219, 0.1); }
+.pending-deposit-item .deposit-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.pending-deposit-item .deposit-amount { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+.pending-deposit-item .deposit-id { font-size: 0.7rem; color: var(--text-muted); font-family: monospace; font-weight: 600; }
+.pending-deposit-item .deposit-expiry { font-size: 0.65rem; color: var(--warning); font-weight: 700; }
+.pending-deposit-item .deposit-status-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 2rem; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+.pending-deposit-item .deposit-status-badge.pending { background: #fef3c7; color: var(--warning); }
+.pending-deposit-item .deposit-status-badge.approval { background: #ede9fe; color: var(--manual-color); }
+.pending-deposit-item .deposit-status-badge.completed { background: #dcfce7; color: var(--success); }
+.pending-deposit-item .deposit-status-badge.rejected { background: #fee2e2; color: var(--danger); }
+.pending-deposit-item .deposit-type-badge-mini { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 1rem; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; }
+.pending-deposit-item .deposit-type-badge-mini.manual { background: #ede9fe; color: var(--manual-color); }
+.pending-deposit-item .deposit-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.pending-deposit-item .deposit-actions button { flex: 1; padding: 0.55rem; border: none; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: inherit; text-transform: uppercase; letter-spacing: 0.3px; }
+.pending-deposit-item .deposit-actions .continue-btn { background: var(--accent); color: #ffffff; }
+.pending-deposit-item .deposit-actions .continue-btn:hover { background: #1a4ac0; }
+.pending-deposit-item .deposit-actions .cancel-btn { background: #fee2e2; color: var(--danger); }
+.pending-deposit-item .deposit-actions .cancel-btn:hover { background: #fecaca; }
+.pending-deposit-item .deposit-actions button:active { transform: scale(0.95); }
+.pending-deposit-item .deposit-actions .disabled-btn { background: #f1f5f9; color: var(--text-muted); cursor: not-allowed; }
+.empty-deposits { text-align: center; padding: 2rem 1rem; color: var(--text-secondary); }
+.empty-deposits i { font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4; color: var(--accent); }
+.empty-deposits p { font-size: 0.85rem; font-weight: 600; }
+#statePayment { display: none; }
+.payment-top { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid var(--border-color); border-radius: 1rem; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0, 50, 100, 0.06); }
+.pay-exactly { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.pay-amount { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.qr-box { background: #ffffff; border-radius: 1rem; padding: 0.5rem; width: 220px; height: 220px; margin: 0 auto 0.5rem auto; position: relative; border: 3px solid var(--accent); box-shadow: 0 8px 20px rgba(26, 86, 219, 0.15); }
+.qr-box img { width: 100%; height: 100%; object-fit: contain; }
+.qr-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); border-radius: 0.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+.qr-overlay.show { opacity: 1; }
+.qr-overlay i { font-size: 3rem; color: var(--success); margin-bottom: 0.5rem; }
+.qr-overlay span { color: white; font-size: 0.8rem; font-weight: 700; }
+.qr-caption { text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.warning-box { background: #fef3c7; border: 1px solid #fde68a; border-radius: 0.75rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.7rem; color: var(--warning); font-weight: 600; }
+.warning-box ul { list-style: none; padding: 0; }
+.warning-box li { padding: 0.2rem 0; display: flex; align-items: center; gap: 0.5rem; }
+.warning-box li i { font-size: 0.5rem; }
+.auto-detect-status { background: #fafcff; border: 1px solid var(--border-color); border-radius: 1rem; padding: 1rem; margin: 1rem 0; text-align: center; transition: all 0.3s ease; }
+.auto-detect-status .status-icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+.auto-detect-status .status-text { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+.auto-detect-status .status-sub { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem; font-weight: 600; }
+.auto-detect-status.manual .status-icon { color: var(--manual-color); }
+.auto-detect-status.approval .status-icon { color: var(--pending-approval); }
+.auto-detect-status.success .status-icon { color: var(--success); }
+.auto-detect-status.error .status-icon { color: var(--danger); }
+.utr-section { margin-top: 0.5rem; }
+.utr-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 700; }
+.utr-input-row { display: flex; gap: 0.5rem; align-items: center; }
+.utr-input-row input { flex: 1; background: var(--input-bg); border: 2px solid var(--border-color); border-radius: 0.75rem; padding: 0.8rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease; font-family: inherit; font-weight: 600; }
+.utr-input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1); background: #ffffff; }
+.utr-input-row i { color: var(--accent); font-size: 1.2rem; }
+.manual-confirm-btn { width: 100%; background: var(--manual-color); border: none; border-radius: 0.75rem; padding: 0.85rem; color: #ffffff; font-weight: 800; cursor: pointer; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); transition: all 0.2s; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
+.manual-confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
+.manual-confirm-btn:active { transform: scale(0.98); opacity: 0.9; }
+.manual-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.amount-auto { background: var(--input-bg); border: 2px solid var(--accent); border-radius: 0.75rem; padding: 0.8rem 1rem; margin: 0.75rem 0; display: flex; align-items: center; gap: 0.75rem; }
+.amount-auto i { color: var(--accent); font-size: 1.2rem; }
+.amount-auto span { font-weight: 800; color: var(--text-primary); font-size: 1rem; }
+.deposit-type-badge { display: inline-block; padding: 0.3rem 0.85rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+.deposit-type-badge.manual { background: #ede9fe; color: var(--manual-color); }
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 22px; border-radius: 2rem; font-size: 0.8rem; font-weight: 700; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+.toast.success { background: var(--success); color: white; }
+.toast.error { background: var(--danger); color: white; }
+.toast.info { background: var(--accent); color: white; }
+.toast.warning { background: var(--warning); color: white; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: 1px solid var(--border-color); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.5rem; }
+.nav-item i { font-size: 1.2rem; }
+.nav-item.active { color: var(--accent); }
+.nav-item:active { transform: scale(0.95); }
+.hidden { display: none !important; }
+@media (max-width: 480px) { .container { padding: 0; } .balance-amount { font-size: 2rem; } .qr-box { width: 190px; height: 190px; } }
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<header class="header">
+    <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+    <span class="header-logo">Deposit</span>
+    <div class="header-right"></div>
+</header>
+
+<div class="container">
+    <!-- BALANCE CARD -->
+    <div class="balance-card">
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount" id="balance">₹0.00</div>
+        <div class="wallet-badge"><i class="fas fa-shield-alt"></i> Universal Wallet</div>
+    </div>
+
+    <!-- STATE 1: DEPOSIT INPUT -->
+    <div id="stateDeposit">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-arrow-down"></i> Enter Deposit Amount</div>
+            <input type="number" id="amount" class="amount-input" placeholder="0" min="1" max="5000" value="50">
+            <div class="amount-sublabel">Min ₹1 | Max ₹5,000</div>
+            <div class="quick-amounts">
+                <button class="quick-amount" onclick="setAmount(50)">₹50</button>
+                <button class="quick-amount" onclick="setAmount(100)">₹100</button>
+                <button class="quick-amount" onclick="setAmount(500)">₹500</button>
+                <button class="quick-amount" onclick="setAmount(1000)">₹1K</button>
+                <button class="quick-amount" onclick="setAmount(2000)">₹2K</button>
+                <button class="quick-amount" onclick="setAmount(5000)">₹5K</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-credit-card"></i> Payment Details</div>
+            <div class="method-row">
+                <span class="method-label">Payment Method</span>
+                <span class="method-value"><i class="fas fa-qrcode"></i> QR Code</span>
+            </div>
+            <div class="method-row">
+                <span class="method-label">Processing Time</span>
+                <span class="method-value"><i class="fas fa-bolt"></i> Manual</span>
+            </div>
+            <div class="method-row">
+                <span class="method-label">Deposit Fee</span>
+                <span class="method-value"><i class="fas fa-gift"></i> Free</span>
+            </div>
+        </div>
+
+        <button class="proceed-btn manual" id="proceedBtn" onclick="proceedToPay()">
+            <i class="fas fa-hand-holding-usd"></i> Proceed To Pay
+        </button>
+
+        <!-- PENDING DEPOSITS -->
+        <div style="margin-top: 1.5rem;">
+            <div class="card-title" style="margin-bottom: 0.75rem;">
+                <i class="fas fa-clock"></i> Pending Deposits
+            </div>
+            <div id="pendingDepositsContainer">
+                <div class="empty-deposits">
+                    <i class="fas fa-inbox"></i>
+                    <p>No Pending Deposits</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATE 2: PAYMENT SCREEN -->
+    <div id="statePayment">
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <span class="deposit-type-badge manual">📝 Manual</span>
+        </div>
+
+        <div class="payment-top">
+            <div>
+                <div class="pay-exactly">Pay Exactly</div>
+                <div class="pay-amount" id="paymentAmount">₹0</div>
+            </div>
+            <div>
+                <div class="pay-exactly">Time Left</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent); font-family: monospace;" id="timerDisplay">29:56</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 700;">
+                Scan QR Code To Pay
+            </div>
+            <div class="qr-box" id="qrCodeContainer">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=admin@upi&am=100" alt="QR">
+                <div class="qr-overlay" id="qrOverlay">
+                    <i class="fas fa-check-circle"></i>
+                    <span>UTR Submitted!</span>
+                </div>
+            </div>
+            <div class="qr-caption">Scan QR With Your UPI App</div>
+        </div>
+
+        <div class="warning-box">
+            <ul>
+                <li><i class="fas fa-circle"></i> Complete Payment Within <strong>30 Minutes</strong></li>
+                <li><i class="fas fa-circle"></i> Send Exact Amount Shown</li>
+                <li><i class="fas fa-circle"></i> Enter UTR After Paying</li>
+            </ul>
+        </div>
+
+        <div class="auto-detect-status manual" id="manualStatus">
+            <span class="status-icon"><i class="fas fa-hand-holding-usd"></i></span>
+            <div class="status-text" id="statusText">Submit UTR For Approval</div>
+            <div class="status-sub" id="statusSub">Pay And Submit UTR For Approval</div>
+        </div>
+
+        <div class="utr-section" id="utrSection">
+            <div class="utr-section-title"><i class="fas fa-pen"></i> Enter UTR After Payment</div>
+            <div class="utr-input-row">
+                <i class="fas fa-search"></i>
+                <input type="text" id="utrInput" placeholder="UTR (e.g. 205507856806)">
+            </div>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 600;">
+                <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Enter UTR From Payment Receipt
+            </div>
+            <button class="manual-confirm-btn" id="manualConfirmBtn" onclick="manualConfirm()">
+                <i class="fas fa-check-circle"></i> Submit For Approval
+            </button>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: center; font-weight: 600;">
+                <i class="fas fa-info-circle"></i> Admin Will Verify And Approve
+            </div>
+        </div>
+
+        <div class="amount-auto">
+            <i class="fas fa-lock"></i>
+            <div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+                    Amount (₹) — Auto Filled
+                </div>
+                <span id="autoAmountDisplay">₹0</span>
+            </div>
+        </div>
+
+        <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: -0.5rem; margin-bottom: 1rem; font-weight: 600;">
+            <i class="fas fa-circle" style="font-size: 0.4rem;"></i> <span id="autoVerifyText">Admin Will Verify And Approve</span>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Send</span></a>
+    <a href="/deposit" class="nav-item active"><i class="fas fa-qrcode"></i><span>QR</span></a>
+    <a href="/withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>Withdraw</span></a>
+    <a href="/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+</div>
+
+<script>
+console.log('Deposit Page Started (Manual Only)');
+
+const token = localStorage.getItem('token');
+if (!token) {
+    console.error('No Token');
+    window.location.href = '/';
+}
+
+let qrTimerInterval = null;
+let paymentAmount = 0;
+let isVerified = false;
+let currentDepositId = null;
+const adminUpi = 'admin@upi';
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} show`;
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== LOAD BALANCE =====
+async function loadBalance() {
+    try {
+        console.log('Loading Balance...');
+        const response = await fetch('/api/wallet/balance', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+        if (data.success && data.balance !== undefined) {
+            document.getElementById('balance').textContent = '₹' + parseFloat(data.balance).toFixed(2);
+            console.log('Balance Loaded: ₹' + data.balance);
+        } else if (data.status === 'success' && data.data && data.data.balance !== undefined) {
+            document.getElementById('balance').textContent = '₹' + parseFloat(data.data.balance).toFixed(2);
+            console.log('Balance Loaded: ₹' + data.data.balance);
+        }
+    } catch(e) {
+        console.error('Load Balance Error:', e.message);
+    }
+}
+
+// ===== LOAD PENDING DEPOSITS =====
+async function loadPendingDeposits() {
+    try {
+        console.log('Loading Pending Deposits...');
+        const response = await fetch('/api/deposit/pending', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+
+        const container = document.getElementById('pendingDepositsContainer');
+
+        if (!data.success || !data.deposits || data.deposits.length === 0) {
+            container.innerHTML = `
+                <div class="empty-deposits">
+                    <i class="fas fa-inbox"></i>
+                    <p>No Pending Deposits</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.deposits.forEach(deposit => {
+            const expiryTime = new Date(deposit.expiresAt);
+            const now = new Date();
+            const timeLeft = Math.floor((expiryTime - now) / 1000 / 60);
+            const minutesLeft = Math.max(0, timeLeft);
+            const expiryText = minutesLeft > 0 ? `${minutesLeft} Min Left` : 'Expiring Soon';
+
+            let statusBadge = '';
+            if (deposit.status === 'pending') {
+                statusBadge = '<span class="deposit-status-badge pending">⏳ Pending</span>';
+            } else if (deposit.status === 'pending_approval') {
+                statusBadge = '<span class="deposit-status-badge approval">⏳ Approval</span>';
+            } else if (deposit.status === 'completed' || deposit.status === 'approved') {
+                statusBadge = '<span class="deposit-status-badge completed">✅ Completed</span>';
+            } else if (deposit.status === 'rejected') {
+                statusBadge = '<span class="deposit-status-badge rejected">❌ Rejected</span>';
+            } else if (deposit.status === 'expired' || deposit.status === 'cancelled') {
+                statusBadge = '<span class="deposit-status-badge rejected">⏰ Expired</span>';
+            }
+
+            let depositTypeMini = '<span class="deposit-type-badge-mini manual">📝 Manual</span>';
+
+            let actionsHtml = '';
+            if (deposit.status === 'pending') {
+                actionsHtml = `
+                    <div class="deposit-actions">
+                        <button class="continue-btn" onclick="continueDeposit('${deposit.depositId}')">
+                            <i class="fas fa-qrcode"></i> Continue
+                        </button>
+                        <button class="cancel-btn" onclick="cancelDeposit('${deposit.depositId}')">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                `;
+            } else if (deposit.status === 'pending_approval') {
+                actionsHtml = `
+                    <div class="deposit-actions">
+                        <button class="disabled-btn" disabled>
+                            <i class="fas fa-clock"></i> Waiting For Approval
+                        </button>
+                    </div>
+                `;
+            } else if (deposit.status === 'completed' || deposit.status === 'approved') {
+                actionsHtml = `
+                    <div class="deposit-actions">
+                        <button class="disabled-btn" disabled>
+                            <i class="fas fa-check-circle"></i> Completed
+                        </button>
+                    </div>
+                `;
+            } else if (deposit.status === 'rejected' || deposit.status === 'expired' || deposit.status === 'cancelled') {
+                actionsHtml = `
+                    <div class="deposit-actions">
+                        <button class="cancel-btn" onclick="removeDeposit('${deposit.depositId}')">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="pending-deposit-item">
+                    <div class="deposit-row">
+                        <div>
+                            <div class="deposit-amount">₹${deposit.amount.toFixed(2)}</div>
+                            <div class="deposit-id">${deposit.depositId}</div>
+                            <div style="margin-top: 0.25rem;">${depositTypeMini}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="deposit-expiry"><i class="fas fa-clock"></i> ${expiryText}</div>
+                            <div style="margin-top: 0.25rem;">${statusBadge}</div>
+                        </div>
+                    </div>
+                    ${actionsHtml}
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        console.log('Loaded', data.deposits.length, 'Pending Deposits');
+
+    } catch(e) {
+        console.error('Load Pending Deposits Error:', e.message);
+    }
+}
+
+async function removeDeposit(depositId) {
+    if (!confirm('Are You Sure You Want To Remove This Deposit?')) {
+        return;
+    }
+    await cancelDeposit(depositId);
+}
+
+// ===== CONTINUE DEPOSIT =====
+async function continueDeposit(depositId) {
+    try {
+        console.log('Continuing Deposit:', depositId);
+
+        const response = await fetch(`/api/deposit/${depositId}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+
+        if (!data.success || !data.deposit) {
+            showToast('Deposit Not Found', 'error');
+            return;
+        }
+
+        const deposit = data.deposit;
+        currentDepositId = deposit.depositId;
+        paymentAmount = deposit.amount;
+        isVerified = false;
+
+        if (new Date(deposit.expiresAt) < new Date()) {
+            showToast('Deposit Expired', 'error');
+            loadPendingDeposits();
+            return;
+        }
+
+        document.getElementById('paymentAmount').textContent = '₹' + deposit.amount;
+        document.getElementById('autoAmountDisplay').textContent = '₹' + deposit.amount;
+
+        const statusEl = document.getElementById('manualStatus');
+        statusEl.className = 'auto-detect-status manual';
+        statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-hand-holding-usd"></i>';
+        document.getElementById('statusText').textContent = 'Submit UTR For Approval';
+        document.getElementById('statusSub').textContent = 'Pay And Submit UTR For Approval';
+
+        document.getElementById('qrOverlay').classList.remove('show');
+
+        const qrData = `upi://pay?pa=${adminUpi}&am=${deposit.amount}`;
+        document.getElementById('qrCodeContainer').innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}" alt="QR">
+            <div class="qr-overlay" id="qrOverlay">
+                <i class="fas fa-check-circle"></i>
+                <span>UTR Submitted!</span>
+            </div>
+        `;
+
+        document.getElementById('utrInput').value = '';
+        document.getElementById('utrInput').disabled = false;
+
+        const confirmBtn = document.getElementById('manualConfirmBtn');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit For Approval';
+
+        const existingDisplay = document.getElementById('utrConfirmationDisplay');
+        if (existingDisplay) {
+            existingDisplay.remove();
+        }
+
+        document.getElementById('stateDeposit').style.display = 'none';
+        document.getElementById('statePayment').style.display = 'block';
+
+        const expiryTime = new Date(deposit.expiresAt);
+        const now = new Date();
+        const remainingSeconds = Math.floor((expiryTime - now) / 1000);
+        const remainingMinutes = Math.floor(remainingSeconds / 60);
+
+        startQRTimer(remainingMinutes > 0 ? remainingMinutes : 1);
+
+        showToast('Continuing Deposit', 'success');
+
+    } catch(e) {
+        console.error('Continue Deposit Error:', e.message);
+        showToast(e.message, 'error');
+    }
+}
+
+// ===== CANCEL DEPOSIT =====
+async function cancelDeposit(depositId) {
+    if (!confirm('Are You Sure You Want To Cancel This Deposit?')) {
+        return;
+    }
+
+    try {
+        console.log('Cancelling Deposit:', depositId);
+
+        const response = await fetch(`/api/deposit/cancel/${depositId}`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Deposit Cancelled', 'success');
+            loadPendingDeposits();
+        } else {
+            showToast(data.message, 'error');
+        }
+
+    } catch(e) {
+        console.error('Cancel Deposit Error:', e.message);
+        showToast(e.message, 'error');
+    }
+}
+
+// ===== SET AMOUNT =====
+function setAmount(amount) {
+    document.getElementById('amount').value = amount;
+}
+
+// ===== PROCEED TO PAY (MANUAL ONLY) =====
+async function proceedToPay() {
+    const amount = parseFloat(document.getElementById('amount').value);
+
+    if (!amount || amount < 1) {
+        showToast('Minimum Deposit Is ₹1', 'error');
+        return;
+    }
+    if (amount > 5000) {
+        showToast('Maximum Deposit Is ₹5,000', 'error');
+        return;
+    }
+
+    paymentAmount = amount;
+    isVerified = false;
+    console.log('Proceeding With: ₹' + amount);
+
+    try {
+        showToast('Creating Deposit...', 'info');
+
+        const response = await fetch('/api/deposit/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ amount: amount })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            if (data.pendingDeposit) {
+                showToast('Pending Deposit: ₹' + data.pendingDeposit.amount, 'error');
+                loadPendingDeposits();
+            } else {
+                showToast(data.message, 'error');
+            }
+            return;
+        }
+
+        currentDepositId = data.deposit.depositId;
+
+        document.getElementById('paymentAmount').textContent = '₹' + amount;
+        document.getElementById('autoAmountDisplay').textContent = '₹' + amount;
+        document.getElementById('qrOverlay').classList.remove('show');
+
+        const qrData = `upi://pay?pa=${adminUpi}&am=${amount}`;
+        document.getElementById('qrCodeContainer').innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}" alt="QR">
+            <div class="qr-overlay" id="qrOverlay">
+                <i class="fas fa-check-circle"></i>
+                <span>UTR Submitted!</span>
+            </div>
+        `;
+
+        document.getElementById('utrInput').value = '';
+        document.getElementById('utrInput').disabled = false;
+        const confirmBtn = document.getElementById('manualConfirmBtn');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit For Approval';
+
+        const existingDisplay = document.getElementById('utrConfirmationDisplay');
+        if (existingDisplay) {
+            existingDisplay.remove();
+        }
+
+        const statusEl = document.getElementById('manualStatus');
+        statusEl.className = 'auto-detect-status manual';
+        statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-hand-holding-usd"></i>';
+        document.getElementById('statusText').textContent = 'Submit UTR For Approval';
+        document.getElementById('statusSub').textContent = 'Pay And Submit UTR For Approval';
+
+        document.getElementById('stateDeposit').style.display = 'none';
+        document.getElementById('statePayment').style.display = 'block';
+
+        startQRTimer(30);
+        showToast('Pay And Submit UTR For Approval', 'info');
+
+        loadPendingDeposits();
+
+    } catch(e) {
+        console.error('Proceed Error:', e.message);
+        showToast(e.message, 'error');
+    }
+}
+
+// ===== TIMER =====
+function startQRTimer(minutes) {
+    let time = minutes * 60;
+    const timerDisplay = document.getElementById('timerDisplay');
+
+    if (qrTimerInterval) clearInterval(qrTimerInterval);
+
+    qrTimerInterval = setInterval(() => {
+        const mins = Math.floor(time / 60);
+        const secs = time % 60;
+        timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (time <= 0) {
+            clearInterval(qrTimerInterval);
+            timerDisplay.textContent = '00:00';
+            showToast('Time Expired!', 'error');
+            goBackToDeposit();
+        }
+        time--;
+    }, 1000);
+}
+
+// ===== MANUAL CONFIRM =====
+async function manualConfirm() {
+    const utr = document.getElementById('utrInput').value.trim();
+
+    if (!utr) {
+        showToast('Please Enter UTR', 'error');
+        return;
+    }
+
+    if (utr.length < 12) {
+        showToast('UTR Minimum 12 Characters', 'error');
+        return;
+    }
+
+    if (!currentDepositId) {
+        showToast('No Active Deposit', 'error');
+        return;
+    }
+
+    const confirmBtn = document.getElementById('manualConfirmBtn');
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+    try {
+        showToast('Submitting For Approval...', 'info');
+
+        const response = await fetch('/api/deposit/manual-confirm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                depositId: currentDepositId,
+                transactionRef: utr
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('UTR Submitted! Waiting For Admin Approval', 'success');
+
+            const statusEl = document.getElementById('manualStatus');
+            statusEl.className = 'auto-detect-status approval';
+            statusEl.querySelector('.status-icon').innerHTML = '<i class="fas fa-clock"></i>';
+
+            const statusText = document.getElementById('statusText');
+            statusText.innerHTML = `
+                ⏳ Pending Admin Approval
+                <div style="font-size: 0.7rem; margin-top: 0.3rem; color: var(--text-secondary); font-weight: 600;">
+                    ₹${data.amount || paymentAmount} • ${data.depositId}
+                </div>
+                <div style="font-size: 0.65rem; margin-top: 0.2rem; color: var(--warning); font-family: monospace; font-weight: 700;">
+                    UTR: ${utr}
+                </div>
+            `;
+
+            document.getElementById('statusSub').textContent = 'You Will Be Notified When Approved';
+
+            document.getElementById('utrInput').disabled = true;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-clock"></i> Pending Approval';
+
+            const overlay = document.getElementById('qrOverlay');
+            if (overlay) {
+                overlay.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    <span style="color: white; font-size: 0.7rem;">UTR Submitted</span>
+                    <span style="color: var(--warning); font-size: 0.6rem; margin-top: 0.2rem;">ID: ${data.depositId}</span>
+                    <span style="color: var(--warning); font-size: 0.6rem;">UTR: ${utr}</span>
+                `;
+                overlay.classList.add('show');
+            }
+
+            const utrSection = document.getElementById('utrSection');
+            if (utrSection) {
+                const existingDisplay = document.getElementById('utrConfirmationDisplay');
+                if (existingDisplay) {
+                    existingDisplay.remove();
+                }
+
+                const displayDiv = document.createElement('div');
+                displayDiv.id = 'utrConfirmationDisplay';
+                displayDiv.style.cssText = `
+                    background: #dcfce7;
+                    border: 1px solid var(--success);
+                    border-radius: 0.75rem;
+                    padding: 0.85rem;
+                    margin-top: 0.5rem;
+                    text-align: left;
+                `;
+                displayDiv.innerHTML = `
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">
+                        ✅ Submitted Details
+                    </div>
+                    <div style="font-weight: 800; color: var(--text-primary); font-size: 0.8rem; margin-top: 0.25rem;">
+                        ${data.depositId}
+                    </div>
+                    <div style="font-weight: 800; color: var(--success); font-family: monospace; font-size: 0.9rem; margin-top: 0.1rem;">
+                        UTR: ${utr}
+                    </div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.25rem; font-weight: 600;">
+                        ⏳ Pending Admin Verification
+                    </div>
+                `;
+                utrSection.appendChild(displayDiv);
+            }
+
+            loadPendingDeposits();
+
+            setTimeout(() => {
+                goBackToDeposit();
+            }, 5000);
+
+        } else {
+            showToast(data.message, 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit For Approval';
+        }
+    } catch(e) {
+        console.error('Manual Confirm Error:', e.message);
+        showToast(e.message, 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit For Approval';
+    }
+}
+
+// ===== GO BACK =====
+function goBackToDeposit() {
+    document.getElementById('statePayment').style.display = 'none';
+    document.getElementById('stateDeposit').style.display = 'block';
+    if (qrTimerInterval) clearInterval(qrTimerInterval);
+    isVerified = false;
+    currentDepositId = null;
+
+    const confirmBtn = document.getElementById('manualConfirmBtn');
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit For Approval';
+    document.getElementById('utrInput').disabled = false;
+    document.getElementById('utrInput').value = '';
+
+    const existingDisplay = document.getElementById('utrConfirmationDisplay');
+    if (existingDisplay) {
+        existingDisplay.remove();
+    }
+
+    loadPendingDeposits();
+    loadBalance();
+}
+
+function goBack() {
+    if (document.getElementById('statePayment').style.display === 'block') {
+        goBackToDeposit();
+    } else {
+        window.location.href = '/dashboard';
+    }
+}
+
+// ===== INIT =====
+loadBalance();
+loadPendingDeposits();
+
+setInterval(loadPendingDeposits, 30000);
+</script>
+</body>
+</html>
