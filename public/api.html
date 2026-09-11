@@ -1,601 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>API Integration • Universal Wallet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 20px;
-            color: #1a2a4a;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            padding-bottom: 80px;
-        }
-
-        /* ---- header / top bar ---- */
-        .top-bar {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
-            padding-top: 8px;
-        }
-
-        .back-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            background: #ffffff;
-            border: 1px solid #c5d9f0;
-            color: #1a56db;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(26, 86, 219, 0.08);
-            flex-shrink: 0;
-            text-decoration: none;
-        }
-        .back-btn:hover {
-            background: #eef3fa;
-            transform: translateX(-2px);
-        }
-        .back-btn:active { transform: scale(0.94); }
-
-        .brand-title {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .brand-title .prime {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1a3a6b;
-            letter-spacing: -0.3px;
-        }
-        .brand-title .wallet {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1a56db;
-            letter-spacing: -0.3px;
-        }
-        .brand-title .badge {
-            font-size: 11px;
-            font-weight: 700;
-            background: #1a56db;
-            color: #fff;
-            padding: 3px 12px;
-            border-radius: 30px;
-            margin-left: 6px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        .page-title {
-            font-size: 26px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            color: #1a3a6b;
-            margin-bottom: 22px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .page-title i {
-            color: #1a56db;
-            font-size: 28px;
-        }
-
-        /* ---- card style (same as universal wallet) ---- */
-        .card {
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 6px 24px rgba(0, 50, 100, 0.06);
-            padding: 24px 22px;
-            border: 1px solid #d6e4f5;
-            margin-bottom: 20px;
-            transition: box-shadow 0.2s ease;
-        }
-        .card:hover {
-            box-shadow: 0 8px 30px rgba(26, 86, 219, 0.08);
-        }
-
-        .card-title {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: #5a7a9a;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .card-title i {
-            color: #1a56db;
-            font-size: 14px;
-            width: 18px;
-        }
-
-        /* ---- toggle & status ---- */
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            transition: all 0.3s ease;
-        }
-        .status-badge.active {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
-        }
-        .status-badge.inactive {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        .status-badge i { font-size: 8px; }
-        .status-desc {
-            font-size: 12px;
-            font-weight: 500;
-            color: #5a7a9a;
-            margin-left: 4px;
-        }
-
-        .toggle-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .toggle-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #5a7a9a;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .toggle {
-            position: relative;
-            width: 50px;
-            height: 28px;
-            flex-shrink: 0;
-        }
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #cbd5e1;
-            transition: 0.3s;
-            border-radius: 34px;
-        }
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background: white;
-            transition: 0.3s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .toggle input:checked + .toggle-slider {
-            background: #1a56db;
-        }
-        .toggle input:checked + .toggle-slider:before {
-            transform: translateX(22px);
-        }
-
-        /* ---- credentials ---- */
-        .credentials-box {
-            background: #f0f7ff;
-            border: 1px solid #c5d9f0;
-            border-radius: 14px;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: 600;
-            color: #1a2a4a;
-            margin-bottom: 8px;
-        }
-        .credentials-box .label {
-            font-family: 'Inter', sans-serif;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #5a7a9a;
-        }
-        .copy-btn-sm {
-            background: #ffffff;
-            border: 1px solid #c5d9f0;
-            color: #1a56db;
-            cursor: pointer;
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-        }
-        .copy-btn-sm:hover {
-            background: #eef3fa;
-            border-color: #1a56db;
-        }
-        .copy-btn-sm:active { transform: scale(0.95); }
-
-        .security-notice {
-            background: #fef3c7;
-            border: 1px solid #fcd34d;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #92400e;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .security-notice i {
-            color: #d97706;
-            font-size: 16px;
-            margin-top: 2px;
-        }
-
-        /* ---- api url box ---- */
-        .api-url-box {
-            background: #f0f7ff;
-            border: 1px solid #c5d9f0;
-            border-radius: 14px;
-            padding: 14px 16px;
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-            color: #1a3a6b;
-            word-break: break-all;
-            line-height: 1.7;
-            margin-bottom: 8px;
-        }
-        .api-url-box .highlight {
-            color: #1a56db;
-            font-weight: 700;
-        }
-
-        /* ---- inputs (same as universal wallet) ---- */
-        .input-group {
-            margin-bottom: 16px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #1a3a6b;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .input-group label i {
-            color: #1a56db;
-            margin-right: 6px;
-            width: 16px;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #c5d9f0;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #1a2a4a;
-            background: #fafcff;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        .input-group input:focus {
-            border-color: #1a56db;
-            box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1);
-            background: #ffffff;
-        }
-        .input-group input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ---- buttons ---- */
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Inter', sans-serif;
-        }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-primary {
-            background: #1a56db;
-            color: #ffffff;
-            box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3);
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4);
-        }
-
-        .btn-secondary {
-            background: #eef3fa;
-            color: #1a3a6b;
-            border: 2px solid #c5d9f0;
-            box-shadow: none;
-        }
-        .btn-secondary:hover {
-            background: #e2eaf3;
-            transform: translateY(-1px);
-        }
-
-        .btn-sm {
-            padding: 10px 18px;
-            font-size: 11px;
-            width: auto;
-            border-radius: 12px;
-            letter-spacing: 0.6px;
-        }
-
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .mt-8 { margin-top: 8px; }
-        .mt-12 { margin-top: 12px; }
-        .mb-8 { margin-bottom: 8px; }
-        .gap-8 { gap: 8px; }
-
-        /* ---- code blocks ---- */
-        .code-block {
-            background: #f1f5f9;
-            border: 1px solid #d6e4f5;
-            border-radius: 14px;
-            padding: 16px;
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            overflow-x: auto;
-            line-height: 1.8;
-            max-height: 280px;
-            overflow-y: auto;
-            color: #1a2a4a;
-        }
-        .code-block .keyword { color: #7c3aed; font-weight: 600; }
-        .code-block .string { color: #059669; }
-        .code-block .comment { color: #6b7280; font-style: italic; }
-        .code-block .function { color: #d97706; }
-        .code-block .variable { color: #dc2626; }
-        .code-block .number { color: #d97706; }
-
-        /* ---- response box ---- */
-        .response-box {
-            background: #f1f5f9;
-            border: 1px solid #d6e4f5;
-            border-radius: 14px;
-            padding: 16px;
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            max-height: 200px;
-            overflow-y: auto;
-            line-height: 1.6;
-            color: #1a2a4a;
-        }
-        .response-box .success { color: #16a34a; font-weight: 700; }
-        .response-box .error { color: #dc2626; font-weight: 700; }
-        .response-box .key { color: #7c3aed; font-weight: 600; }
-        .response-box .string { color: #059669; }
-        .response-box .number { color: #d97706; }
-
-        .payment-response {
-            display: none;
-            margin-top: 14px;
-        }
-        .payment-response.show { display: block; }
-
-        /* ---- disabled state ---- */
-        .api-disabled .credentials-box,
-        .api-disabled .api-url-box {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        .api-disabled .btn,
-        .api-disabled .input-group input {
-            opacity: 0.5;
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-
-        /* ---- bottom nav ---- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #d6e4f5;
-            z-index: 50;
-            max-width: 520px;
-            margin: 0 auto;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.06);
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: #94a3b8;
-            letter-spacing: 0.3px;
-            transition: color 0.2s ease;
-            flex: 1;
-        }
-        .nav-item i {
-            font-size: 20px;
-        }
-        .nav-item.active {
-            color: #1a56db;
-        }
-        .nav-item:hover {
-            color: #1a56db;
-        }
-
-        /* ---- toast ---- */
-        .toast-message {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 14px 28px;
-            border-radius: 60px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 10000;
-            background: #1a3a6b;
-            color: #fff;
-            max-width: 90%;
-            text-align: center;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            animation: fadeInUp 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2.5px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ffffff;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .btn-secondary .loading-spinner {
-            border-color: rgba(26, 86, 219, 0.2);
-            border-top-color: #1a56db;
-        }
-
-        /* ---- responsive ---- */
-        @media (max-width: 480px) {
-            body { padding: 12px; }
-            .app-container { padding-bottom: 70px; }
-            .top-bar { gap: 10px; margin-bottom: 18px; }
-            .back-btn { width: 38px; height: 38px; font-size: 16px; }
-            .brand-title .prime,
-            .brand-title .wallet { font-size: 18px; }
-            .brand-title .badge { font-size: 9px; padding: 2px 10px; }
-            .page-title { font-size: 22px; }
-            .page-title i { font-size: 24px; }
-            .card { padding: 18px 16px; border-radius: 20px; }
-            .btn-sm { padding: 8px 14px; font-size: 10px; }
-            .code-block { font-size: 10px; padding: 12px; }
-            .credentials-box { font-size: 12px; padding: 10px 12px; }
-            .bottom-nav { padding: 8px 0 16px; border-radius: 16px 16px 0 0; }
-            .nav-item { font-size: 9px; }
-            .nav-item i { font-size: 18px; }
-            .toast-message { font-size: 12px; padding: 12px 20px; bottom: 80px; }
-        }
-
-        @media (max-width: 380px) {
-            .brand-title .prime,
-            .brand-title .wallet { font-size: 16px; }
-            .page-title { font-size: 19px; }
-            .card { padding: 14px 12px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>API Integration • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 20px; color: #1a2a4a; }
+.app-container { width: 100%; max-width: 520px; margin: 0 auto; padding-bottom: 80px; }
+.top-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-top: 8px; }
+.back-btn { width: 44px; height: 44px; border-radius: 14px; background: #ffffff; border: 1px solid #c5d9f0; color: #1a56db; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(26, 86, 219, 0.08); flex-shrink: 0; text-decoration: none; }
+.back-btn:hover { background: #eef3fa; transform: translateX(-2px); }
+.back-btn:active { transform: scale(0.94); }
+.brand-title { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.brand-title .prime { font-size: 22px; font-weight: 800; color: #1a3a6b; letter-spacing: -0.3px; }
+.brand-title .wallet { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.3px; }
+.brand-title .badge { font-size: 11px; font-weight: 700; background: #1a56db; color: #fff; padding: 3px 12px; border-radius: 30px; margin-left: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
+.page-title { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #1a3a6b; margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
+.page-title i { color: #1a56db; font-size: 28px; }
+.card { background: #ffffff; border-radius: 24px; box-shadow: 0 6px 24px rgba(0, 50, 100, 0.06); padding: 24px 22px; border: 1px solid #d6e4f5; margin-bottom: 20px; transition: box-shadow 0.2s ease; }
+.card:hover { box-shadow: 0 8px 30px rgba(26, 86, 219, 0.08); }
+.card-title { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #5a7a9a; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.card-title i { color: #1a56db; font-size: 14px; width: 18px; }
+.status-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 40px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; transition: all 0.3s ease; }
+.status-badge.active { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.status-badge.inactive { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.status-badge i { font-size: 8px; }
+.status-desc { font-size: 12px; font-weight: 500; color: #5a7a9a; margin-left: 4px; }
+.toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.toggle-label { font-size: 11px; font-weight: 700; color: #5a7a9a; text-transform: uppercase; letter-spacing: 0.5px; }
+.toggle { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; transition: 0.3s; border-radius: 34px; }
+.toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.toggle input:checked + .toggle-slider { background: #1a56db; }
+.toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
+.credentials-box { background: #f0f7ff; border: 1px solid #c5d9f0; border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; color: #1a2a4a; margin-bottom: 8px; }
+.credentials-box .label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #5a7a9a; }
+.copy-btn-sm { background: #ffffff; border: 1px solid #c5d9f0; color: #1a56db; cursor: pointer; padding: 6px 12px; font-size: 13px; border-radius: 10px; transition: all 0.2s ease; font-family: 'Inter', sans-serif; font-weight: 600; }
+.copy-btn-sm:hover { background: #eef3fa; border-color: #1a56db; }
+.copy-btn-sm:active { transform: scale(0.95); }
+.security-notice { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 14px; padding: 12px 16px; font-size: 12px; font-weight: 500; color: #92400e; display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; }
+.security-notice i { color: #d97706; font-size: 16px; margin-top: 2px; }
+.api-url-box { background: #f0f7ff; border: 1px solid #c5d9f0; border-radius: 14px; padding: 14px 16px; font-size: 11px; font-family: 'Courier New', monospace; font-weight: 500; color: #1a3a6b; word-break: break-all; line-height: 1.7; margin-bottom: 8px; }
+.api-url-box .highlight { color: #1a56db; font-weight: 700; }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 11px; font-weight: 700; color: #1a3a6b; margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
+.input-group label i { color: #1a56db; margin-right: 6px; width: 16px; }
+.input-group input { width: 100%; padding: 14px 16px; border: 2px solid #c5d9f0; border-radius: 14px; font-size: 15px; font-weight: 500; color: #1a2a4a; background: #fafcff; outline: none; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
+.input-group input:focus { border-color: #1a56db; box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.1); background: #ffffff; }
+.input-group input:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.btn-secondary { background: #eef3fa; color: #1a3a6b; border: 2px solid #c5d9f0; box-shadow: none; }
+.btn-secondary:hover { background: #e2eaf3; transform: translateY(-1px); }
+.btn-sm { padding: 10px 18px; font-size: 11px; width: auto; border-radius: 12px; letter-spacing: 0.6px; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.flex-center { display: flex; align-items: center; gap: 8px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mb-8 { margin-bottom: 8px; }
+.gap-8 { gap: 8px; }
+.code-block { background: #f1f5f9; border: 1px solid #d6e4f5; border-radius: 14px; padding: 16px; font-size: 11px; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; overflow-x: auto; line-height: 1.8; max-height: 280px; overflow-y: auto; color: #1a2a4a; }
+.code-block .keyword { color: #7c3aed; font-weight: 600; }
+.code-block .string { color: #059669; }
+.code-block .comment { color: #6b7280; font-style: italic; }
+.code-block .function { color: #d97706; }
+.code-block .variable { color: #dc2626; }
+.code-block .number { color: #d97706; }
+.response-box { background: #f1f5f9; border: 1px solid #d6e4f5; border-radius: 14px; padding: 16px; font-size: 11px; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; line-height: 1.6; color: #1a2a4a; }
+.response-box .success { color: #16a34a; font-weight: 700; }
+.response-box .error { color: #dc2626; font-weight: 700; }
+.response-box .key { color: #7c3aed; font-weight: 600; }
+.response-box .string { color: #059669; }
+.response-box .number { color: #d97706; }
+.payment-response { display: none; margin-top: 14px; }
+.payment-response.show { display: block; }
+.api-disabled .credentials-box,
+.api-disabled .api-url-box { opacity: 0.5; pointer-events: none; }
+.api-disabled .btn,
+.api-disabled .input-group input { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 10px 0 20px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #d6e4f5; z-index: 50; max-width: 520px; margin: 0 auto; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.06); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; text-decoration: none; color: #94a3b8; letter-spacing: 0.3px; transition: color 0.2s ease; flex: 1; }
+.nav-item i { font-size: 20px; }
+.nav-item.active { color: #1a56db; }
+.nav-item:hover { color: #1a56db; }
+.toast-message { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 60px; font-size: 13px; font-weight: 600; z-index: 10000; background: #1a3a6b; color: #fff; max-width: 90%; text-align: center; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); animation: fadeInUp 0.3s ease; font-family: 'Inter', sans-serif; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-secondary .loading-spinner { border-color: rgba(26, 86, 219, 0.2); border-top-color: #1a56db; }
+@media (max-width: 480px) { body { padding: 12px; } .app-container { padding-bottom: 70px; } .top-bar { gap: 10px; margin-bottom: 18px; } .back-btn { width: 38px; height: 38px; font-size: 16px; } .brand-title .prime, .brand-title .wallet { font-size: 18px; } .brand-title .badge { font-size: 9px; padding: 2px 10px; } .page-title { font-size: 22px; } .page-title i { font-size: 24px; } .card { padding: 18px 16px; border-radius: 20px; } .btn-sm { padding: 8px 14px; font-size: 10px; } .code-block { font-size: 10px; padding: 12px; } .credentials-box { font-size: 12px; padding: 10px 12px; } .bottom-nav { padding: 8px 0 16px; border-radius: 16px 16px 0 0; } .nav-item { font-size: 9px; } .nav-item i { font-size: 18px; } .toast-message { font-size: 12px; padding: 12px 20px; bottom: 80px; } }
+@media (max-width: 380px) { .brand-title .prime, .brand-title .wallet { font-size: 16px; } .page-title { font-size: 19px; } .card { padding: 14px 12px; } }
+</style>
 </head>
 <body>
 
 <div class="app-container">
 
-    <!-- ===== TOP BAR ===== -->
     <div class="top-bar">
         <a href="/more" class="back-btn"><i class="fas fa-arrow-left"></i></a>
         <div class="brand-title">
@@ -605,7 +113,6 @@
         </div>
     </div>
 
-    <!-- ===== PAGE TITLE ===== -->
     <div class="page-title">
         <i class="fas fa-code"></i> API INTEGRATION
     </div>
@@ -674,7 +181,7 @@
         </p>
 
         <div class="api-url-box" id="apiUrlDisplay">
-            https://prime-wallet-lifafa.vercel.app/api/payment?key=<span class="highlight" id="urlKey">—</span>&number={number}&amount={amount}&comment={comment}
+            https://universe-wallet.vercel.app/api/payment?key=<span class="highlight" id="urlKey">—</span>&number={number}&amount={amount}&comment={comment}
         </div>
 
         <button class="btn btn-secondary btn-sm mt-8" onclick="copyApiUrl()">
@@ -719,7 +226,7 @@
         <div class="code-block" id="jsExample">
 <span class="comment">// Make Payment Request</span>
 <span class="keyword">async function</span> <span class="function">makePayment</span>() {
-    <span class="keyword">const</span> apiUrl = <span class="string">'https://prime-wallet-lifafa.vercel.app/api/payment'</span>;
+    <span class="keyword">const</span> apiUrl = <span class="string">'https://universe-wallet.vercel.app/api/payment'</span>;
     <span class="keyword">const</span> params = <span class="keyword">new</span> URLSearchParams({
         key: <span class="string">'<span id="jsKey">YOUR_KEY</span>'</span>,
         number: <span class="string">'9876543210'</span>,
@@ -753,7 +260,7 @@
 <span class="keyword">import</span> requests
 
 <span class="keyword">def</span> <span class="function">make_payment</span>():
-    url = <span class="string">'https://prime-wallet-lifafa.vercel.app/api/payment'</span>
+    url = <span class="string">'https://universe-wallet.vercel.app/api/payment'</span>
     params = {
         <span class="string">'key'</span>: <span class="string">'<span id="pyKey">YOUR_KEY</span>'</span>,
         <span class="string">'number'</span>: <span class="string">'9876543210'</span>,
@@ -790,413 +297,410 @@
 </div>
 
 <script>
-    // ============================================
-    // API CONFIGURATION
-    // ============================================
-    const API_BASE = '/api';
-    let apiKey = '';
-    let isApiActive = true;
+/* ============================================
+   API CONFIGURATION — CORRECTED URL
+   ============================================ */
+const API_BASE = '/api';
+const PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
 
-    // ============================================
-    // NAVIGATION
-    // ============================================
-    function goBack() {
-        window.location.href = '/more';
+let apiKey = '';
+let isApiActive = true;
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+function goBack() {
+    window.location.href = '/more';
+}
+
+/* ============================================
+   TOAST
+   ============================================ */
+function showToast(message) {
+    const existing = document.querySelector('.toast-message');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+/* ============================================
+   GENERATE RANDOM API KEY
+   ============================================ */
+function generateRandomApiKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = '';
+    for (let i = 0; i < 18; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
+}
+
+/* ============================================
+   UPDATE DISPLAY
+   ============================================ */
+function updateApiDisplay(key) {
+    apiKey = key;
+    document.getElementById('apiKey').textContent = key || '—';
+    document.getElementById('urlKey').textContent = key || '—';
+    document.getElementById('jsKey').textContent = key || 'YOUR_KEY';
+    document.getElementById('pyKey').textContent = key || 'YOUR_KEY';
+}
+
+/* ============================================
+   COPY FUNCTIONS
+   ============================================ */
+function copyText(elementId, label) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent;
+    if (text && text !== '—') {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(`✅ ${label} copied to clipboard!`);
+        }).catch(() => {
+            showToast(`📋 ${label}: ${text}`);
+        });
+    } else {
+        showToast('⚠️ No ' + label + ' to copy');
+    }
+}
+
+function copyApiUrl() {
+    const urlElement = document.getElementById('apiUrlDisplay');
+    const url = urlElement.textContent.trim();
+    if (url) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('✅ API URL copied to clipboard!');
+        }).catch(() => {
+            showToast('📋 API URL: ' + url);
+        });
+    }
+}
+
+function copyCode(elementId, label) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent.trim();
+    if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(`✅ ${label} code copied to clipboard!`);
+        }).catch(() => {
+            showToast('📋 Code copied to console');
+            console.log(text);
+        });
+    }
+}
+
+/* ============================================
+   TOGGLE API STATUS
+   ============================================ */
+function toggleApiStatus() {
+    const toggle = document.getElementById('apiToggle');
+    const badge = document.getElementById('statusBadge');
+    const statusText = document.getElementById('statusText');
+    const statusDesc = document.getElementById('statusDesc');
+
+    isApiActive = toggle.checked;
+
+    if (isApiActive) {
+        badge.className = 'status-badge active';
+        statusText.textContent = 'ACTIVE';
+        statusDesc.textContent = 'API payments are enabled';
+        document.getElementById('apiCredentialsCard').classList.remove('api-disabled');
+        document.getElementById('apiEndpointCard').classList.remove('api-disabled');
+        document.getElementById('testApiCard').classList.remove('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = false;
+        showToast('✅ API payments have been enabled');
+    } else {
+        badge.className = 'status-badge inactive';
+        statusText.textContent = 'INACTIVE';
+        statusDesc.textContent = 'API payments are disabled';
+        document.getElementById('apiCredentialsCard').classList.add('api-disabled');
+        document.getElementById('apiEndpointCard').classList.add('api-disabled');
+        document.getElementById('testApiCard').classList.add('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = true;
+        showToast('⛔ API payments have been disabled');
     }
 
-    // ============================================
-    // TOAST
-    // ============================================
-    function showToast(message, type = '') {
-        const existing = document.querySelector('.toast-message');
-        if (existing) existing.remove();
+    localStorage.setItem('apiStatus', isApiActive ? 'active' : 'inactive');
+    document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+}
 
-        const toast = document.createElement('div');
-        toast.className = 'toast-message';
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // ============================================
-    // GENERATE RANDOM API KEY
-    // ============================================
-    function generateRandomApiKey() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let key = '';
-        for (let i = 0; i < 18; i++) {
-            key += chars.charAt(Math.floor(Math.random() * chars.length));
+/* ============================================
+   LOAD API KEY FROM DATABASE
+   ============================================ */
+async function loadApiKeyFromDatabase() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/';
+            return;
         }
-        return key;
-    }
 
-    // ============================================
-    // UPDATE DISPLAY
-    // ============================================
-    function updateApiDisplay(key) {
-        apiKey = key;
-        document.getElementById('apiKey').textContent = key || '—';
-        document.getElementById('urlKey').textContent = key || '—';
-        document.getElementById('jsKey').textContent = key || 'YOUR_KEY';
-        document.getElementById('pyKey').textContent = key || 'YOUR_KEY';
-    }
+        const response = await fetch(`${API_BASE}/api-key`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-    // ============================================
-    // COPY FUNCTIONS
-    // ============================================
-    function copyText(elementId, label) {
-        const element = document.getElementById(elementId);
-        const text = element.textContent;
-        if (text && text !== '—') {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast(`✅ ${label} copied to clipboard!`);
-            }).catch(() => {
-                showToast(`📋 ${label}: ${text}`);
-            });
+        const data = await response.json();
+
+        if (response.ok && data.success && data.apiKey) {
+            updateApiDisplay(data.apiKey);
+            localStorage.setItem('apiKey', data.apiKey);
+            return data.apiKey;
         } else {
-            showToast('⚠️ No ' + label + ' to copy');
+            return await saveNewApiKey();
         }
+    } catch (error) {
+        console.error('❌ Error loading API key:', error);
+        const savedKey = localStorage.getItem('apiKey');
+        if (savedKey && savedKey.length === 18 && /^[A-Z0-9]+$/.test(savedKey)) {
+            updateApiDisplay(savedKey);
+            return savedKey;
+        }
+        return await saveNewApiKey();
+    }
+}
+
+/* ============================================
+   SAVE NEW API KEY
+   ============================================ */
+async function saveNewApiKey() {
+    try {
+        const token = localStorage.getItem('token');
+        const newKey = generateRandomApiKey();
+
+        const response = await fetch(`${API_BASE}/api-key`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ apiKey: newKey })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            updateApiDisplay(newKey);
+            localStorage.setItem('apiKey', newKey);
+            return newKey;
+        } else {
+            throw new Error(data.message || 'Failed to save API key');
+        }
+    } catch (error) {
+        console.error('❌ Error saving API key:', error);
+        const fallbackKey = generateRandomApiKey();
+        updateApiDisplay(fallbackKey);
+        localStorage.setItem('apiKey', fallbackKey);
+        showToast('⚠️ API key saved locally only');
+        return fallbackKey;
+    }
+}
+
+/* ============================================
+   REGENERATE API KEY
+   ============================================ */
+async function regenerateApiKey() {
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>';
+
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('❌ Please login first');
+            return;
+        }
+
+        const response = await fetch(`${API_BASE}/api-key/regenerate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            updateApiDisplay(data.apiKey);
+            localStorage.setItem('apiKey', data.apiKey);
+            showToast('🔄 API key regenerated successfully!');
+        } else {
+            throw new Error(data.message || 'Failed to regenerate API key');
+        }
+    } catch (error) {
+        console.error('❌ Regenerate error:', error);
+        showToast('❌ ' + (error.message || 'Failed to regenerate API key'));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+/* ============================================
+   MAKE TEST PAYMENT
+   ============================================ */
+async function makeTestPayment() {
+    if (!isApiActive) {
+        showToast('⛔ API payments are currently disabled. Please enable them first.');
+        return;
     }
 
-    function copyApiUrl() {
-        const urlElement = document.getElementById('apiUrlDisplay');
-        const url = urlElement.textContent.trim();
-        if (url) {
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('✅ API URL copied to clipboard!');
-            }).catch(() => {
-                showToast('📋 API URL: ' + url);
-            });
-        }
+    const numberInput = document.getElementById('payNumber');
+    const amountInput = document.getElementById('testAmount');
+    const commentInput = document.getElementById('testComment');
+
+    const number = numberInput.value.trim();
+    const amount = amountInput.value;
+    const comment = commentInput.value.trim();
+
+    if (!number || number.length < 10) {
+        showToast('⚠️ Please enter a valid number (min 10 digits)');
+        numberInput.focus();
+        return;
     }
 
-    function copyCode(elementId, label) {
-        const element = document.getElementById(elementId);
-        const text = element.textContent.trim();
-        if (text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast(`✅ ${label} code copied to clipboard!`);
-            }).catch(() => {
-                showToast('📋 Code copied to console');
-                console.log(text);
-            });
-        }
+    if (!amount || parseFloat(amount) <= 0) {
+        showToast('⚠️ Please enter a valid amount (greater than 0)');
+        amountInput.focus();
+        return;
     }
 
-    // ============================================
-    // TOGGLE API STATUS
-    // ============================================
-    function toggleApiStatus() {
-        const toggle = document.getElementById('apiToggle');
+    const key = localStorage.getItem('apiKey');
+    if (!key || key === '—' || key === 'YOUR_KEY') {
+        showToast('⚠️ No valid API key found. Please regenerate.');
+        return;
+    }
+
+    const btn = document.getElementById('testPaymentBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+
+    try {
+        const apiUrl = `${PAYMENT_API_URL}?key=${encodeURIComponent(key)}&number=${encodeURIComponent(number)}&amount=${encodeURIComponent(amount)}&comment=${encodeURIComponent(comment || 'Test Payment')}`;
+
+        console.log('📤 Sending request to:', apiUrl);
+
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            data = { status: 'error', message: 'Invalid response from server' };
+        }
+
+        console.log('📥 Response received:', data);
+
+        const responseContainer = document.getElementById('testResponse');
+        const responseContent = document.getElementById('testResponseContent');
+
+        const formattedJson = JSON.stringify(data, null, 4);
+        let coloredJson = formattedJson;
+
+        if (data.status === 'success') {
+            coloredJson = coloredJson.replace(/"status": "success"/g, '"status": "<span class="success">success</span>"');
+            showToast('✅ Payment test successful!');
+            let totalCalls = parseInt(document.getElementById('totalCalls').textContent) || 0;
+            document.getElementById('totalCalls').textContent = totalCalls + 1;
+        } else {
+            coloredJson = coloredJson.replace(/"status": "error"/g, '"status": "<span class="error">error</span>"');
+            showToast('❌ ' + (data.message || 'Payment failed'));
+        }
+
+        coloredJson = coloredJson.replace(/"([^"]+)":/g, (match, key) => {
+            if (key !== 'status') {
+                return `"<span class="key">${key}</span>":`;
+            }
+            return match;
+        });
+
+        coloredJson = coloredJson.replace(/: "([^"]*)"/g, (match, value) => {
+            if (match.includes('span class')) return match;
+            return `: "<span class="string">${value}</span>"`;
+        });
+
+        coloredJson = coloredJson.replace(/: (\d+\.?\d*)/g, (match, value) => {
+            if (match.includes('span class')) return match;
+            return `: <span class="number">${value}</span>`;
+        });
+
+        responseContent.innerHTML = coloredJson;
+        responseContainer.classList.add('show');
+
+        document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+
+    } catch (error) {
+        console.error('❌ Test payment error:', error);
+        showToast('🌐 Network error. Please check your connection and try again.');
+
+        const responseContainer = document.getElementById('testResponse');
+        const responseContent = document.getElementById('testResponseContent');
+        responseContent.innerHTML = `<span class="error">❌ Error: ${error.message || 'Unknown error'}</span>`;
+        responseContainer.classList.add('show');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+/* ============================================
+   LOAD API STATUS
+   ============================================ */
+function loadApiStatus() {
+    const savedStatus = localStorage.getItem('apiStatus');
+    if (savedStatus === 'inactive') {
+        document.getElementById('apiToggle').checked = false;
+        isApiActive = false;
+
         const badge = document.getElementById('statusBadge');
         const statusText = document.getElementById('statusText');
         const statusDesc = document.getElementById('statusDesc');
 
-        isApiActive = toggle.checked;
+        badge.className = 'status-badge inactive';
+        statusText.textContent = 'INACTIVE';
+        statusDesc.textContent = 'API payments are disabled';
 
-        if (isApiActive) {
-            badge.className = 'status-badge active';
-            statusText.textContent = 'ACTIVE';
-            statusDesc.textContent = 'API payments are enabled';
-
-            document.getElementById('apiCredentialsCard').classList.remove('api-disabled');
-            document.getElementById('apiEndpointCard').classList.remove('api-disabled');
-            document.getElementById('testApiCard').classList.remove('api-disabled');
-            document.getElementById('testPaymentBtn').disabled = false;
-
-            showToast('✅ API payments have been enabled');
-        } else {
-            badge.className = 'status-badge inactive';
-            statusText.textContent = 'INACTIVE';
-            statusDesc.textContent = 'API payments are disabled';
-
-            document.getElementById('apiCredentialsCard').classList.add('api-disabled');
-            document.getElementById('apiEndpointCard').classList.add('api-disabled');
-            document.getElementById('testApiCard').classList.add('api-disabled');
-            document.getElementById('testPaymentBtn').disabled = true;
-
-            showToast('⛔ API payments have been disabled');
-        }
-
-        localStorage.setItem('apiStatus', isApiActive ? 'active' : 'inactive');
-        document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+        document.getElementById('apiCredentialsCard').classList.add('api-disabled');
+        document.getElementById('apiEndpointCard').classList.add('api-disabled');
+        document.getElementById('testApiCard').classList.add('api-disabled');
+        document.getElementById('testPaymentBtn').disabled = true;
     }
+}
 
-    // ============================================
-    // LOAD API KEY FROM DATABASE
-    // ============================================
-    async function loadApiKeyFromDatabase() {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/';
-                return;
-            }
-
-            const response = await fetch(`${API_BASE}/api-key`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success && data.apiKey) {
-                updateApiDisplay(data.apiKey);
-                localStorage.setItem('apiKey', data.apiKey);
-                return data.apiKey;
-            } else {
-                return await saveNewApiKey();
-            }
-        } catch (error) {
-            console.error('❌ Error loading API key:', error);
-            const savedKey = localStorage.getItem('apiKey');
-            if (savedKey && savedKey.length === 18 && /^[A-Z0-9]+$/.test(savedKey)) {
-                updateApiDisplay(savedKey);
-                return savedKey;
-            }
-            return await saveNewApiKey();
-        }
+/* ============================================
+   CHECK AUTH
+   ============================================ */
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/';
+        return false;
     }
+    return true;
+}
 
-    // ============================================
-    // SAVE NEW API KEY
-    // ============================================
-    async function saveNewApiKey() {
-        try {
-            const token = localStorage.getItem('token');
-            const newKey = generateRandomApiKey();
+/* ============================================
+   INITIALIZE
+   ============================================ */
+document.addEventListener('DOMContentLoaded', async function() {
+    if (!checkAuth()) return;
 
-            const response = await fetch(`${API_BASE}/api-key`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ apiKey: newKey })
-            });
+    loadApiStatus();
+    await loadApiKeyFromDatabase();
 
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                updateApiDisplay(newKey);
-                localStorage.setItem('apiKey', newKey);
-                return newKey;
-            } else {
-                throw new Error(data.message || 'Failed to save API key');
-            }
-        } catch (error) {
-            console.error('❌ Error saving API key:', error);
-            const fallbackKey = generateRandomApiKey();
-            updateApiDisplay(fallbackKey);
-            localStorage.setItem('apiKey', fallbackKey);
-            showToast('⚠️ API key saved locally only');
-            return fallbackKey;
-        }
-    }
-
-    // ============================================
-    // REGENERATE API KEY
-    // ============================================
-    async function regenerateApiKey() {
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loading-spinner"></span>';
-
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showToast('❌ Please login first');
-                return;
-            }
-
-            const response = await fetch(`${API_BASE}/api-key/regenerate`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                updateApiDisplay(data.apiKey);
-                localStorage.setItem('apiKey', data.apiKey);
-                showToast('🔄 API key regenerated successfully!');
-            } else {
-                throw new Error(data.message || 'Failed to regenerate API key');
-            }
-        } catch (error) {
-            console.error('❌ Regenerate error:', error);
-            showToast('❌ ' + (error.message || 'Failed to regenerate API key'));
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    }
-
-    // ============================================
-    // MAKE TEST PAYMENT
-    // ============================================
-    async function makeTestPayment() {
-        if (!isApiActive) {
-            showToast('⛔ API payments are currently disabled. Please enable them first.');
-            return;
-        }
-
-        const numberInput = document.getElementById('payNumber');
-        const amountInput = document.getElementById('testAmount');
-        const commentInput = document.getElementById('testComment');
-
-        const number = numberInput.value.trim();
-        const amount = amountInput.value;
-        const comment = commentInput.value.trim();
-
-        if (!number || number.length < 10) {
-            showToast('⚠️ Please enter a valid number (min 10 digits)');
-            numberInput.focus();
-            return;
-        }
-
-        if (!amount || parseFloat(amount) <= 0) {
-            showToast('⚠️ Please enter a valid amount (greater than 0)');
-            amountInput.focus();
-            return;
-        }
-
-        const key = localStorage.getItem('apiKey');
-        if (!key || key === '—' || key === 'YOUR_KEY') {
-            showToast('⚠️ No valid API key found. Please regenerate.');
-            return;
-        }
-
-        const btn = document.getElementById('testPaymentBtn');
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loading-spinner"></span> Processing...';
-
-        try {
-            const apiUrl = `https://prime-wallet-lifafa.vercel.app/api/payment?key=${encodeURIComponent(key)}&number=${encodeURIComponent(number)}&amount=${encodeURIComponent(amount)}&comment=${encodeURIComponent(comment || 'Test Payment')}`;
-
-            console.log('📤 Sending request to:', apiUrl);
-
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                data = { status: 'error', message: 'Invalid response from server' };
-            }
-
-            console.log('📥 Response received:', data);
-
-            const responseContainer = document.getElementById('testResponse');
-            const responseContent = document.getElementById('testResponseContent');
-
-            const formattedJson = JSON.stringify(data, null, 4);
-            let coloredJson = formattedJson;
-
-            if (data.status === 'success') {
-                coloredJson = coloredJson.replace(/"status": "success"/g, '"status": "<span class="success">success</span>"');
-                showToast('✅ Payment test successful!');
-                let totalCalls = parseInt(document.getElementById('totalCalls').textContent) || 0;
-                document.getElementById('totalCalls').textContent = totalCalls + 1;
-            } else {
-                coloredJson = coloredJson.replace(/"status": "error"/g, '"status": "<span class="error">error</span>"');
-                showToast('❌ ' + (data.message || 'Payment failed'));
-            }
-
-            coloredJson = coloredJson.replace(/"([^"]+)":/g, (match, key) => {
-                if (key !== 'status') {
-                    return `"<span class="key">${key}</span>":`;
-                }
-                return match;
-            });
-
-            coloredJson = coloredJson.replace(/: "([^"]*)"/g, (match, value) => {
-                if (match.includes('span class')) return match;
-                return `: "<span class="string">${value}</span>"`;
-            });
-
-            coloredJson = coloredJson.replace(/: (\d+\.?\d*)/g, (match, value) => {
-                if (match.includes('span class')) return match;
-                return `: <span class="number">${value}</span>`;
-            });
-
-            responseContent.innerHTML = coloredJson;
-            responseContainer.classList.add('show');
-
-            document.getElementById('lastUsed').textContent = new Date().toLocaleString();
-
-        } catch (error) {
-            console.error('❌ Test payment error:', error);
-            showToast('🌐 Network error. Please check your connection and try again.');
-
-            const responseContainer = document.getElementById('testResponse');
-            const responseContent = document.getElementById('testResponseContent');
-            responseContent.innerHTML = `<span class="error">❌ Error: ${error.message || 'Unknown error'}</span>`;
-            responseContainer.classList.add('show');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    }
-
-    // ============================================
-    // LOAD API STATUS
-    // ============================================
-    function loadApiStatus() {
-        const savedStatus = localStorage.getItem('apiStatus');
-        if (savedStatus === 'inactive') {
-            document.getElementById('apiToggle').checked = false;
-            isApiActive = false;
-
-            const badge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('statusText');
-            const statusDesc = document.getElementById('statusDesc');
-
-            badge.className = 'status-badge inactive';
-            statusText.textContent = 'INACTIVE';
-            statusDesc.textContent = 'API payments are disabled';
-
-            document.getElementById('apiCredentialsCard').classList.add('api-disabled');
-            document.getElementById('apiEndpointCard').classList.add('api-disabled');
-            document.getElementById('testApiCard').classList.add('api-disabled');
-            document.getElementById('testPaymentBtn').disabled = true;
-        }
-    }
-
-    // ============================================
-    // CHECK AUTH
-    // ============================================
-    function checkAuth() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/';
-            return false;
-        }
-        return true;
-    }
-
-    // ============================================
-    // INITIALIZE
-    // ============================================
-    document.addEventListener('DOMContentLoaded', async function() {
-        if (!checkAuth()) return;
-
-        loadApiStatus();
-        await loadApiKeyFromDatabase();
-
-        document.getElementById('lastUsed').textContent = new Date().toLocaleString();
-    });
+    document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+});
 </script>
 
 </body>
