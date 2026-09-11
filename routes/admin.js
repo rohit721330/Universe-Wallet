@@ -762,13 +762,6 @@ router.delete('/delete-user/:userId', verifyAdminToken, async (req, res) => {
             });
         }
         
-        if (userToDelete.isAdmin) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cannot Delete Admin Account.'
-            });
-        }
-        
         // ✅ SOFT DELETE — Data preserve করা হয়
         await userToDelete.softDelete(req.user.fullName || 'Admin');
         
