@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ADMIN PANEL • UNIVERSE WALLET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #11162e;
+            --bg-card: #1a1f3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8fad;
+            --text-muted: #6b6f8d;
+            --border-color: rgba(0, 240, 255, 0.12);
+            --border-soft: rgba(0, 240, 255, 0.06);
+            --accent: #00f0ff;
+            --accent-gradient: linear-gradient(135deg, #00f0ff, #0088ff);
+            --accent-glow: rgba(0, 240, 255, 0.3);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(8, 12, 28, 0.95);
+            --input-bg: #0a0e27;
+            --grid-color: rgba(0, 240, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --pending-color: #f59e0b;
+            --completed-color: #22c55e;
+            --cancelled-color: #ef4444;
+            --admin-color: #00f0ff;
+            --pattern-dot: #00f0ff;
+            --anodized-glow: 0 0 30px rgba(0, 240, 255, 0.15);
+            --anodized-border: 1px solid rgba(0, 240, 255, 0.2);
+            --lifafa-color: #ff6b6b;
+            --gift-color: #ffd93d;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1rem;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        .electron-particle {
+            position: fixed;
+            bottom: -20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: riseElectron linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 60px rgba(0,240,255,0.1);
+        }
+        .electron-particle.big { box-shadow: 0 0 30px rgba(0,240,255,0.6), 0 0 80px rgba(0,240,255,0.15); background: radial-gradient(circle, #00f0ff, #0088ff); }
+        .electron-particle.small { box-shadow: 0 0 15px rgba(0,240,255,0.3); background: radial-gradient(circle, #00f0ff, transparent); }
+        @keyframes riseElectron { 0% { transform: translateY(0) scale(1); opacity: 0; } 5% { opacity: 0.8; } 95% { opacity: 0.8; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+        
+        /* Sidebar */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--bg-secondary); z-index: 1000; transition: all 0.3s ease; padding: 1.5rem 0; overflow-y: auto; border-right: var(--anodized-border); box-shadow: var(--anodized-glow); }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-header .sidebar-logo { font-size: 1.2rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.3); letter-spacing: 0.5px; }
+        .sidebar-header .sidebar-close { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: var(--anodized-border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .sidebar-header .sidebar-close:active { transform: scale(0.9); }
+        .sidebar-user { padding: 1.5rem; border-bottom: var(--anodized-border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-user .user-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .sidebar-user .user-info { flex: 1; min-width: 0; }
+        .sidebar-user .user-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.5px; }
+        .sidebar-user .user-role { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-menu { padding: 0.5rem 0; }
+        .sidebar-menu .menu-label { padding: 0.5rem 1.5rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .sidebar-menu .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; }
+        .sidebar-menu .menu-item i { width: 20px; font-size: 1rem; color: var(--text-muted); }
+        .sidebar-menu .menu-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .sidebar-menu .menu-item.active { background: var(--bg-card); color: var(--accent); border-left: 3px solid var(--accent); }
+        .sidebar-menu .menu-item.active i { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .sidebar-menu .menu-item.logout { margin-top: 0.5rem; border-top: var(--anodized-border); padding-top: 1rem; color: var(--danger); }
+        .sidebar-menu .menu-item.logout i { color: var(--danger); }
+        .sidebar-menu .menu-item.logout:hover { background: rgba(239,68,68,0.1); }
+        .sidebar-menu .menu-item.lifafa i { color: var(--lifafa-color); }
+        .sidebar-menu .menu-item.lifafa.active { border-left-color: var(--lifafa-color); color: var(--lifafa-color); }
+        .sidebar-menu .menu-item.lifafa.active i { color: var(--lifafa-color); }
+        .sidebar-menu .menu-item.gift i { color: var(--gift-color); }
+        .sidebar-menu .menu-item.gift.active { border-left-color: var(--gift-color); color: var(--gift-color); }
+        .sidebar-menu .menu-item.gift.active i { color: var(--gift-color); }
+
+        /* Login Overlay */
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(30px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 1rem; }
+        .login-overlay.show { display: flex; }
+        .login-modal { background: var(--bg-secondary); border: var(--anodized-border); border-radius: 2rem; padding: 2.5rem 2rem; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5), var(--anodized-glow); animation: modalIn 0.4s ease; }
+        @keyframes modalIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .login-modal .modal-logo { text-align: center; margin-bottom: 1.5rem; }
+        .login-modal .modal-logo i { font-size: 3rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; display: block; margin-bottom: 0.5rem; text-shadow: 0 0 40px rgba(0,240,255,0.3); }
+        .login-modal .modal-logo h2 { font-size: 1.5rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); letter-spacing: 1px; }
+        .login-modal .modal-logo p { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; letter-spacing: 1px; }
+        
+        /* Pattern Lock */
+        .pattern-container { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin: 1.5rem 0; }
+        .pattern-status { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); min-height: 1.5rem; text-align: center; letter-spacing: 0.5px; }
+        .pattern-status.error { color: var(--danger); }
+        .pattern-status.success { color: var(--success); }
+        
+        .pattern-wrapper { position: relative; width: 260px; height: 260px; margin: 0 auto; touch-action: none; }
+        .pattern-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .pattern-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 1.2rem; 
+            width: 100%; 
+            height: 100%; 
+            position: relative;
+            z-index: 10;
+        }
+        .pattern-dot { 
+            width: 100%; 
+            aspect-ratio: 1; 
+            border-radius: 50%; 
+            background: var(--bg-card); 
+            border: 2px solid var(--border-color); 
+            cursor: pointer; 
+            position: relative; 
+            transition: all 0.2s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 0 20px rgba(0,240,255,0.05);
+            z-index: 10;
+        }
+        .pattern-dot .dot-inner { 
+            width: 20px; 
+            height: 20px; 
+            border-radius: 50%; 
+            background: var(--pattern-dot); 
+            opacity: 0; 
+            transition: all 0.2s ease; 
+            transform: scale(0); 
+            box-shadow: 0 0 20px rgba(0,240,255,0.3); 
+        }
+        .pattern-dot.active .dot-inner { opacity: 0.8; transform: scale(1); }
+        .pattern-dot.selected .dot-inner { opacity: 1; transform: scale(1.2); box-shadow: 0 0 40px rgba(0,240,255,0.5); }
+        .pattern-dot.wrong { border-color: var(--danger); animation: shake 0.4s ease; }
+        .pattern-dot.wrong .dot-inner { background: var(--danger); opacity: 1; box-shadow: 0 0 40px rgba(239,68,68,0.3); }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .pattern-dot .dot-number { position: absolute; top: -8px; right: -8px; font-size: 0.5rem; font-weight: 700; color: var(--text-muted); background: var(--bg-card); padding: 1px 4px; border-radius: 50%; border: 1px solid var(--border-color); z-index: 15; }
+        .pattern-actions { display: flex; gap: 1rem; margin-top: 0.5rem; }
+        .pattern-actions .btn-pattern { padding: 0.6rem 1.5rem; border: none; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; }
+        .pattern-actions .btn-pattern:active { transform: scale(0.95); }
+        .pattern-actions .btn-clear { background: var(--bg-card); color: var(--text-secondary); border: var(--anodized-border); }
+        .pattern-actions .btn-login { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 20px rgba(0,240,255,0.4); }
+        .pattern-actions .btn-login:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .login-error { color: var(--danger); font-size: 0.75rem; text-align: center; min-height: 1.2rem; margin-top: 0.5rem; }
+        .login-error i { margin-right: 0.3rem; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .menu-btn { background: var(--bg-secondary); border: var(--anodized-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,240,255,0.05); }
+        .menu-btn:active { transform: scale(0.95); }
+        .header-logo { font-size: 1.1rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 30px rgba(0,240,255,0.2); letter-spacing: 1px; }
+        .header-right { display: flex; gap: 0.5rem; align-items: center; }
+        .header-right .admin-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); }
+        .admin-badge { background: rgba(0,240,255,0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: var(--anodized-border); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* Welcome */
+        .welcome-section { margin-bottom: 1.5rem; }
+        .welcome-section .greeting { font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .welcome-section .greeting .greeting-icon { margin-right: 0.25rem; color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .welcome-section .admin-name { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; }
+        .welcome-section .admin-name span { color: var(--accent); text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 1rem; position: relative; overflow: hidden; box-shadow: var(--anodized-glow); transition: all 0.3s ease; }
+        .stat-card:hover { box-shadow: 0 0 40px rgba(0,240,255,0.1); border-color: rgba(0,240,255,0.3); }
+        .stat-card .stat-icon { position: absolute; top: -10px; right: -10px; font-size: 3rem; opacity: 0.05; color: var(--accent); }
+        .stat-card .stat-number { font-size: 1.5rem; font-weight: 800; }
+        .stat-card .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .stat-card .stat-change { font-size: 0.6rem; font-weight: 600; margin-top: 0.25rem; display: inline-block; }
+        .stat-card .stat-change .change-icon { margin-right: 0.15rem; }
+        .stat-card .stat-change.up { color: var(--success); }
+        .stat-card .stat-change.down { color: var(--danger); }
+        .stat-card .stat-number.total { color: var(--accent); text-shadow: 0 0 30px rgba(0,240,255,0.2); }
+        .stat-card .stat-number.users { color: #8b5cf6; }
+        .stat-card .stat-number.pending { color: var(--pending-color); }
+        .stat-card .stat-number.completed { color: var(--completed-color); }
+
+        /* Quick Actions */
+        .quick-actions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .quick-action-btn { background: var(--bg-card); border: var(--anodized-border); border-radius: 1rem; padding: 0.75rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.2s; text-decoration: none; color: var(--text-primary); box-shadow: var(--anodized-glow); }
+        .quick-action-btn:active { transform: scale(0.95); }
+        .quick-action-btn:hover { border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.1); }
+        .quick-action-btn i { font-size: 1.3rem; display: block; margin-bottom: 0.25rem; color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.2); }
+        .quick-action-btn span { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .quick-action-btn.lifafa i { color: var(--lifafa-color); text-shadow: 0 0 20px rgba(255,107,107,0.3); }
+        .quick-action-btn.gift i { color: var(--gift-color); text-shadow: 0 0 20px rgba(255,217,61,0.3); }
+
+        /* Transaction Item */
+        .transaction-item { 
+            background: var(--bg-card); 
+            border: var(--anodized-border); 
+            border-radius: 0.75rem; 
+            padding: 0.75rem 1rem; 
+            margin-bottom: 0.5rem; 
+            box-shadow: var(--anodized-glow);
+            transition: all 0.2s;
+        }
+        .transaction-item:hover { border-color: rgba(0,240,255,0.3); }
+        
+        .tx-row { display: flex; justify-content: space-between; align-items: center; }
+        .tx-id { font-size: 0.65rem; color: var(--text-secondary); font-family: monospace; font-weight: 600; }
+        .tx-amount { font-weight: 700; font-size: 1rem; }
+        .tx-amount.positive { color: var(--success); }
+        .tx-amount.negative { color: var(--danger); }
+        
+        .tx-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem; }
+        .tx-reason { font-size: 0.7rem; color: var(--text-muted); }
+        .tx-status { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; padding: 0.15rem 0.6rem; border-radius: 2rem; letter-spacing: 0.5px; }
+        .tx-status.success { background: rgba(34,197,94,0.15); color: var(--success); }
+        .tx-status.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .tx-status.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .tx-status.cancelled { background: rgba(107,114,128,0.15); color: var(--text-muted); }
+        .tx-time { font-size: 0.55rem; color: var(--text-muted); }
+
+        /* Section Header */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; margin-top: 1rem; }
+        .section-header .section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .section-header .section-title .title-icon { margin-right: 0.4rem; color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.2); }
+        .section-header .view-all { font-size: 0.7rem; font-weight: 600; color: var(--accent); text-decoration: none; cursor: pointer; letter-spacing: 0.5px; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: var(--anodized-border); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; padding: 0.25rem 0.5rem; letter-spacing: 0.5px; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); text-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        .nav-item:active { transform: scale(0.95); }
+        .nav-item.lifafa i { color: var(--lifafa-color); }
+        .nav-item.lifafa.active { color: var(--lifafa-color); text-shadow: 0 0 20px rgba(255,107,107,0.3); }
+        .nav-item.gift i { color: var(--gift-color); }
+        .nav-item.gift.active { color: var(--gift-color); text-shadow: 0 0 20px rgba(255,217,61,0.3); }
+
+        /* Toast */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: var(--anodized-border); letter-spacing: 0.5px; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+        .toast.warning { background: var(--warning); color: #fff; }
+        .toast.info { background: var(--bg-card); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 40px rgba(0,240,255,0.2); }
+
+        /* Loading & Empty */
+        .loading-state { text-align: center; padding: 2rem; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .loading-state i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 1s linear infinite; color: var(--accent); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .empty-state i { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.5; }
+        .hidden { display: none !important; }
+
+        @media (max-width: 480px) {
+            .quick-actions { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .sidebar { width: 260px; }
+            .pattern-wrapper { width: 220px; height: 220px; }
+            .pattern-grid { gap: 1rem; }
+            .tx-row { flex-wrap: wrap; }
+            .tx-amount { margin-left: auto; }
+            .tx-bottom { flex-wrap: wrap; gap: 0.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> ADMIN</span>
+            <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarName">ADMIN</div>
+                <div class="user-role"><i class="fas fa-bolt"></i> SUPER ADMIN</div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">MAIN MENU</div>
+            <button class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i><span>DASHBOARD</span></button>
+            <a href="/admin-lifafa" class="menu-item lifafa"><i class="fas fa-envelope"></i><span>ADMIN LIFAFA</span></a>
+            <a href="/admin-gift" class="menu-item gift"><i class="fas fa-gift"></i><span>ADMIN GIFT</span></a>
+            <a href="/admin-deposit" class="menu-item"><i class="fas fa-coins"></i><span>DEPOSITS</span></a>
+            <a href="/admin-withdraw" class="menu-item"><i class="fas fa-arrow-up"></i><span>WITHDRAWALS</span></a>
+            <a href="/admin-users" class="menu-item"><i class="fas fa-users"></i><span>USERS</span></a>
+            <a href="/admin-gift" class="menu-item"><i class="fas fa-gifts"></i><span>GIFT SETTINGS</span></a>
+            <a href="/game-settings" class="menu-item"><i class="fas fa-gamepad"></i><span>GAMES</span></a>
+            <a href="/admin-settings" class="menu-item"><i class="fas fa-cog"></i><span>SETTINGS</span></a>
+            <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>LOGOUT</span></button>
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div class="login-overlay show" id="loginOverlay">
+        <div class="login-modal">
+            <div class="modal-logo">
+                <i class="fas fa-bolt"></i>
+                <h2>ADMIN PANEL</h2>
+                <p>UNIVERSE WALLET • ANODIZED ACCESS</p>
+            </div>
+            <div class="pattern-container">
+                <div class="pattern-status" id="patternStatus">DRAW YOUR PATTERN</div>
+                <div class="pattern-wrapper" id="patternWrapper">
+                    <canvas class="pattern-canvas" id="patternCanvas"></canvas>
+                    <div class="pattern-grid" id="patternGrid"></div>
+                </div>
+                <div class="pattern-actions">
+                    <button class="btn-pattern btn-clear" onclick="clearPattern()"><i class="fas fa-undo"></i> CLEAR</button>
+                    <button class="btn-pattern btn-login" id="patternLoginBtn" onclick="verifyPattern()" disabled><i class="fas fa-bolt"></i> LOGIN</button>
+                </div>
+                <div class="login-error" id="loginError"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper" id="contentWrapper">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bolt"></i></button>
+                <span class="header-logo">ADMIN PANEL</span>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge"><i class="fas fa-bolt"></i> ADMIN</span>
+                <div class="admin-avatar" onclick="toggleSidebar()" title="Menu"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- DASHBOARD SECTION -->
+            <div id="dashboardSection">
+                <!-- Welcome -->
+                <div class="welcome-section">
+                    <div class="greeting" id="greetingText"><i class="fas fa-bolt greeting-icon"></i> GOOD MORNING</div>
+                    <div class="admin-name">ADMIN <span id="adminNameDisplay">PANEL</span></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-number users" id="totalUsers">0</div>
+                        <div class="stat-label">TOTAL USERS</div>
+                        <div class="stat-change up" id="userChange"><i class="fas fa-arrow-up change-icon"></i> 0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                        <div class="stat-number total" id="totalVolume">₹0</div>
+                        <div class="stat-label">TOTAL VOLUME</div>
+                        <div class="stat-change up" id="volumeChange"><i class="fas fa-arrow-up change-icon"></i> 0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-number pending" id="pendingDeposits">0</div>
+                        <div class="stat-label">PENDING DEPOSITS</div>
+                        <div class="stat-change" id="pendingChange">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-number completed" id="completedDeposits">0</div>
+                        <div class="stat-label">COMPLETED</div>
+                        <div class="stat-change up" id="completedChange"><i class="fas fa-arrow-up change-icon"></i> 0%</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <a href="/admin-lifafa" class="quick-action-btn lifafa"><i class="fas fa-envelope"></i><span>LIFAFA</span></a>
+                    <a href="/admin-gift" class="quick-action-btn gift"><i class="fas fa-gift"></i><span>GIFT</span></a>
+                    <a href="/admin-deposit" class="quick-action-btn"><i class="fas fa-coins"></i><span>DEPOSIT</span></a>
+                    <a href="/admin-withdraw" class="quick-action-btn"><i class="fas fa-arrow-up"></i><span>WITHDRAW</span></a>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-bolt title-icon"></i> RECENT TRANSACTIONS</div>
+                    <a href="/recent-transactions" class="view-all">VIEW ALL →</a>
+                </div>
+                <div id="recentTransactions">
+                    <div class="loading-state"><i class="fas fa-bolt"></i><p>LOADING...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="showSection('dashboard')"><i class="fas fa-bolt"></i><span>DASH</span></button>
+            <a href="/admin-lifafa" class="nav-item lifafa"><i class="fas fa-envelope"></i><span>LIFAFA</span></a>
+            <a href="/admin-gift" class="nav-item gift"><i class="fas fa-gift"></i><span>GIFT</span></a>
+            <a href="/admin-deposit" class="nav-item"><i class="fas fa-coins"></i><span>DEPOSIT</span></a>
+            <a href="/admin-withdraw" class="nav-item"><i class="fas fa-arrow-up"></i><span>WITHDRAW</span></a>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // PATTERN LOCK WITH DEVICE-LIKE LINES
+        // ============================================
+        const MIN_PATTERN_LENGTH = 4;
+        let selectedPattern = [];
+        let isDrawing = false;
+        let dotPositions = [];
+        let canvas, ctx;
+        let currentMousePos = null;
+
+        function initCanvas() {
+            canvas = document.getElementById('patternCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const wrapper = document.getElementById('patternWrapper');
+            if (!wrapper) return;
+            const rect = wrapper.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            computeDotPositions();
+            redrawPattern();
+        }
+
+        function computeDotPositions() {
+            dotPositions = [];
+            const dots = document.querySelectorAll('.pattern-dot');
+            const wrapper = document.getElementById('patternWrapper');
+            if (!wrapper) return;
+            const wrapperRect = wrapper.getBoundingClientRect();
+            dots.forEach(dot => {
+                const r = dot.getBoundingClientRect();
+                dotPositions.push({
+                    x: r.left - wrapperRect.left + r.width / 2,
+                    y: r.top - wrapperRect.top + r.height / 2
+                });
+            });
+        }
+
+        function createPatternGrid() {
+            const grid = document.getElementById('patternGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'pattern-dot';
+                dot.dataset.index = i;
+                dot.dataset.number = i + 1;
+                dot.innerHTML = `<span class="dot-number">${i+1}</span><div class="dot-inner"></div>`;
+                grid.appendChild(dot);
+            }
+            
+            const wrapper = document.getElementById('patternWrapper');
+            if (!wrapper) return;
+            
+            // Remove old listeners by cloning
+            const newWrapper = wrapper.cloneNode(true);
+            wrapper.parentNode.replaceChild(newWrapper, wrapper);
+            
+            newWrapper.addEventListener('mousedown', handleStart);
+            newWrapper.addEventListener('mousemove', handleMove);
+            newWrapper.addEventListener('mouseup', handleEnd);
+            newWrapper.addEventListener('mouseleave', handleEnd);
+            newWrapper.addEventListener('touchstart', handleStart, { passive: false });
+            newWrapper.addEventListener('touchmove', handleMove, { passive: false });
+            newWrapper.addEventListener('touchend', handleEnd);
+            newWrapper.addEventListener('touchcancel', handleEnd);
+            
+            canvas = document.getElementById('patternCanvas');
+            if (canvas) ctx = canvas.getContext('2d');
+            
+            setTimeout(() => {
+                computeDotPositions();
+                resizeCanvas();
+            }, 80);
+        }
+
+        function getPointerPos(e) {
+            const wrapper = document.getElementById('patternWrapper');
+            const rect = wrapper.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function getDotAtPosition(pos) {
+            const HIT_RADIUS = 30;
+            for (let i = 0; i < dotPositions.length; i++) {
+                const d = dotPositions[i];
+                const dist = Math.hypot(pos.x - d.x, pos.y - d.y);
+                if (dist < HIT_RADIUS) return i;
+            }
+            return -1;
+        }
+
+        function handleStart(e) {
+            e.preventDefault();
+            const pos = getPointerPos(e);
+            const idx = getDotAtPosition(pos);
+            if (idx >= 0) {
+                isDrawing = true;
+                selectedPattern = [];
+                document.querySelectorAll('.pattern-dot').forEach(d => d.classList.remove('selected', 'wrong'));
+                addDotToPattern(idx);
+            }
+        }
+
+        function handleMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const pos = getPointerPos(e);
+            currentMousePos = pos;
+            const idx = getDotAtPosition(pos);
+            if (idx >= 0 && !selectedPattern.includes(idx)) {
+                addDotToPattern(idx);
+            }
+            redrawPattern();
+        }
+
+        function handleEnd(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+            currentMousePos = null;
+            const btn = document.getElementById('patternLoginBtn');
+            if (btn) btn.disabled = selectedPattern.length < MIN_PATTERN_LENGTH;
+            redrawPattern();
+        }
+
+        function addDotToPattern(idx) {
+            selectedPattern.push(idx);
+            const dots = document.querySelectorAll('.pattern-dot');
+            if (dots[idx]) dots[idx].classList.add('selected');
+            
+            const status = document.getElementById('patternStatus');
+            const count = selectedPattern.length;
+            if (count >= MIN_PATTERN_LENGTH) {
+                status.textContent = `✅ ${count} DOTS SELECTED`;
+                status.className = 'pattern-status success';
+                const btn = document.getElementById('patternLoginBtn');
+                if (btn) btn.disabled = false;
+            } else {
+                status.textContent = `${count} DOTS (${MIN_PATTERN_LENGTH - count} MORE)`;
+                status.className = 'pattern-status';
+            }
+            document.getElementById('loginError').innerHTML = '';
+            document.querySelectorAll('.pattern-dot').forEach(d => d.classList.remove('wrong'));
+            
+            if (navigator.vibrate) navigator.vibrate(15);
+            redrawPattern();
+        }
+
+        function redrawPattern() {
+            if (!ctx || !canvas) return;
+            const wrapper = document.getElementById('patternWrapper');
+            if (!wrapper) return;
+            const rect = wrapper.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            
+            if (selectedPattern.length === 0) return;
+            
+            const wrong = document.querySelector('.pattern-dot.wrong');
+            const lineColor = wrong ? '#ef4444' : '#00f0ff';
+            const glowColor = wrong ? 'rgba(239,68,68,0.6)' : 'rgba(0,240,255,0.6)';
+            
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = lineColor;
+            ctx.shadowColor = glowColor;
+            ctx.shadowBlur = 15;
+            
+            ctx.beginPath();
+            for (let i = 0; i < selectedPattern.length; i++) {
+                const p = dotPositions[selectedPattern[i]];
+                if (!p) continue;
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            }
+            ctx.stroke();
+            
+            if (isDrawing && currentMousePos && selectedPattern.length > 0) {
+                const lastDot = dotPositions[selectedPattern[selectedPattern.length - 1]];
+                if (lastDot) {
+                    ctx.beginPath();
+                    ctx.moveTo(lastDot.x, lastDot.y);
+                    ctx.lineTo(currentMousePos.x, currentMousePos.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function clearPattern() {
+            selectedPattern = [];
+            isDrawing = false;
+            currentMousePos = null;
+            document.querySelectorAll('.pattern-dot').forEach(d => d.classList.remove('selected', 'wrong'));
+            const status = document.getElementById('patternStatus');
+            if (status) {
+                status.textContent = 'DRAW YOUR PATTERN';
+                status.className = 'pattern-status';
+            }
+            const btn = document.getElementById('patternLoginBtn');
+            if (btn) btn.disabled = true;
+            const err = document.getElementById('loginError');
+            if (err) err.innerHTML = '';
+            if (ctx && canvas) {
+                const wrapper = document.getElementById('patternWrapper');
+                if (wrapper) {
+                    const rect = wrapper.getBoundingClientRect();
+                    ctx.clearRect(0, 0, rect.width, rect.height);
+                }
+            }
+        }
+
+        async function verifyPattern() {
+            const status = document.getElementById('patternStatus');
+            const error = document.getElementById('loginError');
+            const dots = document.querySelectorAll('.pattern-dot');
+            
+            if (selectedPattern.length < MIN_PATTERN_LENGTH) {
+                status.textContent = `❌ ${MIN_PATTERN_LENGTH} DOTS REQUIRED`;
+                status.className = 'pattern-status error';
+                return;
+            }
+
+            const patternString = selectedPattern.map(i => i + 1).join('');
+            status.textContent = '⏳ VERIFYING...';
+            status.className = 'pattern-status';
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pattern: patternString })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = '✅ LOGIN SUCCESS!';
+                    status.className = 'pattern-status success';
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminData', JSON.stringify(data));
+                    document.getElementById('loginOverlay').classList.remove('show');
+                    showToast('✅ ' + data.message, 'success');
+                    setTimeout(() => { loadDashboard(); }, 300);
+                } else {
+                    status.textContent = '❌ ' + data.message;
+                    status.className = 'pattern-status error';
+                    error.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.message;
+                    dots.forEach(d => { if (d.classList.contains('selected')) d.classList.add('wrong'); });
+                    redrawPattern();
+                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    setTimeout(clearPattern, 1200);
+                }
+            } catch (err) {
+                status.textContent = '❌ NETWORK ERROR';
+                status.className = 'pattern-status error';
+                error.innerHTML = '<i class="fas fa-exclamation-circle"></i> NETWORK ERROR';
+                setTimeout(clearPattern, 1200);
+            }
+        }
+
+        // ============================================
+        // SECTION SWITCHING
+        // ============================================
+        function showSection(section) {
+            if (section === 'dashboard') {
+                document.getElementById('dashboardSection').style.display = 'block';
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                document.querySelectorAll('.menu-item')[0].classList.add('active');
+                loadDashboard();
+            }
+            closeSidebar();
+        }
+
+        // ============================================
+        // SIDEBAR
+        // ============================================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // ============================================
+        // SESSION
+        // ============================================
+        function checkSession() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(r => {
+                    if (r.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('adminData');
+                        document.getElementById('loginOverlay').classList.add('show');
+                        createPatternGrid();
+                        return;
+                    }
+                    return r.json();
+                })
+                .then(data => {
+                    if (data && data.success) {
+                        document.getElementById('loginOverlay').classList.remove('show');
+                        loadDashboard();
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('loginOverlay').classList.remove('show');
+                    loadDashboard();
+                });
+            } else {
+                document.getElementById('loginOverlay').classList.add('show');
+                createPatternGrid();
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('ARE YOU SURE YOU WANT TO LOGOUT?')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                document.getElementById('loginOverlay').classList.add('show');
+                closeSidebar();
+                createPatternGrid();
+                clearPattern();
+                showToast('🔒 LOGGED OUT SUCCESSFULLY', 'info');
+            }
+        }
+
+        // ============================================
+        // PARTICLES
+        // ============================================
+        function createElectronParticles() {
+            document.querySelectorAll('.electron-particle').forEach(el => el.remove());
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'electron-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                const size = 2 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.classList.add(size > 5 ? 'big' : 'small');
+                document.body.appendChild(p);
+            }
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ============================================
+        // DASHBOARD
+        // ============================================
+        function getToken() { return localStorage.getItem('adminToken'); }
+
+        async function loadDashboard() {
+            createElectronParticles();
+            await fetchStats();
+            await fetchTransactions();
+            updateGreeting();
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let text = 'GOOD MORNING';
+            if (hour >= 12 && hour < 17) text = 'GOOD AFTERNOON';
+            else if (hour >= 17 && hour < 20) text = 'GOOD EVENING';
+            else if (hour >= 20 || hour < 5) text = 'GOOD NIGHT';
+            document.getElementById('greetingText').innerHTML = `<i class="fas fa-bolt greeting-icon"></i> ${text}`;
+        }
+
+        async function fetchStats() {
+            try {
+                const token = getToken();
+                if (!token) { 
+                    document.getElementById('loginOverlay').classList.add('show'); 
+                    createPatternGrid(); 
+                    return; 
+                }
+                const r = await fetch('/api/admin/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                });
+                if (r.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminData');
+                    document.getElementById('loginOverlay').classList.add('show');
+                    createPatternGrid();
+                    clearPattern();
+                    showToast('❌ SESSION EXPIRED', 'error');
+                    return;
+                }
+                const data = await r.json();
+                if (!data.success) throw new Error(data.message);
+                const s = data.stats;
+                document.getElementById('totalUsers').textContent = s.totalUsers || 0;
+                document.getElementById('totalVolume').textContent = '₹' + (s.totalVolume || 0).toFixed(2);
+                document.getElementById('pendingDeposits').textContent = s.pendingDeposits || 0;
+                document.getElementById('completedDeposits').textContent = s.completedDeposits || 0;
+            } catch(e) { console.error(e); }
+        }
+
+        async function fetchTransactions() {
+            try {
+                const token = getToken();
+                if (!token) return;
+                const r = await fetch('/api/admin/transactions?limit=10', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (r.status === 401) return;
+                const data = await r.json();
+                if (!data.success) { renderRecentTransactions([]); return; }
+                renderRecentTransactions(data.transactions || []);
+            } catch(e) { console.error(e); renderRecentTransactions([]); }
+        }
+
+        function renderRecentTransactions(transactions) {
+            const c = document.getElementById('recentTransactions');
+            if (!transactions || transactions.length === 0) {
+                c.innerHTML = `<div class="empty-state"><i class="fas fa-bolt"></i><p>NO TRANSACTIONS</p></div>`;
+                return;
+            }
+            let html = '';
+            transactions.forEach(tx => {
+                const type = tx.type || 'unknown';
+                const description = tx.description || tx.remark || '';
+                
+                let isNegative = false;
+                if (type === 'withdrawal' || 
+                    type === 'admin_deduct' || 
+                    type === 'transfer' ||
+                    type === 'gift' || 
+                    type === 'lifafa') {
+                    isNegative = true;
+                }
+                if (type === 'gift' && description.toLowerCase().includes('created')) {
+                    isNegative = true;
+                } else if (type === 'gift' && description.toLowerCase().includes('redeem')) {
+                    isNegative = false;
+                }
+                if (type === 'lifafa' && description.toLowerCase().includes('created')) {
+                    isNegative = true;
+                } else if (type === 'lifafa' && description.toLowerCase().includes('claimed')) {
+                    isNegative = false;
+                }
+
+                const amountClass = isNegative ? 'negative' : 'positive';
+                const amountSign = isNegative ? '-' : '+';
+                const status = tx.status || 'pending';
+                const reason = tx.remark || tx.description || 'N/A';
+                const time = new Date(tx.createdAt).toLocaleString('en-IN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    day: '2-digit', 
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                html += `<div class="transaction-item">
+                    <div class="tx-row">
+                        <span class="tx-id">${tx.tx_id || tx._id}</span>
+                        <span class="tx-amount ${amountClass}">${amountSign}₹${(tx.amount || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="tx-bottom">
+                        <span class="tx-reason"><i class="fas fa-sticky-note" style="margin-right:0.3rem;opacity:0.5;"></i>${reason}</span>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span class="tx-time">${time}</span>
+                            <span class="tx-status ${status}">${status}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            c.innerHTML = html;
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            setTimeout(() => {
+                initCanvas();
+                resizeCanvas();
+            }, 200);
+        });
+        
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                initCanvas();
+                resizeCanvas();
+            }, 300);
+        });
+        
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                setTimeout(resizeCanvas, 100);
+            }
+        });
+        
+        setInterval(() => { if (getToken()) { fetchStats(); fetchTransactions(); } }, 30000);
+        
+        document.addEventListener('click', function(e) {
+            const s = document.getElementById('sidebar');
+            const btn = document.querySelector('.menu-btn');
+            if (s && s.classList.contains('open') && !s.contains(e.target) && btn && !btn.contains(e.target)) closeSidebar();
+        });
+        
+        console.log('⚡ UNIVERSE WALLET ADMIN LOADED');
+        console.log('🔑 DEFAULT PATTERN: 8 → 4 → 5 → 2 → 1 → 7');
+        console.log('🔐 PATTERN VERIFIED BY BACKEND');
+        console.log('📌 LOGIN STAYS UNTIL MANUAL LOGOUT');
+    </script>
+</body>
+</html>
