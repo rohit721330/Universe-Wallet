@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pay Invoice • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root { --bg-primary: #f0f5ff; --bg-secondary: #ffffff; --bg-card: #ffffff; --text-primary: #1a2a4a; --text-secondary: #5a7a9a; --text-muted: #8a9ab0; --border-color: #c5d9f0; --border-soft: #e8f0fe; --accent: #1a56db; --accent-gradient: linear-gradient(135deg, #1a56db, #0088ff); --accent-glow: rgba(26, 86, 219, 0.3); --shadow-card: 0 4px 20px rgba(0, 50, 100, 0.08); --nav-bg: rgba(255, 255, 255, 0.98); --input-bg: #fafcff; --grid-color: rgba(26, 86, 219, 0.04); --success: #16a34a; --danger: #dc2626; --warning: #d97706; --manual-color: #8b5cf6; }
+body { font-family: 'Inter', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); color: var(--text-primary); padding: 1rem; padding-bottom: 80px; position: relative; overflow-x: hidden; }
+body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+.header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1.5rem 0; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+.back-btn { background: #ffffff; border: 2px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; color: var(--accent); font-size: 1.1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 50, 100, 0.08); }
+.back-btn:hover { background: #f0f7ff; }
+.back-btn:active { transform: scale(0.95); }
+.header-logo { font-size: 1.3rem; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.header-right { width: 40px; }
+.container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+.invoice-card { background: #ffffff; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0, 50, 100, 0.06); }
+.invoice-card .invoice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-soft); }
+.invoice-card .invoice-header .title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 700; }
+.invoice-card .invoice-header .status-badge { padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+.invoice-card .invoice-header .status-badge.pending { background: #fef3c7; color: var(--warning); }
+.invoice-card .invoice-header .status-badge.paid { background: #dcfce7; color: var(--success); }
+.invoice-card .invoice-header .status-badge.expired { background: #fee2e2; color: var(--danger); }
+.invoice-card .invoice-header .status-badge.cancelled { background: #f1f5f9; color: var(--text-muted); }
+.invoice-card .amount-display { text-align: center; padding: 0.5rem 0 1rem 0; }
+.invoice-card .amount-display .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 700; }
+.invoice-card .amount-display .amount { font-size: 2.5rem; font-weight: 800; color: var(--accent); margin-top: 0.2rem; }
+.invoice-card .detail-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-soft); }
+.invoice-card .detail-row:last-child { border-bottom: none; }
+.invoice-card .detail-row .label { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; }
+.invoice-card .detail-row .value { font-size: 0.7rem; font-weight: 600; color: var(--text-primary); text-align: right; word-break: break-all; }
+.invoice-card .detail-row .value.id-value { font-family: monospace; font-size: 0.65rem; }
+.invoice-card .detail-row .value.sender { color: var(--warning); }
+.invoice-card .detail-row .value.receiver { color: var(--success); }
+.invoice-card .detail-row .value.wallet-id { font-family: monospace; font-size: 0.6rem; color: var(--text-secondary); }
+.timer-container { text-align: center; padding: 0.75rem; background: #f0f7ff; border-radius: 0.75rem; margin: 1rem 0; border: 1px solid var(--border-color); }
+.timer-container .timer { font-size: 1.5rem; font-weight: 700; font-family: monospace; color: var(--accent); }
+.timer-container .timer.expired { color: var(--danger); }
+.timer-container .timer-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-top: 0.2rem; font-weight: 700; }
+.action-btn { width: 100%; padding: 1rem; border: none; border-radius: 1rem; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent-gradient); color: #ffffff; box-shadow: 0 4px 20px var(--accent-glow); margin-top: 0.5rem; }
+.action-btn:active:not(:disabled) { transform: scale(0.98); }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-btn i { font-size: 1rem; }
+.action-btn.secondary { background: #f0f7ff; box-shadow: none; border: 1px solid var(--border-color); color: var(--text-secondary); }
+.action-btn .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.warning-box { background: #fee2e2; border: 1px solid #fca5a5; border-radius: 0.75rem; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.65rem; color: var(--danger); font-weight: 600; }
+.warning-box.success { background: #dcfce7; border-color: #86efac; color: var(--success); }
+.warning-box ul { list-style: none; padding: 0; }
+.warning-box li { padding: 0.2rem 0; display: flex; align-items: center; gap: 0.5rem; }
+.warning-box li i { font-size: 0.5rem; }
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; border: 1px solid var(--border-color); }
+.toast i { margin-right: 0.5rem; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+.toast.success { background: var(--success); color: #fff; }
+.toast.error { background: var(--danger); color: #fff; }
+.toast.warning { background: var(--warning); color: #fff; }
+.toast.info { background: #ffffff; color: var(--accent); border-color: var(--accent); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: 1px solid var(--border-color); padding: 0.5rem 0 1rem 0; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; backdrop-filter: blur(20px); z-index: 100; box-shadow: 0 -4px 20px rgba(0, 50, 100, 0.08); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--text-muted); font-size: 0.6rem; transition: color 0.2s; padding: 0.25rem 0.5rem; font-weight: 700; text-transform: uppercase; }
+.nav-item i { font-size: 1.2rem; }
+.nav-item.active { color: var(--accent); }
+.nav-item:active { transform: scale(0.95); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 30, 60, 0.5); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 1rem; }
+.modal-overlay.active { display: flex; }
+.modal { background: #ffffff; border: 1px solid var(--border-color); border-radius: 1.5rem; padding: 1.5rem; max-width: 380px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.25); animation: modalIn 0.3s ease; text-align: center; }
+@keyframes modalIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.modal .success-icon { font-size: 4rem; color: var(--success); margin-bottom: 0.5rem; }
+.modal .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.modal .modal-sub { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600; }
+.modal .modal-detail { background: #f0f7ff; border-radius: 0.75rem; padding: 1rem; margin: 1rem 0; text-align: left; }
+.modal .modal-detail .row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--border-soft); }
+.modal .modal-detail .row:last-child { border-bottom: none; }
+.modal .modal-detail .row .label { font-size: 0.6rem; color: var(--text-secondary); font-weight: 600; }
+.modal .modal-detail .row .value { font-size: 0.7rem; font-weight: 600; color: var(--text-primary); }
+.modal .modal-detail .row .value.balance { color: var(--accent); font-size: 0.8rem; }
+.modal .modal-footer { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.modal .modal-footer button { flex: 1; padding: 0.7rem; border: none; border-radius: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem; }
+.modal .modal-footer button:active { transform: scale(0.95); }
+.modal .modal-footer .btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 20px var(--accent-glow); }
+.modal .modal-footer .btn-secondary { background: #f0f7ff; color: var(--text-secondary); border: 1px solid var(--border-color); }
+.not-found { text-align: center; padding: 2rem; }
+.not-found i { font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem; display: block; }
+.not-found h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; text-transform: uppercase; }
+.not-found p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; font-weight: 600; }
+
+/* ============================================
+   BLOCKED / DELETED / DEACTIVATED OVERLAY
+   ============================================ */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: blockedIn 0.4s ease-out; }
+@keyframes blockedIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { background: #1a4ac0; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 86, 219, 0.4); }
+.blocked-btn:active { transform: scale(0.98); }
+
+@media (max-width: 480px) { .invoice-card .amount-display .amount { font-size: 2rem; } .modal { max-width: 340px; } }
+</style>
+</head>
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<header class="header">
+    <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+    <span class="header-logo"><i class="fas fa-file-invoice"></i> Pay Invoice</span>
+    <div class="header-right"></div>
+</header>
+
+<div class="container">
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="invoice-card" style="text-align:center;padding:2rem;">
+        <i class="fas fa-spinner fa-pulse" style="font-size:2rem;color:var(--accent);display:block;margin-bottom:0.5rem;"></i>
+        <p style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;">Loading Invoice Details...</p>
+    </div>
+
+    <!-- NOT FOUND -->
+    <div id="notFoundState" class="invoice-card" style="display:none;">
+        <div class="not-found">
+            <i class="fas fa-file-invoice"></i>
+            <h2>Invoice Not Found</h2>
+            <p>The invoice you are looking for does not exist or has been removed.</p>
+            <button class="action-btn" onclick="window.location.href='/invoice'">
+                <i class="fas fa-arrow-left"></i> Back To Invoices
+            </button>
+        </div>
+    </div>
+
+    <!-- INVOICE DETAILS -->
+    <div id="invoiceState" style="display:none;">
+        <div class="invoice-card">
+            <div class="invoice-header">
+                <span class="title"><i class="fas fa-file-invoice"></i> Invoice Details</span>
+                <span class="status-badge pending" id="statusBadge">Pending</span>
+            </div>
+
+            <div class="amount-display">
+                <div class="label">Total Amount</div>
+                <div class="amount" id="invoiceAmount">₹0.00</div>
+            </div>
+
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-hashtag"></i> Invoice ID</span>
+                <span class="value id-value" id="invoiceId">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-arrow-left"></i> From</span>
+                <span class="value sender" id="senderName">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-wallet"></i> Sender Wallet</span>
+                <span class="value wallet-id" id="senderWallet">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-arrow-right"></i> To</span>
+                <span class="value receiver" id="receiverName">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-wallet"></i> Receiver Wallet</span>
+                <span class="value wallet-id" id="receiverWallet">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-sticky-note"></i> Note</span>
+                <span class="value" id="invoiceNote" style="font-size:0.65rem;">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-clock"></i> Created</span>
+                <span class="value" id="createdAt">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-hourglass-end"></i> Expires</span>
+                <span class="value" id="expiresAt">-</span>
+            </div>
+
+            <div class="timer-container">
+                <div class="timer" id="timerDisplay">05:00</div>
+                <div class="timer-label">Time Left To Pay</div>
+            </div>
+        </div>
+
+        <!-- PAYMENT ACTIONS -->
+        <div id="paymentActions">
+            <button class="action-btn" id="payBtn" onclick="openPayModal()">
+                <i class="fas fa-check-circle"></i> Pay Invoice
+            </button>
+            <button class="action-btn secondary" onclick="cancelInvoice()" style="margin-top:0.5rem;">
+                <i class="fas fa-times"></i> Cancel Invoice
+            </button>
+        </div>
+
+        <!-- COMPLETED STATE -->
+        <div id="invoiceCompleted" style="display:none;">
+            <div class="warning-box" id="completedMessage">
+                <ul>
+                    <li><i class="fas fa-circle"></i> <span id="completedText">This invoice has been completed</span></li>
+                </ul>
+            </div>
+            <button class="action-btn secondary" onclick="window.location.href='/invoice'">
+                <i class="fas fa-arrow-left"></i> Back To Invoices
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="modal-overlay" id="payModal">
+    <div class="modal">
+        <div style="font-size:3rem;color:var(--accent);margin-bottom:0.5rem;">
+            <i class="fas fa-credit-card"></i>
+        </div>
+        <div class="modal-title">Confirm Payment</div>
+        <div class="modal-sub">Are you sure you want to pay this invoice?</div>
+        <div class="modal-detail">
+            <div class="row">
+                <span class="label">Invoice ID</span>
+                <span class="value id-value" id="modalInvoiceId">-</span>
+            </div>
+            <div class="row">
+                <span class="label">Amount</span>
+                <span class="value balance" id="modalAmount">₹0.00</span>
+            </div>
+            <div class="row">
+                <span class="label">To</span>
+                <span class="value" id="modalReceiver">-</span>
+            </div>
+            <div class="row">
+                <span class="label">Your Balance</span>
+                <span class="value balance" id="modalBalance">₹0.00</span>
+            </div>
+            <div class="row" style="border-top:1px solid var(--border-color);padding-top:0.5rem;margin-top:0.3rem;">
+                <span class="label">After Payment</span>
+                <span class="value balance" id="modalAfterBalance" style="color:var(--success);">₹0.00</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closePayModal()">Cancel</button>
+            <button class="btn-primary" id="confirmPayBtn" onclick="confirmPay()">
+                <i class="fas fa-check"></i> Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="modal-title">Payment Successful!</div>
+        <div class="modal-sub">The invoice has been paid successfully.</div>
+        <div class="modal-detail">
+            <div class="row">
+                <span class="label">Invoice ID</span>
+                <span class="value id-value" id="successInvoiceId">-</span>
+            </div>
+            <div class="row">
+                <span class="label">Amount Paid</span>
+                <span class="value balance" id="successAmount">₹0.00</span>
+            </div>
+            <div class="row">
+                <span class="label">New Balance</span>
+                <span class="value balance" id="successBalance">₹0.00</span>
+            </div>
+            <div class="row">
+                <span class="label">Transaction ID</span>
+                <span class="value id-value" id="successTxnId">-</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="goToInvoices()" style="width:100%;">
+                <i class="fas fa-arrow-right"></i> View My Invoices
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="/transfer" class="nav-item"><i class="fas fa-paper-plane"></i><span>Send</span></a>
+    <a href="/invoice" class="nav-item active"><i class="fas fa-file-invoice"></i><span>Invoice</span></a>
+    <a href="/deposit" class="nav-item"><i class="fas fa-plus-circle"></i><span>Add</span></a>
+    <a href="/transactions" class="nav-item"><i class="fas fa-receipt"></i><span>History</span></a>
+</div>
+
+<script>
+console.log('🟢 Invoice Pay Page Loaded');
+
+const token = localStorage.getItem('token');
+if (!token) { window.location.href = '/'; }
+
+const API_BASE = '/api/invoice-payment';
+let currentInvoice = null;
+let timerInterval = null;
+let statusCheckInterval = null;
+let isCompleted = false;
+let isAccountBlocked = false;
+
+// ============================================
+// ACCOUNT STATE PROTECTION
+// ============================================
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (statusCheckInterval) { clearInterval(statusCheckInterval); statusCheckInterval = null; }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+// ============================================
+// SAFE FETCH
+// ============================================
+async function safeFetch(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        let data = {};
+        try { data = await response.json(); } catch (e) { data = {}; }
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            throw new Error('Account deleted');
+        }
+        return { response, data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+// ============================================
+// VERIFY USER STATE
+// ============================================
+async function verifyUserState() {
+    const t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked. Please contact support.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            return false;
+        }
+        const user = data.user || data.data || data;
+        if (!user || (!user.id && !user._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found. Please login again.');
+            return false;
+        }
+        if (user.isBlocked === true) {
+            showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (user.isDeleted === true || user.deletedAt) {
+            showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+            return false;
+        }
+        if (user.isActive === false) {
+            showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = message;
+    toast.className = `toast ${type} show`;
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => toast.className = 'toast', 3500);
+}
+
+// ============================================
+// LOAD BALANCE
+// ============================================
+async function loadBalance() {
+    try {
+        const { response, data } = await safeFetch('/api/wallet/balance', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (isAccountBlocked) return;
+        if (data && data.balance !== undefined) {
+            const balance = parseFloat(data.balance).toFixed(2);
+            document.getElementById('modalBalance').textContent = '₹' + balance;
+        } else if (data && data.status === 'success' && data.data && data.data.balance !== undefined) {
+            const balance = parseFloat(data.data.balance).toFixed(2);
+            document.getElementById('modalBalance').textContent = '₹' + balance;
+        }
+    } catch (e) {
+        if (!isAccountBlocked) console.error('Balance error:', e.message);
+    }
+}
+
+// ============================================
+// URL PARAMS
+// ============================================
+function getInvoiceIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id');
+}
+
+// ============================================
+// FETCH INVOICE
+// ============================================
+async function fetchInvoice(invoiceId) {
+    try {
+        const { response, data } = await safeFetch(API_BASE + '/' + invoiceId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (isAccountBlocked) return;
+        if (!data.success) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('notFoundState').style.display = 'block';
+            return;
+        }
+        currentInvoice = data.invoice;
+        renderInvoice(currentInvoice);
+        loadBalance();
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Fetch invoice error:', error);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('notFoundState').style.display = 'block';
+            showToast('<i class="fas fa-exclamation-circle"></i> Failed To Load Invoice', 'error');
+        }
+    }
+}
+
+// ============================================
+// RENDER INVOICE
+// ============================================
+function renderInvoice(inv) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('invoiceState').style.display = 'block';
+    document.getElementById('invoiceAmount').textContent = '₹' + inv.amount.toFixed(2);
+    document.getElementById('invoiceId').textContent = inv.invoiceId;
+    document.getElementById('senderName').textContent = inv.sender ? (inv.sender.fullName || inv.sender.username || 'Unknown') : 'Unknown';
+    document.getElementById('senderWallet').textContent = inv.sender ? (inv.sender.walletId || inv.sender._id || 'N/A') : 'N/A';
+    document.getElementById('receiverName').textContent = inv.receiver ? (inv.receiver.fullName || inv.receiver.username || 'Unknown') : 'Unknown';
+    document.getElementById('receiverWallet').textContent = inv.receiver ? (inv.receiver.walletId || inv.receiver._id || 'N/A') : 'N/A';
+    document.getElementById('invoiceNote').textContent = inv.notes || 'N/A';
+    document.getElementById('createdAt').textContent = new Date(inv.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('expiresAt').textContent = new Date(inv.expiresAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+    const badge = document.getElementById('statusBadge');
+    let statusClass = inv.status;
+    let statusDisplay = '';
+    if (inv.status === 'pending') {
+        const now = new Date();
+        const expiresAt = new Date(inv.expiresAt);
+        if (now > expiresAt) {
+            statusClass = 'expired'; statusDisplay = '⏰ Expired'; inv.status = 'expired'; inv.isExpired = true;
+        } else {
+            statusDisplay = '⏳ Pending';
+        }
+    } else if (inv.status === 'paid') { statusDisplay = '✅ Paid'; }
+    else if (inv.status === 'expired') { statusDisplay = '⏰ Expired'; }
+    else if (inv.status === 'cancelled') { statusDisplay = '🚫 Cancelled'; }
+    badge.className = 'status-badge ' + statusClass;
+    badge.textContent = statusDisplay;
+
+    const actionsDiv = document.getElementById('paymentActions');
+    const completedDiv = document.getElementById('invoiceCompleted');
+    const canPay = inv.status === 'pending' && !inv.isExpired && inv.canBePaid;
+
+    if (canPay) {
+        actionsDiv.style.display = 'block';
+        completedDiv.style.display = 'none';
+        isCompleted = false;
+        startTimer(inv.remainingTime);
+        startStatusCheck();
+    } else {
+        actionsDiv.style.display = 'none';
+        completedDiv.style.display = 'block';
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        if (statusCheckInterval) { clearInterval(statusCheckInterval); statusCheckInterval = null; }
+        const completedText = document.getElementById('completedText');
+        const completedBox = document.getElementById('completedMessage');
+        if (inv.status === 'paid') { completedText.textContent = '✅ This invoice has been paid successfully'; completedBox.className = 'warning-box success'; }
+        else if (inv.status === 'expired' || inv.isExpired) { completedText.textContent = '⏰ This invoice has expired'; completedBox.className = 'warning-box'; }
+        else if (inv.status === 'cancelled') { completedText.textContent = '🚫 This invoice has been cancelled'; completedBox.className = 'warning-box'; }
+        else { completedText.textContent = 'This invoice cannot be paid'; completedBox.className = 'warning-box'; }
+        document.getElementById('timerDisplay').textContent = '—';
+        document.getElementById('timerDisplay').className = 'timer expired';
+    }
+
+    document.getElementById('modalInvoiceId').textContent = inv.invoiceId;
+    document.getElementById('modalAmount').textContent = '₹' + inv.amount.toFixed(2);
+    document.getElementById('modalReceiver').textContent = inv.sender ? (inv.sender.fullName || inv.sender.username || 'Unknown') : 'Unknown';
+
+    const currentBalance = parseFloat(document.getElementById('modalBalance').textContent.replace('₹', ''));
+    const afterBalance = currentBalance - inv.amount;
+    document.getElementById('modalAfterBalance').textContent = '₹' + (afterBalance > 0 ? afterBalance.toFixed(2) : '0.00');
+}
+
+// ============================================
+// TIMER
+// ============================================
+function startTimer(remainingSeconds) {
+    if (timerInterval) clearInterval(timerInterval);
+    let remaining = remainingSeconds || 0;
+    const timerEl = document.getElementById('timerDisplay');
+    timerInterval = setInterval(() => {
+        if (isAccountBlocked) { clearInterval(timerInterval); timerInterval = null; return; }
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+            if (statusCheckInterval) clearInterval(statusCheckInterval);
+            timerEl.textContent = 'Expired';
+            timerEl.className = 'timer expired';
+            showToast('⏰ Invoice Expired', 'error');
+            const invoiceId = getInvoiceIdFromUrl();
+            if (invoiceId) fetchInvoice(invoiceId);
+        }
+        remaining--;
+    }, 1000);
+}
+
+// ============================================
+// STATUS CHECK
+// ============================================
+function startStatusCheck() {
+    if (statusCheckInterval) clearInterval(statusCheckInterval);
+    statusCheckInterval = setInterval(async () => {
+        if (isCompleted || !currentInvoice || isAccountBlocked) return;
+        try {
+            const invoiceId = getInvoiceIdFromUrl();
+            if (!invoiceId) return;
+            const { response, data } = await safeFetch(API_BASE + '/' + invoiceId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (isAccountBlocked) return;
+            if (data.success && data.invoice) {
+                if (data.invoice.status === 'paid' && currentInvoice.status !== 'paid') {
+                    clearInterval(statusCheckInterval);
+                    clearInterval(timerInterval);
+                    isCompleted = true;
+                    showToast('✅ Invoice has been paid!', 'success');
+                    fetchInvoice(invoiceId);
+                    document.getElementById('successInvoiceId').textContent = data.invoice.invoiceId;
+                    document.getElementById('successAmount').textContent = '₹' + data.invoice.amount.toFixed(2);
+                    const balanceResp = await safeFetch('/api/wallet/balance', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (balanceResp.data && balanceResp.data.balance !== undefined) {
+                        document.getElementById('successBalance').textContent = '₹' + parseFloat(balanceResp.data.balance).toFixed(2);
+                    }
+                    document.getElementById('successTxnId').textContent = data.invoice.paymentRef || 'N/A';
+                    document.getElementById('successModal').classList.add('active');
+                }
+                if (data.invoice.status === 'pending' && data.invoice.isExpired) {
+                    clearInterval(statusCheckInterval);
+                    clearInterval(timerInterval);
+                    showToast('⏰ Invoice Expired', 'error');
+                    fetchInvoice(invoiceId);
+                }
+                currentInvoice = data.invoice;
+            }
+        } catch (error) {
+            if (!isAccountBlocked) console.error('Status check error:', error);
+        }
+    }, 3000);
+}
+
+// ============================================
+// OPEN PAY MODAL
+// ============================================
+function openPayModal() {
+    if (isAccountBlocked) return;
+    if (!currentInvoice || currentInvoice.status !== 'pending' || currentInvoice.isExpired) {
+        showToast('<i class="fas fa-exclamation-circle"></i> Invoice cannot be paid', 'error');
+        return;
+    }
+    const balanceText = document.getElementById('modalBalance').textContent;
+    const balance = parseFloat(balanceText.replace('₹', ''));
+    if (balance < currentInvoice.amount) {
+        showToast(`<i class="fas fa-exclamation-circle"></i> Insufficient balance. Need ₹${currentInvoice.amount.toFixed(2)}`, 'error');
+        return;
+    }
+    document.getElementById('payModal').classList.add('active');
+}
+
+function closePayModal() {
+    document.getElementById('payModal').classList.remove('active');
+}
+
+// ============================================
+// CONFIRM PAY
+// ============================================
+async function confirmPay() {
+    if (isAccountBlocked) return;
+    if (!currentInvoice || !currentInvoice.invoiceId) {
+        showToast('<i class="fas fa-exclamation-circle"></i> No invoice to pay', 'error');
+        return;
+    }
+    const btn = document.getElementById('confirmPayBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Processing...';
+    try {
+        const { response, data } = await safeFetch(API_BASE + '/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ invoiceId: currentInvoice.invoiceId })
+        });
+        if (isAccountBlocked) return;
+        if (data.success) {
+            closePayModal();
+            showToast('<i class="fas fa-check-circle"></i> Payment successful!', 'success');
+            document.getElementById('successInvoiceId').textContent = currentInvoice.invoiceId;
+            document.getElementById('successAmount').textContent = '₹' + currentInvoice.amount.toFixed(2);
+            document.getElementById('successBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
+            document.getElementById('successTxnId').textContent = data.transaction?.id || 'N/A';
+            document.getElementById('successModal').classList.add('active');
+            setTimeout(() => {
+                const invoiceId = getInvoiceIdFromUrl();
+                if (invoiceId) fetchInvoice(invoiceId);
+            }, 1000);
+        } else {
+            showToast('<i class="fas fa-exclamation-circle"></i> ' + data.message, 'error');
+        }
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Pay error:', error.message);
+            showToast('<i class="fas fa-exclamation-circle"></i> ' + error.message, 'error');
+        }
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Confirm';
+}
+
+// ============================================
+// CANCEL INVOICE
+// ============================================
+async function cancelInvoice() {
+    if (isAccountBlocked) return;
+    if (!currentInvoice || !currentInvoice.invoiceId) {
+        showToast('<i class="fas fa-exclamation-circle"></i> No invoice to cancel', 'error');
+        return;
+    }
+    if (!confirm('Are you sure you want to cancel this invoice?')) return;
+    try {
+        const { response, data } = await safeFetch(API_BASE + '/cancel/' + currentInvoice.invoiceId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ reason: 'Cancelled by user' })
+        });
+        if (isAccountBlocked) return;
+        if (data.success) {
+            showToast('<i class="fas fa-check-circle"></i> Invoice cancelled', 'success');
+            const invoiceId = getInvoiceIdFromUrl();
+            if (invoiceId) fetchInvoice(invoiceId);
+        } else {
+            showToast('<i class="fas fa-exclamation-circle"></i> ' + data.message, 'error');
+        }
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Cancel error:', error.message);
+            showToast('<i class="fas fa-exclamation-circle"></i> ' + error.message, 'error');
+        }
+    }
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+function goToInvoices() {
+    document.getElementById('successModal').classList.remove('active');
+    window.location.href = '/invoice';
+}
+
+function goBack() {
+    if (document.getElementById('successModal').classList.contains('active')) {
+        document.getElementById('successModal').classList.remove('active');
+    } else {
+        window.location.href = '/invoice';
+    }
+}
+
+// ============================================
+// MODAL CLOSE
+// ============================================
+document.getElementById('payModal').addEventListener('click', function(e) {
+    if (e.target === this) closePayModal();
+});
+document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) goToInvoices();
+});
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', async function() {
+    const isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+    const invoiceId = getInvoiceIdFromUrl();
+    if (invoiceId) {
+        fetchInvoice(invoiceId);
+    } else {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('notFoundState').style.display = 'block';
+    }
+    console.log('✅ Invoice Pay Page Ready');
+});
+</script>
+</body>
+</html>
