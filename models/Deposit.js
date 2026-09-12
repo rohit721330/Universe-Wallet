@@ -42,7 +42,8 @@ depositSchema.pre('save', function(next) {
     }
     
     if (!this.expiresAt) {
-        this.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        // ✅ 30 MINUTES expiry
+        this.expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     }
     
     next();
@@ -141,7 +142,50 @@ depositSchema.statics.cleanupExpired = async function() {
 };
 
 // ============================================
-// INDEXES (শুধু compound index)
+// STATIC: Force expire old pending deposits (B1)
+// 30 মিনিটের বেশি পুরোনো → cancel
+// 30 মিনিটের কম পুরোনো → expiry adjust
+// ============================================
+depositSchema.statics.forceExpireOldPending = async function() {
+    const now = Date.now();
+    const thirtyMinAgo = new Date(now - 30 * 60 * 1000);
+
+    // Step 1: 30 মিনিটের বেশি পুরোনো pending → cancelled
+    const cancelledResult = await this.updateMany(
+        {
+            status: 'pending',
+            createdAt: { $lt: thirtyMinAgo }
+        },
+        {
+            $set: { status: 'cancelled' }
+        }
+    );
+
+    // Step 2: 30 মিনিটের কম পুরোনো pending → expiresAt = createdAt + 30 min
+    const pendingDeposits = await this.find({
+        status: 'pending',
+        createdAt: { $gte: thirtyMinAgo }
+    });
+
+    let updatedCount = 0;
+    for (const deposit of pendingDeposits) {
+        const newExpiry = new Date(deposit.createdAt.getTime() + 30 * 60 * 1000);
+        // শুধু তখনই update করব যখন নতুন expiry বর্তমান expiresAt থেকে ছোট
+        if (newExpiry < deposit.expiresAt) {
+            deposit.expiresAt = newExpiry;
+            await deposit.save();
+            updatedCount++;
+        }
+    }
+
+    return {
+        cancelled: cancelledResult.modifiedCount,
+        updated: updatedCount
+    };
+};
+
+// ============================================
+// INDEXES
 // ============================================
 depositSchema.index({ depositId: 1, status: 1 });
 depositSchema.index({ userId: 1, createdAt: -1 });
