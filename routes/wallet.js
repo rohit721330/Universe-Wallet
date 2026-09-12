@@ -40,8 +40,7 @@ function getTransactionMethod(tx) {
     if (tx.type === 'api') return 'API Transfer';
     if (tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive' || 
         tx.type === 'invoice_payment' || tx.type === 'invoice_pay') return 'Invoice';
-    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
-        tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'deposit') return 'Deposit';
     if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
     if (tx.type === 'admin_add' || tx.type === 'admin_deduct') return 'Admin';
     if (tx.type === 'game_win' || tx.type === 'game_loss') return 'Game';
@@ -60,8 +59,7 @@ function getTransactionCategory(tx) {
     if (tx.type === 'api') return 'P2P';
     if (tx.type === 'invoice_pay_send') return 'Invoice sent';
     if (tx.type === 'invoice_pay_receive') return 'Invoice received';
-    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
-        tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'deposit') return 'Deposit';
     if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
     if (tx.type === 'admin_add') return 'Admin credit';
     if (tx.type === 'admin_deduct') return 'Admin debit';
@@ -198,7 +196,7 @@ router.post('/transaction', verifyToken, async (req, res) => {
                 transactionType: type,
                 source: 'game',
                 balanceAfter: newBalance,
-                method: type === 'game_win' || type === 'game_loss' ? 'Game' : 'Transfer',
+                method: (type === 'game_win' || type === 'game_loss') ? 'Game' : 'Transfer',
                 category: type === 'game_win' ? 'Game win' : (type === 'game_loss' ? 'Game loss' : 'transfer')
             }
         });
