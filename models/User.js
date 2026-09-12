@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 // ============================================
-// DEFAULT LOGO — GitHub Raw URL
+// DEFAULT LOGO — ব্যাকএন্ডে সেভ করা ডিফল্ট ছবি
 // ============================================
 const default_logo = 'https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/universe-wallet-logo.png';
 
@@ -19,9 +19,13 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
     apiKey: { type: String, unique: true, sparse: true, default: null },
+
+    // ✅ ডিফল্ট ছবি ব্যাকএন্ডেই সেভ
     profilePicture: { type: String, default: default_logo },
+
     walletId: { type: String, unique: true, required: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
+
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
@@ -60,14 +64,16 @@ function generateApiKey() {
 }
 
 // ============================================
-// Pre-save: default_logo + Wallet ID + API Key
+// Pre-save: Default Logo + Wallet ID + API Key
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
+        // ✅ ডিফল্ট ছবি (কখনো খালি থাকবে না)
         if (!this.profilePicture) {
             this.profilePicture = default_logo;
         }
 
+        // Wallet ID generate (retry সহ unique নিশ্চিত করা)
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -87,6 +93,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
+        // API Key generate (retry সহ)
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -113,7 +120,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // ============================================
-// COMPARE METHODS — Plain text
+// COMPARE METHODS
 // ============================================
 userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!candidatePassword) return false;
@@ -130,7 +137,7 @@ userSchema.methods.hasPin = function() {
 };
 
 // ============================================
-// INSTANCE METHODS — Account Status Checks
+// INSTANCE METHODS — Account Status
 // ============================================
 userSchema.methods.isAccountActive = function() {
     return !this.isBlocked && !this.isDeleted && this.isActive === true;
@@ -181,7 +188,7 @@ userSchema.methods.unblockAccount = async function() {
 };
 
 // ============================================
-// STATIC METHODS — Find by various fields
+// STATIC METHODS — Find by fields
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
@@ -243,4 +250,8 @@ userSchema.statics.findActiveUserById = function(userId) {
     });
 };
 
+// ============================================
+// EXPORT (ডিফল্ট লোগো সহ — routes/profile.js এ ব্যবহার হবে)
+// ============================================
 module.exports = mongoose.model('User', userSchema);
+module.exports.default_logo = default_logo;
