@@ -90,6 +90,29 @@ router.post('/update-picture', auth, async (req, res) => {
 });
 
 // ============================================================
+// REMOVE PROFILE PICTURE (Revert to Default)
+// ============================================================
+router.post('/remove-picture', auth, async (req, res) => {
+    try {
+        console.log('🗑️ Removing Profile Picture For User:', req.userId);
+        const user = await User.findByIdAndUpdate(
+            req.userId,
+            { profilePicture: null },
+            { new: true, select: '-password -__v' }
+        );
+        if (!user) {
+            console.log('❌ User Not Found');
+            return res.status(404).json({ success: false, message: 'User Not Found' });
+        }
+        console.log('✅ Profile Picture Removed Successfully');
+        res.json({ success: true, message: 'Profile Picture Removed Successfully', user: user });
+    } catch (error) {
+        console.error('⚠️ Profile Picture Remove Error:', error.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error: ' + error.message });
+    }
+});
+
+// ============================================================
 // UPDATE USER PROFILE (Full Name, Mobile, Email, Telegram)
 // ============================================================
 router.put('/update', auth, async (req, res) => {
@@ -105,14 +128,12 @@ router.put('/update', auth, async (req, res) => {
             console.log('❌ No Fields To Update');
             return res.status(400).json({ success: false, message: 'Please Provide Fields To Update' });
         }
-        // Check if email is already used by another user
         if (email) {
             const existingUser = await User.findOne({ email: email, _id: { $ne: req.userId } });
             if (existingUser) {
                 return res.status(400).json({ success: false, message: 'Email Already In Use' });
             }
         }
-        // Check if mobile is already used by another user
         if (mobile) {
             const existingUser = await User.findOne({ mobile: mobile, _id: { $ne: req.userId } });
             if (existingUser) {
