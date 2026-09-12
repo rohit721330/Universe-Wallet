@@ -164,8 +164,13 @@ router.get('/transactions', verifyToken, async (req, res) => {
             const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
                              txObj.receiver_id._id.toString() === user._id.toString();
             
+            // ===== TRANSFER =====
+            if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
+                if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
+                else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
+            }
             // ===== INVOICE PAYMENT =====
-            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
+            else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
                 txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
                 if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
                 else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
@@ -181,7 +186,8 @@ router.get('/transactions', verifyToken, async (req, res) => {
                 transactionType = 'payment_sent';
             }
             
-            if (txObj.metadata && txObj.metadata.transactionType) {
+            // Only overwrite if not already set by transfer/invoice logic
+            if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
                 transactionType = txObj.metadata.transactionType;
             }
             
@@ -277,8 +283,13 @@ router.get('/recent', verifyToken, async (req, res) => {
             const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
                              txObj.receiver_id._id.toString() === user._id.toString();
             
+            // ===== TRANSFER =====
+            if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
+                if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
+                else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
+            }
             // ===== INVOICE PAYMENT =====
-            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
+            else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
                 txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
                 if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
                 else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
@@ -294,7 +305,8 @@ router.get('/recent', verifyToken, async (req, res) => {
                 transactionType = 'payment_sent';
             }
             
-            if (txObj.metadata && txObj.metadata.transactionType) {
+            // Only overwrite if not already set by transfer/invoice logic
+            if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
                 transactionType = txObj.metadata.transactionType;
             }
             
