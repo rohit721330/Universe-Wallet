@@ -72,16 +72,44 @@ function getTransactionCategory(tx) {
 }
 
 // ============================================
+// HELPER: Determine Gift Sub-Category
+// ============================================
+function getGiftSubCategory(tx, userId) {
+    const uid = userId.toString();
+    const sid = tx.sender_id?._id?.toString() || tx.sender_id?.toString() || null;
+    const rid = tx.receiver_id?._id?.toString() || tx.receiver_id?.toString() || null;
+
+    // Metadata-based (most reliable)
+    if (tx.metadata && tx.metadata.category) {
+        if (tx.metadata.category === 'gift_created') return 'gift_created';
+        if (tx.metadata.category === 'gift_received') return 'gift_received';
+    }
+
+    // Fallback based on sender/receiver
+    // Gift Received: user is receiver but not sender
+    if (rid === uid && sid !== uid) return 'gift_received';
+
+    // Gift Created: user is sender AND receiver (own transaction)
+    if (sid === uid && rid === uid) return 'gift_created';
+
+    // Gift Created: user is sender only
+    if (sid === uid && rid !== uid) return 'gift_created';
+
+    return 'gift';
+}
+
+// ============================================
 // HELPER: Transform Transaction for Frontend
 // ============================================
 function transformTransaction(txObj, user) {
     let transactionType = txObj.type || 'unknown';
-    
+    const uid = user._id.toString();
+
     const isSender = txObj.sender_id && txObj.sender_id._id && 
-                   txObj.sender_id._id.toString() === user._id.toString();
+                   txObj.sender_id._id.toString() === uid;
     const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
-                     txObj.receiver_id._id.toString() === user._id.toString();
-    
+                     txObj.receiver_id._id.toString() === uid;
+
     // ===== TRANSFER =====
     if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
         if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
@@ -94,20 +122,31 @@ function transformTransaction(txObj, user) {
         else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
         else transactionType = 'invoice_payment';
     }
-    else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
-        transactionType = 'payment_sent';
-    } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
+    // ===== GIFT =====
+    else if (txObj.type === 'gift') {
+        const subCategory = getGiftSubCategory(txObj, user._id);
+        if (subCategory === 'gift_received') transactionType = 'gift_received';
+        else if (subCategory === 'gift_created') transactionType = 'gift_created';
+        else transactionType = 'gift';
+    }
+    // ===== DEPOSIT =====
+    else if (txObj.type === 'deposit') {
         transactionType = 'payment_received';
-    } else if (txObj.type === 'deposit') {
-        transactionType = 'payment_received';
-    } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
+    }
+    // ===== WITHDRAW =====
+    else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
         transactionType = 'payment_sent';
     }
-    
+    else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api')) {
+        transactionType = 'payment_sent';
+    } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api')) {
+        transactionType = 'payment_received';
+    }
+
     if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
         transactionType = txObj.metadata.transactionType;
     }
-    
+
     return {
         _id: txObj._id,
         tx_id: txObj.tx_id,
@@ -163,14 +202,14 @@ router.post('/transaction', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         const { type, amount, remark, status = 'success', metadata = {} } = req.body;
-        
+
         if (!type || !amount || amount <= 0) {
             return res.status(400).json({ status: 'error', message: 'Invalid Transaction Data' });
         }
-        
+
         let newBalance = parseFloat(user.balance) || 0;
         const parsedAmount = parseFloat(amount);
-        
+
         if (type === 'game_win' || type === 'win') {
             newBalance = newBalance + parsedAmount;
             user.balance = newBalance;
@@ -178,9 +217,9 @@ router.post('/transaction', verifyToken, async (req, res) => {
             newBalance = newBalance - parsedAmount;
             user.balance = newBalance;
         }
-        
+
         await user.save();
-        
+
         const transaction = new Transaction({
             user_id: user._id,
             sender_id: user._id,
@@ -200,9 +239,9 @@ router.post('/transaction', verifyToken, async (req, res) => {
                 category: type === 'game_win' ? 'Game win' : (type === 'game_loss' ? 'Game loss' : 'transfer')
             }
         });
-        
+
         await transaction.save();
-        
+
         res.json({
             status: 'success',
             transaction: {
@@ -214,7 +253,7 @@ router.post('/transaction', verifyToken, async (req, res) => {
             },
             newBalance: parseFloat(user.balance) || 0
         });
-        
+
     } catch (error) {
         console.error('❌ Create transaction error:', error);
         res.status(500).json({ status: 'error', message: 'Failed To Create Transaction: ' + error.message });
@@ -229,7 +268,7 @@ router.get('/transactions', verifyToken, async (req, res) => {
         const user = req.user;
         const { limit = 50, page = 1, type, status } = req.query;
         const skip = (page - 1) * limit;
-        
+
         let query = {
             $or: [
                 { user_id: user._id },
@@ -237,24 +276,24 @@ router.get('/transactions', verifyToken, async (req, res) => {
                 { receiver_id: user._id }
             ]
         };
-        
+
         if (type) query.type = type;
         if (status) query.status = status;
-        
+
         const transactions = await Transaction.find(query)
             .populate('sender_id', 'fullName username mobile walletId email')
             .populate('receiver_id', 'fullName username mobile walletId email')
             .sort({ tx_time: -1 })
             .skip(parseInt(skip))
             .limit(parseInt(limit));
-        
+
         const total = await Transaction.countDocuments(query);
-        
+
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
             return transformTransaction(txObj, user);
         });
-        
+
         res.json({
             status: 'success',
             transactions: transformedTransactions,
@@ -278,18 +317,18 @@ router.get('/transaction/:id', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        
+
         const transaction = await Transaction.findOne({
             _id: id,
             $or: [{ sender_id: user._id }, { receiver_id: user._id }]
         })
         .populate('sender_id', 'fullName username mobile walletId email')
         .populate('receiver_id', 'fullName username mobile walletId email');
-        
+
         if (!transaction) {
             return res.status(404).json({ status: 'error', message: 'Transaction Not Found' });
         }
-        
+
         res.json({ status: 'success', transaction });
     } catch (error) {
         console.error('Get transaction error:', error);
@@ -304,7 +343,7 @@ router.get('/recent', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         const { limit = 5 } = req.query;
-        
+
         const query = {
             $or: [
                 { user_id: user._id },
@@ -312,18 +351,18 @@ router.get('/recent', verifyToken, async (req, res) => {
                 { receiver_id: user._id }
             ]
         };
-        
+
         const transactions = await Transaction.find(query)
             .populate('sender_id', 'fullName username mobile walletId email')
             .populate('receiver_id', 'fullName username mobile walletId email')
             .sort({ tx_time: -1 })
             .limit(parseInt(limit));
-        
+
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
             return transformTransaction(txObj, user);
         });
-        
+
         res.json({ status: 'success', transactions: transformedTransactions });
     } catch (error) {
         console.error('❌ Get Recent Transactions Error:', error.message);
