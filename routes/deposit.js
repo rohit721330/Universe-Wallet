@@ -10,48 +10,36 @@ require('dotenv').config();
 // ===== TELEGRAM BOT CONFIGURATION =====
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TELEGRAM_ID = process.env.ADMIN_TG_ID;
-const ADMIN_UPI = process.env.ADMIN_UPI_ID;
+const ADMIN_UPI = process.env.ADMIN_UPI_ID || 'admin@upi';
 
 // ===== HELPERS =====
 
-// Generate Deposit ID (Manual)
 function generateDepositId() {
     return 'DEP_' + Date.now().toString(36).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
 }
 
-// Generate Transaction ID
 function generateDepositTxnId() {
     return 'TXN_DEPOSIT_' + Date.now() + Math.floor(Math.random() * 99999);
 }
 
-// Get current date time in IST
 function getCurrentDateTime() {
     const now = new Date();
-    const options = {
+    return now.toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    };
-    return now.toLocaleString('en-IN', options);
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
 }
 
-// Generate QR Code
 function generateQRCode(amount) {
     const upiData = `upi://pay?pa=${ADMIN_UPI}&am=${amount}&cu=INR&tn=Universal%20Wallet%20Deposit`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiData)}`;
 }
 
-// Send Telegram Message
 async function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
         const https = require('https');
         if (!BOT_TOKEN) {
-            console.warn('BOT_TOKEN not configured');
             resolve({ success: false, error: 'BOT_TOKEN not configured' });
             return;
         }
@@ -91,68 +79,66 @@ async function sendTelegramMessage(chatId, message) {
     });
 }
 
-// Notify Admin
 async function notifyAdmin(message) {
     if (!ADMIN_TELEGRAM_ID) return;
     try {
         await sendTelegramMessage(ADMIN_TELEGRAM_ID, message);
-        console.log('Admin Notification Sent');
     } catch (error) {
         console.error('Admin Notification Failed:', error.message);
     }
 }
 
-// Notify User
 async function notifyUser(chatId, message) {
     if (!chatId) return;
     try {
         await sendTelegramMessage(chatId, message);
-        console.log('User Notification Sent');
     } catch (error) {
         console.error('User Notification Failed:', error.message);
     }
 }
 
 // ============================================
-// 1. GET USER PROFILE (BALANCE)
+// 0. GET PUBLIC CONFIG (UPI ID) - NO AUTH
 // ============================================
-router.get('/profile/me', auth, async (req, res) => {
+router.get('/config', (req, res) => {
     try {
-        console.log('Fetching Profile For User:', req.userId);
-
-        const user = await User.findById(req.userId).select('-password -pin -__v');
-        
-        if (!user) {
-            console.log('User Not Found');
-            return res.status(404).json({
-                success: false,
-                message: 'User Not Found'
-            });
-        }
-
-        console.log('Profile Fetched Successfully');
         res.json({
             success: true,
-            user: user
+            upiId: ADMIN_UPI,
+            minAmount: 1,
+            maxAmount: 5000,
+            expiryMinutes: 1440
         });
     } catch (error) {
-        console.error('Profile Fetch Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Internal Server Error: ' + error.message
-        });
+        res.status(500).json({ success: false, message: 'Config error' });
     }
 });
 
 // ============================================
-// 2. CREATE DEPOSIT (Manual) - NO NOTIFICATION
+// 1. GET USER PROFILE (BALANCE)
+// ============================================
+router.get('/profile/me', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).select('-password -pin -__v');
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User Not Found' });
+        }
+
+        res.json({ success: true, user: user });
+    } catch (error) {
+        console.error('Profile Fetch Error:', error.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error: ' + error.message });
+    }
+});
+
+// ============================================
+// 2. CREATE DEPOSIT (Manual)
 // ============================================
 router.post('/create', auth, async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.user.id;
-
-        console.log('Creating Manual Deposit:', { userId, amount });
 
         if (!amount || amount < 1 || amount > 5000) {
             return res.status(400).json({
@@ -191,7 +177,6 @@ router.post('/create', auth, async (req, res) => {
         });
         
         await deposit.save();
-        console.log('Manual Deposit Created With Deposit Id:', deposit.depositId);
 
         const qrCode = generateQRCode(amount);
         deposit.qrData = qrCode;
@@ -211,15 +196,12 @@ router.post('/create', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Create Deposit Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
 // ============================================
-// 3. SUBMIT UTR FOR MANUAL APPROVAL (NOTIFICATION HERE)
+// 3. SUBMIT UTR FOR MANUAL APPROVAL
 // ============================================
 router.post('/submit-utr', auth, async (req, res) => {
     try {
@@ -227,13 +209,8 @@ router.post('/submit-utr', auth, async (req, res) => {
         const userId = req.user.id;
         const dateTime = getCurrentDateTime();
 
-        console.log('UTR Submission:', { userId, depositId, transactionRef });
-
         if (!depositId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Deposit Id Is Required'
-            });
+            return res.status(400).json({ success: false, message: 'Deposit Id Is Required' });
         }
 
         if (!transactionRef || transactionRef.length < 12) {
@@ -246,21 +223,13 @@ router.post('/submit-utr', auth, async (req, res) => {
         const deposit = await Deposit.findOne({ depositId, userId, status: 'pending' });
         
         if (!deposit) {
-            console.log('Pending Deposit Not Found');
-            return res.status(404).json({
-                success: false,
-                message: 'Pending Deposit Not Found'
-            });
+            return res.status(404).json({ success: false, message: 'Pending Deposit Not Found' });
         }
 
         if (deposit.isExpired()) {
             deposit.status = 'cancelled';
             await deposit.save();
-            console.log('Deposit Expired:', depositId);
-            return res.status(400).json({
-                success: false,
-                message: 'This Deposit Has Expired'
-            });
+            return res.status(400).json({ success: false, message: 'This Deposit Has Expired' });
         }
 
         const existingUtr = await Deposit.findOne({ 
@@ -269,10 +238,7 @@ router.post('/submit-utr', auth, async (req, res) => {
         });
         
         if (existingUtr) {
-            return res.status(400).json({
-                success: false,
-                message: 'This UTR Has Already Been Used'
-            });
+            return res.status(400).json({ success: false, message: 'This UTR Has Already Been Used' });
         }
 
         deposit.transactionRef = transactionRef;
@@ -280,12 +246,9 @@ router.post('/submit-utr', auth, async (req, res) => {
         deposit.verifiedAt = new Date();
         await deposit.save();
 
-        console.log('UTR Submitted For Approval:', depositId);
-
         const user = await User.findById(userId);
 
-        // ===== SEND NOTIFICATION TO ADMIN =====
-        const adminMessage = 
+        await notifyAdmin(
 `UTR Submitted - Pending Approval
 
 Name: ${user.fullName || 'N/A'}
@@ -293,13 +256,11 @@ Wallet ID: ${user.walletId || 'N/A'}
 Amount: ₹${deposit.amount.toFixed(2)}
 Deposit ID: ${deposit.depositId}
 UTR: ${transactionRef}
-Time: ${dateTime}`;
+Time: ${dateTime}`
+        );
 
-        await notifyAdmin(adminMessage);
-
-        // ===== SEND NOTIFICATION TO USER =====
         if (user.telegramId) {
-            const userMessage = 
+            await notifyUser(user.telegramId, 
 `UTR Submitted For Approval
 
 Dear ${user.fullName},
@@ -311,9 +272,8 @@ Deposit ID: ${deposit.depositId}
 UTR: ${transactionRef}
 Time: ${dateTime}
 
-Please wait for admin approval.`;
-
-            await notifyUser(user.telegramId, userMessage);
+Please wait for admin approval.`
+            );
         }
 
         res.json({
@@ -328,11 +288,16 @@ Please wait for admin approval.`;
 
     } catch (error) {
         console.error('UTR Submission Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
+});
+
+// ============================================
+// 3b. ALIAS: manual-confirm → submit-utr (for backward compatibility)
+// ============================================
+router.post('/manual-confirm', (req, res, next) => {
+    req.url = '/submit-utr';
+    router.handle(req, res, next);
 });
 
 // ============================================
@@ -341,36 +306,28 @@ Please wait for admin approval.`;
 router.get('/pending', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        console.log('Fetching Pending Deposits For User:', userId);
 
         const pendingDeposits = await Deposit.find({
             userId: userId,
-            status: 'pending',
+            status: { $in: ['pending', 'pending_approval'] },
             expiresAt: { $gt: new Date() }
         }).sort({ createdAt: -1 });
-
-        console.log('Found', pendingDeposits.length, 'Pending Deposits');
 
         const depositsWithQR = pendingDeposits.map(deposit => ({
             depositId: deposit.depositId,
             amount: deposit.amount,
+            status: deposit.status,
             qrCode: deposit.qrData,
-            upiId: deposit.upiId,
+            upiId: deposit.upiId || ADMIN_UPI,
             expiresAt: deposit.expiresAt,
             createdAt: deposit.createdAt
         }));
 
-        res.json({
-            success: true,
-            deposits: depositsWithQR
-        });
+        res.json({ success: true, deposits: depositsWithQR });
 
     } catch (error) {
         console.error('Get Pending Deposits Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
@@ -383,8 +340,6 @@ router.post('/cancel/:depositId', auth, async (req, res) => {
         const userId = req.user.id;
         const dateTime = getCurrentDateTime();
 
-        console.log('Cancelling Deposit:', { userId, depositId });
-
         const deposit = await Deposit.findOne({ 
             depositId: depositId, 
             userId: userId,
@@ -392,42 +347,31 @@ router.post('/cancel/:depositId', auth, async (req, res) => {
         });
 
         if (!deposit) {
-            return res.status(404).json({
-                success: false,
-                message: 'Pending Deposit Not Found'
-            });
+            return res.status(404).json({ success: false, message: 'Pending Deposit Not Found' });
         }
 
         if (deposit.isExpired()) {
             deposit.status = 'cancelled';
             await deposit.save();
-            return res.status(400).json({
-                success: false,
-                message: 'This Deposit Has Expired'
-            });
+            return res.status(400).json({ success: false, message: 'This Deposit Has Expired' });
         }
 
         deposit.status = 'cancelled';
         await deposit.save();
 
-        console.log('Deposit Cancelled:', depositId);
-
         const user = await User.findById(userId);
 
-        // ===== SEND NOTIFICATION TO ADMIN =====
-        const adminMessage = 
+        await notifyAdmin(
 `Deposit Cancelled
 
 Name: ${user?.fullName || 'N/A'}
 Amount: ₹${deposit.amount.toFixed(2)}
 Deposit ID: ${deposit.depositId}
-Time: ${dateTime}`;
+Time: ${dateTime}`
+        );
 
-        await notifyAdmin(adminMessage);
-
-        // ===== SEND NOTIFICATION TO USER =====
         if (user?.telegramId) {
-            const userMessage = 
+            await notifyUser(user.telegramId, 
 `Deposit Cancelled
 
 Dear ${user.fullName},
@@ -436,27 +380,20 @@ Your deposit has been cancelled.
 
 Amount: ₹${deposit.amount.toFixed(2)}
 Deposit ID: ${deposit.depositId}
-Time: ${dateTime}`;
-
-            await notifyUser(user.telegramId, userMessage);
+Time: ${dateTime}`
+            );
         }
 
-        res.json({
-            success: true,
-            message: 'Deposit Cancelled Successfully'
-        });
+        res.json({ success: true, message: 'Deposit Cancelled Successfully' });
 
     } catch (error) {
         console.error('Cancel Deposit Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
 // ============================================
-// 6. ADMIN APPROVE DEPOSIT (NOTIFICATION HERE)
+// 6. ADMIN APPROVE DEPOSIT
 // ============================================
 router.post('/admin/approve/:depositId', auth, async (req, res) => {
     try {
@@ -464,14 +401,9 @@ router.post('/admin/approve/:depositId', auth, async (req, res) => {
         const adminId = req.user.id;
         const dateTime = getCurrentDateTime();
 
-        console.log('Admin Approving Deposit:', { adminId, depositId });
-
         const admin = await User.findById(adminId);
         if (!admin || !admin.isAdmin) {
-            return res.status(403).json({
-                success: false,
-                message: 'Admin Access Required'
-            });
+            return res.status(403).json({ success: false, message: 'Admin Access Required' });
         }
 
         const deposit = await Deposit.findOne({ 
@@ -480,10 +412,7 @@ router.post('/admin/approve/:depositId', auth, async (req, res) => {
         });
 
         if (!deposit) {
-            return res.status(404).json({
-                success: false,
-                message: 'Deposit Not Found Or Not Pending Approval'
-            });
+            return res.status(404).json({ success: false, message: 'Deposit Not Found Or Not Pending Approval' });
         }
 
         deposit.status = 'approved';
@@ -495,8 +424,10 @@ router.post('/admin/approve/:depositId', auth, async (req, res) => {
         user.balance += deposit.amount;
         await user.save();
 
+        const balanceAfter = user.balance;
         const txnId = generateDepositTxnId();
 
+        // ✅ Transaction with all metadata for CSV/PDF
         const transaction = new Transaction({
             tx_id: txnId,
             user_id: deposit.userId,
@@ -511,15 +442,16 @@ router.post('/admin/approve/:depositId', auth, async (req, res) => {
             metadata: {
                 depositId: deposit.depositId,
                 transactionRef: deposit.transactionRef,
-                type: 'admin_approved'
+                type: 'admin_approved',
+                transactionType: 'payment_received',
+                method: 'Deposit',
+                category: 'Deposit',
+                balanceAfter: balanceAfter
             }
         });
         await transaction.save();
 
-        console.log('Deposit Approved:', depositId);
-
-        // ===== SEND NOTIFICATION TO ADMIN =====
-        const adminConfirmMessage = 
+        await notifyAdmin(
 `Deposit Approved
 
 Name: ${user.fullName || 'N/A'}
@@ -528,13 +460,11 @@ Deposit ID: ${deposit.depositId}
 Transaction ID: ${txnId}
 UTR: ${deposit.transactionRef}
 New Balance: ₹${user.balance.toFixed(2)}
-Time: ${dateTime}`;
+Time: ${dateTime}`
+        );
 
-        await notifyAdmin(adminConfirmMessage);
-
-        // ===== SEND NOTIFICATION TO USER =====
         if (user.telegramId) {
-            const userMessage = 
+            await notifyUser(user.telegramId, 
 `Deposit Approved!
 
 Dear ${user.fullName},
@@ -547,9 +477,8 @@ Transaction ID: ${txnId}
 New Balance: ₹${user.balance.toFixed(2)}
 Time: ${dateTime}
 
-Amount credited to your wallet.`;
-
-            await notifyUser(user.telegramId, userMessage);
+Amount credited to your wallet.`
+            );
         }
 
         res.json({
@@ -562,15 +491,12 @@ Amount credited to your wallet.`;
 
     } catch (error) {
         console.error('Approve Deposit Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
 // ============================================
-// 7. ADMIN REJECT DEPOSIT (NOTIFICATION HERE)
+// 7. ADMIN REJECT DEPOSIT
 // ============================================
 router.post('/admin/reject/:depositId', auth, async (req, res) => {
     try {
@@ -579,14 +505,9 @@ router.post('/admin/reject/:depositId', auth, async (req, res) => {
         const { reason } = req.body;
         const dateTime = getCurrentDateTime();
 
-        console.log('Admin Rejecting Deposit:', { adminId, depositId });
-
         const admin = await User.findById(adminId);
         if (!admin || !admin.isAdmin) {
-            return res.status(403).json({
-                success: false,
-                message: 'Admin Access Required'
-            });
+            return res.status(403).json({ success: false, message: 'Admin Access Required' });
         }
 
         const deposit = await Deposit.findOne({ 
@@ -595,10 +516,7 @@ router.post('/admin/reject/:depositId', auth, async (req, res) => {
         });
 
         if (!deposit) {
-            return res.status(404).json({
-                success: false,
-                message: 'Deposit Not Found Or Not Pending Approval'
-            });
+            return res.status(404).json({ success: false, message: 'Deposit Not Found Or Not Pending Approval' });
         }
 
         deposit.status = 'rejected';
@@ -607,12 +525,9 @@ router.post('/admin/reject/:depositId', auth, async (req, res) => {
         deposit.adminNote = reason || 'No reason provided';
         await deposit.save();
 
-        console.log('Deposit Rejected:', depositId);
-
         const user = await User.findById(deposit.userId);
 
-        // ===== SEND NOTIFICATION TO ADMIN =====
-        const adminConfirmMessage = 
+        await notifyAdmin(
 `Deposit Rejected
 
 Name: ${user?.fullName || 'N/A'}
@@ -620,13 +535,11 @@ Amount: ₹${deposit.amount.toFixed(2)}
 Deposit ID: ${deposit.depositId}
 UTR: ${deposit.transactionRef}
 Reason: ${deposit.adminNote}
-Time: ${dateTime}`;
+Time: ${dateTime}`
+        );
 
-        await notifyAdmin(adminConfirmMessage);
-
-        // ===== SEND NOTIFICATION TO USER =====
         if (user?.telegramId) {
-            const userMessage = 
+            await notifyUser(user.telegramId, 
 `Deposit Rejected
 
 Dear ${user.fullName},
@@ -638,9 +551,8 @@ Deposit ID: ${deposit.depositId}
 Reason: ${deposit.adminNote}
 Time: ${dateTime}
 
-Please contact support for more information.`;
-
-            await notifyUser(user.telegramId, userMessage);
+Please contact support for more information.`
+            );
         }
 
         res.json({
@@ -651,10 +563,7 @@ Please contact support for more information.`;
 
     } catch (error) {
         console.error('Reject Deposit Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
@@ -665,8 +574,6 @@ router.get('/my-deposits', auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { status, limit = 20, page = 1 } = req.query;
-
-        console.log('Fetching Deposits:', { userId, status, page, limit });
 
         const filter = { userId };
         if (status) filter.status = status;
@@ -685,7 +592,7 @@ router.get('/my-deposits', auth, async (req, res) => {
             amount: deposit.amount,
             status: deposit.status,
             qrCode: deposit.qrData,
-            upiId: deposit.upiId,
+            upiId: deposit.upiId || ADMIN_UPI,
             expiresAt: deposit.expiresAt,
             createdAt: deposit.createdAt,
             transactionRef: deposit.transactionRef || null,
@@ -693,8 +600,6 @@ router.get('/my-deposits', auth, async (req, res) => {
             rejectedAt: deposit.rejectedAt || null,
             adminNote: deposit.adminNote || null
         }));
-
-        console.log('Deposits Fetched:', deposits.length);
 
         res.json({
             success: true,
@@ -709,10 +614,7 @@ router.get('/my-deposits', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Get Deposits Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
@@ -724,15 +626,10 @@ router.get('/:depositId', auth, async (req, res) => {
         const { depositId } = req.params;
         const userId = req.user.id;
 
-        console.log('Fetching Deposit:', { userId, depositId });
-
         const deposit = await Deposit.findOne({ depositId, userId });
 
         if (!deposit) {
-            return res.status(404).json({
-                success: false,
-                message: 'Deposit Not Found'
-            });
+            return res.status(404).json({ success: false, message: 'Deposit Not Found' });
         }
 
         res.json({
@@ -742,7 +639,7 @@ router.get('/:depositId', auth, async (req, res) => {
                 amount: deposit.amount,
                 status: deposit.status,
                 qrCode: deposit.qrData,
-                upiId: deposit.upiId,
+                upiId: deposit.upiId || ADMIN_UPI,
                 expiresAt: deposit.expiresAt,
                 createdAt: deposit.createdAt,
                 transactionRef: deposit.transactionRef || null,
@@ -754,10 +651,7 @@ router.get('/:depositId', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Get Deposit Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
@@ -768,17 +662,10 @@ router.post('/cleanup-expired', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         if (!user.isAdmin) {
-            return res.status(403).json({
-                success: false,
-                message: 'Admin Access Required'
-            });
+            return res.status(403).json({ success: false, message: 'Admin Access Required' });
         }
 
-        console.log('Cleaning Up Expired Deposits');
-
         const result = await Deposit.cleanupExpired();
-        
-        console.log('Cleaned Up:', result.modifiedCount);
 
         res.json({
             success: true,
@@ -787,10 +674,7 @@ router.post('/cleanup-expired', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Cleanup Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Server Error'
-        });
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
 
