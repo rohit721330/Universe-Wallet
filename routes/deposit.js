@@ -167,7 +167,6 @@ router.post('/create', auth, async (req, res) => {
 
         const depositId = generateDepositId();
 
-        // ✅ 30 MINUTES expiry
         const deposit = new Deposit({
             userId: userId,
             amount: amount,
@@ -428,7 +427,6 @@ router.post('/admin/approve/:depositId', auth, async (req, res) => {
         const balanceAfter = user.balance;
         const txnId = generateDepositTxnId();
 
-        // ✅ Transaction with full metadata
         const transaction = new Transaction({
             tx_id: txnId,
             user_id: deposit.userId,
@@ -680,9 +678,7 @@ router.post('/cleanup-expired', auth, async (req, res) => {
 });
 
 // ============================================
-// 11. FORCE EXPIRE OLD PENDING DEPOSITS (One-time, Admin only, B1)
-// 30 মিনিটের বেশি পুরোনো → cancelled
-// 30 মিনিটের কম পুরোনো → expiresAt = createdAt + 30 min
+// 11. FORCE EXPIRE OLD PENDING DEPOSITS (B1)
 // ============================================
 router.post('/force-expire-old-pending', auth, async (req, res) => {
     try {
@@ -691,11 +687,7 @@ router.post('/force-expire-old-pending', auth, async (req, res) => {
             return res.status(403).json({ success: false, message: 'Admin Access Required' });
         }
 
-        console.log('Force Expiring Old Pending Deposits (B1)...');
-
         const result = await Deposit.forceExpireOldPending();
-
-        console.log('Result:', result);
 
         res.json({
             success: true,
