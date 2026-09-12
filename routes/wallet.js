@@ -165,9 +165,10 @@ router.get('/transactions', verifyToken, async (req, res) => {
                              txObj.receiver_id._id.toString() === user._id.toString();
             
             // ===== INVOICE PAYMENT =====
-            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay') {
-                if (isSender) transactionType = 'invoice_paid';
-                else if (isReceiver) transactionType = 'invoice_received';
+            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
+                txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
+                if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
+                else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
                 else transactionType = 'invoice_payment';
             }
             else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
@@ -277,9 +278,10 @@ router.get('/recent', verifyToken, async (req, res) => {
                              txObj.receiver_id._id.toString() === user._id.toString();
             
             // ===== INVOICE PAYMENT =====
-            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay') {
-                if (isSender) transactionType = 'invoice_paid';
-                else if (isReceiver) transactionType = 'invoice_received';
+            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
+                txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
+                if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
+                else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
                 else transactionType = 'invoice_payment';
             }
             else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
