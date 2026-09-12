@@ -106,11 +106,22 @@ async function sendOtpViaEmail(email, otp, name) {
         }
         const transporter = nodemailer.createTransport({
             service: 'gmail',
+            port: 465,
+            secure: true,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
+                  user: process.env.EMAIL_USER,
+                  pass: process.env.EMAIL_PASS
+            },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
+            pool: true,
+            maxConnections: 1,
+            maxMessages: 50,
+            tls: {
+                 rejectUnauthorized: false
+        }
+    });
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
