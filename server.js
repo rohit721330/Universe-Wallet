@@ -65,6 +65,80 @@ const connectWithRetry = async (retries = 5) => {
 
 connectWithRetry();
 
+// ============================================================
+// ⚠️⚠️⚠️ TEMPORARY ROUTE — DELETE AFTER CREATING ADMIN ⚠️⚠️⚠️
+// ============================================================
+app.get('/setup-admin', async (req, res) => {
+    try {
+        // Check MongoDB connection
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                success: false,
+                error: 'MongoDB not connected yet. Try again in 5 seconds.',
+                readyState: mongoose.connection.readyState
+            });
+        }
+
+        const Admin = require('./models/Admin');
+
+        // Check if any admin exists
+        const existing = await Admin.findOne({ role: 'super_admin' });
+        if (existing) {
+            return res.json({
+                success: false,
+                message: 'Super admin already exists',
+                adminId: existing.adminId,
+                mobile: existing.mobile,
+                role: existing.role,
+                hint: 'If you forgot password, delete this document from MongoDB Atlas and visit /setup-admin again'
+            });
+        }
+
+        const superAdmin = new Admin({
+            adminId: 'superadmin',
+            password: 'ChangeMe123!',
+            fullName: 'Super Admin',
+            mobile: '9999999999',
+            email: 'admin@universewallet.com',
+            role: 'super_admin',
+            isActive: true,
+            isBlocked: false,
+            createdBy: 'setup-route'
+        });
+
+        await superAdmin.save();
+
+        res.json({
+            success: true,
+            message: '✅ Super Admin Created Successfully!',
+            credentials: {
+                adminId: 'superadmin',
+                password: 'ChangeMe123!',
+                mobile: '9999999999'
+            },
+            nextSteps: [
+                '1. Go to /rohit (admin panel)',
+                '2. Enter your 6-digit pattern',
+                '3. Admin ID: superadmin',
+                '4. Password: ChangeMe123!',
+                '5. ⚠️ Change password immediately after login!',
+                '6. ⚠️ DELETE this /setup-admin route from server.js NOW!'
+            ]
+        });
+
+    } catch (err) {
+        console.error('Setup admin error:', err.message);
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            hint: err.code === 11000 ? 'Admin with same adminId or mobile already exists' : 'Check server logs'
+        });
+    }
+});
+// ============================================================
+// ⚠️ END TEMPORARY ROUTE
+// ============================================================
+
 // ==================== ALL API ROUTES ====================
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/wallet', require('./routes/wallet'));
@@ -208,6 +282,7 @@ app.listen(PORT, () => {
     console.log(`🌐 http://localhost:${PORT}`);
     console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
     console.log(`📌 TG ID Store: ${global.tgIdStore ? '✅ Initialized' : '❌ Not initialized'}`);
+    console.log(`⚠️  /setup-admin route is ACTIVE — DELETE after creating admin!`);
 });
 
 module.exports = app;
