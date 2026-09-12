@@ -132,20 +132,20 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f5f8fd; 
 ========================= */
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(15, 30, 60, 0.4); z-index: 998; display: none; backdrop-filter: blur(3px); }
 .sidebar-overlay.active { display: block; }
-.sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; z-index: 999; background: #ffffff; border-right: 1px solid #e9edf4; box-shadow: 4px 0 20px rgba(0, 50, 100, 0.08); padding: 24px 18px; overflow-y: auto; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; z-index: 999; background: #ffffff; border-right: 1px solid #e9edf4; box-shadow: 4px 0 20px rgba(0, 50, 100, 0.08); padding: 16px 14px; overflow-y: auto; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .sidebar.open { left: 0; }
-.sidebar-profile { text-align: center; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid #eef2f7; }
-.profile-pic-container { width: 70px; height: 70px; margin: 0 auto 10px; cursor: pointer; }
+.sidebar-profile { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #eef2f7; }
+.profile-pic-container { width: 55px; height: 55px; margin: 0 auto 7px; cursor: pointer; }
 .profile-pic { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
 .profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-.sidebar-username { font-size: 16px; font-weight: 800; color: #1a3a6b; margin-bottom: 3px; }
-.sidebar-mobile { font-size: 11px; font-weight: 600; color: #5a7a9a; margin-bottom: 8px; }
-.sidebar-balance { font-size: 18px; font-weight: 900; display: inline-flex; align-items: center; gap: 4px; padding: 6px 16px; border-radius: 40px; background: #eef3fa; color: #1a56db; border: 1px solid #e9edf4; }
-.sidebar-menu { display: flex; flex-direction: column; gap: 3px; }
-.sidebar-menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 600; color: #1a3a6b; text-decoration: none; transition: all 0.2s; }
+.sidebar-username { font-size: 14px; font-weight: 800; color: #1a3a6b; margin-bottom: 2px; }
+.sidebar-mobile { font-size: 10px; font-weight: 600; color: #5a7a9a; margin-bottom: 6px; }
+.sidebar-balance { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px; border-radius: 40px; background: #eef3fa; color: #1a56db; border: 1px solid #e9edf4; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; color: #1a3a6b; text-decoration: none; transition: all 0.2s; }
 .sidebar-menu-item:hover { background: #eef3fa; }
-.sidebar-menu-item i { width: 20px; font-size: 15px; text-align: center; color: #1a56db; }
-.sidebar-menu-item.logout-item { margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; border-radius: 0; color: #dc2626; }
+.sidebar-menu-item i { width: 18px; font-size: 13px; text-align: center; color: #1a56db; }
+.sidebar-menu-item.logout-item { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eef2f7; border-radius: 0; color: #dc2626; }
 .sidebar-menu-item.logout-item i { color: #dc2626 !important; }
 .sidebar-menu-item.logout-item:hover { background: #fee2e2; }
 
