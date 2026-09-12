@@ -63,6 +63,14 @@
       }
     },
     {
+      "src": "/setup-admin",
+      "dest": "/server.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
       "src": "/(normal|dice|toss|scratch)(/?)",
       "dest": "/server.js",
       "headers": {
