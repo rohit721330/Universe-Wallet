@@ -15,9 +15,9 @@ const depositSchema = new mongoose.Schema({
     },
     transactionRef: { type: String, default: null, sparse: true },
     verifiedAt: { type: Date, default: null },
-    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    approvedBy: { type: String, default: null },
     approvedAt: { type: Date, default: null },
-    rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    rejectedBy: { type: String, default: null },
     rejectedAt: { type: Date, default: null },
     adminNote: { type: String, default: '' },
     expiresAt: { type: Date, required: true, index: true },
@@ -32,20 +32,17 @@ const depositSchema = new mongoose.Schema({
 // PRE-SAVE MIDDLEWARE: Generate Deposit ID with "PAY_" prefix
 // ============================================
 depositSchema.pre('save', function(next) {
-    console.log('Pre-save Hook Running...');
-    
     if (!this.depositId) {
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
         this.depositId = `PAY_${timestamp}_${random}`;
-        console.log('Generated Deposit Id:', this.depositId);
     }
-    
+
     if (!this.expiresAt) {
         // ✅ 30 MINUTES expiry
         this.expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     }
-    
+
     next();
 });
 
@@ -57,7 +54,6 @@ depositSchema.pre('validate', function(next) {
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
         this.depositId = `PAY_${timestamp}_${random}`;
-        console.log('Generated Deposit Id (Validate):', this.depositId);
     }
     next();
 });
@@ -79,7 +75,7 @@ depositSchema.methods.canBeRejected = function() {
 
 depositSchema.methods.approve = async function(adminId, note = '') {
     this.status = 'approved';
-    this.approvedBy = adminId;
+    this.approvedBy = adminId || null;
     this.approvedAt = new Date();
     if (note) this.adminNote = note;
     await this.save();
@@ -88,7 +84,7 @@ depositSchema.methods.approve = async function(adminId, note = '') {
 
 depositSchema.methods.reject = async function(adminId, reason = '') {
     this.status = 'rejected';
-    this.rejectedBy = adminId;
+    this.rejectedBy = adminId || null;
     this.rejectedAt = new Date();
     if (reason) this.adminNote = reason;
     await this.save();
@@ -170,7 +166,6 @@ depositSchema.statics.forceExpireOldPending = async function() {
     let updatedCount = 0;
     for (const deposit of pendingDeposits) {
         const newExpiry = new Date(deposit.createdAt.getTime() + 30 * 60 * 1000);
-        // শুধু তখনই update করব যখন নতুন expiry বর্তমান expiresAt থেকে ছোট
         if (newExpiry < deposit.expiresAt) {
             deposit.expiresAt = newExpiry;
             await deposit.save();
