@@ -12,14 +12,14 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: [
-            'deposit', 'manual-deposit',
+            'deposit',
             'withdraw',
             'transfer', 'transfer_send', 'transfer_receive',
             'lifafa_creation', 'lifafa_claim', 'lifafa_referral',
             'game_win', 'game_loss',
             'gift',
             'admin_add', 'admin_deduct',
-            'api', 'prime_deposit',
+            'api',
             'invoice_pay',
             'invoice_pay_send',
             'invoice_pay_receive'
@@ -62,7 +62,6 @@ transactionSchema.virtual('formattedAmount').get(function() {
 transactionSchema.virtual('typeLabel').get(function() {
     const labels = {
         'deposit': 'Deposit',
-        'manual-deposit': 'Manual Deposit',
         'withdraw': 'Withdrawal',
         'transfer': 'Transfer',
         'transfer_send': 'Transfer Sent',
@@ -76,7 +75,6 @@ transactionSchema.virtual('typeLabel').get(function() {
         'admin_add': 'Admin Add',
         'admin_deduct': 'Admin Deduct',
         'api': 'API Transaction',
-        'prime_deposit': 'Prime Deposit',
         'invoice_pay': 'Invoice Payment',
         'invoice_pay_send': 'Invoice Payment Sent',
         'invoice_pay_receive': 'Invoice Payment Received'
@@ -107,8 +105,6 @@ transactionSchema.virtual('direction').get(function() {
         this.type === 'admin_add' || 
         this.type === 'game_win' ||
         this.type === 'deposit' ||
-        this.type === 'manual-deposit' ||
-        this.type === 'prime_deposit' ||
         this.type === 'api' ||
         this.type === 'invoice_pay_receive') {
         return 'received';
@@ -137,7 +133,7 @@ transactionSchema.methods.isCredit = function(userId) {
         return true;
     }
     const creditTypes = ['lifafa_claim', 'lifafa_referral', 'admin_add', 'game_win', 
-                         'deposit', 'manual-deposit', 'prime_deposit', 'api',
+                         'deposit', 'api',
                          'invoice_pay_receive'];
     return creditTypes.includes(this.type);
 };
@@ -205,8 +201,6 @@ transactionSchema.statics.getUserSummary = async function(userId) {
                                 { $eq: ['$type', 'admin_add'] },
                                 { $eq: ['$type', 'game_win'] },
                                 { $eq: ['$type', 'deposit'] },
-                                { $eq: ['$type', 'manual-deposit'] },
-                                { $eq: ['$type', 'prime_deposit'] },
                                 { $eq: ['$type', 'api'] },
                                 { $eq: ['$type', 'invoice_pay_receive'] },
                                 { $eq: ['$receiver_id', mongoose.Types.ObjectId(userId)] }
