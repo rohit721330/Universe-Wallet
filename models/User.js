@@ -1,6 +1,11 @@
 // FILE: models/User.js
 const mongoose = require('mongoose');
 
+// ============================================
+// DEFAULT LOGO — GitHub Raw URL
+// ============================================
+const default_logo = 'https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/universe-wallet-logo.png';
+
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: [true, 'Full name is required'], trim: true },
     mobile: { type: String, required: [true, 'Mobile number is required'], unique: true, trim: true, match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'] },
@@ -14,11 +19,9 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
     apiKey: { type: String, unique: true, sparse: true, default: null },
-    profilePicture: { type: String, default: null },
+    profilePicture: { type: String, default: default_logo },
     walletId: { type: String, unique: true, required: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
-
-    // ✅ NEW FIELDS — Deletion / Deactivation Support
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
@@ -57,11 +60,14 @@ function generateApiKey() {
 }
 
 // ============================================
-// Pre-save: Wallet ID + API Key (with retry)
+// Pre-save: default_logo + Wallet ID + API Key
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
-        // Wallet ID generate (retry সহ unique নিশ্চিত করা)
+        if (!this.profilePicture) {
+            this.profilePicture = default_logo;
+        }
+
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -81,7 +87,6 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // API Key generate (retry সহ)
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -200,7 +205,7 @@ userSchema.statics.findByApiKey = function(apiKey) {
 };
 
 // ============================================
-// STATIC METHODS — Counts (excluding deleted)
+// STATIC METHODS — Counts
 // ============================================
 userSchema.statics.getUserCount = function() {
     return this.countDocuments({ isDeleted: false });
@@ -219,9 +224,6 @@ userSchema.statics.getDeletedUserCount = function() {
     return this.countDocuments({ isDeleted: true });
 };
 
-// ============================================
-// STATIC METHODS — Only active users
-// ============================================
 userSchema.statics.findActiveUsers = function(query = {}) {
     return this.find({
         ...query,
