@@ -5,6 +5,9 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const { auth } = require('../middleware/auth');
 
+// ✅ মডেল থেকে ডিফল্ট লোগো import
+const { default_logo } = require('../models/User');
+
 // ============================================================
 // GET CURRENT USER PROFILE
 // ============================================================
@@ -16,8 +19,15 @@ router.get('/me', auth, async (req, res) => {
             console.log('❌ User Not Found');
             return res.status(404).json({ success: false, message: 'User Not Found' });
         }
+
+        // ✅ যদি কোনো কারণে ছবি খালি থাকে, ডিফল্ট সেট
+        const userObj = user.toObject();
+        if (!userObj.profilePicture) {
+            userObj.profilePicture = default_logo;
+        }
+
         console.log('✅ Profile Fetched Successfully');
-        res.json({ success: true, user: user });
+        res.json({ success: true, user: userObj });
     } catch (error) {
         console.error('⚠️ Profile Fetch Error:', error.message);
         res.status(500).json({ success: false, message: 'Internal Server Error: ' + error.message });
