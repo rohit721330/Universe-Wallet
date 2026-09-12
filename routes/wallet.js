@@ -33,6 +33,110 @@ const verifyToken = async (req, res, next) => {
 };
 
 // ============================================
+// HELPER: Determine Transaction Method
+// ============================================
+function getTransactionMethod(tx) {
+    if (tx.metadata && tx.metadata.method) return tx.metadata.method;
+    if (tx.type === 'api') return 'API Transfer';
+    if (tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive' || 
+        tx.type === 'invoice_payment' || tx.type === 'invoice_pay') return 'Invoice';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
+        tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add' || tx.type === 'admin_deduct') return 'Admin';
+    if (tx.type === 'game_win' || tx.type === 'game_loss') return 'Game';
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'Lifafa';
+    if (tx.type === 'gift') return 'Gift';
+    return 'Transfer';
+}
+
+// ============================================
+// HELPER: Determine Transaction Category
+// ============================================
+function getTransactionCategory(tx) {
+    if (tx.metadata && tx.metadata.category) return tx.metadata.category;
+    if (tx.type === 'transfer_send') return 'P2P sent';
+    if (tx.type === 'transfer_receive') return 'P2P received';
+    if (tx.type === 'api') return 'P2P';
+    if (tx.type === 'invoice_pay_send') return 'Invoice sent';
+    if (tx.type === 'invoice_pay_receive') return 'Invoice received';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || 
+        tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add') return 'Admin credit';
+    if (tx.type === 'admin_deduct') return 'Admin debit';
+    if (tx.type === 'game_win') return 'Game win';
+    if (tx.type === 'game_loss') return 'Game loss';
+    if (tx.type === 'lifafa_creation') return 'Lifafa created';
+    if (tx.type === 'lifafa_claim') return 'Lifafa claimed';
+    if (tx.type === 'gift') return 'Gift';
+    return 'transfer';
+}
+
+// ============================================
+// HELPER: Transform Transaction for Frontend
+// ============================================
+function transformTransaction(txObj, user) {
+    let transactionType = txObj.type || 'unknown';
+    
+    const isSender = txObj.sender_id && txObj.sender_id._id && 
+                   txObj.sender_id._id.toString() === user._id.toString();
+    const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
+                     txObj.receiver_id._id.toString() === user._id.toString();
+    
+    // ===== TRANSFER =====
+    if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
+        if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
+        else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
+    }
+    // ===== INVOICE PAYMENT =====
+    else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
+        txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
+        if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
+        else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
+        else transactionType = 'invoice_payment';
+    }
+    else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
+        transactionType = 'payment_sent';
+    } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
+        transactionType = 'payment_received';
+    } else if (txObj.type === 'deposit') {
+        transactionType = 'payment_received';
+    } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
+        transactionType = 'payment_sent';
+    }
+    
+    if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
+        transactionType = txObj.metadata.transactionType;
+    }
+    
+    return {
+        _id: txObj._id,
+        tx_id: txObj.tx_id,
+        user_id: txObj.user_id,
+        sender_id: txObj.sender_id,
+        receiver_id: txObj.receiver_id,
+        sender: txObj.sender_id,
+        receiver: txObj.receiver_id,
+        amount: txObj.amount,
+        fee: txObj.fee || 0,
+        type: txObj.type,
+        transactionType: transactionType,
+        status: txObj.status || 'success',
+        remark: txObj.remark,
+        description: txObj.description,
+        tx_time: txObj.tx_time,
+        createdAt: txObj.createdAt,
+        metadata: txObj.metadata || {},
+        method: getTransactionMethod(txObj),
+        category: getTransactionCategory(txObj),
+        balanceAfter: (txObj.metadata && txObj.metadata.balanceAfter !== undefined && txObj.metadata.balanceAfter !== null)
+            ? txObj.metadata.balanceAfter 
+            : null
+    };
+}
+
+// ============================================
 // GET WALLET BALANCE
 // ============================================
 router.get('/balance', verifyToken, async (req, res) => {
@@ -62,9 +166,6 @@ router.post('/transaction', verifyToken, async (req, res) => {
         const user = req.user;
         const { type, amount, remark, status = 'success', metadata = {} } = req.body;
         
-        console.log('📥 Transaction Request:', { type, amount, remark, userId: user._id });
-        console.log('💰 User balance before:', user.balance);
-        
         if (!type || !amount || amount <= 0) {
             return res.status(400).json({ status: 'error', message: 'Invalid Transaction Data' });
         }
@@ -81,7 +182,6 @@ router.post('/transaction', verifyToken, async (req, res) => {
         }
         
         await user.save();
-        console.log('💰 User balance after:', user.balance);
         
         const transaction = new Transaction({
             user_id: user._id,
@@ -97,12 +197,13 @@ router.post('/transaction', verifyToken, async (req, res) => {
                 ...metadata,
                 transactionType: type,
                 source: 'game',
-                balanceAfter: newBalance
+                balanceAfter: newBalance,
+                method: type === 'game_win' || type === 'game_loss' ? 'Game' : 'Transfer',
+                category: type === 'game_win' ? 'Game win' : (type === 'game_loss' ? 'Game loss' : 'transfer')
             }
         });
         
         await transaction.save();
-        console.log('✅ Transaction saved:', transaction._id);
         
         res.json({
             status: 'success',
@@ -142,8 +243,6 @@ router.get('/transactions', verifyToken, async (req, res) => {
         if (type) query.type = type;
         if (status) query.status = status;
         
-        console.log('🔍 Fetching Transactions For User:', user._id);
-        
         const transactions = await Transaction.find(query)
             .populate('sender_id', 'fullName username mobile walletId email')
             .populate('receiver_id', 'fullName username mobile walletId email')
@@ -153,61 +252,9 @@ router.get('/transactions', verifyToken, async (req, res) => {
         
         const total = await Transaction.countDocuments(query);
         
-        console.log('✅ Found', transactions.length, 'Transactions');
-        
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
-            let transactionType = txObj.type || 'unknown';
-            
-            const isSender = txObj.sender_id && txObj.sender_id._id && 
-                           txObj.sender_id._id.toString() === user._id.toString();
-            const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
-                             txObj.receiver_id._id.toString() === user._id.toString();
-            
-            // ===== TRANSFER =====
-            if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
-                if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
-                else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
-            }
-            // ===== INVOICE PAYMENT =====
-            else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
-                txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
-                if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
-                else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
-                else transactionType = 'invoice_payment';
-            }
-            else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
-                transactionType = 'payment_sent';
-            } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
-                transactionType = 'payment_received';
-            } else if (txObj.type === 'deposit') {
-                transactionType = 'payment_received';
-            } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
-                transactionType = 'payment_sent';
-            }
-            
-            // Only overwrite if not already set by transfer/invoice logic
-            if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
-                transactionType = txObj.metadata.transactionType;
-            }
-            
-            return {
-                _id: txObj._id,
-                tx_id: txObj.tx_id,
-                user_id: txObj.user_id,
-                sender_id: txObj.sender_id,
-                receiver_id: txObj.receiver_id,
-                amount: txObj.amount,
-                fee: txObj.fee || 0,
-                type: txObj.type,
-                transactionType: transactionType,
-                status: txObj.status || 'success',
-                remark: txObj.remark,
-                description: txObj.description,
-                tx_time: txObj.tx_time,
-                createdAt: txObj.createdAt,
-                metadata: txObj.metadata
-            };
+            return transformTransaction(txObj, user);
         });
         
         res.json({
@@ -276,56 +323,7 @@ router.get('/recent', verifyToken, async (req, res) => {
         
         const transformedTransactions = transactions.map(tx => {
             const txObj = tx.toObject ? tx.toObject() : tx;
-            let transactionType = txObj.type || 'unknown';
-            
-            const isSender = txObj.sender_id && txObj.sender_id._id && 
-                           txObj.sender_id._id.toString() === user._id.toString();
-            const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
-                             txObj.receiver_id._id.toString() === user._id.toString();
-            
-            // ===== TRANSFER =====
-            if (txObj.type === 'transfer_send' || txObj.type === 'transfer_receive') {
-                if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
-                else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
-            }
-            // ===== INVOICE PAYMENT =====
-            else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
-                txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
-                if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
-                else if (txObj.type === 'invoice_pay_send' || isSender) transactionType = 'invoice_paid';
-                else transactionType = 'invoice_payment';
-            }
-            else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
-                transactionType = 'payment_sent';
-            } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
-                transactionType = 'payment_received';
-            } else if (txObj.type === 'deposit') {
-                transactionType = 'payment_received';
-            } else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
-                transactionType = 'payment_sent';
-            }
-            
-            // Only overwrite if not already set by transfer/invoice logic
-            if (transactionType === txObj.type && txObj.metadata && txObj.metadata.transactionType) {
-                transactionType = txObj.metadata.transactionType;
-            }
-            
-            return {
-                _id: txObj._id,
-                tx_id: txObj.tx_id,
-                user_id: txObj.user_id,
-                sender: txObj.sender_id,
-                receiver: txObj.receiver_id,
-                amount: txObj.amount,
-                fee: txObj.fee || 0,
-                type: txObj.type,
-                transactionType: transactionType,
-                status: txObj.status || 'success',
-                remark: txObj.remark,
-                description: txObj.description,
-                tx_time: txObj.tx_time,
-                createdAt: txObj.createdAt
-            };
+            return transformTransaction(txObj, user);
         });
         
         res.json({ status: 'success', transactions: transformedTransactions });
