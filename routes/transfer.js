@@ -47,22 +47,14 @@ const verifyToken = async (req, res, next) => {
         const token = req.headers.authorization?.split(' ')[1];
         
         if (!token) {
-            console.log('No Token Provided');
-            return res.status(401).json({ 
-                success: false, 
-                message: 'No Token Provided' 
-            });
+            return res.status(401).json({ success: false, message: 'No Token Provided' });
         }
         
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
         
         if (!user) {
-            console.log('User Not Found');
-            return res.status(401).json({ 
-                success: false, 
-                message: 'User Not Found' 
-            });
+            return res.status(401).json({ success: false, message: 'User Not Found' });
         }
         
         req.user = user;
@@ -70,21 +62,12 @@ const verifyToken = async (req, res, next) => {
     } catch (error) {
         console.error('Token Verification Error:', error.message);
         if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Invalid Token. Please Login Again.' 
-            });
+            return res.status(401).json({ success: false, message: 'Invalid Token. Please Login Again.' });
         }
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Token Expired. Please Login Again.' 
-            });
+            return res.status(401).json({ success: false, message: 'Token Expired. Please Login Again.' });
         }
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Authentication Error' 
-        });
+        return res.status(500).json({ success: false, message: 'Authentication Error' });
     }
 };
 
@@ -92,102 +75,46 @@ const verifyToken = async (req, res, next) => {
 // HELPER: Send Message Via Telegram
 // ============================================
 async function sendTelegramMessage(chatId, message) {
-    if (!BOT_TOKEN) {
-        console.log('Bot Token Not Configured');
-        return { success: false, error: 'BOT_TOKEN not configured' };
-    }
-
+    if (!BOT_TOKEN) return { success: false, error: 'BOT_TOKEN not configured' };
     try {
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-        
-        console.log('Sending Telegram Message To Chat:', chatId);
-        
         const response = await axios.post(url, {
             chat_id: chatId,
             text: message,
             parse_mode: 'HTML'
-        }, {
-            timeout: 15000,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.data && response.data.ok) {
-            console.log('Telegram Message Sent Successfully To Chat:', chatId);
-            return { success: true };
-        } else {
-            console.error('Telegram API Response:', response.data?.description || 'Unknown Error');
-            return { success: false, error: response.data?.description || 'Unknown Error' };
-        }
+        }, { timeout: 15000, headers: { 'Content-Type': 'application/json' } });
+        if (response.data && response.data.ok) return { success: true };
+        return { success: false, error: response.data?.description || 'Unknown Error' };
     } catch (error) {
-        console.error('Failed To Send Telegram Message:', error.message);
-        if (error.response) {
-            console.error('Telegram API Response:', error.response.data);
-        }
-        if (error.code === 'ECONNABORTED') {
-            return { success: false, error: 'Telegram API Time Out' };
-        }
+        if (error.code === 'ECONNABORTED') return { success: false, error: 'Telegram API Time Out' };
         return { success: false, error: error.message };
     }
 }
 
-// ============================================
-// HELPER: Send Notification To Admin
-// ============================================
 async function notifyAdmin(message) {
-    if (!ADMIN_TG) {
-        console.log('Admin Telegram Id Not Configured');
-        return;
-    }
-    try {
-        await sendTelegramMessage(ADMIN_TG, message);
-        console.log('Admin Notification Sent Successfully');
-    } catch (error) {
-        console.error('Failed To Send Admin Notification:', error.message);
-    }
+    if (!ADMIN_TG) return;
+    try { await sendTelegramMessage(ADMIN_TG, message); }
+    catch (error) { console.error('Admin Notification Error:', error.message); }
 }
 
-// ============================================
-// HELPER: Send Notification To User
-// ============================================
 async function notifyUser(chatId, message) {
     if (!chatId) return;
-    try {
-        await sendTelegramMessage(chatId, message);
-        console.log('User Notification Sent Successfully');
-    } catch (error) {
-        console.error('Failed To Send User Notification:', error.message);
-    }
+    try { await sendTelegramMessage(chatId, message); }
+    catch (error) { console.error('User Notification Error:', error.message); }
 }
 
-// ============================================
-// HELPER: Get Current Date And Time In IST
-// ============================================
 function getCurrentDateTime() {
     const now = new Date();
-    const options = {
+    return now.toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    };
-    return now.toLocaleString('en-IN', options);
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
 }
 
-// ============================================
-// HELPER: Get Client IP
-// ============================================
 function getClientIp(req) {
-    return req.headers['x-forwarded-for'] || 
-           req.connection.remoteAddress || 
-           req.socket.remoteAddress || 
-           req.ip || 
-           'Unknown';
+    return req.headers['x-forwarded-for'] || req.connection.remoteAddress || 
+           req.socket.remoteAddress || req.ip || 'Unknown';
 }
 
 // ============================================
@@ -198,50 +125,26 @@ router.get('/view', verifyToken, async (req, res) => {
         const { number } = req.query;
         const currentUser = req.user;
         
-        console.log('User Lookup Request:', number);
-        
         if (!number) {
-            console.log('Mobile Number Required');
-            return res.status(400).json({
-                status: 'error',
-                error: 'Mobile Number Is Required'
-            });
+            return res.status(400).json({ status: 'error', error: 'Mobile Number Is Required' });
         }
         
         if (!/^\d{10}$/.test(number)) {
-            console.log('Invalid Mobile Number');
-            return res.status(400).json({
-                status: 'error',
-                error: 'Invalid Mobile Number. Must Be 10 Digits.'
-            });
+            return res.status(400).json({ status: 'error', error: 'Invalid Mobile Number. Must Be 10 Digits.' });
         }
         
         if (currentUser.mobile === number) {
-            console.log('Self Lookup Attempt');
-            return res.status(400).json({
-                status: 'error',
-                error: 'You Cannot View Your Own Details Here'
-            });
+            return res.status(400).json({ status: 'error', error: 'You Cannot View Your Own Details Here' });
         }
         
         const user = await User.findOne({ mobile: number });
         if (!user) {
-            console.log('User Not Found:', number);
-            return res.status(404).json({
-                status: 'error',
-                error: 'User Not Found'
-            });
+            return res.status(404).json({ status: 'error', error: 'User Not Found' });
         }
         
         if (user.isBlocked) {
-            console.log('User Account Blocked');
-            return res.status(403).json({
-                status: 'error',
-                error: 'This User Account Is Blocked'
-            });
+            return res.status(403).json({ status: 'error', error: 'This User Account Is Blocked' });
         }
-        
-        console.log('User Found:', user.fullName);
         
         res.json({
             status: 'success',
@@ -250,13 +153,9 @@ router.get('/view', verifyToken, async (req, res) => {
             walletId: user.walletId,
             isVerified: true
         });
-        
     } catch (error) {
         console.error('View User Error:', error.message);
-        res.status(500).json({
-            status: 'error',
-            error: 'Failed To Fetch User Details'
-        });
+        res.status(500).json({ status: 'error', error: 'Failed To Fetch User Details' });
     }
 });
 
@@ -266,22 +165,15 @@ router.get('/view', verifyToken, async (req, res) => {
 router.get('/balance', verifyToken, async (req, res) => {
     try {
         const user = req.user;
-        
-        console.log('Balance Check For:', user.mobile);
-        
         res.json({
             status: 'success',
             balance: user.balance,
             walletId: user.walletId,
             fullName: user.fullName
         });
-        
     } catch (error) {
         console.error('Balance Error:', error.message);
-        res.status(500).json({
-            status: 'error',
-            error: 'Failed To Fetch Balance'
-        });
+        res.status(500).json({ status: 'error', error: 'Failed To Fetch Balance' });
     }
 });
 
@@ -295,76 +187,40 @@ router.post('/', verifyToken, async (req, res) => {
         const dateTime = getCurrentDateTime();
         const clientIp = getClientIp(req);
         
-        console.log('Transfer Request:', { 
-            Sender: sender.mobile, 
-            Receiver: mobile, 
-            Amount: amount 
-        });
-        
-        // Validation
         if (!mobile || !mobile.toString().trim()) {
-            console.log('Receiver Mobile Required');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Receiver Mobile Number Is Required' 
-            });
+            return res.status(400).json({ success: false, error: 'Receiver Mobile Number Is Required' });
         }
         
         const mobileNumber = mobile.toString().trim();
         
         if (mobileNumber.length !== 10 || !/^\d{10}$/.test(mobileNumber)) {
-            console.log('Invalid Mobile Number');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Please Enter A Valid 10-Digit Mobile Number' 
-            });
+            return res.status(400).json({ success: false, error: 'Please Enter A Valid 10-Digit Mobile Number' });
         }
         
         const transferAmount = parseFloat(amount);
         if (isNaN(transferAmount) || transferAmount < 1) {
-            console.log('Invalid Amount');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Minimum Transfer Amount Is ₹1' 
-            });
+            return res.status(400).json({ success: false, error: 'Minimum Transfer Amount Is ₹1' });
         }
         
         if (transferAmount > 5000) {
-            console.log('Maximum Amount Exceeded');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Maximum Transfer Amount Is ₹5,000' 
-            });
+            return res.status(400).json({ success: false, error: 'Maximum Transfer Amount Is ₹5,000' });
         }
         
         if (sender.mobile === mobileNumber) {
-            console.log('Self Transfer Attempt');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'You Cannot Send Money To Yourself' 
-            });
+            return res.status(400).json({ success: false, error: 'You Cannot Send Money To Yourself' });
         }
         
         const receiver = await User.findOne({ mobile: mobileNumber });
         
         if (!receiver) {
-            console.log('Receiver Not Found:', mobileNumber);
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Receiver Not Found. Please Verify The Mobile Number' 
-            });
+            return res.status(404).json({ success: false, error: 'Receiver Not Found. Please Verify The Mobile Number' });
         }
         
         if (receiver.isBlocked) {
-            console.log('Receiver Account Blocked');
-            return res.status(403).json({ 
-                success: false, 
-                error: 'Receiver Account Is Blocked' 
-            });
+            return res.status(403).json({ success: false, error: 'Receiver Account Is Blocked' });
         }
         
         if (sender.balance < transferAmount) {
-            console.log('Insufficient Balance:', sender.balance);
             return res.status(400).json({ 
                 success: false, 
                 error: `Insufficient Balance. Your Current Balance Is ₹${sender.balance.toFixed(2)}` 
@@ -376,20 +232,20 @@ router.post('/', verifyToken, async (req, res) => {
         session.startTransaction();
         
         try {
-            console.log('Processing Transfer...');
-            
+            // Update balances
             sender.balance -= transferAmount;
             receiver.balance += transferAmount;
             
             await sender.save({ session });
             await receiver.save({ session });
             
-            console.log('Sender Balance Updated:', sender.balance);
-            console.log('Receiver Balance Updated:', receiver.balance);
+            // ✅ Capture balanceAfter for both users
+            const senderBalanceAfter = sender.balance;
+            const receiverBalanceAfter = receiver.balance;
             
             const transactionId = await generateUniqueTransactionId();
             
-            // Sender Transaction - transfer_send (debit)
+            // ✅ Sender Transaction - transfer_send (debit)
             await Transaction.create([{
                 tx_id: transactionId,
                 user_id: sender._id,
@@ -408,11 +264,16 @@ router.post('/', verifyToken, async (req, res) => {
                     receiverName: receiver.fullName,
                     ipAddress: clientIp,
                     timestamp: new Date(),
-                    transactionType: 'payment_sent'
+                    transactionType: 'payment_sent',
+                    // ✅ NEW FIELDS
+                    method: 'Transfer',
+                    category: 'P2P sent',
+                    balanceAfter: senderBalanceAfter,
+                    note: note || ''
                 }
             }], { session });
             
-            // Receiver Transaction - transfer_receive (credit)
+            // ✅ Receiver Transaction - transfer_receive (credit)
             await Transaction.create([{
                 tx_id: transactionId,
                 user_id: receiver._id,
@@ -431,18 +292,20 @@ router.post('/', verifyToken, async (req, res) => {
                     receiverName: receiver.fullName,
                     ipAddress: clientIp,
                     timestamp: new Date(),
-                    transactionType: 'payment_received'
+                    transactionType: 'payment_received',
+                    // ✅ NEW FIELDS
+                    method: 'Transfer',
+                    category: 'P2P received',
+                    balanceAfter: receiverBalanceAfter,
+                    note: note || ''
                 }
             }], { session });
             
             await session.commitTransaction();
             session.endSession();
             
-            console.log('Transaction Created:', transactionId);
+            // ==================== TELEGRAM NOTIFICATIONS ====================
             
-            // ==================== SEND TELEGRAM NOTIFICATIONS ====================
-            
-            // Notify Receiver
             if (receiver.telegramId) {
                 const receiverMessage = 
 `Money Received
@@ -458,12 +321,9 @@ Note: ${note || 'N/A'}
 Date: ${dateTime}
 
 Amount credited to your wallet.`;
-                
                 await notifyUser(receiver.telegramId, receiverMessage);
-                console.log('Receiver Notification Sent');
             }
             
-            // Notify Sender
             if (sender.telegramId) {
                 const senderMessage = 
 `Payment Completed
@@ -479,13 +339,10 @@ New Balance: ₹${sender.balance.toFixed(2)}
 Note: ${note || 'N/A'}
 
 Transfer completed successfully.`;
-                
                 await notifyUser(sender.telegramId, senderMessage);
-                console.log('Sender Notification Sent');
             }
             
-            // Notify Admin
-            const adminMessage = 
+            await notifyAdmin(
 `Transfer Completed
 
 Sender Name: ${sender.fullName || sender.username}
@@ -496,9 +353,8 @@ Amount: ₹${transferAmount.toFixed(2)}
 Transaction ID: ${transactionId}
 Note: ${note || 'No Comment'}
 
-Date: ${dateTime}`;
-            
-            await notifyAdmin(adminMessage);
+Date: ${dateTime}`
+            );
             
             res.json({
                 success: true,
@@ -525,7 +381,7 @@ Date: ${dateTime}`;
 });
 
 // ============================================
-// GET TRANSACTION HISTORY - GET /api/transfer/history
+// GET TRANSACTION HISTORY
 // ============================================
 router.get('/history', verifyToken, async (req, res) => {
     try {
@@ -533,13 +389,8 @@ router.get('/history', verifyToken, async (req, res) => {
         const { limit = 50, page = 1 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         
-        console.log('Fetching Transaction History For:', user.mobile);
-        
         const transactions = await Transaction.find({
-            $or: [
-                { sender_id: user._id },
-                { receiver_id: user._id }
-            ]
+            $or: [{ sender_id: user._id }, { receiver_id: user._id }]
         })
         .populate('sender_id', 'fullName username mobile')
         .populate('receiver_id', 'fullName username mobile')
@@ -548,13 +399,8 @@ router.get('/history', verifyToken, async (req, res) => {
         .limit(parseInt(limit));
         
         const total = await Transaction.countDocuments({
-            $or: [
-                { sender_id: user._id },
-                { receiver_id: user._id }
-            ]
+            $or: [{ sender_id: user._id }, { receiver_id: user._id }]
         });
-        
-        console.log('Found', transactions.length, 'Transactions');
         
         res.json({
             status: 'success',
@@ -568,22 +414,17 @@ router.get('/history', verifyToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Transaction History Error:', error.message);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Failed To Fetch Transaction History' 
-        });
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Transaction History' });
     }
 });
 
 // ============================================
-// GET SINGLE TRANSACTION DETAILS - GET /api/transfer/transaction/:txnId
+// GET SINGLE TRANSACTION DETAILS
 // ============================================
 router.get('/transaction/:txnId', verifyToken, async (req, res) => {
     try {
         const { txnId } = req.params;
         const user = req.user;
-        
-        console.log('Fetching Transaction Details:', txnId);
         
         const transaction = await Transaction.findOne({ tx_id: txnId })
             .populate('sender_id', 'fullName username mobile walletId')
@@ -591,51 +432,31 @@ router.get('/transaction/:txnId', verifyToken, async (req, res) => {
             .populate('user_id', 'fullName username mobile walletId');
         
         if (!transaction) {
-            console.log('Transaction Not Found:', txnId);
-            return res.status(404).json({ 
-                status: 'error', 
-                message: 'Transaction Not Found' 
-            });
+            return res.status(404).json({ status: 'error', message: 'Transaction Not Found' });
         }
         
-        // Check if user is authorized
         const isAuthorized = 
             transaction.sender_id?._id?.toString() === user._id.toString() || 
             transaction.receiver_id?._id?.toString() === user._id.toString() ||
             transaction.user_id?._id?.toString() === user._id.toString();
         
         if (!isAuthorized) {
-            console.log('Unauthorized Access To Transaction');
-            return res.status(403).json({ 
-                status: 'error', 
-                message: 'Unauthorized To View This Transaction' 
-            });
+            return res.status(403).json({ status: 'error', message: 'Unauthorized To View This Transaction' });
         }
         
-        console.log('Transaction Found');
-        
-        res.json({
-            status: 'success',
-            transaction
-        });
-        
+        res.json({ status: 'success', transaction });
     } catch (error) {
         console.error('Transaction Details Error:', error.message);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Failed To Fetch Transaction Details' 
-        });
+        res.status(500).json({ status: 'error', message: 'Failed To Fetch Transaction Details' });
     }
 });
 
 // ============================================
-// PUBLIC: GET SINGLE TRANSACTION (NO AUTH)
+// PUBLIC: GET SINGLE TRANSACTION
 // ============================================
 router.get('/public/transaction/:txnId', async (req, res) => {
     try {
         const { txnId } = req.params;
-        
-        console.log('Public Fetching Transaction:', txnId);
         
         const transaction = await Transaction.findOne({ tx_id: txnId })
             .populate('sender_id', 'fullName username walletId')
@@ -643,44 +464,29 @@ router.get('/public/transaction/:txnId', async (req, res) => {
             .populate('user_id', 'fullName username walletId');
         
         if (!transaction) {
-            return res.status(200).json({
-                success: false,
-                message: 'Transaction Not Found'
-            });
+            return res.status(200).json({ success: false, message: 'Transaction Not Found' });
         }
         
         const txnObj = transaction.toObject();
         delete txnObj.metadata?.senderApiKey;
         delete txnObj.metadata?.receiverApiKey;
         
-        console.log('Public Transaction Found');
-        
-        res.status(200).json({
-            success: true,
-            transaction: txnObj
-        });
-        
+        res.status(200).json({ success: true, transaction: txnObj });
     } catch (error) {
         console.error('Public Transaction Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Failed To Fetch Transaction Details'
-        });
+        res.status(500).json({ success: false, message: 'Failed To Fetch Transaction Details' });
     }
 });
 
 // ============================================
-// GET MY API KEY - GET /api/transfer/my-apikey
+// GET MY API KEY
 // ============================================
 router.get('/my-apikey', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         
         if (!user.apiKey) {
-            return res.status(404).json({
-                success: false,
-                message: 'API Key Not Found'
-            });
+            return res.status(404).json({ success: false, message: 'API Key Not Found' });
         }
         
         res.json({
@@ -690,13 +496,9 @@ router.get('/my-apikey', verifyToken, async (req, res) => {
             fullName: user.fullName,
             mobile: user.mobile
         });
-        
     } catch (error) {
         console.error('Get API Key Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Failed To Fetch API Key'
-        });
+        res.status(500).json({ success: false, message: 'Failed To Fetch API Key' });
     }
 });
 
