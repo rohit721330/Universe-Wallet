@@ -5,26 +5,42 @@ const giftCodeSchema = new mongoose.Schema({
     code: { type: String, unique: true, required: true, uppercase: true },
     amount: { type: Number, required: true, min: 0.01 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    
+    // ✅ NEW: Multi-user support
+    maxUsers: { type: Number, default: 1, min: 1 },
+    usedCount: { type: Number, default: 0, min: 0 },
+    usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    
+    // Legacy fields (for backward compatibility)
     isUsed: { type: Boolean, default: false },
     redeemedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     redeemedAt: { type: Date, default: null },
+    
     note: { type: String, maxlength: 200, default: '' },
     createdAt: { type: Date, default: Date.now }
 });
 
 // ============================================
-// INDEXES FOR BETTER PERFORMANCE
+// INDEXES
 // ============================================
 giftCodeSchema.index({ isUsed: 1 });
 giftCodeSchema.index({ createdBy: 1 });
-giftCodeSchema.index({ redeemedBy: 1 });
 giftCodeSchema.index({ code: 1, isUsed: 1 });
+giftCodeSchema.index({ usedBy: 1 });
 
 // ============================================
 // VIRTUALS
 // ============================================
 giftCodeSchema.virtual('isActive').get(function() {
-    return !this.isUsed;
+    return this.usedCount < this.maxUsers;
+});
+
+giftCodeSchema.virtual('isFullyUsed').get(function() {
+    return this.usedCount >= this.maxUsers;
+});
+
+giftCodeSchema.virtual('remainingSlots').get(function() {
+    return Math.max(0, this.maxUsers - this.usedCount);
 });
 
 giftCodeSchema.virtual('formattedAmount').get(function() {
@@ -32,23 +48,53 @@ giftCodeSchema.virtual('formattedAmount').get(function() {
 });
 
 giftCodeSchema.virtual('statusLabel').get(function() {
-    return this.isUsed ? 'Used' : 'Active';
+    if (this.usedCount >= this.maxUsers) return 'Used';
+    if (this.usedCount > 0) return 'Partially Used';
+    return 'Active';
 });
 
 // ============================================
 // METHODS
 // ============================================
 giftCodeSchema.methods.isValid = function() {
-    return !this.isUsed;
+    return this.usedCount < this.maxUsers;
+};
+
+giftCodeSchema.methods.canUserRedeem = function(userId) {
+    // Check if user already redeemed
+    if (this.usedBy && this.usedBy.some(id => id.toString() === userId.toString())) {
+        return false;
+    }
+    return this.usedCount < this.maxUsers;
 };
 
 giftCodeSchema.methods.use = async function(userId) {
-    if (this.isUsed) {
-        throw new Error('Gift code already used');
+    // Check slots available
+    if (this.usedCount >= this.maxUsers) {
+        throw new Error('Gift code has reached maximum usage limit');
     }
-    this.isUsed = true;
-    this.redeemedBy = userId;
-    this.redeemedAt = new Date();
+    
+    // Check if user already used
+    if (this.usedBy && this.usedBy.some(id => id.toString() === userId.toString())) {
+        throw new Error('You have already redeemed this gift code');
+    }
+    
+    // Add user to usedBy array
+    this.usedBy = this.usedBy || [];
+    this.usedBy.push(userId);
+    this.usedCount = (this.usedCount || 0) + 1;
+    
+    // Update legacy fields
+    if (this.usedCount === 1) {
+        this.redeemedBy = userId;
+        this.redeemedAt = new Date();
+    }
+    
+    // Mark as fully used if reached limit
+    if (this.usedCount >= this.maxUsers) {
+        this.isUsed = true;
+    }
+    
     await this.save();
     return this;
 };
@@ -78,7 +124,7 @@ giftCodeSchema.statics.getUserCreatedCodes = function(userId) {
 };
 
 giftCodeSchema.statics.getUserRedeemedCodes = function(userId) {
-    return this.find({ redeemedBy: userId }).sort({ redeemedAt: -1 });
+    return this.find({ usedBy: userId }).sort({ redeemedAt: -1 });
 };
 
 giftCodeSchema.statics.getStats = async function() {
@@ -108,6 +154,12 @@ giftCodeSchema.pre('save', function(next) {
     if (this.code) {
         this.code = this.code.toUpperCase().trim();
     }
+    
+    // Auto-set isUsed based on usedCount
+    if (this.usedCount >= this.maxUsers) {
+        this.isUsed = true;
+    }
+    
     next();
 });
 
