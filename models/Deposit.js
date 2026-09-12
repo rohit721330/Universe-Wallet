@@ -15,6 +15,7 @@ const depositSchema = new mongoose.Schema({
     },
     transactionRef: { type: String, default: null, sparse: true },
     verifiedAt: { type: Date, default: null },
+    // ✅ String type (admin's custom ID like "uwln427970")
     approvedBy: { type: String, default: null },
     approvedAt: { type: Date, default: null },
     rejectedBy: { type: String, default: null },
