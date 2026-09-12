@@ -164,7 +164,13 @@ router.get('/transactions', verifyToken, async (req, res) => {
             const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
                              txObj.receiver_id._id.toString() === user._id.toString();
             
-            if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
+            // ===== INVOICE PAYMENT =====
+            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay') {
+                if (isSender) transactionType = 'invoice_paid';
+                else if (isReceiver) transactionType = 'invoice_received';
+                else transactionType = 'invoice_payment';
+            }
+            else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
                 transactionType = 'payment_sent';
             } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
                 transactionType = 'payment_received';
@@ -270,7 +276,13 @@ router.get('/recent', verifyToken, async (req, res) => {
             const isReceiver = txObj.receiver_id && txObj.receiver_id._id && 
                              txObj.receiver_id._id.toString() === user._id.toString();
             
-            if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
+            // ===== INVOICE PAYMENT =====
+            if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay') {
+                if (isSender) transactionType = 'invoice_paid';
+                else if (isReceiver) transactionType = 'invoice_received';
+                else transactionType = 'invoice_payment';
+            }
+            else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'withdraw')) {
                 transactionType = 'payment_sent';
             } else if (isReceiver && (txObj.type === 'transfer' || txObj.type === 'api' || txObj.type === 'deposit')) {
                 transactionType = 'payment_received';
