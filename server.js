@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 const MONGO_URI = process.env.MONGODB_URI;
 
 // ✅ ADMIN_WALLET_ID
-const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'UW_ADMIN_DEFAULT';
+const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'UWLN427970';
 
 // ✅ Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
@@ -95,11 +95,11 @@ app.get('/setup-admin', async (req, res) => {
         }
 
         const superAdmin = new Admin({
-            adminId: 'superadmin',
-            password: 'ChangeMe123!',
-            fullName: 'Super Admin',
-            mobile: '9999999999',
-            email: 'admin@universewallet.com',
+            adminId: 'UWLN427970',
+            password: 'Universe@330',
+            fullName: 'Universe Admin',
+            mobile: '9517532486',
+            email: 'business.universewallet@gmail.com',
             role: 'super_admin',
             isActive: true,
             isBlocked: false,
