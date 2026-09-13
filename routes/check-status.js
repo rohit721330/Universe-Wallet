@@ -9,20 +9,18 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// ✅ FIX: '/:mobile' (আগে ছিল '/check-status/:mobile')
-// ✅ FIX: mongoose.connection.readyState check সরানো হয়েছে
 router.get('/:mobile', async (req, res) => {
     try {
+        // ===== Mobile normalize =====
         let mobile = String(req.params.mobile || '').trim();
+        mobile = mobile.replace(/\D/g, ''); // শুধু digits
 
-        // ===== Validation =====
-        mobile = mobile.replace(/\D/g, '');
-
-        // India: +91 বাদ দিই যদি থাকে
+        // India: +91 বা 91 prefix বাদ দিই
         if (mobile.length === 12 && mobile.startsWith('91')) {
             mobile = mobile.slice(2);
         }
 
+        // ===== Validation =====
         if (!/^[6-9]\d{9}$/.test(mobile)) {
             return res.status(400).json({
                 success: false,
@@ -47,7 +45,21 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // ===== Blocked Check =====
+        // ============================================
+        // ✅ STATUS CHECK — Priority Order
+        // ============================================
+
+        // ✅ Priority 1: DELETED (সবার আগে check)
+        if (user.isDeleted === true || user.deletedAt) {
+            return res.status(200).json({
+                success: true,
+                allowed: false,
+                reason: 'deleted',
+                message: 'Your account has been deleted. Please contact support.'
+            });
+        }
+
+        // ✅ Priority 2: BLOCKED
         if (user.isBlocked === true) {
             return res.status(200).json({
                 success: true,
@@ -59,17 +71,7 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // ===== Deleted Check =====
-        if (user.isDeleted === true || user.deletedAt) {
-            return res.status(200).json({
-                success: true,
-                allowed: false,
-                reason: 'deleted',
-                message: 'Your account has been deleted. Please contact support.'
-            });
-        }
-
-        // ===== Deactivated Check =====
+        // ✅ Priority 3: DEACTIVATED
         if (user.isActive === false) {
             return res.status(200).json({
                 success: true,
