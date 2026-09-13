@@ -5,9 +5,8 @@
 
 const express = require('express');
 const router = express.Router();
-
-// আপনার User model import করুন
 const User = require('../models/User');
+const mongoose = require('mongoose');  // ✅ এই লাইনটা যোগ করুন
 
 router.get('/check-status/:mobile', async (req, res) => {
     try {
