@@ -222,12 +222,12 @@ tr:last-child td { border-bottom: 0; }
         </button>
 
         <div class="profile-mini">
-            <img src="logo.png" alt="Profile"
+            <img id="headerProfileImage" src="" alt="Profile"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-            <div class="profile-fallback" style="display:none;">
+            <div class="profile-fallback" id="headerProfileFallback" style="display:none;">
                 <i class="fas fa-user"></i>
             </div>
-            <span>Arpita</span>
+            <span id="headerUsername">—</span>
         </div>
     </div>
 </header>
@@ -565,6 +565,93 @@ function showToast(message, icon) {
 }
 
 /* =========================================================
+   ✅ UNIVERSAL USER EXTRACTOR
+========================================================= */
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload;
+    var safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+
+/* =========================================================
+   ✅ SET PROFILE (Header — backend থেকে আসা ছবি only)
+========================================================= */
+function setHeaderProfile(user) {
+    var imgEl = document.getElementById('headerProfileImage');
+    var fallbackEl = document.getElementById('headerProfileFallback');
+    var nameEl = document.getElementById('headerUsername');
+    if (!imgEl) return;
+
+    // Set username
+    if (nameEl) {
+        var name = (user && user.fullName) ? user.fullName : '—';
+        // Show first name only for compact display
+        nameEl.textContent = name.split(' ')[0] || '—';
+    }
+
+    // Set profile picture
+    var imgSrc = '';
+    if (user && user.profilePicture && typeof user.profilePicture === 'string') {
+        var pp = user.profilePicture.trim();
+        if (pp.startsWith('data:image/') ||
+            pp.startsWith('http://') ||
+            pp.startsWith('https://') ||
+            pp.startsWith('/')) {
+            imgSrc = pp;
+        }
+    }
+
+    if (imgSrc) {
+        imgEl.src = imgSrc;
+        imgEl.style.display = '';
+        if (fallbackEl) fallbackEl.style.display = 'none';
+    } else {
+        imgEl.style.display = 'none';
+        if (fallbackEl) fallbackEl.style.display = 'flex';
+    }
+}
+
+/* =========================================================
+   ✅ LOAD USER FROM BACKEND
+========================================================= */
+async function loadUserProfile() {
+    try {
+        // First try cached user (fast render)
+        try {
+            var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (cachedUser && (cachedUser.id || cachedUser._id)) {
+                setHeaderProfile(cachedUser);
+            }
+        } catch(e){}
+
+        // Then fetch fresh data from backend
+        var token = localStorage.getItem('token');
+        if (!token) return;
+
+        var res = await fetch(API_BASE + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) return;
+
+        var data = await res.json();
+        var user = extractUser(data);
+        if (user && (user.id || user._id)) {
+            localStorage.setItem('user', JSON.stringify(user));
+            setHeaderProfile(user);
+        }
+    } catch (err) {
+        console.error('Load user error:', err);
+    }
+}
+
+/* =========================================================
    GENERATE RANDOM API KEY (18 chars)
 ========================================================= */
 function generateRandomApiKey() {
@@ -800,7 +887,7 @@ async function regenerateApiKey() {
 }
 
 /* =========================================================
-   MAKE TEST PAYMENT (Always Success Mode)
+   MAKE TEST PAYMENT (Simulated)
 ========================================================= */
 async function makeTestPayment() {
     if (!isApiActive) {
@@ -907,7 +994,7 @@ async function makeTestPayment() {
 }
 
 /* =========================================================
-   SHOW cURL COMMAND (Inline, Horizontal Scrollable)
+   SHOW cURL COMMAND
 ========================================================= */
 function showCurlCommand() {
     const number = document.getElementById('payNumber').value.trim() || '9876543210';
@@ -915,7 +1002,6 @@ function showCurlCommand() {
     const comment = document.getElementById('testComment').value.trim() || 'Test Payment';
     const key = localStorage.getItem('apiKey') || apiKey || 'YOUR_KEY';
 
-    // Universal Wallet URL — শুধু API Key
     const fullUrl = `${PAYMENT_API_URL}?key=${key}&number=${number}&amount=${amount}&comment=${encodeURIComponent(comment)}`;
 
     const curlCmd = `curl -X GET "${fullUrl}"`;
@@ -994,6 +1080,11 @@ function checkAuth() {
 ========================================================= */
 document.addEventListener('DOMContentLoaded', async function() {
     if (!checkAuth()) return;
+
+    // ✅ Load user profile FIRST (blocked check সহ)
+    await loadUserProfile();
+
+    // Then load API status and key
     loadApiStatus();
     await loadApiKeyFromDatabase();
     document.getElementById('lastUsed').textContent = new Date().toLocaleString();
