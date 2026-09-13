@@ -1,55 +1,43 @@
 // FILE: routes/check-status.js
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
-const mongoose = require('mongoose');  // ✅ এই লাইনটা যোগ করুন
 
 // ============================================
 // GET /api/check-status/:mobile
 // Mobile number দিয়ে user status check (No Auth Required)
 // ============================================
+
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+
+// ✅ FIX: '/:mobile' (আগে ছিল '/check-status/:mobile')
+// ✅ FIX: mongoose.connection.readyState check সরানো হয়েছে
 router.get('/:mobile', async (req, res) => {
     try {
-        // CORS headers
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
-        // Mobile normalize
         let mobile = String(req.params.mobile || '').trim();
-        mobile = mobile.replace(/\D/g, ''); // শুধু digits
 
-        // +91 বা 91 prefix বাদ দিই
+        // ===== Validation =====
+        mobile = mobile.replace(/\D/g, '');
+
+        // India: +91 বাদ দিই যদি থাকে
         if (mobile.length === 12 && mobile.startsWith('91')) {
             mobile = mobile.slice(2);
         }
 
-        // Validation
         if (!/^[6-9]\d{9}$/.test(mobile)) {
             return res.status(400).json({
                 success: false,
                 allowed: false,
                 reason: 'invalid_mobile',
-                message: 'Invalid mobile number. Must be 10 digits starting with 6-9.'
+                message: 'Invalid mobile number format. Must be 10 digits starting with 6-9.'
             });
         }
 
-        // MongoDB connection check
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({
-                success: false,
-                allowed: false,
-                reason: 'db_unavailable',
-                message: 'Database temporarily unavailable. Please try again.'
-            });
-        }
-
-        // User খুঁজি
+        // ===== User খুঁজি =====
         const user = await User.findOne({ mobile: mobile }).select(
             'mobile isBlocked isDeleted isActive deletedAt blockedAt blockReason'
         );
 
-        // User নেই
+        // ===== User নেই =====
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -59,7 +47,7 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // Blocked check
+        // ===== Blocked Check =====
         if (user.isBlocked === true) {
             return res.status(200).json({
                 success: true,
@@ -71,7 +59,7 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // Deleted check
+        // ===== Deleted Check =====
         if (user.isDeleted === true || user.deletedAt) {
             return res.status(200).json({
                 success: true,
@@ -81,7 +69,7 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // Deactivated check
+        // ===== Deactivated Check =====
         if (user.isActive === false) {
             return res.status(200).json({
                 success: true,
@@ -91,7 +79,7 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // ✅ সব ঠিক
+        // ===== All Good =====
         return res.status(200).json({
             success: true,
             allowed: true,
@@ -108,14 +96,6 @@ router.get('/:mobile', async (req, res) => {
             message: 'Server error. Please try again later.'
         });
     }
-});
-
-// OPTIONS preflight for CORS
-router.options('/:mobile', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.status(200).end();
 });
 
 module.exports = router;
