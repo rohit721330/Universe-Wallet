@@ -71,6 +71,7 @@ body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Sego
 .header-left { display: flex; align-items: center; gap: 12px; }
 .menu-btn { width: 34px; height: 34px; border: 0; border-radius: 9px; background: var(--input); color: var(--text); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: background .2s; }
 .menu-btn:hover { background: var(--card2); }
+.menu-btn span { font-size: 20px; line-height: 1; }
 .page-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .header-right { display: flex; align-items: center; gap: 10px; }
 
@@ -82,6 +83,38 @@ body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Sego
 .profile-mini { display: flex; align-items: center; cursor: pointer; }
 .profile-mini img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
 .profile-fallback { width: 32px; height: 32px; border-radius: 50%; background: var(--input); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+
+/* ===== SIDEBAR (Dashboard style) ===== */
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(15, 30, 60, 0.4); z-index: 998; display: none; backdrop-filter: blur(3px); }
+.sidebar-overlay.active { display: block; }
+.sidebar {
+    position: fixed; top: 0; left: -280px;
+    width: 280px; height: 100%;
+    z-index: 999;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    box-shadow: 4px 0 20px rgba(0, 50, 100, 0.1);
+    padding: 18px 14px;
+    overflow-y: auto;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background .3s ease, border .3s ease;
+}
+.sidebar.open { left: 0; }
+.sidebar-profile { text-align: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.profile-pic-container { width: 60px; height: 60px; margin: 0 auto 8px; cursor: pointer; }
+.profile-pic { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
+.profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.sidebar-username { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.sidebar-mobile { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.sidebar-balance { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 40px; background: var(--primary-bg); color: var(--primary); border: 1px solid var(--border); }
+.sidebar-balance i { font-size: 12px; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; transition: all 0.2s; }
+.sidebar-menu-item:hover { background: var(--card2); }
+.sidebar-menu-item i { width: 18px; font-size: 13px; text-align: center; color: var(--primary); }
+.sidebar-menu-item.active { background: var(--primary-bg); color: var(--primary); font-weight: 700; }
+.sidebar-menu-item.logout-item { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); border-radius: 0; color: var(--red); }
+.sidebar-menu-item.logout-item i { color: var(--red) !important; }
+.sidebar-menu-item.logout-item:hover { background: var(--red-bg); }
 
 /* ===== MAIN CONTAINER ===== */
 .container { width: min(100% - 20px, 1180px); margin: 12px auto 30px; }
@@ -257,6 +290,38 @@ tr:last-child td { border-bottom: 0; }
 </div>
 
 <!-- =====================================================
+     SIDEBAR (Dashboard style)
+===================================================== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+        <div class="profile-pic-container" onclick="goToProfile()">
+            <div class="profile-pic" id="sidebarProfilePic"></div>
+        </div>
+        <div class="sidebar-username" id="sidebarUsername">Loading...</div>
+        <div class="sidebar-mobile" id="sidebarMobile">---</div>
+        <div class="sidebar-balance">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+            <span id="sidebarBalanceAmount">0.00</span>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <div class="sidebar-menu-item" onclick="location.href='/dashboard'"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transfer'"><i class="fa-solid fa-paper-plane"></i> <span>Transfer</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/deposit'"><i class="fa-solid fa-plus-circle"></i> <span>Add Fund</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/withdraw'"><i class="fa-solid fa-arrow-up"></i> <span>Withdraw</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transactions'"><i class="fa-solid fa-receipt"></i> <span>Transactions</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/gift'"><i class="fa-solid fa-gift"></i> <span>Gift Code</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/profile'"><i class="fa-solid fa-user-circle"></i> <span>Profile</span></div>
+        <div class="sidebar-menu-item active" onclick="location.href='/api'"><i class="fa-solid fa-code"></i> <span>API Settings</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/ai'"><i class="fa-solid fa-brain"></i> <span>AI Assistant</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/tg'"><i class="fa-brands fa-telegram"></i> <span>Join Telegram</span></div>
+        <div class="sidebar-menu-item" onclick="window.open('https://t.me/UNIVERSAL_OFC_SUPPORT', '_blank')"><i class="fa-solid fa-headset"></i> <span>Contact Support</span></div>
+        <div class="sidebar-menu-item logout-item" onclick="showLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></div>
+    </nav>
+</aside>
+
+<!-- =====================================================
      PIN GATE OVERLAY
 ===================================================== -->
 <div class="pin-gate-overlay" id="pinGateOverlay">
@@ -301,8 +366,9 @@ tr:last-child td { border-bottom: 0; }
 ===================================================== -->
 <header class="header">
     <div class="header-left">
-        <button class="menu-btn" onclick="window.location.href='/dashboard'">
-            <i class="fas fa-arrow-left"></i>
+        <!-- ✅ Sidebar toggle (Back button এর পরিবর্তে) -->
+        <button class="menu-btn" onclick="toggleSidebar()" title="Menu">
+            <span>☰</span>
         </button>
         <div class="page-title">API Integration</div>
     </div>
@@ -657,6 +723,43 @@ themeBtn.addEventListener('click', function () {
 });
 
 /* =========================================================
+   SIDEBAR
+========================================================= */
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeSidebar();
+});
+
+/* =========================================================
+   LOGOUT MODAL (reuse blocked overlay button style)
+========================================================= */
+function showLogoutModal() {
+    closeSidebar();
+    if (confirm('Are you sure you want to logout from your account?')) {
+        logout();
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+function goToProfile() {
+    window.location.href = '/profile';
+}
+
+/* =========================================================
    TOAST
 ========================================================= */
 function showToast(message, icon) {
@@ -732,20 +835,8 @@ function showBlockedOverlay(title, message) {
     if (message) document.getElementById('blockedSub').textContent = message;
     document.getElementById('blockedOverlay').classList.add('active');
 
-    // Hide PIN gate
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
-}
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('pin_set');
-    sessionStorage.removeItem('pin_verified');
-    window.location.href = '/';
 }
 
 /* =========================================================
@@ -778,7 +869,43 @@ function setHeaderProfile(user) {
 }
 
 /* =========================================================
-   ✅ VERIFY USER STATE (blocked check সহ)
+   ✅ SET SIDEBAR PROFILE (Dashboard style)
+========================================================= */
+function setSidebarProfile(user) {
+    if (!user) return;
+
+    var sidebarPic = document.getElementById('sidebarProfilePic');
+    var usernameEl = document.getElementById('sidebarUsername');
+    var mobileEl = document.getElementById('sidebarMobile');
+
+    var imgSrc = '';
+    if (user.profilePicture && typeof user.profilePicture === 'string') {
+        var pp = user.profilePicture.trim();
+        if (pp.startsWith('data:image/') ||
+            pp.startsWith('http://') ||
+            pp.startsWith('https://') ||
+            pp.startsWith('/')) {
+            imgSrc = pp;
+        }
+    }
+
+    if (sidebarPic) {
+        if (imgSrc) {
+            sidebarPic.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
+        } else {
+            sidebarPic.innerHTML = '<i class="fas fa-user" style="font-size:22px;color:#fff;"></i>';
+        }
+    }
+
+    if (usernameEl) usernameEl.textContent = user.fullName || 'User';
+    if (mobileEl) {
+        var mob = user.mobile || '---';
+        mobileEl.textContent = (mob.length === 10) ? '+91 ' + mob.slice(0,5) + ' ' + mob.slice(5) : mob;
+    }
+}
+
+/* =========================================================
+   ✅ VERIFY USER STATE (blocked check + sidebar profile)
 ========================================================= */
 async function verifyUserState() {
     var t = localStorage.getItem('token');
@@ -808,7 +935,6 @@ async function verifyUserState() {
             return false;
         }
 
-        // Mobile status check (Token-free!)
         if (user.mobile && !blockCheckDone) {
             blockCheckDone = true;
             var status = await checkStatusByMobile(user.mobile);
@@ -818,10 +944,8 @@ async function verifyUserState() {
             }
         }
 
-        // Set profile picture in header
         setHeaderProfile(user);
-
-        // Cache user
+        setSidebarProfile(user);
         localStorage.setItem('user', JSON.stringify(user));
         return true;
     } catch (error) {
@@ -1038,22 +1162,16 @@ async function initPinGate() {
    PAGE READY — সব data load হয়
 ========================================================= */
 async function onPageReady() {
-    // 1. Verify user state (blocked check + profile pic)
     var isUserValid = await verifyUserState();
     if (!isUserValid) return;
 
-    // 2. Load API status
     loadApiStatus();
-
-    // 3. Load API key from database
     await loadApiKeyFromDatabase();
-
-    // 4. Update last used
     document.getElementById('lastUsed').textContent = new Date().toLocaleString();
 }
 
 /* =========================================================
-   GENERATE RANDOM API KEY (18 chars)
+   GENERATE RANDOM API KEY (10 chars)
 ========================================================= */
 function generateRandomApiKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1473,11 +1591,9 @@ function loadApiStatus() {
 document.addEventListener('DOMContentLoaded', async function() {
     if (!AUTH_TOKEN) { window.location.href = '/'; return; }
 
-    // ✅ STEP 1: FIRST verify user (blocked/deleted check)
     var isUserValid = await verifyUserState();
     if (!isUserValid) return;
 
-    // ✅ STEP 2: THEN show PIN gate
     initPinGate();
 });
 </script>
