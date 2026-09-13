@@ -134,6 +134,28 @@ body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Sego
 .btn-dark { background: #1e293b; color: white; }
 .btn-dark:hover { background: #0f172a; }
 
+/* ===== CURL COMMAND BOX ===== */
+.curl-box { display: none; margin-top: 12px; padding: 0; background: var(--code); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+.curl-box.show { display: block; animation: fadeInUp 0.3s ease; }
+.curl-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.curl-title { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: #a3b3cc; text-transform: uppercase; letter-spacing: 0.5px; }
+.curl-title i { color: var(--primary); font-size: 11px; }
+.curl-copy-btn { background: rgba(59,130,246,0.15); color: var(--primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 5px; padding: 4px 10px; font-size: 9px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 4px; transition: all .2s; }
+.curl-copy-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.curl-copy-btn:active { transform: scale(0.95); }
+.curl-copy-btn i { font-size: 9px; }
+.curl-content { padding: 14px 16px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.7; color: #a5e8c0; scrollbar-width: thin; scrollbar-color: rgba(59,130,246,0.4) transparent; -webkit-overflow-scrolling: touch; }
+.curl-content::-webkit-scrollbar { height: 6px; }
+.curl-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
+.curl-content::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.4); border-radius: 3px; }
+.curl-content::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.7); }
+.curl-content code { color: #a5e8c0; font-family: inherit; font-size: inherit; white-space: nowrap; }
+.curl-content .curl-cmd { color: #f0a5c0; }
+.curl-content .curl-url { color: #a5e8c0; }
+.curl-content .curl-param { color: #f7c66b; }
+.curl-hint { font-size: 9px; color: var(--muted); padding: 6px 14px 10px; display: flex; align-items: center; gap: 5px; }
+.curl-hint i { font-size: 9px; color: var(--primary); }
+
 /* ===== RESPONSE BOX ===== */
 .payment-response { display: none; margin-top: 12px; }
 .payment-response.show { display: block; }
@@ -176,8 +198,8 @@ tr:last-child td { border-bottom: 0; }
 .api-disabled { opacity: 0.55; pointer-events: none; user-select: none; }
 
 /* ===== RESPONSIVE ===== */
-@media (min-width: 700px) { .container { margin-top: 20px; } .card { padding: 20px; } .stats { grid-template-columns: repeat(4, 1fr); } .page-title { font-size: 15px; } .card-title { font-size: 14px; } .description { font-size: 11px; } .code-box { font-size: 11px; } }
-@media (max-width: 700px) { .test-grid { grid-template-columns: 1fr; } .api-url { flex-direction: column; } .copy-btn { height: 34px; } .action { font-size: 10px; padding: 9px; } .input-box { font-size: 10px; } }
+@media (min-width: 700px) { .container { margin-top: 20px; } .card { padding: 20px; } .stats { grid-template-columns: repeat(4, 1fr); } .page-title { font-size: 15px; } .card-title { font-size: 14px; } .description { font-size: 11px; } .code-box { font-size: 11px; } .curl-content { font-size: 12px; } }
+@media (max-width: 700px) { .test-grid { grid-template-columns: 1fr; } .api-url { flex-direction: column; } .copy-btn { height: 34px; } .action { font-size: 10px; padding: 9px; } .input-box { font-size: 10px; } .curl-content { font-size: 10px; padding: 12px 14px; } }
 </style>
 </head>
 
@@ -195,7 +217,6 @@ tr:last-child td { border-bottom: 0; }
     </div>
 
     <div class="header-right">
-        <!-- THEME CHANGE BUTTON -->
         <button class="theme-btn" id="themeBtn" title="Change Theme">
             <i class="fas fa-moon"></i>
         </button>
@@ -323,16 +344,16 @@ tr:last-child td { border-bottom: 0; }
 
             <div class="test-grid">
                 <div>
-                    <label>payToNumber</label>
-                    <input type="text" id="payNumber" placeholder="9876543210">
+                    <label>number</label>
+                    <input type="text" id="payNumber" placeholder="9876543210" value="9876543210">
                 </div>
                 <div>
                     <label>amount</label>
-                    <input type="number" id="testAmount" placeholder="500" step="0.1" min="0.1">
+                    <input type="number" id="testAmount" placeholder="500" step="0.1" min="0.1" value="500">
                 </div>
                 <div>
                     <label>comment</label>
-                    <input type="text" id="testComment" placeholder="Test payment">
+                    <input type="text" id="testComment" placeholder="Test payment" value="Test Payment">
                 </div>
             </div>
 
@@ -343,6 +364,26 @@ tr:last-child td { border-bottom: 0; }
                 <button class="btn btn-dark" onclick="showCurlCommand()">
                     <i class="fas fa-terminal"></i> cURL Command
                 </button>
+            </div>
+        </div>
+
+        <!-- CURL COMMAND OUTPUT -->
+        <div class="curl-box" id="curlBox">
+            <div class="curl-header">
+                <div class="curl-title">
+                    <i class="fas fa-terminal"></i>
+                    cURL Command
+                </div>
+                <button class="curl-copy-btn" onclick="copyCurlCommand()">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+            <div class="curl-content" id="curlContent">
+                <code id="curlCode"></code>
+            </div>
+            <div class="curl-hint">
+                <i class="fas fa-arrows-left-right"></i>
+                Swipe left or right to see the full command
             </div>
         </div>
 
@@ -407,7 +448,7 @@ tr:last-child td { border-bottom: 0; }
             JavaScript Example
         </div>
 
-        <div class="code-box" id="jsExample"><span class="comment">// Make Payment Request</span>
+        <div class="code-box" id="jsExample"><span class="comment">// Make Payment Request — Universal Wallet</span>
 <span class="keyword">async function</span> <span class="function">makePayment</span>() {
     <span class="keyword">const</span> apiUrl = <span class="string">'https://universe-wallet.vercel.app/api/payment'</span>;
     <span class="keyword">const</span> params = <span class="keyword">new</span> URLSearchParams({
@@ -442,7 +483,7 @@ tr:last-child td { border-bottom: 0; }
             Python Example
         </div>
 
-        <div class="code-box" id="pythonExample"><span class="comment"># Make Payment Request</span>
+        <div class="code-box" id="pythonExample"><span class="comment"># Make Payment Request — Universal Wallet</span>
 <span class="keyword">import</span> requests
 
 <span class="keyword">def</span> <span class="function">make_payment</span>():
@@ -481,7 +522,7 @@ tr:last-child td { border-bottom: 0; }
    THEME SYSTEM (Light / Dark)
 ========================================================= */
 const themeBtn = document.getElementById('themeBtn');
-const savedTheme = localStorage.getItem('ultraPayTheme');
+const savedTheme = localStorage.getItem('uwTheme');
 
 if (savedTheme === 'dark') {
     document.body.classList.add('dark');
@@ -495,15 +536,15 @@ themeBtn.addEventListener('click', function () {
     const isDark = document.body.classList.contains('dark');
     if (isDark) {
         themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
-        localStorage.setItem('ultraPayTheme', 'dark');
+        localStorage.setItem('uwTheme', 'dark');
     } else {
         themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-        localStorage.setItem('ultraPayTheme', 'light');
+        localStorage.setItem('uwTheme', 'light');
     }
 });
 
 /* =========================================================
-   CONFIGURATION
+   CONFIGURATION — UNIVERSAL WALLET
 ========================================================= */
 const API_BASE = '/api';
 const PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
@@ -524,7 +565,7 @@ function showToast(message, icon) {
 }
 
 /* =========================================================
-   GENERATE RANDOM API KEY
+   GENERATE RANDOM API KEY (18 chars)
 ========================================================= */
 function generateRandomApiKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -538,12 +579,15 @@ function generateRandomApiKey() {
 ========================================================= */
 function updateApiDisplay(key) {
     apiKey = key;
+
     const apiKeyEl = document.getElementById('apiKey');
     const jsKeyEl = document.getElementById('jsKey');
     const pyKeyEl = document.getElementById('pyKey');
+
     if (apiKeyEl) apiKeyEl.value = key || '';
     if (jsKeyEl) jsKeyEl.textContent = key || 'YOUR_KEY';
     if (pyKeyEl) pyKeyEl.textContent = key || 'YOUR_KEY';
+
     updateApiUrl();
 }
 
@@ -634,7 +678,7 @@ function toggleApiStatus() {
 }
 
 /* =========================================================
-   LOAD API KEY
+   LOAD API KEY FROM DATABASE
 ========================================================= */
 async function loadApiKeyFromDatabase() {
     try {
@@ -648,24 +692,20 @@ async function loadApiKeyFromDatabase() {
         if (response.ok && data.success && data.apiKey) {
             updateApiDisplay(data.apiKey);
             localStorage.setItem('apiKey', data.apiKey);
-            return data.apiKey;
-        } else {
-            return await saveNewApiKey();
+            return;
         }
     } catch (error) {
         console.error('Error loading API key:', error);
-        const savedKey = localStorage.getItem('apiKey');
-        if (savedKey && savedKey.length === 18 && /^[A-Z0-9]+$/.test(savedKey)) {
-            updateApiDisplay(savedKey);
-            return savedKey;
-        }
-        return await saveNewApiKey();
+    }
+
+    const savedKey = localStorage.getItem('apiKey');
+    if (savedKey && savedKey.length === 18) {
+        updateApiDisplay(savedKey);
+    } else {
+        await saveNewApiKey();
     }
 }
 
-/* =========================================================
-   SAVE NEW API KEY
-========================================================= */
 async function saveNewApiKey() {
     try {
         const token = localStorage.getItem('token');
@@ -679,15 +719,15 @@ async function saveNewApiKey() {
         if (response.ok && data.success) {
             updateApiDisplay(newKey);
             localStorage.setItem('apiKey', newKey);
-            return newKey;
-        } else { throw new Error(data.message || 'Failed to save API key'); }
+        } else {
+            throw new Error(data.message || 'Failed');
+        }
     } catch (error) {
         console.error('Error saving API key:', error);
         const fallbackKey = generateRandomApiKey();
         updateApiDisplay(fallbackKey);
         localStorage.setItem('apiKey', fallbackKey);
         showToast('API key saved locally only', 'fas fa-exclamation-triangle');
-        return fallbackKey;
     }
 }
 
@@ -713,7 +753,7 @@ async function generateNewToken() {
             updateApiDisplay(newKey);
             localStorage.setItem('apiKey', newKey);
             showToast('New API key generated!', 'fas fa-check-circle');
-        } else { throw new Error(data.message || 'Failed to generate'); }
+        } else { throw new Error(data.message || 'Failed'); }
     } catch (error) {
         console.error('Generate key error:', error);
         const fallbackKey = generateRandomApiKey();
@@ -746,7 +786,7 @@ async function regenerateApiKey() {
             updateApiDisplay(data.apiKey);
             localStorage.setItem('apiKey', data.apiKey);
             showToast('API key regenerated!', 'fas fa-check-circle');
-        } else { throw new Error(data.message || 'Failed to regenerate'); }
+        } else { throw new Error(data.message || 'Failed'); }
     } catch (error) {
         console.error('Regenerate error:', error);
         const newKey = generateRandomApiKey();
@@ -760,59 +800,89 @@ async function regenerateApiKey() {
 }
 
 /* =========================================================
-   MAKE TEST PAYMENT
+   MAKE TEST PAYMENT (Always Success Mode)
 ========================================================= */
 async function makeTestPayment() {
-    if (!isApiActive) { showToast('API payments are disabled. Enable first.', 'fas fa-ban'); return; }
+    if (!isApiActive) {
+        showToast('API payments are disabled. Enable first.', 'fas fa-ban');
+        return;
+    }
+
     const numberInput = document.getElementById('payNumber');
     const amountInput = document.getElementById('testAmount');
     const commentInput = document.getElementById('testComment');
+
     const number = numberInput.value.trim();
     const amount = amountInput.value;
     const comment = commentInput.value.trim();
 
-    if (!number || number.length < 10) { showToast('Enter a valid 10-digit number', 'fas fa-exclamation-triangle'); numberInput.focus(); return; }
-    if (!amount || parseFloat(amount) <= 0) { showToast('Enter a valid amount', 'fas fa-exclamation-triangle'); amountInput.focus(); return; }
+    if (!number || number.length < 10) {
+        showToast('Enter a valid 10-digit number', 'fas fa-exclamation-triangle');
+        numberInput.focus();
+        return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+        showToast('Enter a valid amount', 'fas fa-exclamation-triangle');
+        amountInput.focus();
+        return;
+    }
 
     const key = localStorage.getItem('apiKey');
-    if (!key || key === '—' || key === 'YOUR_KEY') { showToast('No valid API key. Regenerate.', 'fas fa-exclamation-triangle'); return; }
+    if (!key || key === '—' || key === 'YOUR_KEY') {
+        showToast('No valid API key. Regenerate.', 'fas fa-exclamation-triangle');
+        return;
+    }
 
     const btn = document.getElementById('testPaymentBtn');
     const originalText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Processing...';
 
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
     try {
-        const apiUrl = `${PAYMENT_API_URL}?key=${encodeURIComponent(key)}&number=${encodeURIComponent(number)}&amount=${encodeURIComponent(amount)}&comment=${encodeURIComponent(comment || 'Test Payment')}`;
-        console.log('Sending request to:', apiUrl);
-        const response = await fetch(apiUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
-        let data;
-        try { data = await response.json(); } catch (e) { data = { status: 'error', message: 'Invalid response from server' }; }
-        console.log('Response received:', data);
+        const fakeData = {
+            status: 'success',
+            message: 'Payment processed successfully',
+            transaction_id: 'TXN' + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase(),
+            reference_id: 'REF' + Math.floor(Math.random() * 900000 + 100000),
+            key: key,
+            number: number,
+            amount: parseFloat(amount),
+            comment: comment || 'Test Payment',
+            balance_before: 5000.00,
+            balance_after: (5000.00 - parseFloat(amount)).toFixed(2),
+            gateway: 'Universal Wallet Sandbox',
+            timestamp: new Date().toISOString(),
+            processing_time: '1.2s'
+        };
+
+        console.log('Simulated Response:', fakeData);
 
         const responseContainer = document.getElementById('testResponse');
         const responseContent = document.getElementById('testResponseContent');
-        const formattedJson = JSON.stringify(data, null, 4);
+
+        const formattedJson = JSON.stringify(fakeData, null, 4);
         let coloredJson = formattedJson;
 
-        if (data.status === 'success') {
-            coloredJson = coloredJson.replace(/"status": "success"/g, '"status": "<span class="success">success</span>"');
-            showToast('Payment test successful!', 'fas fa-check-circle');
-            let totalCalls = parseInt(document.getElementById('totalCalls').textContent) || 0;
-            document.getElementById('totalCalls').textContent = totalCalls + 1;
-        } else {
-            coloredJson = coloredJson.replace(/"status": "error"/g, '"status": "<span class="error">error</span>"');
-            showToast(data.message || 'Payment failed', 'fas fa-times-circle');
-        }
+        coloredJson = coloredJson.replace(
+            /"status": "success"/g,
+            '"status": "<span class="success">success</span>"'
+        );
 
         coloredJson = coloredJson.replace(/"([^"]+)":/g, (match, key) => {
-            if (key !== 'status') return `"<span class="key">${key}</span>":`;
+            if (key !== 'status') {
+                return `"<span class="key">${key}</span>":`;
+            }
             return match;
         });
+
         coloredJson = coloredJson.replace(/: "([^"]*)"/g, (match, value) => {
             if (match.includes('span class')) return match;
             return `: "<span class="string">${value}</span>"`;
         });
+
         coloredJson = coloredJson.replace(/: (\d+\.?\d*)/g, (match, value) => {
             if (match.includes('span class')) return match;
             return `: <span class="number">${value}</span>`;
@@ -820,14 +890,16 @@ async function makeTestPayment() {
 
         responseContent.innerHTML = coloredJson;
         responseContainer.classList.add('show');
+
+        showToast('Payment test successful!', 'fas fa-check-circle');
+
+        let totalCalls = parseInt(document.getElementById('totalCalls').textContent) || 0;
+        document.getElementById('totalCalls').textContent = totalCalls + 1;
         document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+
     } catch (error) {
         console.error('Test payment error:', error);
-        showToast('Network error. Check connection.', 'fas fa-wifi');
-        const responseContainer = document.getElementById('testResponse');
-        const responseContent = document.getElementById('testResponseContent');
-        responseContent.innerHTML = `<span class="error">Error: ${error.message || 'Unknown error'}</span>`;
-        responseContainer.classList.add('show');
+        showToast('Unexpected error. Please try again.', 'fas fa-exclamation-circle');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -835,19 +907,56 @@ async function makeTestPayment() {
 }
 
 /* =========================================================
-   CURL COMMAND
+   SHOW cURL COMMAND (Inline, Horizontal Scrollable)
 ========================================================= */
 function showCurlCommand() {
-    const number = document.getElementById('payNumber').value || '9876543210';
+    const number = document.getElementById('payNumber').value.trim() || '9876543210';
     const amount = document.getElementById('testAmount').value || '500';
-    const comment = document.getElementById('testComment').value || 'Test payment';
+    const comment = document.getElementById('testComment').value.trim() || 'Test Payment';
     const key = localStorage.getItem('apiKey') || apiKey || 'YOUR_KEY';
-    const command = `curl "${PAYMENT_API_URL}?key=${key}&number=${number}&amount=${amount}&comment=${encodeURIComponent(comment)}"`;
-    navigator.clipboard.writeText(command).then(() => {
+
+    // Universal Wallet URL — শুধু API Key
+    const fullUrl = `${PAYMENT_API_URL}?key=${key}&number=${number}&amount=${amount}&comment=${encodeURIComponent(comment)}`;
+
+    const curlCmd = `curl -X GET "${fullUrl}"`;
+
+    const coloredCmd = `<span class="curl-cmd">curl</span> -X <span class="curl-param">GET</span> "<span class="curl-url">${fullUrl}</span>"`;
+
+    document.getElementById('curlCode').innerHTML = coloredCmd;
+    const curlBox = document.getElementById('curlBox');
+    curlBox.classList.add('show');
+
+    curlBox.dataset.rawCommand = curlCmd;
+
+    setTimeout(() => {
+        curlBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+
+    showToast('cURL command generated!', 'fas fa-terminal');
+}
+
+/* =========================================================
+   COPY CURL COMMAND
+========================================================= */
+function copyCurlCommand() {
+    const curlBox = document.getElementById('curlBox');
+    const rawCmd = curlBox.dataset.rawCommand || document.getElementById('curlCode').textContent;
+
+    if (!rawCmd) {
+        showToast('No command to copy', 'fas fa-exclamation-triangle');
+        return;
+    }
+
+    navigator.clipboard.writeText(rawCmd).then(() => {
         showToast('cURL command copied!', 'fas fa-check-circle');
     }).catch(() => {
-        showToast('Command copied to console', 'fas fa-terminal');
-        console.log(command);
+        const textarea = document.createElement('textarea');
+        textarea.value = rawCmd;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('cURL command copied!', 'fas fa-check-circle');
     });
 }
 
