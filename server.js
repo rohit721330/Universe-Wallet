@@ -141,6 +141,7 @@ app.get('/setup-admin', async (req, res) => {
 
 // ==================== ALL API ROUTES ====================
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/check-status', require('./routes/check-status'));
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/withdraw-settings', require('./routes/withdraw-settings'));
