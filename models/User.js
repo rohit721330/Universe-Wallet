@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
     walletId: { type: String, unique: true, required: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
 
+    // ✅ Account Status Flags
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
@@ -153,15 +154,18 @@ userSchema.methods.canLogin = function() {
 // ============================================
 // INSTANCE METHODS — Soft Delete / Restore
 // ============================================
+
+// ✅ FIXED: isBlocked আর touch করা হয় না
 userSchema.methods.softDelete = async function(adminName = 'Admin') {
     this.isDeleted = true;
-    this.isActive = false;
-    this.isBlocked = true;
     this.deletedAt = new Date();
     this.deletedBy = adminName;
+    // ⚠️ IMPORTANT: isBlocked এবং isActive এই method এ touch করা হয় না
+    // কারণ deleted মানেই deleted — blocked/deactivated আলাদা state
     return await this.save();
 };
 
+// ✅ FIXED: restore সব reset করে
 userSchema.methods.restore = async function() {
     this.isDeleted = false;
     this.isActive = true;
