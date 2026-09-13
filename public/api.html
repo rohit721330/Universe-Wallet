@@ -36,6 +36,36 @@ body.dark {
 html { scroll-behavior: smooth; }
 body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; min-height: 100vh; }
 
+/* ===== PAGE GATE ===== */
+#pageContent { display: none; }
+#pageContent.visible { display: block; }
+
+/* ===== PIN GATE OVERLAY ===== */
+.pin-gate-overlay { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.pin-gate-overlay.hidden { display: none; }
+.pin-card { background: #fff; border-radius: 24px; padding: 2rem 1.5rem; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.25); animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); text-align: center; position: relative; }
+@keyframes modalPopIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.pin-icon-box { width: 68px; height: 68px; border-radius: 20px; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #fff; font-size: 1.8rem; box-shadow: 0 6px 20px rgba(26, 86, 219, 0.35); }
+.pin-title { font-size: 1.25rem; font-weight: 900; color: #172033; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.pin-subtitle { font-size: 0.8rem; color: #5a7a9a; margin-bottom: 1.5rem; font-weight: 600; line-height: 1.5; }
+.pin-step-badge { display: inline-block; font-size: 0.6rem; font-weight: 800; padding: 4px 12px; border-radius: 30px; margin-bottom: 12px; letter-spacing: 0.5px; background: #dbeafe; color: #1a56db; text-transform: uppercase; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 1.5rem; }
+.pin-dot { width: 54px; height: 54px; border-radius: 14px; background: #fafcff; border: 2px solid #c5d9f0; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: 0.2s; }
+.pin-dot.filled { border-color: #1a56db; background: #dbeafe; color: #1a56db; }
+.pin-dot.filled::after { content: '●'; }
+.pin-dot.error { border-color: #dc2626; background: #fee2e2; animation: shake 0.3s ease; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pin-key { padding: 16px; border-radius: 14px; font-size: 22px; font-weight: 700; cursor: pointer; background: #fafcff; border: 2px solid #c5d9f0; color: #172033; text-align: center; font-family: inherit; transition: all 0.15s; user-select: none; }
+.pin-key:hover { background: #f0f7ff; }
+.pin-key:active { transform: scale(0.95); }
+.pin-key.del { color: #dc2626; }
+.pin-key.go { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; border-color: transparent; }
+.pin-key.go .key-spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+.pin-key.go.loading .key-spinner { display: block; }
+.pin-key.go.loading i { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ===== TOP HEADER ===== */
 .header { height: 58px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: sticky; top: 0; z-index: 100; transition: background .3s ease, border .3s ease; }
 .header-left { display: flex; align-items: center; gap: 12px; }
@@ -48,10 +78,10 @@ body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Sego
 .theme-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 50%; background: var(--card2); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: transform .25s ease, background .3s ease, border .3s ease; }
 .theme-btn:hover { transform: rotate(20deg) scale(1.05); }
 
-/* ===== PROFILE ===== */
-.profile-mini { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text); }
-.profile-mini img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-.profile-fallback { width: 30px; height: 30px; border-radius: 50%; background: var(--input); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+/* ===== PROFILE (No username) ===== */
+.profile-mini { display: flex; align-items: center; cursor: pointer; }
+.profile-mini img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+.profile-fallback { width: 32px; height: 32px; border-radius: 50%; background: var(--input); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
 
 /* ===== MAIN CONTAINER ===== */
 .container { width: min(100% - 20px, 1180px); margin: 12px auto 30px; }
@@ -192,18 +222,79 @@ tr:last-child td { border-bottom: 0; }
 
 /* ===== SPINNER ===== */
 .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255, 255, 255, 0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ===== DISABLED STATE ===== */
 .api-disabled { opacity: 0.55; pointer-events: none; user-select: none; }
 
+/* ===== BLOCKED OVERLAY ===== */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: modalPopIn 0.4s ease-out; }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
 /* ===== RESPONSIVE ===== */
 @media (min-width: 700px) { .container { margin-top: 20px; } .card { padding: 20px; } .stats { grid-template-columns: repeat(4, 1fr); } .page-title { font-size: 15px; } .card-title { font-size: 14px; } .description { font-size: 11px; } .code-box { font-size: 11px; } .curl-content { font-size: 12px; } }
-@media (max-width: 700px) { .test-grid { grid-template-columns: 1fr; } .api-url { flex-direction: column; } .copy-btn { height: 34px; } .action { font-size: 10px; padding: 9px; } .input-box { font-size: 10px; } .curl-content { font-size: 10px; padding: 12px 14px; } }
+@media (max-width: 700px) { .test-grid { grid-template-columns: 1fr; } .api-url { flex-direction: column; } .copy-btn { height: 34px; } .action { font-size: 10px; padding: 9px; } .input-box { font-size: 10px; } .curl-content { font-size: 10px; padding: 12px 14px; } .pin-dot { width: 48px; height: 48px; font-size: 20px; } .pin-key { padding: 14px; font-size: 20px; } }
+@media (max-width: 380px) { .pin-dot { width: 44px; height: 44px; font-size: 18px; } .pin-key { padding: 12px; font-size: 18px; } }
 </style>
 </head>
 
 <body>
+
+<!-- =====================================================
+     BLOCKED OVERLAY
+===================================================== -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- =====================================================
+     PIN GATE OVERLAY
+===================================================== -->
+<div class="pin-gate-overlay" id="pinGateOverlay">
+    <div class="pin-card">
+        <div class="pin-icon-box"><i class="fa-solid fa-lock" id="pinGateIcon"></i></div>
+        <div class="pin-step-badge" id="pinGateBadge" style="display: none;">Step 1 of 2</div>
+        <div class="pin-title" id="pinGateTitle">Enter PIN</div>
+        <div class="pin-subtitle" id="pinGateSubtitle">Enter your 4-digit PIN to continue</div>
+        <div class="pin-dots">
+            <div class="pin-dot" id="pg-dot-0"></div>
+            <div class="pin-dot" id="pg-dot-1"></div>
+            <div class="pin-dot" id="pg-dot-2"></div>
+            <div class="pin-dot" id="pg-dot-3"></div>
+        </div>
+        <div class="pin-keypad">
+            <div class="pin-key" onclick="pinGatePress('1')">1</div>
+            <div class="pin-key" onclick="pinGatePress('2')">2</div>
+            <div class="pin-key" onclick="pinGatePress('3')">3</div>
+            <div class="pin-key" onclick="pinGatePress('4')">4</div>
+            <div class="pin-key" onclick="pinGatePress('5')">5</div>
+            <div class="pin-key" onclick="pinGatePress('6')">6</div>
+            <div class="pin-key" onclick="pinGatePress('7')">7</div>
+            <div class="pin-key" onclick="pinGatePress('8')">8</div>
+            <div class="pin-key" onclick="pinGatePress('9')">9</div>
+            <div class="pin-key del" onclick="pinGateDel()"><i class="fa-solid fa-delete-left"></i></div>
+            <div class="pin-key" onclick="pinGatePress('0')">0</div>
+            <div class="pin-key go" id="pinGateSubmitBtn" onclick="pinGateSubmit()">
+                <div class="key-spinner"></div>
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     PAGE CONTENT
+===================================================== -->
+<div id="pageContent">
 
 <!-- =====================================================
      TOP HEADER
@@ -221,13 +312,11 @@ tr:last-child td { border-bottom: 0; }
             <i class="fas fa-moon"></i>
         </button>
 
-        <div class="profile-mini">
-            <img id="headerProfileImage" src="" alt="Profile"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-            <div class="profile-fallback" id="headerProfileFallback" style="display:none;">
+        <div class="profile-mini" onclick="window.location.href='/profile'">
+            <img id="headerProfileImage" src="" alt="Profile" style="display:none;">
+            <div class="profile-fallback" id="headerProfileFallback">
                 <i class="fas fa-user"></i>
             </div>
-            <span id="headerUsername">—</span>
         </div>
     </div>
 </header>
@@ -514,12 +603,36 @@ tr:last-child td { border-bottom: 0; }
 
 </main>
 
+</div><!-- /#pageContent -->
+
 <!-- =====================================================
      JAVASCRIPT
 ===================================================== -->
 <script>
 /* =========================================================
-   THEME SYSTEM (Light / Dark)
+   CONFIG
+========================================================= */
+const API_BASE = '/api';
+const PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
+const PIN_API_URL = '/api/pin';
+const AUTH_TOKEN = localStorage.getItem('token');
+
+let apiKey = '';
+let isApiActive = true;
+let isAccountBlocked = false;
+let blockCheckDone = false;
+
+// PIN Gate state
+let gateMode = 'verify';
+let gateStep = 1;
+let gateStep1Value = '';
+let gateCode = '';
+let pinVerified = false;
+
+if (!AUTH_TOKEN) { window.location.href = '/'; }
+
+/* =========================================================
+   THEME SYSTEM
 ========================================================= */
 const themeBtn = document.getElementById('themeBtn');
 const savedTheme = localStorage.getItem('uwTheme');
@@ -542,14 +655,6 @@ themeBtn.addEventListener('click', function () {
         localStorage.setItem('uwTheme', 'light');
     }
 });
-
-/* =========================================================
-   CONFIGURATION — UNIVERSAL WALLET
-========================================================= */
-const API_BASE = '/api';
-const PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
-let apiKey = '';
-let isApiActive = true;
 
 /* =========================================================
    TOAST
@@ -581,22 +686,76 @@ function extractUser(payload) {
 }
 
 /* =========================================================
-   ✅ SET PROFILE (Header — backend থেকে আসা ছবি only)
+   ✅ CHECK STATUS BY MOBILE (Token ছাড়া)
+========================================================= */
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+            cleanMobile = cleanMobile.slice(2);
+        }
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        var data = await res.json();
+        console.log('🔍 Status check:', data);
+        return data;
+    } catch (err) {
+        console.error('❌ Status check failed:', err);
+        return { allowed: true, reason: 'network_error' };
+    }
+}
+
+/* =========================================================
+   ✅ HANDLE BLOCK REASON
+========================================================= */
+function handleBlockReason(reason) {
+    if (reason === 'blocked') {
+        showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
+    } else if (reason === 'deleted') {
+        showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
+    } else if (reason === 'inactive') {
+        showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
+    } else if (reason === 'notfound') {
+        showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    } else {
+        showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
+    }
+}
+
+/* =========================================================
+   ✅ SHOW BLOCKED OVERLAY
+========================================================= */
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+
+    // Hide PIN gate
+    var pinGate = document.getElementById('pinGateOverlay');
+    if (pinGate) pinGate.classList.add('hidden');
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+/* =========================================================
+   ✅ SET HEADER PROFILE (শুধু ছবি, username নেই)
 ========================================================= */
 function setHeaderProfile(user) {
     var imgEl = document.getElementById('headerProfileImage');
     var fallbackEl = document.getElementById('headerProfileFallback');
-    var nameEl = document.getElementById('headerUsername');
     if (!imgEl) return;
 
-    // Set username
-    if (nameEl) {
-        var name = (user && user.fullName) ? user.fullName : '—';
-        // Show first name only for compact display
-        nameEl.textContent = name.split(' ')[0] || '—';
-    }
-
-    // Set profile picture
     var imgSrc = '';
     if (user && user.profilePicture && typeof user.profilePicture === 'string') {
         var pp = user.profilePicture.trim();
@@ -619,36 +778,278 @@ function setHeaderProfile(user) {
 }
 
 /* =========================================================
-   ✅ LOAD USER FROM BACKEND
+   ✅ VERIFY USER STATE (blocked check সহ)
 ========================================================= */
-async function loadUserProfile() {
+async function verifyUserState() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
     try {
-        // First try cached user (fast render)
-        try {
-            var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
-            if (cachedUser && (cachedUser.id || cachedUser._id)) {
-                setHeaderProfile(cachedUser);
-            }
-        } catch(e){}
-
-        // Then fetch fresh data from backend
-        var token = localStorage.getItem('token');
-        if (!token) return;
-
         var res = await fetch(API_BASE + '/auth/me', {
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
         });
-        if (!res.ok) return;
+        var data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
 
-        var data = await res.json();
-        var user = extractUser(data);
-        if (user && (user.id || user._id)) {
-            localStorage.setItem('user', JSON.stringify(user));
-            setHeaderProfile(user);
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return false;
         }
-    } catch (err) {
-        console.error('Load user error:', err);
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            return false;
+        }
+
+        var user = extractUser(data);
+        console.log('👤 Extracted User:', user);
+
+        if (!user || (!user.id && !user._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+
+        // Mobile status check (Token-free!)
+        if (user.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(user.mobile);
+            if (status && status.allowed === false) {
+                handleBlockReason(status.reason);
+                return false;
+            }
+        }
+
+        // Set profile picture in header
+        setHeaderProfile(user);
+
+        // Cache user
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+    } catch (error) {
+        console.error('Verify user state error:', error);
+        return true;
     }
+}
+
+/* =========================================================
+   PIN GATE — Set/Verify
+========================================================= */
+function showPinGate() {
+    document.getElementById('pinGateOverlay').classList.remove('hidden');
+    document.getElementById('pageContent').classList.remove('visible');
+}
+
+function hidePinGate() {
+    document.getElementById('pinGateOverlay').classList.add('hidden');
+    document.getElementById('pageContent').classList.add('visible');
+}
+
+function updatePinGateUI() {
+    var badge = document.getElementById('pinGateBadge');
+    var title = document.getElementById('pinGateTitle');
+    var subtitle = document.getElementById('pinGateSubtitle');
+    var icon = document.getElementById('pinGateIcon');
+
+    if (gateMode === 'set') {
+        icon.className = 'fa-solid fa-lock';
+        badge.style.display = 'inline-block';
+        if (gateStep === 1) {
+            badge.textContent = 'Step 1 of 2';
+            title.textContent = 'Create PIN';
+            subtitle.textContent = 'Set a 4-digit PIN to secure your account';
+        } else {
+            badge.textContent = 'Step 2 of 2';
+            title.textContent = 'Confirm PIN';
+            subtitle.textContent = 'Re-enter the same 4-digit PIN';
+        }
+    } else {
+        icon.className = 'fa-solid fa-shield-halved';
+        badge.style.display = 'none';
+        title.textContent = 'Enter PIN';
+        subtitle.textContent = 'Enter your 4-digit PIN to continue';
+    }
+}
+
+function updatePinGateDots(isError) {
+    for (var i = 0; i < 4; i++) {
+        var dot = document.getElementById('pg-dot-' + i);
+        dot.classList.toggle('filled', i < gateCode.length);
+        if (isError) dot.classList.add('error');
+        else dot.classList.remove('error');
+        dot.textContent = '';
+    }
+}
+
+function pinGatePress(n) {
+    if (gateCode.length < 4) {
+        gateCode += n;
+        updatePinGateDots();
+        if (gateCode.length === 4) setTimeout(function(){ pinGateSubmit(); }, 150);
+    }
+}
+
+function pinGateDel() {
+    gateCode = gateCode.slice(0, -1);
+    updatePinGateDots();
+}
+
+function pinGateDisableKeypad(on) {
+    var btn = document.getElementById('pinGateSubmitBtn');
+    if (on) btn.classList.add('loading');
+    else btn.classList.remove('loading');
+    document.querySelectorAll('.pin-key').forEach(function(k){
+        k.style.pointerEvents = on ? 'none' : '';
+        k.style.opacity = on ? '0.7' : '1';
+    });
+}
+
+async function pinGateSubmit() {
+    if (gateCode.length < 4) { showToast('Please Enter 4-Digit PIN', 'fas fa-exclamation-circle'); return; }
+
+    if (gateMode === 'set') {
+        if (gateStep === 1) {
+            gateStep1Value = gateCode;
+            gateStep = 2;
+            gateCode = '';
+            updatePinGateUI();
+            updatePinGateDots();
+            showToast('Now Confirm Your PIN', 'fas fa-info-circle');
+        } else {
+            if (gateCode !== gateStep1Value) {
+                showToast('PINs Do Not Match!', 'fas fa-times-circle');
+                updatePinGateDots(true);
+                setTimeout(function(){
+                    gateStep = 1; gateStep1Value = ''; gateCode = '';
+                    updatePinGateUI(); updatePinGateDots();
+                }, 800);
+                return;
+            }
+            await callGateSetPin(gateCode);
+        }
+    } else {
+        await callGateVerifyPin(gateCode);
+    }
+}
+
+async function callGateSetPin(pin) {
+    pinGateDisableKeypad(true);
+    try {
+        var response = await fetch(PIN_API_URL + '/set-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
+            body: JSON.stringify({ pin: pin })
+        });
+        var data = await response.json();
+
+        if (data.success) {
+            localStorage.setItem('pin_set', 'true');
+            try {
+                var u = JSON.parse(localStorage.getItem('user') || '{}');
+                u.pin_set = true;
+                localStorage.setItem('user', JSON.stringify(u));
+            } catch(e){}
+            sessionStorage.setItem('pin_verified', 'true');
+            pinVerified = true;
+            showToast('PIN Set Successfully!', 'fas fa-check-circle');
+            setTimeout(function(){
+                hidePinGate();
+                onPageReady();
+            }, 500);
+        } else {
+            showToast(data.message || 'Error Setting PIN', 'fas fa-times-circle');
+            gateStep = 1; gateStep1Value = ''; gateCode = '';
+            updatePinGateUI(); updatePinGateDots();
+        }
+    } catch (error) {
+        showToast('Network Error: ' + error.message, 'fas fa-times-circle');
+        gateStep = 1; gateStep1Value = ''; gateCode = '';
+        updatePinGateUI(); updatePinGateDots();
+    } finally {
+        pinGateDisableKeypad(false);
+    }
+}
+
+async function callGateVerifyPin(pin) {
+    pinGateDisableKeypad(true);
+    try {
+        var response = await fetch(PIN_API_URL + '/verify-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
+            body: JSON.stringify({ pin: pin })
+        });
+        var data = await response.json();
+
+        if (data.success) {
+            sessionStorage.setItem('pin_verified', 'true');
+            pinVerified = true;
+            showToast('PIN Verified!', 'fas fa-check-circle');
+            setTimeout(function(){
+                hidePinGate();
+                onPageReady();
+            }, 400);
+        } else {
+            showToast(data.message || 'Wrong PIN', 'fas fa-times-circle');
+            updatePinGateDots(true);
+            setTimeout(function(){
+                gateCode = ''; updatePinGateDots(); pinGateDisableKeypad(false);
+            }, 600);
+        }
+    } catch (error) {
+        showToast('Network Error: ' + error.message, 'fas fa-times-circle');
+        gateCode = ''; updatePinGateDots(); pinGateDisableKeypad(false);
+    }
+}
+
+async function initPinGate() {
+    if (sessionStorage.getItem('pin_verified') === 'true') {
+        hidePinGate();
+        onPageReady();
+        return;
+    }
+
+    showPinGate();
+    pinGateDisableKeypad(true);
+
+    try {
+        var response = await fetch(PIN_API_URL + '/check-pin-status', {
+            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+        });
+        var data = await response.json();
+
+        if (data.success) {
+            gateMode = data.hasPin ? 'verify' : 'set';
+        } else {
+            var u = JSON.parse(localStorage.getItem('user') || '{}');
+            gateMode = u.pin_set ? 'verify' : 'set';
+        }
+    } catch (e) {
+        var u2 = JSON.parse(localStorage.getItem('user') || '{}');
+        gateMode = u2.pin_set ? 'verify' : 'set';
+    }
+
+    gateStep = 1;
+    gateStep1Value = '';
+    gateCode = '';
+    updatePinGateUI();
+    updatePinGateDots();
+    pinGateDisableKeypad(false);
+}
+
+/* =========================================================
+   PAGE READY — সব data load হয়
+========================================================= */
+async function onPageReady() {
+    // 1. Verify user state (blocked check + profile pic)
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    // 2. Load API status
+    loadApiStatus();
+
+    // 3. Load API key from database
+    await loadApiKeyFromDatabase();
+
+    // 4. Update last used
+    document.getElementById('lastUsed').textContent = new Date().toLocaleString();
 }
 
 /* =========================================================
@@ -1067,27 +1468,17 @@ function loadApiStatus() {
 }
 
 /* =========================================================
-   AUTH CHECK
-========================================================= */
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    if (!token) { window.location.href = '/'; return false; }
-    return true;
-}
-
-/* =========================================================
    INIT
 ========================================================= */
 document.addEventListener('DOMContentLoaded', async function() {
-    if (!checkAuth()) return;
+    if (!AUTH_TOKEN) { window.location.href = '/'; return; }
 
-    // ✅ Load user profile FIRST (blocked check সহ)
-    await loadUserProfile();
+    // ✅ STEP 1: FIRST verify user (blocked/deleted check)
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
 
-    // Then load API status and key
-    loadApiStatus();
-    await loadApiKeyFromDatabase();
-    document.getElementById('lastUsed').textContent = new Date().toLocaleString();
+    // ✅ STEP 2: THEN show PIN gate
+    initPinGate();
 });
 </script>
 
