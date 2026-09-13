@@ -385,7 +385,7 @@ tr:last-child td { border-bottom: 0; }
         </p>
 
         <div class="input-group">
-            <label><i class="fas fa-key"></i> API Key (18 characters)</label>
+            <label><i class="fas fa-key"></i> API Key (10 characters)</label>
             <div class="input-row">
                 <input type="text" id="apiKey" class="input-box" value="" readonly placeholder="Loading...">
                 <button class="copy-btn" onclick="copyText('apiKey', 'API Key')">
@@ -505,7 +505,7 @@ tr:last-child td { border-bottom: 0; }
                         <td>key</td>
                         <td>String</td>
                         <td><span class="required">Required</span></td>
-                        <td>Your 18-character API key</td>
+                        <td>Your 10-character API key</td>
                     </tr>
                     <tr>
                         <td>number</td>
@@ -1058,7 +1058,7 @@ async function onPageReady() {
 function generateRandomApiKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let key = '';
-    for (let i = 0; i < 18; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 10; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
     return key;
 }
 
@@ -1187,7 +1187,7 @@ async function loadApiKeyFromDatabase() {
     }
 
     const savedKey = localStorage.getItem('apiKey');
-    if (savedKey && savedKey.length === 18) {
+    if (savedKey && savedKey.length === 10) {
         updateApiDisplay(savedKey);
     } else {
         await saveNewApiKey();
