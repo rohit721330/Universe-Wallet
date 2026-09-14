@@ -1,6 +1,7 @@
 // FILE: routes/transfer.js
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const axios = require('axios');
@@ -27,9 +28,7 @@ async function generateUniqueTransactionId() {
         }
         
         const existing = await Transaction.findOne({ tx_id: result });
-        if (!existing) {
-            return result;
-        }
+        if (!existing) return result;
         
         attempts++;
         console.log(`Duplicate Transaction ID Found: ${result}, Retrying...`);
@@ -181,6 +180,8 @@ router.get('/balance', verifyToken, async (req, res) => {
 // SEND MONEY (TRANSFER) - POST /api/transfer/
 // ============================================
 router.post('/', verifyToken, async (req, res) => {
+    const session = await mongoose.startSession();
+    
     try {
         const { mobile, amount, note } = req.body;
         const sender = req.user;
@@ -228,7 +229,6 @@ router.post('/', verifyToken, async (req, res) => {
         }
         
         // Start Transaction
-        const session = await User.startSession();
         session.startTransaction();
         
         try {
@@ -243,6 +243,7 @@ router.post('/', verifyToken, async (req, res) => {
             const senderBalanceAfter = sender.balance;
             const receiverBalanceAfter = receiver.balance;
             
+            // ✅ একটি unique tx_id ব্যবহার হবে
             const transactionId = await generateUniqueTransactionId();
             
             // ✅ Sender Transaction - transfer_send (debit)
@@ -265,7 +266,6 @@ router.post('/', verifyToken, async (req, res) => {
                     ipAddress: clientIp,
                     timestamp: new Date(),
                     transactionType: 'payment_sent',
-                    // ✅ NEW FIELDS
                     method: 'Transfer',
                     category: 'P2P sent',
                     balanceAfter: senderBalanceAfter,
@@ -293,7 +293,6 @@ router.post('/', verifyToken, async (req, res) => {
                     ipAddress: clientIp,
                     timestamp: new Date(),
                     transactionType: 'payment_received',
-                    // ✅ NEW FIELDS
                     method: 'Transfer',
                     category: 'P2P received',
                     balanceAfter: receiverBalanceAfter,
@@ -302,61 +301,61 @@ router.post('/', verifyToken, async (req, res) => {
             }], { session });
             
             await session.commitTransaction();
-            session.endSession();
+            await session.endSession();
             
             // ==================== TELEGRAM NOTIFICATIONS ====================
             
             if (receiver.telegramId) {
                 const receiverMessage = 
-`Money Received
+`💰 <b>Money Received</b> 💰
 
-Dear ${receiver.fullName || receiver.username},
+Dear <b>${receiver.fullName || receiver.username}</b>,
 
-You have just received a payment in your wallet.
+You have just received a payment in your wallet. 🎉
 
-Amount: ₹${transferAmount.toFixed(2)}
-From: ${sender.fullName || sender.username}
-Transaction ID: ${transactionId}
-Note: ${note || 'N/A'}
-Date: ${dateTime}
+<b>💵 Amount:</b> ₹${transferAmount.toFixed(2)}
+<b>👤 From:</b> ${sender.fullName || sender.username}
+<b>🆔 Transaction ID:</b> ${transactionId}
+<b>📝 Note:</b> ${note || 'N/A'}
+<b>📅 Date:</b> ${dateTime}
 
-Amount credited to your wallet.`;
+✅ Amount credited to your wallet.`;
                 await notifyUser(receiver.telegramId, receiverMessage);
             }
             
             if (sender.telegramId) {
                 const senderMessage = 
-`Payment Completed
+`✅ <b>Payment Completed</b> ✅
 
-Dear ${sender.fullName || sender.username},
+Dear <b>${sender.fullName || sender.username}</b>,
 
-Your payment has been processed successfully.
+Your payment has been processed successfully. 🎉
 
-Amount: ₹${transferAmount.toFixed(2)}
-To: ${receiver.fullName || receiver.username} (${receiver.mobile})
-Transaction ID: ${transactionId}
-New Balance: ₹${sender.balance.toFixed(2)}
-Note: ${note || 'N/A'}
+<b>💵 Amount:</b> ₹${transferAmount.toFixed(2)}
+<b>👤 To:</b> ${receiver.fullName || receiver.username} (${receiver.mobile})
+<b>🆔 Transaction ID:</b> ${transactionId}
+<b>💰 New Balance:</b> ₹${sender.balance.toFixed(2)}
+<b>📝 Note:</b> ${note || 'N/A'}
 
-Transfer completed successfully.`;
+✅ Transfer completed successfully.`;
                 await notifyUser(sender.telegramId, senderMessage);
             }
             
             await notifyAdmin(
-`Transfer Completed
+`💸 <b>Transfer Completed</b> 💸
 
-Sender Name: ${sender.fullName || sender.username}
-Sender Mobile: ${sender.mobile}
-Receiver Name: ${receiver.fullName || receiver.username}
-Receiver Mobile: ${receiver.mobile}
-Amount: ₹${transferAmount.toFixed(2)}
-Transaction ID: ${transactionId}
-Note: ${note || 'No Comment'}
+<b>👤 Sender:</b> ${sender.fullName || sender.username}
+<b>📱 Sender Mobile:</b> ${sender.mobile}
+<b>👤 Receiver:</b> ${receiver.fullName || receiver.username}
+<b>📱 Receiver Mobile:</b> ${receiver.mobile}
+<b>💵 Amount:</b> ₹${transferAmount.toFixed(2)}
+<b>🆔 Transaction ID:</b> ${transactionId}
+<b>📝 Note:</b> ${note || 'No Comment'}
 
-Date: ${dateTime}`
+<b>📅 Date:</b> ${dateTime}`
             );
             
-            res.json({
+            return res.json({
                 success: true,
                 message: `Transfer Successful! ₹${transferAmount.toFixed(2)} Sent To ${receiver.fullName || receiver.username}`,
                 txnId: transactionId,
@@ -366,14 +365,14 @@ Date: ${dateTime}`
             
         } catch (error) {
             await session.abortTransaction();
-            session.endSession();
+            await session.endSession();
             console.error('Transaction Failed:', error.message);
             throw error;
         }
         
     } catch (error) {
         console.error('Transfer Error:', error.message);
-        res.status(500).json({ 
+        return res.status(500).json({ 
             success: false, 
             error: error.message || 'Transfer Failed. Please Try Again' 
         });
@@ -381,7 +380,7 @@ Date: ${dateTime}`
 });
 
 // ============================================
-// GET TRANSACTION HISTORY
+// ✅ GET TRANSFER HISTORY (শুধুমাত্র transfer_send + transfer_receive)
 // ============================================
 router.get('/history', verifyToken, async (req, res) => {
     try {
@@ -389,18 +388,23 @@ router.get('/history', verifyToken, async (req, res) => {
         const { limit = 50, page = 1 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         
-        const transactions = await Transaction.find({
-            $or: [{ sender_id: user._id }, { receiver_id: user._id }]
-        })
-        .populate('sender_id', 'fullName username mobile')
-        .populate('receiver_id', 'fullName username mobile')
-        .sort({ tx_time: -1 })
-        .skip(skip)
-        .limit(parseInt(limit));
+        // ✅ শুধুমাত্র Transfer type filter
+        const query = {
+            $or: [
+                { sender_id: user._id },
+                { receiver_id: user._id }
+            ],
+            type: { $in: ['transfer_send', 'transfer_receive'] }
+        };
         
-        const total = await Transaction.countDocuments({
-            $or: [{ sender_id: user._id }, { receiver_id: user._id }]
-        });
+        const transactions = await Transaction.find(query)
+            .populate('sender_id', 'fullName username mobile')
+            .populate('receiver_id', 'fullName username mobile')
+            .sort({ tx_time: -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+        
+        const total = await Transaction.countDocuments(query);
         
         res.json({
             status: 'success',
