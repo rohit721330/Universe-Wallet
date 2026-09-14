@@ -99,7 +99,7 @@ async function sendTelegramMessage(chatId, message) {
     }
 }
 
-async function sendOtpViaEmail(email, otp, name) {
+async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
     try {
         const nodemailer = require('nodemailer');
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
