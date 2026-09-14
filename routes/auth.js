@@ -102,6 +102,7 @@ async function sendTelegramMessage(chatId, message) {
 async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
     try {
         const nodemailer = require('nodemailer');
+        const dateTime = getCurrentDateTime();
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
             console.error('❌ Email credentials not configured');
             return { success: false, error: 'Email service not configured' };
