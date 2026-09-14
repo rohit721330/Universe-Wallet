@@ -8,8 +8,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>
+/* ===== THEME VARIABLES (LIGHT) ===== */
+:root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --input-bg: #f0f2f5; --input-focus-bg: #fff; --input-shadow: #cfe1ff; --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --icon-btn-bg: #fff; --icon-btn-border: #e5eaf0; --user-avatar-border: #dce6ef; --tab-bg: #f6f7f9; --tab-border: #e0e5eb; --tab-color: #667181; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #f6f7f9; --amount-btn-border: #e0e5eb; --amount-btn-color: #667181; --amount-btn-hover-bg: #e5efff; --summary-bg: #fafbfd; --summary-border: #dfe5eb; --summary-row-border: #edf0f4; --summary-row-color: #687587; --summary-strong: #263247; --section-bg: #fff; --section-header-border: #edf0f4; --payment-border: #edf0f4; --feature-border: #edf0f3; --feature-strong: #263044; --feature-small: #a0a9b4; --success-bg: #e7f8ef; --success-color: #18a473; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --modal-bg: #ffffff; --modal-detail-color: #172033; --modal-label-color: #8a9ab0; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #ffffff; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; }
+
+/* ===== THEME VARIABLES (DARK) ===== */
+body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --input-bg: #101a2c; --input-focus-bg: #0d1526; --input-shadow: #1e3a5f; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --icon-btn-bg: #202d42; --icon-btn-border: #2b3a50; --user-avatar-border: #334155; --tab-bg: #202d42; --tab-border: #2b3a50; --tab-color: #8491a6; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #202d42; --amount-btn-border: #2b3a50; --amount-btn-color: #8491a6; --amount-btn-hover-bg: #172b55; --summary-bg: #111b2a; --summary-border: #2b3a50; --summary-row-border: #2b3a50; --summary-row-color: #8491a6; --summary-strong: #edf3ff; --section-bg: #1a2639; --section-header-border: #2b3a50; --payment-border: #2b3a50; --feature-border: #2b3a50; --feature-strong: #edf3ff; --feature-small: #8491a6; --success-bg: #12352f; --success-color: #10c993; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --modal-bg: #1a2639; --modal-detail-color: #edf3ff; --modal-label-color: #8491a6; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #1a2639; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; }
+
+/* ===== RESET ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; color: #172033; }
+body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
 
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
@@ -41,30 +48,32 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ==================== APP LAYOUT ==================== */
-.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; padding-bottom: 130px; background: linear-gradient(rgba(255,255,255,.72), rgba(244,248,253,.92)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, rgba(80,120,170,.07) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, rgba(80,120,170,.07) 39px); }
+.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; padding-bottom: 130px; background: linear-gradient(var(--bg-pattern-1), var(--bg-pattern-2)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, var(--grid-color) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--grid-color) 39px); transition: background .3s ease; }
 
 /* ==================== HEADER ==================== */
-.header { height: 64px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,.96); border-bottom: 1px solid #e8edf4; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.header { height: 64px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; background: var(--header-bg); border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s ease, border .3s ease; }
 .header-left { display: flex; align-items: center; gap: 11px; }
-.menu-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e4e9ef; border-radius: 11px; font-size: 15px; color: #607080; cursor: pointer; transition: 0.2s; }
-.menu-btn:hover { background: #f0f5fb; }
+.menu-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--menu-btn-bg); border: 1px solid var(--menu-btn-border); border-radius: 11px; font-size: 15px; color: var(--menu-btn-color); cursor: pointer; transition: 0.2s; }
+.menu-btn:hover { background: var(--sidebar-item-hover-bg); }
 .menu-btn:active { transform: scale(0.95); }
-.title { font-size: 15px; font-weight: 700; }
+.title { font-size: 15px; font-weight: 700; color: var(--text-title); }
 .header-right { display: flex; align-items: center; gap: 7px; }
-.icon-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e5eaf0; border-radius: 11px; color: #229ED9; font-size: 18px; cursor: pointer; transition: 0.2s; }
-.icon-btn:hover { background: #f0f9ff; border-color: #229ED9; }
-.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid #dce6ef; overflow: hidden; box-shadow: 0 3px 10px rgba(26, 86, 219, 0.25); transition: transform 0.2s; }
+
+/* ===== THEME TOGGLE BUTTON (Telegram এর পরিবর্তে) ===== */
+.theme-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: var(--theme-btn-bg); border: 1px solid var(--theme-btn-border); border-radius: 50%; color: var(--theme-btn-color); font-size: 15px; cursor: pointer; transition: all 0.25s ease; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--bottom-nav-active); color: var(--bottom-nav-active); }
+.theme-btn:active { transform: scale(0.95); }
+
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid var(--user-avatar-border); overflow: hidden; box-shadow: 0 3px 10px rgba(26, 86, 219, 0.25); transition: transform 0.2s; }
 .user-avatar:hover { transform: scale(1.05); }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
-/* ==================== SIDEBAR (DRAWER) ==================== */
+/* ==================== SIDEBAR ==================== */
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
-
-.sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
+.sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: var(--sidebar-bg); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background .3s ease; display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
 .sidebar.open { transform: translateX(0); }
-
-.sidebar-header { padding: 22px 18px 18px; background: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); color: #fff; position: relative; overflow: hidden; }
+.sidebar-header { padding: 22px 18px 18px; background: var(--sidebar-header); color: #fff; position: relative; overflow: hidden; }
 .sidebar-header::before { content: ''; position: absolute; width: 180px; height: 180px; right: -70px; top: -70px; border-radius: 50%; background: rgba(255,255,255,0.08); }
 .sidebar-header::after { content: ''; position: absolute; width: 120px; height: 120px; right: -30px; bottom: -60px; border-radius: 50%; background: rgba(255,255,255,0.06); }
 .sidebar-user { display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
@@ -76,33 +85,28 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 .sidebar-balance-box { margin-top: 14px; padding: 10px 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
 .sidebar-balance-label { font-size: 9px; font-weight: 700; opacity: 0.85; letter-spacing: 0.5px; text-transform: uppercase; }
 .sidebar-balance-value { font-size: 16px; font-weight: 900; }
-
 .sidebar-menu { flex: 1; overflow-y: auto; padding: 14px 10px; }
 .sidebar-menu::-webkit-scrollbar { width: 4px; }
 .sidebar-menu::-webkit-scrollbar-thumb { background: #c5d9f0; border-radius: 4px; }
-
-.sidebar-section-label { font-size: 9px; font-weight: 800; color: #8a9ab0; letter-spacing: 1.2px; text-transform: uppercase; padding: 12px 12px 6px; }
-.sidebar-item { display: flex; align-items: center; gap: 13px; padding: 12px 14px; margin-bottom: 3px; border-radius: 12px; color: #40506a; text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; position: relative; }
-.sidebar-item:hover { background: #eef4ff; color: #1264ff; transform: translateX(3px); }
-.sidebar-item.active { background: linear-gradient(135deg, #e8f1ff, #dbe9ff); color: #1264ff; }
-.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3.5px; border-radius: 4px; background: #1264ff; }
-.sidebar-item-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: #f0f5fb; color: #5a7a9a; font-size: 14px; flex-shrink: 0; transition: 0.2s; }
-.sidebar-item:hover .sidebar-item-icon { background: #dbe9ff; color: #1264ff; }
+.sidebar-section-label { font-size: 9px; font-weight: 800; color: var(--muted-3); letter-spacing: 1.2px; text-transform: uppercase; padding: 12px 12px 6px; }
+.sidebar-item { display: flex; align-items: center; gap: 13px; padding: 12px 14px; margin-bottom: 3px; border-radius: 12px; color: var(--sidebar-item-color); text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.sidebar-item:hover { background: var(--sidebar-item-hover-bg); color: var(--bottom-nav-active); transform: translateX(3px); }
+.sidebar-item.active { background: var(--sidebar-item-active-bg); color: var(--bottom-nav-active); }
+.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3.5px; border-radius: 4px; background: var(--bottom-nav-active); }
+.sidebar-item-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: var(--sidebar-item-icon-bg); color: var(--sidebar-item-icon-color); font-size: 14px; flex-shrink: 0; transition: 0.2s; }
+.sidebar-item:hover .sidebar-item-icon { background: var(--sidebar-item-icon-hover-bg); color: var(--sidebar-item-icon-hover-color); }
 .sidebar-item.active .sidebar-item-icon { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; box-shadow: 0 4px 10px rgba(26, 86, 219, 0.3); }
 .sidebar-item-text { flex: 1; }
 .sidebar-item-badge { font-size: 8px; font-weight: 800; padding: 3px 7px; border-radius: 20px; background: #ff4444; color: #fff; letter-spacing: 0.3px; }
-
-.sidebar-divider { height: 1px; margin: 10px 14px; background: linear-gradient(90deg, transparent, #e0e8f2, transparent); }
-
-.sidebar-footer { padding: 14px 16px 20px; border-top: 1px solid #eef2f8; background: #fff; }
+.sidebar-divider { height: 1px; margin: 10px 14px; background: var(--sidebar-divider); }
+.sidebar-footer { padding: 14px 16px 20px; border-top: 1px solid var(--sidebar-footer-border); background: var(--sidebar-footer-bg); transition: background .3s ease, border .3s ease; }
 .sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; letter-spacing: 0.5px; }
 .sidebar-logout:hover { background: #fecaca; }
 .sidebar-logout:active { transform: scale(0.97); }
-.sidebar-version { text-align: center; font-size: 9px; color: #a0aab5; font-weight: 600; margin-top: 10px; letter-spacing: 0.5px; }
+.sidebar-version { text-align: center; font-size: 9px; color: var(--muted-3); font-weight: 600; margin-top: 10px; letter-spacing: 0.5px; }
 
-/* ==================== MAIN CONTENT ==================== */
+/* ==================== MAIN ==================== */
 .main { padding: 16px 12px; }
-
 .balance-card { position: relative; min-height: 150px; padding: 20px; overflow: hidden; border-radius: 16px; color: #fff; background: radial-gradient(circle at 90% 20%, rgba(100,170,255,.45), transparent 35%), linear-gradient(135deg, #1269e9, #3c82ed); box-shadow: 0 10px 25px rgba(35,105,220,.22); }
 .balance-card::after { content: ""; position: absolute; width: 220px; height: 120px; right: -50px; bottom: -65px; border-radius: 50%; background: rgba(255,255,255,.10); }
 .balance-content { position: relative; z-index: 2; }
@@ -112,42 +116,42 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 .add-funds { margin-top: 13px; padding: 7px 13px; border: 1px solid rgba(255,255,255,.25); border-radius: 9px; background: rgba(255,255,255,.14); color: #fff; font-size: 9px; cursor: pointer; font-family: inherit; font-weight: 700; }
 .add-funds:active { transform: scale(0.95); }
 
-.card { margin-top: 16px; padding: 16px; background: rgba(255,255,255,.96); border-radius: 16px; box-shadow: 0 5px 18px rgba(30,60,100,.08); }
-.card-title { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: #8c99a9; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.card { margin-top: 16px; padding: 16px; background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); transition: background .3s ease, border .3s ease, box-shadow .3s ease; }
+.card-title { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
 .card-title::before { content: ""; width: 4px; height: 13px; border-radius: 5px; background: #2779e8; }
 
 .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 16px; }
-.tab-btn { padding: 9px 12px; border: 1.5px solid #e0e5eb; border-radius: 10px; background: #f6f7f9; color: #667181; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-family: inherit; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.tab-btn.active { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3); }
+.tab-btn { padding: 9px 12px; border: 1.5px solid var(--tab-border); border-radius: 10px; background: var(--tab-bg); color: var(--tab-color); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-family: inherit; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.tab-btn.active { background: var(--tab-active-bg); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-.input-label { display: block; margin-bottom: 7px; color: #657183; font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
+.input-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
 .input-box { position: relative; margin-bottom: 14px; }
-.input-box span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9aa7b7; font-size: 13px; }
-.input-box input { width: 100%; height: 42px; padding: 0 12px 0 32px; border: none; outline: none; border-radius: 10px; background: #f0f2f5; color: #172033; font-size: 12px; font-weight: 600; font-family: inherit; transition: 0.2s; }
-.input-box input:focus { box-shadow: 0 0 0 2px #cfe1ff; background: #fff; }
-.input-box input::placeholder { color: #a0aab5; font-weight: 500; }
+.input-box span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted-2); font-size: 13px; }
+.input-box input { width: 100%; height: 42px; padding: 0 12px 0 32px; border: none; outline: none; border-radius: 10px; background: var(--input-bg); color: var(--text); font-size: 12px; font-weight: 600; font-family: inherit; transition: 0.2s; }
+.input-box input:focus { box-shadow: 0 0 0 2px var(--input-shadow); background: var(--input-focus-bg); }
+.input-box input::placeholder { color: var(--muted-3); font-weight: 500; }
 
 .user-status { display: none; align-items: center; gap: 6px; margin-top: -8px; margin-bottom: 12px; padding: 7px 12px; border-radius: 20px; font-size: 9px; font-weight: 700; }
 .user-status.active { display: inline-flex; }
-.user-status.verified { background: #dcfce7; color: #16a34a; }
-.user-status.error { background: #fee2e2; color: #dc2626; }
-.user-status.loading { background: #dbeafe; color: #1a56db; }
+.user-status.verified { background: var(--toast-bg-success); color: var(--toast-color-success); }
+.user-status.error { background: var(--toast-bg-error); color: var(--toast-color-error); }
+.user-status.loading { background: var(--toast-bg-info); color: var(--toast-color-info); }
 
 .quick-amounts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: -3px; margin-bottom: 14px; }
-.amount-btn { padding: 7px 11px; border: 1px solid #e0e5eb; border-radius: 8px; background: #f6f7f9; color: #667181; font-size: 9px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; }
-.amount-btn:hover, .amount-btn.active { background: #e5efff; border-color: #b9d2fb; color: #2676e6; }
+.amount-btn { padding: 7px 11px; border: 1px solid var(--amount-btn-border); border-radius: 8px; background: var(--amount-btn-bg); color: var(--amount-btn-color); font-size: 9px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; }
+.amount-btn:hover, .amount-btn.active { background: var(--amount-btn-hover-bg); border-color: var(--bottom-nav-active); color: var(--bottom-nav-active); }
 .amount-btn:active { transform: scale(0.95); }
 
-.summary { padding: 13px; border: 1px solid #dfe5eb; border-radius: 11px; background: #fafbfd; margin-top: 12px; }
-.summary-title { margin-bottom: 12px; color: #9aa5b2; font-size: 8px; letter-spacing: 1px; font-weight: 700; }
-.summary-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #edf0f4; color: #687587; font-size: 9px; font-weight: 600; }
+.summary { padding: 13px; border: 1px solid var(--summary-border); border-radius: 11px; background: var(--summary-bg); margin-top: 12px; transition: background .3s ease, border .3s ease; }
+.summary-title { margin-bottom: 12px; color: var(--muted-2); font-size: 8px; letter-spacing: 1px; font-weight: 700; }
+.summary-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--summary-row-border); color: var(--summary-row-color); font-size: 9px; font-weight: 600; }
 .summary-row:last-child { border-bottom: none; }
-.summary-row strong { color: #263247; font-weight: 700; }
+.summary-row strong { color: var(--summary-strong); font-weight: 700; }
 .free { color: #13a675 !important; }
-.total { margin-top: 3px; color: #263247 !important; font-weight: 700; }
+.total { margin-top: 3px; color: var(--summary-strong) !important; font-weight: 700; }
 .total span { color: #2879e8; font-size: 17px; font-weight: 800; }
 
 .pay-btn { width: 100%; height: 44px; margin-top: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, #1a56db, #0088ff); color: white; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); }
@@ -156,48 +160,46 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; background: linear-gradient(135deg, #a9c8fa, #86adf2); box-shadow: none; transform: none; }
 .pay-btn:disabled:hover { transform: none; box-shadow: none; }
 .pay-btn .spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.6s linear infinite; }
+.gallery-btn { background: var(--tab-bg) !important; color: var(--tab-color) !important; border: 1.5px solid var(--tab-border) !important; box-shadow: none !important; }
+.gallery-btn:hover { background: var(--amount-btn-hover-bg) !important; }
+.security-text { margin-top: 10px; text-align: center; color: var(--muted-3); font-size: 8px; font-weight: 600; }
 
-.gallery-btn { background: #f6f7f9 !important; color: #667181 !important; border: 1.5px solid #e0e5eb !important; box-shadow: none !important; }
-.gallery-btn:hover { background: #eef2f7 !important; }
-
-.security-text { margin-top: 10px; text-align: center; color: #9aa4b0; font-size: 8px; font-weight: 600; }
-
-.section-card { margin-top: 16px; background: #fff; border-radius: 16px; box-shadow: 0 5px 18px rgba(30,60,100,.08); overflow: hidden; }
-.section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid #edf0f4; }
-.section-name { display: flex; align-items: center; gap: 7px; color: #8b97a7; font-size: 9px; font-weight: 700; letter-spacing: .7px; }
+.section-card { margin-top: 16px; background: var(--section-bg); border-radius: 16px; box-shadow: var(--card-shadow); overflow: hidden; border: 1px solid var(--card-border); transition: background .3s ease, border .3s ease, box-shadow .3s ease; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid var(--section-header-border); }
+.section-name { display: flex; align-items: center; gap: 7px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: .7px; }
 .section-name::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: #8c42df; }
 .view { color: #2678df; font-size: 8px; font-weight: 700; cursor: pointer; }
 
-.payment { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-bottom: 1px solid #edf0f4; }
+.payment { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-bottom: 1px solid var(--payment-border); }
 .payment:last-child { border-bottom: none; }
 .payment-icon { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #e2f8ee; color: #19a775; font-size: 15px; }
 .payment-info { flex: 1; min-width: 0; }
-.payment-info strong { display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #263044; font-size: 10px; font-weight: 700; }
-.payment-info small { color: #9da7b3; font-size: 8px; font-weight: 600; }
+.payment-info strong { display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--feature-strong); font-size: 10px; font-weight: 700; }
+.payment-info small { color: var(--muted-3); font-size: 8px; font-weight: 600; }
 .payment-right { text-align: right; }
 .payment-amount { display: block; color: #e6494f; font-size: 10px; font-weight: 800; }
-.success { display: inline-block; margin-top: 3px; padding: 2px 6px; border-radius: 8px; background: #e7f8ef; color: #18a473; font-size: 7px; font-weight: 800; }
+.success { display: inline-block; margin-top: 3px; padding: 2px 6px; border-radius: 8px; background: var(--success-bg); color: var(--success-color); font-size: 7px; font-weight: 800; }
 
-.why-card { margin-top: 16px; padding: 14px 15px; background: #fff; border-radius: 16px; box-shadow: 0 5px 18px rgba(30,60,100,.08); }
-.why-title { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; color: #8d98a6; font-size: 9px; font-weight: 700; letter-spacing: .8px; }
+.why-card { margin-top: 16px; padding: 14px 15px; background: var(--section-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); transition: background .3s ease, border .3s ease; }
+.why-title { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: .8px; }
 .why-title::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: #e87916; }
-.feature { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid #edf0f3; }
+.feature { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--feature-border); }
 .feature:last-child { border-bottom: none; }
 .feature-icon { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: #edf4ff; color: #2779e8; font-size: 14px; }
 .feature:nth-child(3) .feature-icon { background: #e7f8ef; color: #13a879; }
 .feature:nth-child(4) .feature-icon { background: #f4eaff; color: #9749dc; }
 .feature:nth-child(5) .feature-icon { background: #fff0df; color: #e77a18; }
-.feature-info strong { display: block; color: #263044; font-size: 10px; font-weight: 700; margin-bottom: 3px; }
-.feature-info small { display: block; color: #a0a9b4; font-size: 8px; line-height: 11px; font-weight: 500; }
+.feature-info strong { display: block; color: var(--feature-strong); font-size: 10px; font-weight: 700; margin-bottom: 3px; }
+.feature-info small { display: block; color: var(--feature-small); font-size: 8px; line-height: 11px; font-weight: 500; }
 
 /* ==================== SCANNER MODAL ==================== */
 .scanner-modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); z-index: 200; align-items: flex-end; justify-content: center; }
 .scanner-modal.open { display: flex; }
-.scanner-card-modal { background: #ffffff; border-radius: 24px 24px 0 0; padding: 1.5rem; width: 100%; max-width: 430px; animation: slideUp 0.3s ease; }
+.scanner-card-modal { background: var(--modal-bg); border-radius: 24px 24px 0 0; padding: 1.5rem; width: 100%; max-width: 430px; animation: slideUp 0.3s ease; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .scanner-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.scanner-header h3 { font-size: 0.9rem; font-weight: 900; color: #172033; text-transform: uppercase; letter-spacing: 0.05em; }
-.close-scanner { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #f0f7ff; color: #5a7a9a; }
+.scanner-header h3 { font-size: 0.9rem; font-weight: 900; color: var(--text-title); text-transform: uppercase; letter-spacing: 0.05em; }
+.close-scanner { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--tab-bg); color: var(--muted); }
 .close-scanner:hover { background: #fee2e2; color: #dc2626; }
 .scanner-wrapper { position: relative; border-radius: 16px; overflow: hidden; border: 3px solid #1a56db; }
 #qr-reader-area { border-radius: 14px; overflow: hidden; background: #000; }
@@ -213,51 +215,52 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 /* ==================== SUCCESS MODAL ==================== */
 .success-modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; padding: 1.5rem; }
 .success-modal.open { display: flex; }
-.receipt-wrapper { width: 100%; max-width: 380px; border-radius: 24px; overflow: hidden; animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); background: #ffffff; }
-.receipt-header { padding: 2rem 1.5rem; text-align: center; color: white; background: linear-gradient(135deg, #1a56db, #0088ff); position: relative; }
-.receipt-header::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 30px; border-radius: 50% / 100% 100% 0 0; background: #ffffff; }
+.receipt-wrapper { width: 100%; max-width: 380px; border-radius: 24px; overflow: hidden; animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); background: var(--modal-bg); }
+.receipt-header { padding: 2rem 1.5rem; text-align: center; color: white; background: var(--modal-header); position: relative; }
+.receipt-header::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 30px; border-radius: 50% / 100% 100% 0 0; background: var(--modal-bg); }
 .success-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.6rem; }
 .receipt-header h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 0.2rem; }
 .receipt-header p { font-size: 0.65rem; font-weight: 600; opacity: 0.85; letter-spacing: 0.05em; }
-.receipt-details { padding: 1.5rem 1.5rem 1rem; background: #ffffff; }
+.receipt-details { padding: 1.5rem 1.5rem 1rem; background: var(--modal-bg); transition: background .3s ease; }
 .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; padding: 0.2rem 0; }
-.detail-row span:first-child { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #8a9ab0; }
-.detail-row span:last-child { font-size: 0.75rem; font-weight: 800; text-align: right; word-break: break-all; color: #172033; }
-.receipt-footer { padding: 0 1.5rem 1.5rem; }
+.detail-row span:first-child { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--modal-label-color); }
+.detail-row span:last-child { font-size: 0.75rem; font-weight: 800; text-align: right; word-break: break-all; color: var(--modal-detail-color); }
+.receipt-footer { padding: 0 1.5rem 1.5rem; background: var(--modal-footer); transition: background .3s ease; }
 .close-modal-btn { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; background: #1a56db; color: white; }
 .close-modal-btn:active { transform: scale(0.95); }
 
 /* ==================== TOAST ==================== */
 .toast-notify { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 0.8rem 1.2rem; border-radius: 14px; font-size: 0.75rem; font-weight: 700; text-align: center; z-index: 10000; opacity: 0; transition: all 0.3s ease; pointer-events: none; max-width: 90%; width: max-content; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
 .toast-notify.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast-notify.error { background: #fee2e2; color: #dc2626; border-left: 4px solid #dc2626; }
-.toast-notify.success { background: #dcfce7; color: #16a34a; border-left: 4px solid #16a34a; }
-.toast-notify.info { background: #dbeafe; color: #1a56db; border-left: 4px solid #1a56db; }
-.toast-notify.warning { background: #fef3c7; color: #d97706; border-left: 4px solid #d97706; }
+.toast-notify.error { background: var(--toast-bg-error); color: var(--toast-color-error); border-left: 4px solid var(--toast-color-error); }
+.toast-notify.success { background: var(--toast-bg-success); color: var(--toast-color-success); border-left: 4px solid var(--toast-color-success); }
+.toast-notify.info { background: var(--toast-bg-info); color: var(--toast-color-info); border-left: 4px solid var(--toast-color-info); }
+.toast-notify.warning { background: var(--toast-bg-warning); color: var(--toast-color-warning); border-left: 4px solid var(--toast-color-warning); }
 
 /* ==================== BOTTOM NAV ==================== */
-.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 2px solid #dce9ff; border-radius: 46px; box-shadow: 0 15px 45px rgba(30, 100, 220, 0.15), inset 0 0 25px rgba(30, 100, 220, 0.03); z-index: 1000; }
-.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #8a9bb8; text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; transition: color 0.25s ease, transform 0.25s ease; }
-.bottom-nav .nav-item:hover { color: #1264ff; transform: translateY(-2px); }
-.bottom-nav .nav-item.active { color: #1264ff; }
+.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30, 100, 220, 0.15), inset 0 0 25px rgba(30, 100, 220, 0.03); z-index: 1000; transition: background .3s ease, border .3s ease; }
+.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; transition: color 0.25s ease, transform 0.25s ease; }
+.bottom-nav .nav-item:hover { color: var(--bottom-nav-active); transform: translateY(-2px); }
+.bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
 .bottom-nav .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
 .bottom-nav .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; transition: 0.25s ease; }
 .bottom-nav .nav-item.active .nav-icon svg { filter: drop-shadow(0 0 5px rgba(18, 100, 255, 0.45)); }
-.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: #1264ff; z-index: 10; }
-.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(145deg, #ffffff, #eaf3ff); border: 5px solid #ffffff; box-shadow: 0 0 0 2px #d9e7ff, 0 10px 25px rgba(18, 100, 255, 0.25), 0 0 25px rgba(18, 100, 255, 0.15); transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.bottom-nav .scan-item:hover .scan-circle { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 2px #c9dcff, 0 12px 30px rgba(18, 100, 255, 0.32), 0 0 35px rgba(18, 100, 255, 0.25); }
-.bottom-nav .qr-icon { width: 30px; height: 30px; fill: #1264ff; stroke: none; filter: drop-shadow(0 0 4px rgba(18, 100, 255, 0.3)); }
-.bottom-nav .scan-item span { color: #1264ff; font-size: 9px; font-weight: 800; letter-spacing: 0.8px; margin-top: 2px; }
-.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: #1264ff; box-shadow: 0 0 8px rgba(18, 100, 255, 0.5); }
+.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: var(--bottom-nav-active); z-index: 10; }
+.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--scan-circle-bg); border: 5px solid var(--modal-bg); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 10px 25px rgba(18, 100, 255, 0.25), 0 0 25px rgba(18, 100, 255, 0.15); transition: transform 0.25s ease, box-shadow 0.25s ease, background .3s ease, border .3s ease; }
+.bottom-nav .scan-item:hover .scan-circle { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 12px 30px rgba(18, 100, 255, 0.32), 0 0 35px rgba(18, 100, 255, 0.25); }
+.bottom-nav .qr-icon { width: 30px; height: 30px; fill: var(--bottom-nav-active); stroke: none; filter: drop-shadow(0 0 4px rgba(18, 100, 255, 0.3)); }
+.bottom-nav .scan-item span { color: var(--bottom-nav-active); font-size: 9px; font-weight: 800; letter-spacing: 0.8px; margin-top: 2px; }
+.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); box-shadow: 0 0 8px rgba(18, 100, 255, 0.5); }
 .bottom-nav .scan-item::after { display: none; }
 
 /* ==================== BLOCKED OVERLAY ==================== */
-.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; transition: background .3s ease; }
 .blocked-overlay.active { display: flex; }
-.blocked-card { background: #ffffff; border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid #c5d9f0; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: modalPopIn 0.4s ease-out; }
+.blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: modalPopIn 0.4s ease-out; transition: background .3s ease, border .3s ease; }
 .blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
-.blocked-title { font-size: 24px; font-weight: 900; color: #1a3a6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-.blocked-sub { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
+.blocked-title { font-size: 24px; font-weight: 900; color: var(--text-title); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
 .blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 /* ==================== RESPONSIVE ==================== */
@@ -273,7 +276,6 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
     .pin-dot { width: 48px; height: 48px; font-size: 20px; }
     .pin-key { padding: 14px; font-size: 20px; }
 }
-
 @media (max-width: 380px) {
     .bottom-nav { height: 66px; }
     .bottom-nav .nav-item { font-size: 7px; }
@@ -283,7 +285,6 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
     .pin-key { padding: 12px; font-size: 18px; }
     .sidebar { width: 270px; }
 }
-
 @media (max-width: 360px) {
     .main { padding: 13px 10px; }
     .balance-card { min-height: 145px; padding: 18px; }
@@ -300,7 +301,6 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
 
 <!-- ================= SIDEBAR ================= -->
 <aside class="sidebar" id="sidebar">
-    <!-- Sidebar Header (User Info) -->
     <div class="sidebar-header">
         <div class="sidebar-user">
             <div class="sidebar-avatar" id="sidebarAvatar">
@@ -317,58 +317,46 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
         </div>
     </div>
 
-    <!-- Sidebar Menu -->
     <div class="sidebar-menu">
         <div class="sidebar-section-label">MAIN</div>
-
         <a href="/dashboard" class="sidebar-item" data-sidebar="dashboard">
             <div class="sidebar-item-icon"><i class="fas fa-house"></i></div>
             <span class="sidebar-item-text">Dashboard</span>
         </a>
-
         <a href="/transfer" class="sidebar-item active" data-sidebar="transfer">
             <div class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></div>
             <span class="sidebar-item-text">Transfer</span>
         </a>
-
         <a href="/qr" class="sidebar-item" data-sidebar="qr">
             <div class="sidebar-item-icon"><i class="fas fa-qrcode"></i></div>
             <span class="sidebar-item-text">Scan QR</span>
         </a>
-
         <a href="/deposit" class="sidebar-item" data-sidebar="deposit">
             <div class="sidebar-item-icon"><i class="fas fa-circle-plus"></i></div>
             <span class="sidebar-item-text">Add Funds</span>
         </a>
-
         <a href="/withdraw" class="sidebar-item" data-sidebar="withdraw">
             <div class="sidebar-item-icon"><i class="fas fa-circle-minus"></i></div>
             <span class="sidebar-item-text">Withdraw</span>
         </a>
-
         <a href="/transactions" class="sidebar-item" data-sidebar="transactions">
             <div class="sidebar-item-icon"><i class="fas fa-clock-rotate-left"></i></div>
             <span class="sidebar-item-text">Transactions</span>
         </a>
-
         <div class="sidebar-divider"></div>
         <div class="sidebar-section-label">ACCOUNT</div>
-
         <a href="/profile" class="sidebar-item" data-sidebar="profile">
             <div class="sidebar-item-icon"><i class="fas fa-user"></i></div>
             <span class="sidebar-item-text">My Profile</span>
         </a>
-
         <a href="/settings" class="sidebar-item" data-sidebar="settings">
             <div class="sidebar-item-icon"><i class="fas fa-gear"></i></div>
             <span class="sidebar-item-text">Settings</span>
         </a>
-
         <a href="/support" class="sidebar-item" data-sidebar="support">
             <div class="sidebar-item-icon"><i class="fas fa-headset"></i></div>
             <span class="sidebar-item-text">Support</span>
         </a>
-
         <a href="/refer" class="sidebar-item" data-sidebar="refer">
             <div class="sidebar-item-icon"><i class="fas fa-gift"></i></div>
             <span class="sidebar-item-text">Refer & Earn</span>
@@ -376,7 +364,6 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
         </a>
     </div>
 
-    <!-- Sidebar Footer -->
     <div class="sidebar-footer">
         <button class="sidebar-logout" onclick="logout()">
             <i class="fas fa-right-from-bracket"></i>
@@ -441,7 +428,10 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
                 <div class="title">Transfer</div>
             </div>
             <div class="header-right">
-                <div class="icon-btn" onclick="openTelegram()"><i class="fa-brands fa-telegram"></i></div>
+                <!-- ✅ THEME TOGGLE (Telegram এর পরিবর্তে) -->
+                <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <div class="user-avatar" id="userAvatar" onclick="location.href='/profile'"></div>
             </div>
         </header>
@@ -531,8 +521,8 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
                         <div style="margin-bottom: 1rem;">
                             <i class="fa-solid fa-qrcode" style="font-size: 4rem; color: #1a56db; opacity: 0.6;"></i>
                         </div>
-                        <p style="font-size: 0.85rem; font-weight: 700; color: #5a7a9a; margin-bottom: 0.5rem;">Scan or Upload Recipient's QR</p>
-                        <p style="font-size: 0.7rem; color: #8a9ab0; margin-bottom: 1.5rem;">
+                        <p style="font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 0.5rem;">Scan or Upload Recipient's QR</p>
+                        <p style="font-size: 0.7rem; color: var(--muted-3); margin-bottom: 1.5rem;">
                             <i class="fa-solid fa-shield-alt"></i> QR must contain 10-digit mobile number
                         </p>
 
@@ -542,7 +532,7 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
                         </button>
 
                         <div style="margin: 12px 0;">
-                            <span style="color: #8a9ab0; font-size: 0.7rem; font-weight: 600;">───── Or ─────</span>
+                            <span style="color: var(--muted-3); font-size: 0.7rem; font-weight: 600;">───── Or ─────</span>
                         </div>
 
                         <button class="pay-btn" onclick="openQRScanner()">
@@ -560,7 +550,7 @@ body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: #f3f7fc; 
                     <div class="view" onclick="location.href='/transactions'">View All →</div>
                 </div>
                 <div id="recentPaymentsList">
-                    <div style="text-align: center; padding: 20px; color: #a0a9b4; font-size: 11px; font-weight: 600;">Loading...</div>
+                    <div style="text-align: center; padding: 20px; color: var(--muted-3); font-size: 11px; font-weight: 600;">Loading...</div>
                 </div>
             </section>
 
@@ -696,6 +686,37 @@ var pinVerified = false;
 var pendingTransferData = null;
 
 // ============================================
+// ✅ THEME SYSTEM (localStorage-এ সেভ, uwTheme key)
+// ============================================
+(function initTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else if (savedTheme === 'light') {
+        document.body.classList.remove('dark');
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+    } else {
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+})();
+
+function toggleTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    if (isDark) {
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('uwTheme', 'dark');
+    } else {
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('uwTheme', 'light');
+    }
+}
+
+// ============================================
 // SIDEBAR OPEN / CLOSE
 // ============================================
 function openSidebar() {
@@ -711,26 +732,17 @@ function closeSidebar() {
     document.body.style.overflow = '';
 }
 
-// Sidebar এ swipe gesture (touch)
 (function initSidebarSwipe(){
     var sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
     var startX = 0, currentX = 0, isDragging = false;
-
-    sidebar.addEventListener('touchstart', function(e){
-        startX = e.touches[0].clientX;
-        isDragging = true;
-    }, { passive: true });
-
+    sidebar.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; isDragging = true; }, { passive: true });
     sidebar.addEventListener('touchmove', function(e){
         if (!isDragging) return;
         currentX = e.touches[0].clientX;
         var diff = currentX - startX;
-        if (diff < 0) {
-            sidebar.style.transform = 'translateX(' + diff + 'px)';
-        }
+        if (diff < 0) sidebar.style.transform = 'translateX(' + diff + 'px)';
     }, { passive: true });
-
     sidebar.addEventListener('touchend', function(){
         if (!isDragging) return;
         isDragging = false;
@@ -741,7 +753,6 @@ function closeSidebar() {
     });
 })();
 
-// Body তে swipe দিয়ে sidebar open (left edge থেকে)
 (function initEdgeSwipe(){
     var startX = 0, startY = 0, tracking = false;
     document.addEventListener('touchstart', function(e){
@@ -750,7 +761,6 @@ function closeSidebar() {
         var y = e.touches[0].clientY;
         if (x < 30) { startX = x; startY = y; tracking = true; }
     }, { passive: true });
-
     document.addEventListener('touchend', function(e){
         if (!tracking) return;
         tracking = false;
@@ -762,7 +772,6 @@ function closeSidebar() {
     }, { passive: true });
 })();
 
-// Escape key দিয়ে sidebar বন্ধ
 document.addEventListener('keydown', function(e){
     if (e.key === 'Escape') closeSidebar();
 });
@@ -774,28 +783,19 @@ function updateSidebarUser(user) {
     if (!user) return;
     var name = user.fullName || user.username || 'User';
     var mobile = user.mobile ? ('+91 ' + user.mobile) : '';
-
     var nameEl = document.getElementById('sidebarUserName');
     var mobileEl = document.getElementById('sidebarUserMobile');
     var avatarEl = document.getElementById('sidebarAvatar');
-
     if (nameEl) nameEl.textContent = name;
     if (mobileEl) mobileEl.textContent = mobile;
-
     if (avatarEl) {
         var imgSrc = '';
         if (user.profilePicture && typeof user.profilePicture === 'string') {
             var pp = user.profilePicture.trim();
-            if (pp.startsWith('data:image/') || pp.startsWith('http://') ||
-                pp.startsWith('https://') || pp.startsWith('/')) {
-                imgSrc = pp;
-            }
+            if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
         }
-        if (imgSrc) {
-            avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
-        } else {
-            avatarEl.innerHTML = '<i class="fas fa-user"></i>';
-        }
+        if (imgSrc) avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
+        else avatarEl.innerHTML = '<i class="fas fa-user"></i>';
     }
 }
 
@@ -823,9 +823,6 @@ function showToast(message, type) {
     toast._timeout = setTimeout(function(){ toast.classList.remove('show'); }, 3000);
 }
 
-// ============================================
-// UNIVERSAL USER EXTRACTOR
-// ============================================
 function extractUser(payload) {
     if (!payload) return null;
     var u = payload;
@@ -839,59 +836,34 @@ function extractUser(payload) {
     return u;
 }
 
-// ============================================
-// CHECK STATUS BY MOBILE
-// ============================================
 async function checkStatusByMobile(mobile) {
     if (!mobile) return { allowed: true, reason: null };
     try {
         var cleanMobile = String(mobile).replace(/\D/g, '');
-        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
-            cleanMobile = cleanMobile.slice(2);
-        }
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) cleanMobile = cleanMobile.slice(2);
         var res = await fetch('/api/check-status/' + cleanMobile);
-        var data = await res.json();
-        return data;
-    } catch (err) {
-        return { allowed: true, reason: 'network_error' };
-    }
+        return await res.json();
+    } catch (err) { return { allowed: true, reason: 'network_error' }; }
 }
 
 function handleBlockReason(reason) {
-    if (reason === 'blocked') {
-        showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
-    } else if (reason === 'deleted') {
-        showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
-    } else if (reason === 'inactive') {
-        showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
-    } else if (reason === 'notfound') {
-        showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
-    } else {
-        showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
-    }
+    if (reason === 'blocked') showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
+    else if (reason === 'deleted') showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
+    else if (reason === 'inactive') showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
+    else if (reason === 'notfound') showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    else showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
 }
 
-// ============================================
-// SET AVATAR (Header)
-// ============================================
 function setAvatar(user) {
     var avatarEl = document.getElementById('userAvatar');
     if (!avatarEl) return;
-
     var imgSrc = '';
     if (user && user.profilePicture && typeof user.profilePicture === 'string') {
         var pp = user.profilePicture.trim();
-        if (pp.startsWith('data:image/') || pp.startsWith('http://') ||
-            pp.startsWith('https://') || pp.startsWith('/')) {
-            imgSrc = pp;
-        }
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
     }
-
-    if (imgSrc) {
-        avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
-    } else {
-        avatarEl.innerHTML = '<i class="fas fa-user" style="font-size:16px;"></i>';
-    }
+    if (imgSrc) avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
+    else avatarEl.innerHTML = '<i class="fas fa-user" style="font-size:16px;"></i>';
 }
 
 // ============================================
@@ -901,30 +873,20 @@ function showPinGate() {
     document.getElementById('pinGateOverlay').classList.remove('hidden');
     document.getElementById('pageContent').classList.remove('visible');
 }
-
 function hidePinGate() {
     document.getElementById('pinGateOverlay').classList.add('hidden');
     document.getElementById('pageContent').classList.add('visible');
 }
-
 function updatePinGateUI() {
     var badge = document.getElementById('pinGateBadge');
     var title = document.getElementById('pinGateTitle');
     var subtitle = document.getElementById('pinGateSubtitle');
     var icon = document.getElementById('pinGateIcon');
-
     if (gateMode === 'set') {
         icon.className = 'fa-solid fa-lock';
         badge.style.display = 'inline-block';
-        if (gateStep === 1) {
-            badge.textContent = 'Step 1 of 2';
-            title.textContent = 'Create PIN';
-            subtitle.textContent = 'Set a 4-digit PIN to secure your account';
-        } else {
-            badge.textContent = 'Step 2 of 2';
-            title.textContent = 'Confirm PIN';
-            subtitle.textContent = 'Re-enter the same 4-digit PIN';
-        }
+        if (gateStep === 1) { badge.textContent = 'Step 1 of 2'; title.textContent = 'Create PIN'; subtitle.textContent = 'Set a 4-digit PIN to secure your account'; }
+        else { badge.textContent = 'Step 2 of 2'; title.textContent = 'Confirm PIN'; subtitle.textContent = 'Re-enter the same 4-digit PIN'; }
     } else {
         icon.className = 'fa-solid fa-shield-halved';
         badge.style.display = 'none';
@@ -932,17 +894,14 @@ function updatePinGateUI() {
         subtitle.textContent = 'Enter your 4-digit PIN to continue';
     }
 }
-
 function updatePinGateDots(isError) {
     for (var i = 0; i < 4; i++) {
         var dot = document.getElementById('pg-dot-' + i);
         dot.classList.toggle('filled', i < gateCode.length);
-        if (isError) dot.classList.add('error');
-        else dot.classList.remove('error');
+        if (isError) dot.classList.add('error'); else dot.classList.remove('error');
         dot.textContent = '';
     }
 }
-
 function pinGatePress(n) {
     if (gateCode.length < 4) {
         gateCode += n;
@@ -950,32 +909,21 @@ function pinGatePress(n) {
         if (gateCode.length === 4) setTimeout(function(){ pinGateSubmit(); }, 150);
     }
 }
-
-function pinGateDel() {
-    gateCode = gateCode.slice(0, -1);
-    updatePinGateDots();
-}
-
+function pinGateDel() { gateCode = gateCode.slice(0, -1); updatePinGateDots(); }
 function pinGateDisableKeypad(on) {
     var btn = document.getElementById('pinGateSubmitBtn');
-    if (on) btn.classList.add('loading');
-    else btn.classList.remove('loading');
+    if (on) btn.classList.add('loading'); else btn.classList.remove('loading');
     document.querySelectorAll('.pin-key').forEach(function(k){
         k.style.pointerEvents = on ? 'none' : '';
         k.style.opacity = on ? '0.7' : '1';
     });
 }
-
 async function pinGateSubmit() {
     if (gateCode.length < 4) { showToast('Please Enter 4-Digit PIN', 'error'); return; }
-
     if (gateMode === 'set') {
         if (gateStep === 1) {
-            gateStep1Value = gateCode;
-            gateStep = 2;
-            gateCode = '';
-            updatePinGateUI();
-            updatePinGateDots();
+            gateStep1Value = gateCode; gateStep = 2; gateCode = '';
+            updatePinGateUI(); updatePinGateDots();
             showToast('Now Confirm Your PIN', 'info');
         } else {
             if (gateCode !== gateStep1Value) {
@@ -989,11 +937,8 @@ async function pinGateSubmit() {
             }
             await callGateSetPin(gateCode);
         }
-    } else {
-        await callGateVerifyPin(gateCode);
-    }
+    } else { await callGateVerifyPin(gateCode); }
 }
-
 async function callGateSetPin(pin) {
     pinGateDisableKeypad(true);
     try {
@@ -1003,21 +948,13 @@ async function callGateSetPin(pin) {
             body: JSON.stringify({ pin: pin })
         });
         var data = await response.json();
-
         if (data.success) {
             localStorage.setItem('pin_set', 'true');
-            try {
-                var u = JSON.parse(localStorage.getItem('user') || '{}');
-                u.pin_set = true;
-                localStorage.setItem('user', JSON.stringify(u));
-            } catch(e){}
+            try { var u = JSON.parse(localStorage.getItem('user') || '{}'); u.pin_set = true; localStorage.setItem('user', JSON.stringify(u)); } catch(e){}
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Set Successfully!', 'success');
-            setTimeout(function(){
-                hidePinGate();
-                onPageReady();
-            }, 500);
+            setTimeout(function(){ hidePinGate(); onPageReady(); }, 500);
         } else {
             showToast(data.message || 'Error Setting PIN', 'error');
             gateStep = 1; gateStep1Value = ''; gateCode = '';
@@ -1027,11 +964,8 @@ async function callGateSetPin(pin) {
         showToast('Network Error: ' + error.message, 'error');
         gateStep = 1; gateStep1Value = ''; gateCode = '';
         updatePinGateUI(); updatePinGateDots();
-    } finally {
-        pinGateDisableKeypad(false);
-    }
+    } finally { pinGateDisableKeypad(false); }
 }
-
 async function callGateVerifyPin(pin) {
     pinGateDisableKeypad(true);
     try {
@@ -1041,98 +975,62 @@ async function callGateVerifyPin(pin) {
             body: JSON.stringify({ pin: pin })
         });
         var data = await response.json();
-
         if (data.success) {
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Verified!', 'success');
-            setTimeout(function(){
-                hidePinGate();
-                onPageReady();
-            }, 400);
+            setTimeout(function(){ hidePinGate(); onPageReady(); }, 400);
         } else {
             showToast(data.message || 'Wrong PIN', 'error');
             updatePinGateDots(true);
-            setTimeout(function(){
-                gateCode = ''; updatePinGateDots(); pinGateDisableKeypad(false);
-            }, 600);
+            setTimeout(function(){ gateCode = ''; updatePinGateDots(); pinGateDisableKeypad(false); }, 600);
         }
     } catch (error) {
         showToast('Network Error: ' + error.message, 'error');
         gateCode = ''; updatePinGateDots(); pinGateDisableKeypad(false);
     }
 }
-
 async function initPinGate() {
-    if (sessionStorage.getItem('pin_verified') === 'true') {
-        hidePinGate();
-        onPageReady();
-        return;
-    }
-
+    if (sessionStorage.getItem('pin_verified') === 'true') { hidePinGate(); onPageReady(); return; }
     showPinGate();
     pinGateDisableKeypad(true);
-
     try {
         var response = await fetch(PIN_API_URL + '/check-pin-status', {
             headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
         });
         var data = await response.json();
-
-        if (data.success) {
-            gateMode = data.hasPin ? 'verify' : 'set';
-        } else {
-            var u = JSON.parse(localStorage.getItem('user') || '{}');
-            gateMode = u.pin_set ? 'verify' : 'set';
-        }
+        if (data.success) gateMode = data.hasPin ? 'verify' : 'set';
+        else { var u = JSON.parse(localStorage.getItem('user') || '{}'); gateMode = u.pin_set ? 'verify' : 'set'; }
     } catch (e) {
         var u2 = JSON.parse(localStorage.getItem('user') || '{}');
         gateMode = u2.pin_set ? 'verify' : 'set';
     }
-
-    gateStep = 1;
-    gateStep1Value = '';
-    gateCode = '';
-    updatePinGateUI();
-    updatePinGateDots();
-    pinGateDisableKeypad(false);
+    gateStep = 1; gateStep1Value = ''; gateCode = '';
+    updatePinGateUI(); updatePinGateDots(); pinGateDisableKeypad(false);
 }
 
-// ============================================
-// PAGE READY
-// ============================================
 async function onPageReady() {
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         setAvatar(cachedUser);
         updateSidebarUser(cachedUser);
-    } catch(e){
-        setAvatar({});
-        updateSidebarUser({});
-    }
-
+    } catch(e){ setAvatar({}); updateSidebarUser({}); }
     var isUserValid = await verifyUserState();
     if (!isUserValid) return;
-
     refreshWalletBalance();
     loadRecentPayments();
     updatePayButtonState();
     updateSummary();
 }
 
-// ============================================
-// BLOCKED OVERLAY
-// ============================================
 function showBlockedOverlay(title, message) {
     if (isAccountBlocked) return;
     isAccountBlocked = true;
     if (title) document.getElementById('blockedTitle').textContent = title;
     if (message) document.getElementById('blockedSub').textContent = message;
     document.getElementById('blockedOverlay').classList.add('active');
-
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
-
     if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode = null; }
     document.getElementById('qrScannerModal').classList.remove('open');
     document.getElementById('successModal').classList.remove('open');
@@ -1147,25 +1045,15 @@ function logout() {
     window.location.href = '/';
 }
 
-// ============================================
-// SAFE FETCH
-// ============================================
 async function safeFetch(url, options) {
     options = options || {};
     try {
         var response = await fetch(url, options);
         var data = {};
         try { data = await response.json(); } catch (e) { data = {}; }
-
         if (response.status === 401) { logout(); throw new Error('Session expired'); }
-        if (response.status === 403) {
-            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
-            throw new Error('Account blocked');
-        }
-        if (response.status === 404 && data.userNotFound) {
-            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
-            throw new Error('Account deleted');
-        }
+        if (response.status === 403) { showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.'); throw new Error('Account blocked'); }
+        if (response.status === 404 && data.userNotFound) { showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.'); throw new Error('Account deleted'); }
         return { response: response, data: data };
     } catch (error) {
         if (!isAccountBlocked) throw error;
@@ -1173,9 +1061,6 @@ async function safeFetch(url, options) {
     }
 }
 
-// ============================================
-// VERIFY USER STATE
-// ============================================
 async function verifyUserState() {
     var t = localStorage.getItem('token');
     if (!t) { window.location.href = '/'; return false; }
@@ -1185,107 +1070,61 @@ async function verifyUserState() {
         });
         var data = {};
         try { data = await res.json(); } catch (e) { data = {}; }
-
         if (res.status === 401) { logout(); return false; }
-        if (res.status === 403) {
-            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
-            return false;
-        }
-        if (res.status === 404) {
-            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
-            return false;
-        }
-
+        if (res.status === 403) { showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.'); return false; }
+        if (res.status === 404) { showBlockedOverlay('Account Not Found', 'Your account has been deleted.'); return false; }
         var user = extractUser(data);
-
-        if (!user || (!user.id && !user._id)) {
-            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
-            return false;
-        }
-
+        if (!user || (!user.id && !user._id)) { showBlockedOverlay('Invalid Account', 'Your account data could not be found.'); return false; }
         if (user.mobile && !blockCheckDone) {
             blockCheckDone = true;
             var status = await checkStatusByMobile(user.mobile);
-            if (status && status.allowed === false) {
-                handleBlockReason(status.reason);
-                return false;
-            }
+            if (status && status.allowed === false) { handleBlockReason(status.reason); return false; }
         }
-
         localStorage.setItem('user', JSON.stringify(user));
         setAvatar(user);
         updateSidebarUser(user);
         return true;
-    } catch (error) {
-        console.error('Verify user state error:', error);
-        return true;
-    }
+    } catch (error) { console.error('Verify user state error:', error); return true; }
 }
 
-// ============================================
-// TAB SWITCHING
-// ============================================
 function switchTab(tab) {
     if (isAccountBlocked) return;
     var tabNumber = document.getElementById('tabNumber');
     var tabQr = document.getElementById('tabQr');
     var btnNumber = document.querySelector('.tab-btn:first-child');
     var btnQr = document.querySelector('.tab-btn:last-child');
-
     if (tab === 'number') {
-        tabNumber.classList.add('active');
-        tabQr.classList.remove('active');
-        btnNumber.classList.add('active');
-        btnQr.classList.remove('active');
+        tabNumber.classList.add('active'); tabQr.classList.remove('active');
+        btnNumber.classList.add('active'); btnQr.classList.remove('active');
     } else {
-        tabNumber.classList.remove('active');
-        tabQr.classList.add('active');
-        btnNumber.classList.remove('active');
-        btnQr.classList.add('active');
+        tabNumber.classList.remove('active'); tabQr.classList.add('active');
+        btnNumber.classList.remove('active'); btnQr.classList.add('active');
         closeQRScanner();
     }
 }
 
-// ============================================
-// PAY BUTTON STATE
-// ============================================
 function updatePayButtonState() {
     if (isAccountBlocked) return;
     var payBtn = document.getElementById('payBtn');
     if (!payBtn) return;
-
     var mobile = document.getElementById('wallet').value.trim();
     var amountVal = parseFloat(document.getElementById('amount').value) || 0;
     var balance = parseFloat(document.getElementById('userBalance').textContent) || 0;
-
     var isMobileValid = /^\d{10}$/.test(mobile);
     var isUserVerified = isVerified === true;
     var isAmountValid = amountVal > 0;
     var isBalanceSufficient = amountVal <= balance;
     var isNotProcessing = !payBtn.classList.contains('processing');
-
     var canPay = isMobileValid && isUserVerified && isAmountValid && isBalanceSufficient && isNotProcessing;
-
-    if (canPay) {
-        payBtn.disabled = false;
-        payBtn.style.opacity = '1';
-        payBtn.style.cursor = 'pointer';
-    } else {
-        payBtn.disabled = true;
-        payBtn.style.opacity = '0.5';
-        payBtn.style.cursor = 'not-allowed';
-    }
+    if (canPay) { payBtn.disabled = false; payBtn.style.opacity = '1'; payBtn.style.cursor = 'pointer'; }
+    else { payBtn.disabled = true; payBtn.style.opacity = '0.5'; payBtn.style.cursor = 'not-allowed'; }
 }
 
-// ============================================
-// WALLET INPUT
-// ============================================
 function onWalletInput(value) {
     if (isAccountBlocked) return;
     updateSummary();
     clearTimeout(searchTimeout);
     updateUserStatus('', '');
-
     var clean = value.toString().trim();
     if (!/^\d{10}$/.test(clean)) {
         isVerified = false;
@@ -1293,7 +1132,6 @@ function onWalletInput(value) {
         updatePayButtonState();
         return;
     }
-
     currentReceiverMobile = clean;
     updateUserStatus('loading', 'Verifying...');
     updatePayButtonState();
@@ -1308,7 +1146,6 @@ async function fetchUserDetails(mobileNumber) {
             headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN, 'Content-Type': 'application/json' }
         });
         if (isAccountBlocked) return;
-
         if (result.response && result.response.ok && result.data.status === 'success') {
             currentReceiverName = result.data.name || result.data.fullName || 'Unknown User';
             currentReceiverMobile = mobileNumber;
@@ -1320,10 +1157,7 @@ async function fetchUserDetails(mobileNumber) {
             isVerified = false;
         }
     } catch (err) {
-        if (!isAccountBlocked) {
-            updateUserStatus('error', err.message || 'Network Error');
-            isVerified = false;
-        }
+        if (!isAccountBlocked) { updateUserStatus('error', err.message || 'Network Error'); isVerified = false; }
     }
     updatePayButtonState();
 }
@@ -1334,7 +1168,6 @@ function updateUserStatus(status, message) {
     var textSpan = document.getElementById('userStatusText');
     var icon = badge.querySelector('i');
     badge.classList.remove('active', 'verified', 'error', 'loading');
-
     if (status === 'loading') {
         badge.classList.add('active', 'loading');
         icon.className = 'fa-solid fa-spinner fa-pulse';
@@ -1355,13 +1188,9 @@ function updateUserStatus(status, message) {
         textSpan.textContent = '';
         isVerified = false;
     }
-
     updatePayButtonState();
 }
 
-// ============================================
-// AMOUNT & SUMMARY
-// ============================================
 function onAmountInput(value) {
     if (isAccountBlocked) return;
     document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -1371,10 +1200,8 @@ function onAmountInput(value) {
 function updateSummary() {
     var amt = parseFloat(document.getElementById('amount').value) || 0;
     var wallet = document.getElementById('wallet').value.trim();
-
     document.getElementById('summaryAmount').textContent = '₹' + amt.toFixed(2);
     document.getElementById('totalDebit').textContent = '₹' + amt.toFixed(2);
-
     if (wallet.length === 10 && isVerified && currentReceiverName) {
         document.getElementById('sendingTo').textContent = currentReceiverName + ' (' + wallet + ')';
     } else if (wallet.length > 0) {
@@ -1382,7 +1209,6 @@ function updateSummary() {
     } else {
         document.getElementById('sendingTo').textContent = '—';
     }
-
     updatePayButtonState();
 }
 
@@ -1397,9 +1223,6 @@ document.querySelectorAll('.amount-btn').forEach(function(button) {
     });
 });
 
-// ============================================
-// BALANCE
-// ============================================
 async function refreshWalletBalance() {
     if (isAccountBlocked) return;
     try {
@@ -1416,9 +1239,6 @@ async function refreshWalletBalance() {
     } catch (error) {}
 }
 
-// ============================================
-// RECENT TRANSFERS ONLY
-// ============================================
 async function loadRecentPayments() {
     if (isAccountBlocked) return;
     try {
@@ -1426,57 +1246,37 @@ async function loadRecentPayments() {
             headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN, 'Content-Type': 'application/json' }
         });
         if (isAccountBlocked) return;
-
         var list = document.getElementById('recentPaymentsList');
         if (!result.response || !result.response.ok) {
-            list.innerHTML = '<div style="text-align:center;padding:20px;color:#a0a9b4;font-size:11px;font-weight:600;">Failed to load</div>';
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted-3);font-size:11px;font-weight:600;">Failed to load</div>';
             return;
         }
-
         var txns = result.data.transactions || [];
         if (txns.length === 0) {
-            list.innerHTML = '<div style="text-align:center;padding:20px;color:#a0a9b4;font-size:11px;font-weight:600;">No transfers yet</div>';
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted-3);font-size:11px;font-weight:600;">No transfers yet</div>';
             return;
         }
-
         var userData = JSON.parse(localStorage.getItem('user') || '{}');
         var userId = userData.id || userData._id || '';
-
         list.innerHTML = '';
         txns.forEach(function(tx){
             var isCreditTx = (tx.type === 'transfer_receive');
-
             var name = '';
             var subInfo = '';
-
             if (isCreditTx) {
-                if (tx.sender_id) {
-                    name = tx.sender_id.fullName || tx.sender_id.mobile || 'Sender';
-                    subInfo = tx.sender_id.mobile || '';
-                } else {
-                    name = 'Money Received';
-                }
+                if (tx.sender_id) { name = tx.sender_id.fullName || tx.sender_id.mobile || 'Sender'; subInfo = tx.sender_id.mobile || ''; }
+                else name = 'Money Received';
             } else {
-                if (tx.receiver_id) {
-                    name = tx.receiver_id.fullName || tx.receiver_id.mobile || 'Receiver';
-                    subInfo = tx.receiver_id.mobile || '';
-                } else {
-                    name = 'Money Sent';
-                }
+                if (tx.receiver_id) { name = tx.receiver_id.fullName || tx.receiver_id.mobile || 'Receiver'; subInfo = tx.receiver_id.mobile || ''; }
+                else name = 'Money Sent';
             }
-
             var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
-            var ts = dt.toLocaleString('en-IN', {
-                day: '2-digit', month: 'short',
-                hour: '2-digit', minute: '2-digit'
-            });
-
+            var ts = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
             var amtValue = parseFloat(tx.amount || 0).toFixed(2);
             var amt = (isCreditTx ? '+' : '-') + '₹' + amtValue;
             var iconBg = isCreditTx ? 'background:#e2f8ee;color:#19a775;' : 'background:#ffe4e5;color:#e7444b;';
             var amtColor = isCreditTx ? '#18a473' : '#e6494f';
             var sign = isCreditTx ? '↓' : '↑';
-
             var div = document.createElement('div');
             div.className = 'payment';
             div.innerHTML =
@@ -1491,22 +1291,15 @@ async function loadRecentPayments() {
                 '</div>';
             list.appendChild(div);
         });
-    } catch(e) {
-        console.error('Load recent transfers error:', e);
-    }
+    } catch(e) { console.error('Load recent transfers error:', e); }
 }
 
-// ============================================
-// QR SCANNER
-// ============================================
 function openQRScanner() {
     if (isAccountBlocked) return;
     var modal = document.getElementById('qrScannerModal');
     modal.classList.add('open');
-
     if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode = null; }
     document.getElementById('qr-reader-area').innerHTML = '';
-
     try {
         html5QrCode = new Html5Qrcode('qr-reader-area');
         html5QrCode.start(
@@ -1527,17 +1320,8 @@ function openQRScanner() {
 function onQRScanSuccess(decodedText) {
     if (isAccountBlocked) return;
     if (html5QrCode) {
-        html5QrCode.stop().then(function(){
-            closeQRScanner();
-            processQRData(decodedText.trim());
-        }).catch(function(){
-            closeQRScanner();
-            processQRData(decodedText.trim());
-        });
-    } else {
-        closeQRScanner();
-        processQRData(decodedText.trim());
-    }
+        html5QrCode.stop().then(function(){ closeQRScanner(); processQRData(decodedText.trim()); }).catch(function(){ closeQRScanner(); processQRData(decodedText.trim()); });
+    } else { closeQRScanner(); processQRData(decodedText.trim()); }
 }
 
 function closeQRScanner() {
@@ -1546,14 +1330,9 @@ function closeQRScanner() {
             document.getElementById('qrScannerModal').classList.remove('open');
             html5QrCode = null;
         });
-    } else {
-        document.getElementById('qrScannerModal').classList.remove('open');
-    }
+    } else { document.getElementById('qrScannerModal').classList.remove('open'); }
 }
 
-// ============================================
-// GALLERY
-// ============================================
 function chooseFromGallery() {
     if (isAccountBlocked) return;
     document.getElementById('galleryFileInput').click();
@@ -1563,16 +1342,8 @@ function handleGalleryImage(input) {
     if (isAccountBlocked) { input.value = ''; return; }
     var file = input.files[0];
     if (!file) return;
-    if (!file.type.match(/image\/(jpeg|png|gif|webp|bmp)/i)) {
-        showToast('Invalid file type', 'error');
-        input.value = '';
-        return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('File too large! Max 5MB', 'error');
-        input.value = '';
-        return;
-    }
+    if (!file.type.match(/image\/(jpeg|png|gif|webp|bmp)/i)) { showToast('Invalid file type', 'error'); input.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('File too large! Max 5MB', 'error'); input.value = ''; return; }
     showToast('Processing image...', 'info');
     var scanner = new Html5Qrcode();
     scanner.scanFile(file, true)
@@ -1593,72 +1364,46 @@ function processQRData(decodedText) {
         setTimeout(function(){ mobileInput.style.borderColor = ''; mobileInput.style.boxShadow = ''; }, 2000);
         onWalletInput(mobileNumber);
         showToast('QR scanned! Fetching user details...', 'success');
-    } else {
-        showToast('Invalid QR. No 10-digit mobile found.', 'error');
-    }
+    } else { showToast('Invalid QR. No 10-digit mobile found.', 'error'); }
 }
 
-// ============================================
-// INITIATE TRANSFER
-// ============================================
 async function initiateTransfer() {
     if (isAccountBlocked) return;
-
     var payBtn = document.getElementById('payBtn');
     if (payBtn.disabled) return;
-
     var mobile = document.getElementById('wallet').value.trim();
     var amount = document.getElementById('amount').value;
     var note = '';
-
     if (!mobile || mobile.length < 10) { showToast('Enter a valid 10-digit mobile', 'error'); return; }
     if (!isVerified) { showToast('Please wait, verifying recipient...', 'error'); return; }
     if (!amount || amount <= 0) { showToast('Enter a valid amount', 'error'); return; }
-
     var currentBalance = parseFloat(document.getElementById('userBalance').textContent);
     if (parseFloat(amount) > currentBalance) {
         showToast('Insufficient balance! ₹' + currentBalance.toFixed(2) + ' available', 'error');
         return;
     }
-
     pendingTransferData = { mobile: mobile, amount: parseFloat(amount), note: note };
-
     if (sessionStorage.getItem('pin_verified') === 'true') {
         await executeTransferDirectly(pendingTransferData);
-    } else {
-        showToast('Please verify PIN first', 'error');
-    }
+    } else { showToast('Please verify PIN first', 'error'); }
 }
 
-// ============================================
-// EXECUTE TRANSFER
-// ============================================
 async function executeTransferDirectly(transferData) {
     if (isAccountBlocked) return;
     var transferBtn = document.getElementById('payBtn');
     transferBtn.classList.add('processing');
     transferBtn.disabled = true;
     transferBtn.innerHTML = '<span class="spinner"></span> Processing...';
-
     try {
         var result = await safeFetch(API_BASE_URL + '/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
-            body: JSON.stringify({
-                mobile: transferData.mobile,
-                amount: transferData.amount,
-                note: transferData.note
-            })
+            body: JSON.stringify({ mobile: transferData.mobile, amount: transferData.amount, note: transferData.note })
         });
         if (isAccountBlocked) return;
-
         if (result.data.success === true) {
             var now = new Date();
-            var formattedDateTime = now.toLocaleString('en-IN', {
-                day: '2-digit', month: 'short', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: true
-            });
-
+            var formattedDateTime = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
             document.getElementById('modalAmount').textContent = '-₹' + transferData.amount.toFixed(2);
             document.getElementById('modalAmountDisplay').textContent = '₹' + transferData.amount.toFixed(2);
             document.getElementById('modalTxId').textContent = result.data.txnId || 'TXN' + Date.now();
@@ -1667,7 +1412,6 @@ async function executeTransferDirectly(transferData) {
             document.getElementById('modalMessage').textContent = transferData.note || 'General Transfer';
             document.getElementById('modalDateTime').textContent = formattedDateTime;
             document.getElementById('successModal').classList.add('open');
-
             document.getElementById('wallet').value = '';
             document.getElementById('amount').value = '';
             updateUserStatus('', '');
@@ -1676,13 +1420,10 @@ async function executeTransferDirectly(transferData) {
             currentReceiverName = '';
             document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('active'); });
             updateSummary();
-
             showToast('Transfer successful!', 'success');
             refreshWalletBalance();
             loadRecentPayments();
-        } else {
-            showToast(result.data.message || result.data.error || 'Transfer Failed', 'error');
-        }
+        } else { showToast(result.data.message || result.data.error || 'Transfer Failed', 'error'); }
     } catch (error) {
         if (!isAccountBlocked) showToast(error.message, 'error');
     } finally {
@@ -1697,9 +1438,6 @@ function dismissModal() {
     document.getElementById('successModal').classList.remove('open');
 }
 
-// ============================================
-// BOTTOM NAV ACTIVE
-// ============================================
 (function setActiveNav(){
     var path = window.location.pathname;
     document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
@@ -1712,20 +1450,13 @@ function dismissModal() {
     if (active) active.classList.add('active');
 })();
 
-// ============================================
-// INIT
-// ============================================
 document.addEventListener('DOMContentLoaded', function() {
     if (!AUTH_TOKEN) return;
+    // ✅ Theme button listener
+    var themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
     initPinGate();
 });
-
-// openTelegram fallback (যদি গ্লোবাল ফাংশন না থাকে)
-if (typeof window.openTelegram !== 'function') {
-    window.openTelegram = function() {
-        window.open('https://t.me/', '_blank');
-    };
-}
 </script>
 
 </body>
