@@ -8,15 +8,6 @@ const rateLimit = require('express-rate-limit');
 const axios = require('axios');
 require('dotenv').config();
 
-// ===== INITIALIZE GLOBAL STORES (only for login & reset) =====
-if (!global.loginOtpStore) {
-    global.loginOtpStore = new Map();
-}
-if (!global.resetOtpStore) {
-    global.resetOtpStore = new Map();
-}
-// =============================================================
-
 // Rate limiters
 const otpLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -112,8 +103,8 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
             port: 465,
             secure: true,
             auth: {
-                  user: process.env.EMAIL_USER,
-                  pass: process.env.EMAIL_PASS
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             },
             connectionTimeout: 15000,
             greetingTimeout: 15000,
@@ -122,10 +113,11 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
             maxConnections: 1,
             maxMessages: 50,
             tls: {
-                 rejectUnauthorized: false
-        }
-    });
-                const html = `
+                rejectUnauthorized: false
+            }
+        });
+
+        const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -180,7 +172,7 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
     </div>
 </body>
 </html>`;
-        
+
         const mailOptions = {
             from: `"UNIVERSAL WALLET" <${EMAIL_USER}>`,
             to: email,
@@ -267,20 +259,6 @@ async function deleteOtp(identifier, type) {
 }
 // ================================================================
 
-// Helper: Clean expired OTPs from global stores
-function cleanExpiredOtps() {
-    const now = Date.now();
-    const stores = [global.loginOtpStore, global.resetOtpStore];
-    stores.forEach(store => {
-        if (store) {
-            for (const [key, value] of store.entries()) {
-                if (value.expires && value.expires < now) store.delete(key);
-            }
-        }
-    });
-}
-setInterval(cleanExpiredOtps, 5 * 60 * 1000);
-
 // ==================== LOGIN WITH PASSWORD (STEP 1) ====================
 router.post('/login', loginLimiter, async (req, res) => {
     try {
@@ -350,17 +328,17 @@ router.post('/send-login-otp', otpLimiter, async (req, res) => {
         }
 
         const otp = generateOTP();
-        const expires = Date.now() + 5 * 60 * 1000;
         const targetEmail = email || user.email;
 
-        global.loginOtpStore.set(user._id.toString(), { otp, expires, email: targetEmail });
+        // Store in MongoDB (Vercel-safe)
+        await saveOtp(user._id.toString(), 'login', otp);
 
         console.log(`📧 Login OTP For ${targetEmail}: ${otp}`);
 
-        const result = await sendOtpViaEmail(targetEmail, otp, user.fullName);
+        const result = await sendOtpViaEmail(targetEmail, otp, user.fullName, 'Login');
         if (!result.success) {
             console.error('❌ Failed To Send OTP Via Email:', result.error);
-            global.loginOtpStore.delete(user._id.toString());
+            await deleteOtp(user._id.toString(), 'login');
             return res.status(200).json({ success: false, message: 'Failed to send OTP. Please check your email and try again.' });
         }
 
@@ -400,7 +378,7 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'User not found' });
         }
 
-        const storedData = global.loginOtpStore?.get(user._id.toString());
+        const storedData = await getOtp(user._id.toString(), 'login');
         if (!storedData) {
             return res.status(200).json({ success: false, message: 'No OTP found. Please request a new OTP.' });
         }
@@ -409,16 +387,12 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid OTP. Please enter the correct 6-digit code.' });
         }
 
-        if (Date.now() > storedData.expires) {
-            global.loginOtpStore.delete(user._id.toString());
-            return res.status(200).json({ success: false, message: 'OTP expired. Please request a new OTP.' });
-        }
-
         if (user.isBlocked) {
             return res.status(200).json({ success: false, message: 'Your account has been blocked. Please contact support.' });
         }
 
-        global.loginOtpStore.delete(user._id.toString());
+        // Consume OTP
+        await deleteOtp(user._id.toString(), 'login');
 
         const token = jwt.sign(
             { userId: user._id, isAdmin: user.isAdmin },
@@ -481,16 +455,12 @@ router.post('/verify-login-otp', loginLimiter, async (req, res) => {
 
         if (!user) return res.status(200).json({ success: false, message: 'User not found' });
 
-        const storedData = global.loginOtpStore?.get(user._id.toString());
+        const storedData = await getOtp(user._id.toString(), 'login');
         if (!storedData) return res.status(200).json({ success: false, message: 'No OTP found. Please request a new OTP.' });
         if (storedData.otp !== otp) return res.status(200).json({ success: false, message: 'Invalid OTP.' });
-        if (Date.now() > storedData.expires) {
-            global.loginOtpStore.delete(user._id.toString());
-            return res.status(200).json({ success: false, message: 'OTP expired.' });
-        }
         if (user.isBlocked) return res.status(200).json({ success: false, message: 'Account blocked.' });
 
-        global.loginOtpStore.delete(user._id.toString());
+        await deleteOtp(user._id.toString(), 'login');
 
         const token = jwt.sign({ userId: user._id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '90d' });
 
@@ -522,7 +492,6 @@ router.post('/verify-login-otp', loginLimiter, async (req, res) => {
 });
 
 // ==================== SEND REGISTRATION EMAIL OTP ====================
-// Frontend calls: /auth/send-registration-otp with { email, name }
 router.post('/send-registration-otp', otpLimiter, async (req, res) => {
     try {
         const { email, name } = req.body;
@@ -543,14 +512,14 @@ router.post('/send-registration-otp', otpLimiter, async (req, res) => {
         }
 
         const otp = generateOTP();
-        await saveOtp(email, 'register_email', otp);
+        await saveOtp(email.toLowerCase().trim(), 'register_email', otp);
 
         console.log(`📧 Registration Email OTP For ${email}: ${otp}`);
 
-        const result = await sendOtpViaEmail(email, otp, name);
+        const result = await sendOtpViaEmail(email, otp, name, 'Registration');
         if (!result.success) {
             console.error('❌ Failed To Send Registration Email OTP:', result.error);
-            await deleteOtp(email, 'register_email');
+            await deleteOtp(email.toLowerCase().trim(), 'register_email');
             return res.status(200).json({ success: false, message: 'Failed to send OTP. Please check your email and try again.' });
         }
 
@@ -663,7 +632,7 @@ router.post('/verify-telegram-otp', async (req, res) => {
 
         console.log('✅ Telegram OTP Verified For:', telegramId);
 
-        // Don't delete yet - deleted after successful registration
+        // Keep the OTP until registration succeeds (deleted in /register)
         res.status(200).json({ success: true, message: 'Telegram OTP verified successfully' });
     } catch (error) {
         console.error('❌ Verify Telegram OTP Error:', error);
@@ -717,8 +686,6 @@ router.post('/send-reg-otp-legacy', otpLimiter, async (req, res) => {
 });
 
 // ==================== REGISTER NEW USER ====================
-// Frontend sends: { name, mobile, email, password, telegramId, otp }
-// otp = EMAIL OTP (telegram already verified in step 2)
 router.post('/register', async (req, res) => {
     try {
         const { name, mobile, email, password, telegramId, tg_id, otp } = req.body;
@@ -754,8 +721,9 @@ router.post('/register', async (req, res) => {
             return res.status(200).json({ success: false, message: 'Password must contain uppercase, lowercase, and number.' });
         }
 
-        // Verify EMAIL OTP
-        const emailStoredData = await getOtp(email, 'register_email');
+        // Verify EMAIL OTP (normalized)
+        const normalizedEmail = email.toLowerCase().trim();
+        const emailStoredData = await getOtp(normalizedEmail, 'register_email');
         console.log('📦 Email OTP Data:', emailStoredData ? 'Found' : 'Not Found');
 
         if (!emailStoredData) {
@@ -766,14 +734,14 @@ router.post('/register', async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid Email OTP. Please enter the correct 6-digit code.' });
         }
 
-        // Check telegram OTP (already verified in step 2, but ensure it exists)
+        // Check telegram OTP (already verified in step 2, but ensure it still exists)
         const tgStoredData = await getOtp(tgId.toString(), 'register_telegram');
         if (!tgStoredData) {
-            console.log('⚠️ Telegram OTP missing - assuming already verified');
+            console.log('⚠️ Telegram OTP missing - assuming already verified or expired');
         }
 
         // Check duplicates
-        const existingUser = await User.findOne({ $or: [{ mobile }, { telegramId: tgId }, { email }] });
+        const existingUser = await User.findOne({ $or: [{ mobile }, { telegramId: tgId }, { email: normalizedEmail }] });
         if (existingUser) {
             let errorMsg = 'User already exists';
             if (existingUser.mobile === mobile && existingUser.telegramId === tgId) {
@@ -782,7 +750,7 @@ router.post('/register', async (req, res) => {
                 errorMsg = 'This mobile number is already registered. Please login.';
             } else if (existingUser.telegramId === tgId) {
                 errorMsg = 'This Telegram ID is already registered. Please login.';
-            } else if (existingUser.email === email) {
+            } else if (existingUser.email === normalizedEmail) {
                 errorMsg = 'This email is already registered. Please login.';
             }
             return res.status(200).json({ success: false, message: errorMsg });
@@ -797,7 +765,7 @@ router.post('/register', async (req, res) => {
         const user = await User.create({
             fullName: name,
             mobile: mobile,
-            email: email,
+            email: normalizedEmail,
             password: password,
             telegramId: tgId,
             walletId: walletId,
@@ -810,7 +778,8 @@ router.post('/register', async (req, res) => {
             isBlocked: false
         });
 
-        await deleteOtp(email, 'register_email');
+        // Clean up OTPs
+        await deleteOtp(normalizedEmail, 'register_email');
         await deleteOtp(tgId.toString(), 'register_telegram');
 
         console.log('✅ User Created Successfully:', user._id);
@@ -909,8 +878,9 @@ router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
         }
 
         const otp = generateOTP();
-        const expires = Date.now() + 5 * 60 * 1000;
-        global.resetOtpStore.set(identifier, { otp, expires });
+
+        // Store in MongoDB (Vercel-safe)
+        await saveOtp(identifier, 'reset', otp);
 
         console.log(`📱 Forget Password OTP For ${identifier}: ${otp}`);
 
@@ -935,7 +905,7 @@ router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
 
         if (!result.success) {
             console.error('❌ Failed to send OTP via Telegram:', result.error);
-            global.resetOtpStore.delete(identifier);
+            await deleteOtp(identifier, 'reset');
 
             if (result.error === 'Telegram API Time Out' || result.error.includes('ECONN')) {
                 return res.status(200).json({ success: false, message: 'Telegram service is unavailable. Please try again in a few moments.' });
@@ -983,7 +953,7 @@ router.post('/reset-password', async (req, res) => {
             return res.status(200).json({ success: false, message: 'User not found. Please check your details.' });
         }
 
-        const storedData = global.resetOtpStore?.get(identifier);
+        const storedData = await getOtp(identifier, 'reset');
         if (!storedData) {
             return res.status(200).json({ success: false, message: 'No OTP found. Please request a new OTP.' });
         }
@@ -992,12 +962,8 @@ router.post('/reset-password', async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid OTP. Please enter the correct 6-digit code.' });
         }
 
-        if (Date.now() > storedData.expires) {
-            global.resetOtpStore.delete(identifier);
-            return res.status(200).json({ success: false, message: 'OTP expired. Please request a new OTP.' });
-        }
-
-        global.resetOtpStore.delete(identifier);
+        // Consume OTP
+        await deleteOtp(identifier, 'reset');
 
         user.password = password;
         await user.save();
