@@ -34,6 +34,8 @@ const loginLimiter = rateLimit({
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TG_ID = process.env.ADMIN_TG_ID;
 const JWT_SECRET = process.env.JWT_SECRET;
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 if (!BOT_TOKEN) console.error('❌ Bot Token Is Not Set In Environment Variables.');
 if (!ADMIN_TG_ID) console.error('❌ Admin TG Id Is Not Set In Environment Variables.');
@@ -122,24 +124,68 @@ async function sendOtpViaEmail(email, otp, name) {
                  rejectUnauthorized: false
         }
     });
+                const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; }
+        .container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,50,100,0.1); }
+        .header { background: linear-gradient(135deg, #1a56db, #2563eb); padding: 30px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; }
+        .header p { margin: 6px 0 0; font-size: 12px; letter-spacing: 2px; opacity: 0.9; }
+        .body { padding: 30px; color: #1a2a4a; }
+        .greeting { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+        .message { font-size: 14px; color: #5a7a9a; line-height: 1.6; margin-bottom: 24px; }
+        .otp-box { background: #f0f7ff; border: 2px dashed #1a56db; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0; }
+        .otp-label { font-size: 12px; color: #5a7a9a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        .otp-code { font-size: 36px; font-weight: 900; color: #1a56db; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+        .details { background: #fafcff; border-left: 4px solid #1a56db; border-radius: 8px; padding: 14px 18px; margin: 20px 0; }
+        .details-row { font-size: 13px; color: #1a3a6b; padding: 3px 0; }
+        .details-row strong { color: #5a7a9a; display: inline-block; width: 90px; }
+        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #92400e; margin-top: 20px; }
+        .footer { background: #f0f4f8; padding: 20px; text-align: center; font-size: 11px; color: #5a7a9a; letter-spacing: 1px; }
+        .footer strong { color: #1a56db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Universal Wallet</h1>
+            <p>DIGITAL WALLET • SECURE • FAST</p>
+        </div>
+        <div class="body">
+            <div class="greeting">Dear ${name || 'User'},</div>
+            <div class="message">
+                Your One-Time Password (OTP) has been generated for <strong>${purpose}</strong>. Please use the code below to continue.
+            </div>
+            <div class="otp-box">
+                <div class="otp-label">Your OTP Code</div>
+                <div class="otp-code">${otp}</div>
+            </div>
+            <div class="details">
+                <div class="details-row"><strong>Validity:</strong> 5 minutes</div>
+                <div class="details-row"><strong>Purpose:</strong> ${purpose}</div>
+                <div class="details-row"><strong>Time:</strong> ${dateTime}</div>
+            </div>
+            <div class="warning">
+                ⚠️ <strong>Never share this OTP</strong> with anyone. Our team will never ask for your OTP.
+            </div>
+        </div>
+        <div class="footer">
+            ⚡ POWERED BY <strong>UNIVERSAL WALLET</strong> ⚡
+        </div>
+    </div>
+</body>
+</html>`;
+        
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"UNIVERSAL WALLET" <${EMAIL_USER}>`,
             to: email,
             subject: '🔐 Your OTP for Universal Wallet',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-                    <h2 style="color: #1a56db;">Universal Wallet</h2>
-                    <p>Hello ${name || 'User'},</p>
-                    <p>Your OTP for login is:</p>
-                    <div style="font-size: 32px; font-weight: 800; color: #1a56db; background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center; letter-spacing: 5px;">
-                        ${otp}
-                    </div>
-                    <p style="color: #666; font-size: 14px;">This OTP is valid for <strong>5 minutes</strong>.</p>
-                    <p style="color: #999; font-size: 12px; margin-top: 20px;">If you didn't request this, please ignore this email.</p>
-                    <hr style="border: none; border-top: 1px solid #e0e0e0;">
-                    <p style="color: #999; font-size: 11px; text-align: center;">Universal Wallet • Secure • Fast</p>
-                </div>
-            `
+            html: html,
+            text: `Dear ${name || 'User'},\n\nYour OTP for ${purpose} is: ${otp}\n\nValidity: 5 minutes\n\nNever share this OTP.`
         };
         const info = await transporter.sendMail(mailOptions);
         console.log('✅ Email sent:', info.messageId);
