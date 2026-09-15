@@ -9,16 +9,14 @@ const axios = require('axios');
 require('dotenv').config();
 
 // =========================================================
-// ✅ ADD THIS: Ensure DB is connected for every request
+// ✅ DB CONNECTION MIDDLEWARE (Vercel serverless-safe)
 // =========================================================
 router.use(async (req, res, next) => {
     try {
-        // Access the same global cache
         const mongoose = require('mongoose');
         if (mongoose.connection.readyState === 1) {
-            return next();  // Already connected
+            return next();
         }
-
         const cached = global.mongoose;
         if (cached && cached.promise) {
             await cached.promise;
@@ -349,7 +347,6 @@ router.post('/login', loginLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'Mobile & Password Required' });
         }
 
-        // ✅ শুধু active (non-deleted) user খুঁজি
         const user = await User.findOne({ mobile, isDeleted: false });
         if (!user) {
             return res.status(200).json({ success: false, message: 'User Not Found. Please Check Your Mobile Number.' });
@@ -508,7 +505,6 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
 
 // =========================================================
 // SEND TELEGRAM OTP
-// ✅ FIX: শুধু active user-দের মধ্যে duplicate check
 // =========================================================
 router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
     try {
@@ -580,7 +576,6 @@ router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
 
 // =========================================================
 // VERIFY TELEGRAM OTP
-// (OTP কনজিউম করা হয় না — /register এ consume হয়)
 // =========================================================
 router.post('/verify-telegram-otp', async (req, res) => {
     try {
@@ -613,7 +608,8 @@ router.post('/verify-telegram-otp', async (req, res) => {
 
 // =========================================================
 // REGISTER NEW USER (শুধু Telegram OTP)
-// ✅ FIX: Deleted user-এর field মুক্ত করা হয় → আবার register করা যায়
+// ✅ FIX: Deleted user-এর field rename করার দরকার নেই
+// কারণ User.js-এ partial unique index আছে (isDeleted: false)
 // =========================================================
 router.post('/register', async (req, res) => {
     try {
@@ -623,6 +619,7 @@ router.post('/register', async (req, res) => {
 
         console.log('📝 Registration Request:', { name, mobile, email, telegramId: tgId, otp: otp ? 'Provided' : 'Missing' });
 
+        // ---- Required field check ----
         if (!name || !mobile || !email || !password || !tgId || !otp) {
             const missing = [];
             if (!name) missing.push('Name');
@@ -675,33 +672,11 @@ router.post('/register', async (req, res) => {
         }
 
         // =========================================================
-        // ✅ Step 2: Deleted user থাকলে তার field মুক্ত করা
-        // (partial unique index থাকার কারণে email/mobile/telegramId automatically মুক্ত,
-        //  তবে explicit safety হিসেবে পুরনো deleted user-এর field rename করে দিই)
+        // ✅ Step 2: সরানো হয়েছে — Deleted user-এর field rename করার দরকার নেই
+        // Partial unique index নিজেই deleted user-এর field মুক্ত রাখে
         // =========================================================
-        const deletedUserWithSameData = await User.findOne({
-            isDeleted: true,
-            $or: [{ mobile }, { telegramId: tgId }, { email: normalizedEmail }]
-        });
 
-        if (deletedUserWithSameData) {
-            console.log('♻️ Freeing up fields from deleted user:', deletedUserWithSameData._id);
-            const delId = deletedUserWithSameData._id.toString();
-            if (deletedUserWithSameData.mobile === mobile) {
-                deletedUserWithSameData.mobile = 'DEL_' + delId.slice(-10);
-            }
-            if (deletedUserWithSameData.email === normalizedEmail) {
-                deletedUserWithSameData.email = 'deleted_' + delId + '@deleted.local';
-            }
-            if (deletedUserWithSameData.telegramId === tgId) {
-                deletedUserWithSameData.telegramId = 'DEL_' + delId.slice(-10);
-            }
-            await deletedUserWithSameData.save();
-        }
-
-        // =========================================================
-        // ✅ Step 3: Telegram OTP verify
-        // =========================================================
+        // ---- Verify TELEGRAM OTP ----
         const tgStoredData = await getOtp(tgId.toString(), 'register_telegram');
         if (!tgStoredData) {
             return res.status(200).json({ success: false, message: 'No Telegram OTP found. Please request a new OTP.' });
@@ -710,18 +685,14 @@ router.post('/register', async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid Telegram OTP. Please enter the correct 6-digit code.' });
         }
 
-        // =========================================================
-        // ✅ Step 4: Generate unique walletId & apiKey
-        // =========================================================
+        // ---- Generate unique walletId & apiKey ----
         let walletId = generateWalletId();
         while (await User.findOne({ walletId })) walletId = generateWalletId();
 
         let apiKey = generateApiKey();
         while (await User.findOne({ apiKey })) apiKey = generateApiKey();
 
-        // =========================================================
-        // ✅ Step 5: Create new user
-        // =========================================================
+        // ---- Create new user ----
         const user = await User.create({
             fullName: name,
             mobile: mobile,
