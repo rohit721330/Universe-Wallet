@@ -2,15 +2,15 @@
 const mongoose = require('mongoose');
 
 // ============================================
-// DEFAULT LOGO — ব্যাকএন্ডে সেভ করা ডিফল্ট ছবি
+// DEFAULT LOGO
 // ============================================
 const default_logo = 'https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/universe-wallet-logo.png';
 
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: [true, 'Full name is required'], trim: true },
-    mobile: { type: String, required: [true, 'Mobile number is required'], unique: true, trim: true, match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'] },
-    email: { type: String, required: [true, 'Email address is required'], unique: true, trim: true, lowercase: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'] },
-    telegramId: { type: String, unique: true, sparse: true, trim: true },
+    mobile: { type: String, required: [true, 'Mobile number is required'], trim: true, match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'] },
+    email: { type: String, required: [true, 'Email address is required'], trim: true, lowercase: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'] },
+    telegramId: { type: String, trim: true },
     password: { type: String, required: [true, 'Password is required'] },
     pin: { type: String, default: null },
     pin_set: { type: Boolean, default: false },
@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     isNewUser: { type: Boolean, default: true },
     apiKey: { type: String, unique: true, sparse: true, default: null },
 
-    // ✅ ডিফল্ট ছবি ব্যাকএন্ডেই সেভ
+    // ✅ ডিফল্ট ছবি
     profilePicture: { type: String, default: default_logo },
 
     walletId: { type: String, unique: true, required: true, uppercase: true },
@@ -34,6 +34,47 @@ const userSchema = new mongoose.Schema({
     blockReason: { type: String, default: null },
     blockedAt: { type: Date, default: null }
 }, { timestamps: true });
+
+// =========================================================
+// ✅ CRITICAL INDEXES (Partial Unique — deleted user মুক্ত)
+// =========================================================
+// শুধু isDeleted: false user-দের মধ্যে mobile/email/telegramId unique
+// Deleted user-এর একই mobile/email/telegramId দিয়ে আবার register করা যাবে
+
+userSchema.index(
+    { mobile: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { isDeleted: false },
+        name: 'mobile_unique_active'
+    }
+);
+
+userSchema.index(
+    { email: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { isDeleted: false },
+        name: 'email_unique_active'
+    }
+);
+
+userSchema.index(
+    { telegramId: 1 },
+    {
+        unique: true,
+        sparse: true,
+        partialFilterExpression: { isDeleted: false },
+        name: 'telegramId_unique_active'
+    }
+);
+
+// walletId এবং apiKey সবসময় unique (deleted user-দের সহ)
+userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
+userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
+
+// Query performance index
+userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
 // ============================================
 // HELPER: Generate Wallet ID
@@ -69,12 +110,11 @@ function generateApiKey() {
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
-        // ✅ ডিফল্ট ছবি (কখনো খালি থাকবে না)
         if (!this.profilePicture) {
             this.profilePicture = default_logo;
         }
 
-        // Wallet ID generate (retry সহ unique নিশ্চিত করা)
+        // Wallet ID generate
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -94,7 +134,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // API Key generate (retry সহ)
+        // API Key generate
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -160,8 +200,7 @@ userSchema.methods.softDelete = async function(adminName = 'Admin') {
     this.isDeleted = true;
     this.deletedAt = new Date();
     this.deletedBy = adminName;
-    // ⚠️ IMPORTANT: isBlocked এবং isActive এই method এ touch করা হয় না
-    // কারণ deleted মানেই deleted — blocked/deactivated আলাদা state
+    // ⚠️ isBlocked এবং isActive এই method এ touch করা হয় না
     return await this.save();
 };
 
@@ -192,27 +231,47 @@ userSchema.methods.unblockAccount = async function() {
 };
 
 // ============================================
-// STATIC METHODS — Find by fields
+// STATIC METHODS — Find by fields (active only)
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
     return this.findOne({ walletId: walletId.toUpperCase() });
 };
+
 userSchema.statics.findByMobile = function(mobile) {
     if (!mobile) return null;
     return this.findOne({ mobile: mobile });
 };
+
 userSchema.statics.findByEmail = function(email) {
     if (!email) return null;
     return this.findOne({ email: email.toLowerCase() });
 };
+
 userSchema.statics.findByTelegramId = function(telegramId) {
     if (!telegramId) return null;
     return this.findOne({ telegramId: telegramId });
 };
+
 userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey });
+};
+
+// ✅ নতুন: active (non-deleted) user খোঁজা
+userSchema.statics.findActiveByMobile = function(mobile) {
+    if (!mobile) return null;
+    return this.findOne({ mobile: mobile, isDeleted: false });
+};
+
+userSchema.statics.findActiveByEmail = function(email) {
+    if (!email) return null;
+    return this.findOne({ email: email.toLowerCase(), isDeleted: false });
+};
+
+userSchema.statics.findActiveByTelegramId = function(telegramId) {
+    if (!telegramId) return null;
+    return this.findOne({ telegramId: telegramId, isDeleted: false });
 };
 
 // ============================================
@@ -221,6 +280,7 @@ userSchema.statics.findByApiKey = function(apiKey) {
 userSchema.statics.getUserCount = function() {
     return this.countDocuments({ isDeleted: false });
 };
+
 userSchema.statics.getActiveUserCount = function() {
     return this.countDocuments({
         isBlocked: false,
@@ -228,9 +288,11 @@ userSchema.statics.getActiveUserCount = function() {
         isActive: true
     });
 };
+
 userSchema.statics.getBlockedUserCount = function() {
     return this.countDocuments({ isBlocked: true, isDeleted: false });
 };
+
 userSchema.statics.getDeletedUserCount = function() {
     return this.countDocuments({ isDeleted: true });
 };
@@ -255,7 +317,7 @@ userSchema.statics.findActiveUserById = function(userId) {
 };
 
 // ============================================
-// EXPORT (ডিফল্ট লোগো সহ — routes/profile.js এ ব্যবহার হবে)
+// EXPORT
 // ============================================
 module.exports = mongoose.model('User', userSchema);
 module.exports.default_logo = default_logo;
