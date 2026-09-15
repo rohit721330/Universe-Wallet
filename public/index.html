@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Universal Wallet — Payment Gateway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ===== THEME VARIABLES (LIGHT) ===== */
+:root { --primary: #3972f5; --primary2: #5b4bea; --green: #17b989; --green-dark: #0cae78; --danger: #ef5350; --bg: #eef4ff; --card: #ffffff; --input: #f7f9fe; --border: #dfe6f0; --text: #10192c; --text2: #526072; --muted: #9da8b7; --shadow: 0 16px 44px rgba(42,74,140,.16); }
+body.dark { --bg: #0c1220; --card: #151e31; --input: #0e1729; --border: #26334b; --text: #f4f7ff; --text2: #c0cada; --muted: #7f8ca3; --shadow: 0 16px 44px rgba(0,0,0,.35); }
+
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; min-height: 100%; }
+body { font-family: "Poppins", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; transition: .3s ease; }
+
+/* ===== BACKGROUND ===== */
+.page { min-height: 100vh; position: relative; padding-bottom: 32px; overflow: hidden; }
+.hero { position: absolute; left: 0; top: 0; width: 100%; height: 520px; background: radial-gradient(circle at 15% 25%, rgba(255,255,255,.12) 0 2px, transparent 3px), radial-gradient(circle at 80% 15%, rgba(255,255,255,.1) 0 2px, transparent 3px), linear-gradient(135deg, #2868ed 0%, #4852ed 48%, #6238e9 100%); background-size: 72px 72px, 96px 96px, auto; z-index: 0; }
+.hero:before, .hero:after { content: ""; position: absolute; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; }
+.hero:before { width: 312px; height: 312px; right: -56px; top: -88px; }
+.hero:after { width: 240px; height: 240px; left: 172px; top: -40px; }
+
+/* ===== TOP BAR ===== */
+.topbar { width: 100%; max-width: 544px; margin: auto; padding: 16px 19px 0; display: flex; justify-content: flex-end; position: relative; z-index: 5; }
+.theme-btn { width: 35px; height: 35px; border: 1px solid rgba(255,255,255,.25); border-radius: 11px; background: rgba(255,255,255,.13); backdrop-filter: blur(12px); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: .25s ease; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.05); }
+
+/* ===== CONTAINER ===== */
+.container { width: 100%; max-width: 544px; margin: auto; padding: 28px 18px 0; position: relative; z-index: 2; }
+
+/* ===== BRAND ===== */
+.brand { display: flex; align-items: center; gap: 14px; padding: 28px 11px 32px; color: white; }
+.logo { width: 74px; height: 74px; border-radius: 19px; display: flex; align-items: center; justify-content: center; font-size: 34px; color: white; background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.30); box-shadow: inset 0 0 20px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.10); backdrop-filter: blur(12px); }
+.brand-name { font-size: 31px; line-height: 1; font-weight: 900; letter-spacing: -1.2px; }
+.brand-name span { color: #dce4ff; }
+.brand-sub { margin-top: 6px; font-size: 14px; letter-spacing: 1.6px; font-weight: 600; opacity: .75; }
+
+/* ===== TABS ===== */
+.tabs { display: flex; background: var(--card); border-radius: 18px; padding: 5px; margin-bottom: 18px; box-shadow: 0 8px 24px rgba(42,74,140,.10); border: 1px solid var(--border); transition: .3s ease; }
+.tab { flex: 1; padding: 13px 8px; border: 0; border-radius: 13px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 900; letter-spacing: .8px; cursor: pointer; font-family: inherit; text-transform: uppercase; transition: .25s ease; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.tab i { font-size: 14px; }
+.tab.active { color: #fff; background: linear-gradient(100deg, #3972f5, #5b4bea); box-shadow: 0 6px 16px rgba(57,114,245,.30); }
+
+/* ===== CARD ===== */
+.card { position: relative; background: var(--card); border-radius: 27px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(255,255,255,.25); transition: .3s ease; animation: cardIn .5s ease; }
+.card:before { content: ""; display: block; height: 6px; background: linear-gradient(90deg, #3972f5, #584be9, #bb4ff0); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.card.hidden { display: none !important; }
+
+/* ===== CARD BODY ===== */
+.card-body { padding: 32px 26px 26px; }
+.icon-box { width: 59px; height: 59px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #edf3ff; color: #3972f5; font-size: 26px; margin-bottom: 20px; }
+body.dark .icon-box { background: #1b2943; color: #60a5fa; }
+h1 { font-size: 32px; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 8px; }
+.subtitle { font-size: 17px; color: var(--muted); margin-bottom: 30px; }
+
+/* ===== FORM ===== */
+.field { margin-bottom: 20px; }
+label { display: block; margin-bottom: 9px; font-size: 14px; font-weight: 800; color: var(--text2); letter-spacing: .8px; }
+label i { margin-right: 6px; color: var(--primary); font-size: 12px; }
+.input-wrap { position: relative; }
+.input-wrap input { width: 100%; height: 56px; border: 2px solid var(--border); border-radius: 15px; background: var(--input); color: var(--text); outline: none; padding: 0 46px 0 51px; font-size: 15px; transition: .25s; font-family: inherit; }
+.input-wrap input:focus { border-color: #3972f5; box-shadow: 0 0 0 4px rgba(57,114,245,.12); }
+.input-wrap input::placeholder { color: var(--muted); }
+.input-icon { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #b7c2d3; pointer-events: none; }
+.eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: #b7c2d3; font-size: 15px; cursor: pointer; padding: 4px; }
+.eye:hover { color: var(--primary); }
+
+/* ===== INPUT ROW ===== */
+.input-row { display: flex; gap: 10px; align-items: center; }
+.input-row .input-wrap { flex: 1; min-width: 0; }
+.getid-btn { height: 56px; padding: 0 19px; border: 0; border-radius: 15px; background: linear-gradient(100deg, #3972f5, #5b4bea); color: #fff; font-size: 13px; font-weight: 900; cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 6px 16px rgba(57,114,245,.25); transition: .2s; font-family: inherit; letter-spacing: .8px; }
+.getid-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(57,114,245,.35); }
+.getid-btn:active { transform: scale(.97); }
+.getid-btn i { font-size: 12px; }
+
+/* ===== CHECK ROW ===== */
+.check-row { display: flex; align-items: center; justify-content: space-between; margin: 3px 0 24px; }
+.remember { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text2); cursor: pointer; }
+.remember input { width: 20px; height: 20px; accent-color: #3972f5; cursor: pointer; }
+.link { color: #3972f5; font-weight: 800; text-decoration: none; cursor: pointer; }
+
+/* ===== BUTTON ===== */
+.btn { width: 100%; height: 56px; border: 0; border-radius: 16px; color: #fff; font-size: 17px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(100deg, #3972f5, #5b4bea); box-shadow: 0 10px 24px rgba(57,114,245,.25); transition: .2s; font-family: inherit; letter-spacing: .5px; }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.btn i { font-size: 15px; }
+.btn.green { background: linear-gradient(135deg, #27bf91, #0cae78); box-shadow: 0 12px 25px rgba(15, 174, 123, .25); }
+.btn.btn-secondary { background: var(--input); color: var(--text2); border: 2px solid var(--border); box-shadow: none; }
+.btn.btn-secondary:hover { background: #e2eaf3; box-shadow: none; }
+.btn .spinner { display: none; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+.btn.loading .spinner { display: inline-block; }
+.btn.loading i, .btn.loading span { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== SECURITY FOOTER ===== */
+.security { border-top: 1px solid var(--border); padding: 18px 20px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px 40px; color: var(--text2); font-size: 13px; }
+.security-item { display: flex; align-items: center; gap: 7px; font-weight: 600; }
+.security-item i { font-size: 12px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #17b989; box-shadow: 0 0 0 4px rgba(23,185,137,.12); display: inline-block; }
+.shield { color: #17b989; }
+.lock { color: #3972f5; }
+
+/* ===== REGISTER STEPS ===== */
+.steps { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin: -8px -10px 28px; }
+.step { display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; }
+.step-number { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #d9e2f0; background: #f4f8ff; color: #9da8b7; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; transition: .25s ease; }
+body.dark .step-number { background: #1b2943; border-color: #26334b; color: #7f8ca3; }
+.step.active .step-number { background: linear-gradient(100deg, #3972f5, #5b4bea); color: #fff; border-color: transparent; box-shadow: 0 5px 14px rgba(57,114,245,.35); transform: scale(1.08); }
+.step.done .step-number { background: linear-gradient(100deg, #21c592, #08a878); color: #fff; border-color: transparent; }
+.step-line { flex: 0 0 21px; height: 2.5px; border-radius: 3px; background: #e3eaf5; transition: .25s ease; }
+body.dark .step-line { background: #26334b; }
+.step-line.done { background: #18bd91; }
+
+/* ===== PASSWORD STRENGTH ===== */
+.strength-title { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; }
+.strength-bars { display: flex; gap: 4px; margin: 6px 0 10px; }
+.strength-bars span { flex: 1; height: 6px; border-radius: 8px; background: var(--border); }
+.strength-bars span.good { background: #17b989; }
+.strength-status { font-weight: 800; }
+.rules { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+.rules li { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 7px; font-weight: 500; }
+.rules li i { font-size: 11px; color: #aeb9c9; }
+.rules li.ok { color: #17b989; }
+.rules li.ok i { color: #17b989; }
+
+/* ===== TWO BUTTONS ===== */
+.button-row { display: flex; gap: 13px; }
+.btn-back { width: 35%; border: 2px solid var(--border); background: var(--input); color: var(--text2); box-shadow: none; font-size: 14px; }
+.button-row .btn:not(.btn-back) { flex: 1; font-size: 15px; }
+
+/* ===== OTP STEP (Ultra Pay style) ===== */
+.otp-shield { width: 96px; height: 96px; border-radius: 50%; background: #d9f5e6; color: #17b989; display: flex; align-items: center; justify-content: center; font-size: 42px; margin: 6px auto 22px; }
+body.dark .otp-shield { background: #12352f; color: #10c993; }
+.otp-instruction { text-align: center; font-size: 19px; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 8px; }
+.otp-instruction strong { font-weight: 800; color: var(--text); }
+.otp-expiry { text-align: center; font-size: 16px; color: var(--muted); font-weight: 500; margin-bottom: 30px; }
+.otp-expiry strong { color: #ef5350; font-weight: 800; }
+.otp-label { text-align: left; font-size: 14px; font-weight: 800; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.otp-input-wrap { position: relative; margin-bottom: 24px; }
+.otp-input-wrap input { width: 100%; height: 60px; border: 3px solid #4b79dc; border-radius: 16px; background: var(--input); color: var(--text); outline: none; padding: 0 20px 0 52px; font-size: 18px; font-weight: 600; letter-spacing: 6px; transition: .25s; font-family: inherit; }
+.otp-input-wrap input::placeholder { font-size: 15px; letter-spacing: 4px; font-weight: 500; color: var(--muted); }
+.otp-input-wrap input:focus { border-color: #3265dc; box-shadow: 0 0 0 6px rgba(72, 116, 220, .13); background: var(--card); }
+.otp-input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #3972f5; pointer-events: none; }
+.otp-links { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; align-items: center; padding-bottom: 22px; }
+.otp-link-primary { color: #3c70c7; font-size: 16px; font-weight: 700; text-decoration: underline; cursor: pointer; transition: .2s; background: transparent; border: 0; font-family: inherit; }
+.otp-link-primary:hover { color: var(--primary2); }
+.otp-link-primary.disabled { opacity: .5; pointer-events: none; }
+.otp-link-secondary { color: var(--muted); font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .2s; text-decoration: none; background: transparent; border: 0; font-family: inherit; }
+.otp-link-secondary:hover { color: var(--text); }
+.otp-link-secondary i { font-size: 14px; }
+
+/* ===== TELEGRAM BOX ===== */
+.telegram-box { background: #edf3ff; border: 2px solid #dce6f6; border-radius: 18px; padding: 26px 19px; text-align: center; margin-bottom: 22px; }
+body.dark .telegram-box { background: #101b30; border-color: #263650; }
+.telegram-icon { width: 67px; height: 67px; border-radius: 50%; background: linear-gradient(135deg, #3972f5, #5b4bea); color: #fff; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 8px 20px rgba(57,114,245,.35); }
+.telegram-box h2 { margin-bottom: 6px; font-size: 21px; color: var(--text); }
+.telegram-box p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+/* ===== TERMS BOX ===== */
+.terms-box { display: flex; align-items: flex-start; gap: 11px; padding: 16px 18px; background: #f4f8ff; border: 2px solid #dce6f6; border-radius: 16px; margin-bottom: 22px; cursor: pointer; transition: .2s ease; }
+body.dark .terms-box { background: #0e1729; border-color: #263650; }
+.terms-box input[type="checkbox"] { width: 19px; height: 19px; accent-color: #3972f5; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+.terms-box label { font-size: 14px; color: var(--text2); line-height: 1.5; cursor: pointer; margin: 0; text-transform: none; letter-spacing: 0; font-weight: 600; }
+.terms-box label a { color: #3972f5; font-weight: 800; text-decoration: none; }
+
+/* ===== OTP BANNER ===== */
+.otp-banner { background: #f0fdf4; border: 1px solid #86efac; border-radius: 14px; padding: 12px 16px; display: none; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #16a34a; margin-bottom: 18px; }
+.otp-banner.show { display: flex; }
+.otp-banner i { font-size: 18px; }
+body.dark .otp-banner { background: #12352f; border-color: #166534; color: #10c993; }
+
+/* ===== MESSAGE ===== */
+.msg { padding: 12px 16px; border-radius: 14px; font-size: 13px; font-weight: 600; display: none; margin-bottom: 16px; }
+.msg.show { display: block; }
+.msg.error { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+.msg.success { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+.msg.info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+body.dark .msg.error { background: #3a2025; color: #f87171; border-left-color: #dc2626; }
+body.dark .msg.success { background: #12352f; color: #10c993; border-left-color: #16a34a; }
+body.dark .msg.info { background: #172b55; color: #60a5fa; border-left-color: #3b82f6; }
+.msg i { margin-right: 8px; }
+
+/* ===== TOAST (bottom) ===== */
+.toast-msg { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(120px); width: calc(100% - 32px); max-width: 496px; padding: 14px 16px; border-radius: 18px; background: var(--card); box-shadow: 0 12px 32px rgba(0,0,0,.12); display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text); z-index: 60; opacity: 0; transition: .35s ease; border: 1px solid var(--border); }
+.toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-msg i:first-child { color: #3972f5; font-size: 16px; }
+.toast-msg button { margin-left: auto; border: 0; background: transparent; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+.toast-msg.success i:first-child { color: #17b989; }
+.toast-msg.error i:first-child { color: #ef5350; }
+.toast-msg.info i:first-child { color: #3972f5; }
+
+/* ===== ALERT (deprecated but kept) ===== */
+.alert { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(120px); width: calc(100% - 36px); max-width: 496px; padding: 15px 18px; border-radius: 16px; background: var(--card); box-shadow: 0 12px 32px rgba(0,0,0,.15); display: flex; align-items: center; gap: 11px; font-size: 14px; z-index: 50; opacity: 0; transition: .35s; font-weight: 700; }
+.alert.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.alert-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; font-size: 12px; }
+.alert.success .alert-icon { background: #17b989; }
+.alert.error .alert-icon { background: #ef5350; }
+.alert.info .alert-icon { background: #3972f5; }
+.close-alert { margin-left: auto; border: 0; background: none; font-size: 18px; color: var(--muted); cursor: pointer; }
+
+.hidden { display: none !important; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+    .container { padding: 16px 16px 0; }
+    .topbar { padding: 12px 16px 0; }
+    .brand { padding: 24px 6px 28px; gap: 12px; }
+    .logo { width: 62px; height: 62px; border-radius: 17px; font-size: 29px; }
+    .brand-name { font-size: 26px; }
+    .brand-sub { font-size: 12px; }
+    .tabs { border-radius: 14px; padding: 4px; margin-bottom: 14px; }
+    .tab { font-size: 12px; padding: 11px 6px; letter-spacing: .4px; }
+    .tab i { font-size: 12px; }
+    .card { border-radius: 24px; }
+    .card-body { padding: 27px 22px 22px; }
+    h1 { font-size: 27px; }
+    .subtitle { font-size: 15px; margin-bottom: 24px; }
+    .input-wrap input { height: 54px; font-size: 14px; padding-left: 46px; padding-right: 42px; }
+    .input-icon { font-size: 14px; left: 15px; }
+    .eye { font-size: 14px; right: 12px; }
+    .btn { height: 54px; font-size: 16px; }
+    .step-number { width: 30px; height: 30px; font-size: 12px; }
+    .step-line { flex: 0 0 16px; }
+    .security { gap: 11px 20px; font-size: 12px; padding: 14px 16px; }
+    .getid-btn { height: 54px; padding: 0 13px; font-size: 11px; }
+    .getid-btn i { font-size: 11px; }
+    .telegram-box { padding: 21px 14px; }
+    .telegram-icon { width: 58px; height: 58px; font-size: 24px; }
+    .telegram-box h2 { font-size: 18px; }
+    .telegram-box p { font-size: 13px; }
+    .terms-box { padding: 13px 14px; gap: 10px; }
+    .terms-box label { font-size: 13px; }
+    .terms-box input[type="checkbox"] { width: 17px; height: 17px; }
+    .field { margin-bottom: 16px; }
+    label { font-size: 12px; margin-bottom: 7px; }
+    .rules li { font-size: 12px; }
+    .otp-shield { width: 82px; height: 82px; font-size: 36px; margin-bottom: 18px; }
+    .otp-instruction { font-size: 17px; }
+    .otp-expiry { font-size: 15px; margin-bottom: 24px; }
+    .otp-label { font-size: 13px; }
+    .otp-input-wrap input { height: 56px; font-size: 16px; padding-left: 46px; letter-spacing: 5px; }
+    .otp-input-wrap input::placeholder { font-size: 13px; letter-spacing: 3px; }
+    .otp-link-primary, .otp-link-secondary { font-size: 15px; }
+}
+@media (max-width: 390px) {
+    .card-body { padding-left: 16px; padding-right: 16px; }
+    .brand-name { font-size: 22px; }
+    .logo { width: 56px; height: 56px; font-size: 26px; }
+    .check-row { align-items: flex-start; gap: 8px; }
+    .remember { font-size: 13px; }
+    .link { font-size: 12px; }
+    .getid-btn { padding: 0 10px; font-size: 10px; }
+    .tab { font-size: 11px; }
+    .step-number { width: 27px; height: 27px; font-size: 11px; }
+    .step-line { flex: 0 0 11px; }
+    h1 { font-size: 24px; }
+    .subtitle { font-size: 14px; }
+    .otp-instruction { font-size: 15px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="hero"></div>
+
+<!-- THEME BUTTON -->
+<div class="topbar">
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Change theme">
+        <i class="fas fa-moon"></i>
+    </button>
+</div>
+
+<main class="container">
+
+    <!-- BRAND -->
+    <div class="brand">
+        <div class="logo"><i class="fas fa-bolt"></i></div>
+        <div>
+            <div class="brand-name">Universal <span>Wallet</span></div>
+            <div class="brand-sub">PAYMENT GATEWAY</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="switchTab('login')">
+            <i class="fas fa-sign-in-alt"></i> LOGIN
+        </button>
+        <button class="tab" id="tabRegister" onclick="switchTab('register')">
+            <i class="fas fa-user-plus"></i> REGISTER
+        </button>
+    </div>
+
+    <!-- ============================================
+         LOGIN — STEP 1
+         ============================================ -->
+    <section id="loginCard" class="card">
+        <div class="card-body">
+            <div class="steps" id="loginSteps"></div>
+
+            <!-- LOGIN STEP 1 -->
+            <div id="loginStep1">
+                <div class="icon-box"><i class="fas fa-sign-in-alt"></i></div>
+                <h1>Sign In</h1>
+                <p class="subtitle">Enter your credentials to continue</p>
+
+                <div id="loginMsg" class="msg"></div>
+
+                <div class="field">
+                    <label><i class="fas fa-mobile-alt"></i> MOBILE NUMBER</label>
+                    <div class="input-wrap">
+                        <span class="input-icon"><i class="fas fa-mobile-alt"></i></span>
+                        <input type="tel" id="loginMobile" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label><i class="fas fa-lock"></i> PASSWORD</label>
+                    <div class="input-wrap">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                        <button type="button" class="eye" onclick="togglePassword('loginPassword',this)" aria-label="Show password">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="check-row">
+                    <label class="remember">
+                        <input type="checkbox" checked>
+                        <span>Remember me</span>
+                    </label>
+                    <a class="link" onclick="forgotPassword()">Forgot password?</a>
+                </div>
+
+                <button type="button" class="btn" id="loginBtn" onclick="loginUser()">
+                    <div class="spinner"></div>
+                    <i class="fas fa-arrow-right"></i>
+                    <span>SIGN IN</span>
+                </button>
+            </div>
+
+            <!-- LOGIN STEP 2 (Ultra Pay OTP style) -->
+            <div id="loginStep2" class="hidden">
+
+                <div class="otp-shield">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+
+                <div class="otp-instruction">
+                    Enter the 6-digit code sent to your <strong>Email</strong>
+                </div>
+
+                <div class="otp-expiry">
+                    Code expires in <strong id="loginTimer">4:58</strong>
+                </div>
+
+                <div id="loginOtpMsg" class="msg"></div>
+
+                <div class="otp-label">VERIFICATION CODE</div>
+
+                <div class="otp-input-wrap">
+                    <span class="otp-input-icon"><i class="fas fa-shield-alt"></i></span>
+                    <input type="tel" id="loginOtp" maxlength="6" placeholder="Enter 6-digit code" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <button type="button" class="btn green" id="verifyOtpBtn" onclick="verifyLoginOtp()">
+                    <div class="spinner"></div>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verify &amp; Login</span>
+                </button>
+
+                <div class="otp-links">
+                    <button type="button" class="otp-link-primary" id="resendLoginOtpBtn" onclick="resendLoginOtp()">Resend OTP</button>
+                    <button type="button" class="otp-link-secondary" onclick="backToLoginStep1()">
+                        <i class="fas fa-arrow-left"></i> Back to login
+                    </button>
+                </div>
+
+                <!-- Hidden email display (for JS compatibility) -->
+                <span id="loginOtpEmailDisplay" style="display:none;"></span>
+            </div>
+
+        </div>
+        <div class="security">
+            <div class="security-item"><span class="dot"></span> Systems Online</div>
+            <div class="security-item"><i class="fas fa-shield-alt shield"></i> SSL Secured</div>
+            <div class="security-item"><i class="fas fa-lock lock"></i> 256-bit Encrypted</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         REGISTER STEP 1
+         ============================================ -->
+    <section id="registerStep1" class="card hidden">
+        <div class="card-body">
+            <div class="steps" id="steps1"></div>
+            <div class="icon-box"><i class="fas fa-user"></i></div>
+            <h1>Create Account</h1>
+            <p class="subtitle">Enter your personal details below</p>
+
+            <div id="registerMsg" class="msg"></div>
+
+            <div class="field">
+                <label><i class="fas fa-user"></i> FULL NAME</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fas fa-user"></i></span>
+                    <input id="regName" type="text" placeholder="Enter your full name" autocomplete="name">
+                </div>
+            </div>
+
+            <div class="field">
+                <label><i class="fas fa-envelope"></i> EMAIL ADDRESS</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                    <input id="regEmail" type="email" placeholder="your@email.com" autocomplete="email">
+                </div>
+            </div>
+
+            <div class="field">
+                <label><i class="fas fa-mobile-alt"></i> PHONE NUMBER</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fas fa-mobile-alt"></i></span>
+                    <input id="regMobile" type="tel" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+                </div>
+            </div>
+
+            <button type="button" class="btn" onclick="goToStep2()">
+                <span>CONTINUE</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        <div class="security">
+            <div class="security-item"><span class="dot"></span> Systems Online</div>
+            <div class="security-item"><i class="fas fa-shield-alt shield"></i> SSL Secured</div>
+            <div class="security-item"><i class="fas fa-lock lock"></i> 256-bit Encrypted</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         REGISTER STEP 2
+         ============================================ -->
+    <section id="registerStep2" class="card hidden">
+        <div class="card-body">
+            <div class="steps" id="steps2"></div>
+            <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+            <h1>Set Password</h1>
+            <p class="subtitle">Choose a strong password for your account</p>
+
+            <div class="field">
+                <label><i class="fas fa-key"></i> CREATE PASSWORD</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="newPassword" placeholder="Create a strong password" maxlength="20">
+                    <button type="button" class="eye" onclick="togglePassword('newPassword',this)" aria-label="Show password">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="strength-title">
+                    <span>Password strength</span>
+                    <strong class="strength-status" id="strengthStatus">—</strong>
+                </div>
+                <div class="strength-bars">
+                    <span id="bar1"></span>
+                    <span id="bar2"></span>
+                    <span id="bar3"></span>
+                    <span id="bar4"></span>
+                </div>
+                <ul class="rules">
+                    <li id="ruleLength"><i class="fas fa-circle"></i> 8 to 20 characters</li>
+                    <li id="ruleNumber"><i class="fas fa-circle"></i> Contains a number</li>
+                    <li id="ruleSpecial"><i class="fas fa-circle"></i> Contains special character</li>
+                    <li id="ruleCase"><i class="fas fa-circle"></i> Upper &amp; lowercase letters</li>
+                </ul>
+            </div>
+
+            <div class="field">
+                <label><i class="fas fa-key"></i> CONFIRM PASSWORD</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="confirmPassword" placeholder="Re-enter your password" maxlength="20">
+                    <button type="button" class="eye" onclick="togglePassword('confirmPassword',this)" aria-label="Show password">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="btn btn-back" onclick="showRegisterStep1()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="button" class="btn" onclick="goToStep3()">
+                    Continue <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="security">
+            <div class="security-item"><span class="dot"></span> Systems Online</div>
+            <div class="security-item"><i class="fas fa-shield-alt shield"></i> SSL Secured</div>
+            <div class="security-item"><i class="fas fa-lock lock"></i> 256-bit Encrypted</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         REGISTER STEP 3
+         ============================================ -->
+    <section id="registerStep3" class="card hidden">
+        <div class="card-body">
+            <div class="steps" id="steps3"></div>
+            <div class="icon-box"><i class="fab fa-telegram"></i></div>
+            <h1>Telegram ID</h1>
+            <p class="subtitle">Enter your Telegram numeric ID below</p>
+
+            <div class="telegram-box">
+                <div class="telegram-icon"><i class="fab fa-telegram"></i></div>
+                <h2>Get Your Telegram ID</h2>
+                <p>Open our bot in Telegram and copy your numeric ID</p>
+            </div>
+
+            <div class="field">
+                <label><i class="fab fa-telegram"></i> TELEGRAM ID</label>
+                <div class="input-row">
+                    <div class="input-wrap">
+                        <span class="input-icon"><i class="fab fa-telegram"></i></span>
+                        <input id="regTelegramId" type="text" maxlength="15" placeholder="Your numeric Telegram ID" inputmode="numeric">
+                    </div>
+                    <button type="button" class="getid-btn" onclick="getTelegramId()" title="Get your Telegram ID">
+                        GET ID <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="btn btn-back" onclick="showRegisterStep2()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="button" class="btn" onclick="goToStep4()">
+                    Continue <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="security">
+            <div class="security-item"><span class="dot"></span> Systems Online</div>
+            <div class="security-item"><i class="fas fa-shield-alt shield"></i> SSL Secured</div>
+            <div class="security-item"><i class="fas fa-lock lock"></i> 256-bit Encrypted</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         REGISTER STEP 4
+         ============================================ -->
+    <section id="registerStep4" class="card hidden">
+        <div class="card-body">
+            <div class="steps" id="steps4"></div>
+
+            <div id="registerMsg4" class="msg"></div>
+
+            <div class="otp-shield">
+                <i class="fab fa-telegram"></i>
+            </div>
+
+            <div class="otp-instruction">
+                Enter the 6-digit code sent to your <strong>Telegram</strong>
+            </div>
+
+            <div class="otp-expiry">
+                Code expires in <strong id="timer">4:58</strong>
+            </div>
+
+            <div class="otp-label">VERIFICATION CODE</div>
+
+            <div class="otp-input-wrap">
+                <span class="otp-input-icon"><i class="fas fa-shield-alt"></i></span>
+                <input id="telegramOtp" type="tel" maxlength="6" placeholder="Enter 6-digit code" inputmode="numeric" autocomplete="one-time-code">
+            </div>
+
+            <div class="terms-box" id="termsBox">
+                <input type="checkbox" id="termsCheckbox">
+                <label for="termsCheckbox">
+                    I agree to the <a href="#" onclick="event.preventDefault(); alert('Terms & Conditions');">Terms &amp; Conditions</a> and <a href="#" onclick="event.preventDefault(); alert('Privacy Policy');">Privacy Policy</a> of Universal Wallet.
+                </label>
+            </div>
+
+            <div class="otp-links" style="margin-bottom: 20px;">
+                <button type="button" class="otp-link-primary" id="resendOtpBtn" onclick="resendOTP()">Resend OTP</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="btn btn-back" onclick="showRegisterStep3()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="button" class="btn green" id="registerBtn" onclick="registerUser()">
+                    <div class="spinner"></div>
+                    <i class="fas fa-user-plus"></i>
+                    <span>CREATE ACCOUNT</span>
+                </button>
+            </div>
+        </div>
+        <div class="security">
+            <div class="security-item"><span class="dot"></span> Systems Online</div>
+            <div class="security-item"><i class="fas fa-shield-alt shield"></i> SSL Secured</div>
+            <div class="security-item"><i class="fas fa-lock lock"></i> 256-bit Encrypted</div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ALERT (legacy, kept for compatibility) -->
+<div id="alert" class="alert">
+    <div class="alert-icon" id="alertIcon"><i class="fas fa-check"></i></div>
+    <div id="alertText">Message</div>
+    <button class="close-alert" onclick="hideAlert()" aria-label="Close">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+</div>
+
+<script>
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
+var API_BASE = '/api';
+var COOLDOWN_MS = 3 * 60 * 1000;
+
+var tempLoginData = null;
+var tempRegistrationData = null;
+
+var loginCooldownInterval = null;
+var registerTelegramCooldownEnd = 0;
+
+/* =========================================================
+   THEME
+   ========================================================= */
+(function initTheme(){ var saved = localStorage.getItem('uwTheme'); var btn = document.getElementById('themeBtn'); var icon = btn.querySelector('i'); if(saved === 'dark'){ document.body.classList.add('dark'); icon.className = 'fas fa-sun'; } else { document.body.classList.remove('dark'); icon.className = 'fas fa-moon'; } })();
+function toggleTheme(){ document.body.classList.toggle('dark'); var dark = document.body.classList.contains('dark'); var icon = document.querySelector('#themeBtn i'); localStorage.setItem('uwTheme', dark ? 'dark' : 'light'); icon.className = dark ? 'fas fa-sun' : 'fas fa-moon'; }
+
+/* =========================================================
+   VIEW CONTROL
+   ========================================================= */
+var views = ['loginCard','registerStep1','registerStep2','registerStep3','registerStep4'];
+function hideAll(){ views.forEach(function(id){ document.getElementById(id).classList.add('hidden'); }); window.scrollTo({top:0,behavior:'smooth'}); }
+function showLogin(){ hideAll(); document.getElementById('loginCard').classList.remove('hidden'); }
+function showRegisterStep1(){ hideAll(); document.getElementById('registerStep1').classList.remove('hidden'); updateRegisterStepDots(1); }
+function showRegisterStep2(){ hideAll(); document.getElementById('registerStep2').classList.remove('hidden'); updateRegisterStepDots(2); }
+function showRegisterStep3(){ hideAll(); document.getElementById('registerStep3').classList.remove('hidden'); updateRegisterStepDots(3); }
+function showRegisterStep4(){ hideAll(); document.getElementById('registerStep4').classList.remove('hidden'); updateRegisterStepDots(4); }
+
+/* =========================================================
+   TAB SWITCHER
+   ========================================================= */
+function switchTab(tab){
+    var tabLogin = document.getElementById('tabLogin');
+    var tabRegister = document.getElementById('tabRegister');
+    if(tab === 'login'){
+        tabLogin.classList.add('active'); tabRegister.classList.remove('active');
+        showLogin(); resetLoginToStep1();
+    } else {
+        tabRegister.classList.add('active'); tabLogin.classList.remove('active');
+        showRegisterStep1(); resetRegisterToStep1();
+    }
+}
+
+/* =========================================================
+   EMAIL MASKING
+   ========================================================= */
+function maskEmail(email){
+    if(!email || email.indexOf('@') === -1) return email || '';
+    var parts = email.split('@');
+    var local = parts[0], domain = parts[1], len = local.length;
+    if(len <= 6){ var first = local.substring(0, Math.min(2, len)); var last = len > 3 ? local.substring(len - 2) : ''; return first + '***' + last + '@' + domain; }
+    return local.substring(0, 3) + '*'.repeat(len - 6) + local.substring(len - 3) + '@' + domain;
+}
+
+/* =========================================================
+   TOAST (bottom style — Ultra Pay)
+   ========================================================= */
+var toastTimer;
+function showToast(message, type){
+    type = type || 'info';
+    var old = document.getElementById('globalToast');
+    if(old) old.remove();
+    var t = document.createElement('div');
+    t.id = 'globalToast';
+    t.className = 'toast-msg ' + type;
+    var iconClass = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+    t.innerHTML = '<i class="fas ' + iconClass + '"></i> <span>' + message + '</span> <button aria-label="Close"><i class="fas fa-times"></i></button>';
+    t.querySelector('button').addEventListener('click', function(){ t.remove(); });
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ if(t) t.remove(); }, 4500);
+}
+
+/* =========================================================
+   ALERT (kept for backward compatibility)
+   ========================================================= */
+function showAlert(message, type){
+    showToast(message, type);
+}
+function hideAlert(){ var t = document.getElementById('globalToast'); if(t) t.remove(); }
+
+/* =========================================================
+   MESSAGES (inline)
+   ========================================================= */
+function showMessage(containerId, message, type){
+    var el = document.getElementById(containerId);
+    if(!el) return;
+    el.innerHTML = '<i class="fas fa-' + (type === 'error' ? 'times-circle' : type === 'info' ? 'info-circle' : 'check-circle') + '"></i> ' + message;
+    el.className = 'msg show ' + type;
+}
+function clearMessages(){ document.querySelectorAll('.msg').forEach(function(el){ el.className = 'msg'; el.innerHTML = ''; }); }
+
+/* =========================================================
+   API REQUEST
+   ========================================================= */
+async function apiRequest(endpoint, options){
+    options = options || {};
+    try {
+        var res = await fetch(API_BASE + endpoint, Object.assign({}, options, { headers: Object.assign({ 'Content-Type': 'application/json' }, options.headers || {}) }));
+        var text = await res.text();
+        var data;
+        try { data = JSON.parse(text); } catch (parseErr) { throw new Error('Server error. Please try again in a moment.'); }
+        if(!res.ok || data.success === false) throw new Error(data.message || 'Request failed');
+        return data;
+    } catch (err) { throw new Error(err.message || 'Network error'); }
+}
+
+/* =========================================================
+   LOGIN OTP TIMER (Step 2)
+   ========================================================= */
+var loginTimerInterval = null;
+var loginSecondsLeft = 298;
+
+function startLoginTimer(){
+    clearInterval(loginTimerInterval);
+    loginSecondsLeft = 298;
+    updateLoginTimer();
+    loginTimerInterval = setInterval(function(){
+        loginSecondsLeft--;
+        updateLoginTimer();
+        if(loginSecondsLeft <= 0) clearInterval(loginTimerInterval);
+    }, 1000);
+}
+function updateLoginTimer(){
+    var minutes = Math.floor(loginSecondsLeft / 60);
+    var seconds = loginSecondsLeft % 60;
+    var el = document.getElementById('loginTimer');
+    if(el) el.textContent = minutes + ':' + String(seconds).padStart(2, '0');
+}
+
+/* =========================================================
+   REGISTER OTP TIMER (Step 4)
+   ========================================================= */
+var timerInterval = null;
+var secondsLeft = 298;
+
+function startTimer(){
+    clearInterval(timerInterval);
+    secondsLeft = 298;
+    updateTimer();
+    timerInterval = setInterval(function(){
+        secondsLeft--;
+        updateTimer();
+        if(secondsLeft <= 0) clearInterval(timerInterval);
+    }, 1000);
+}
+function updateTimer(){
+    var minutes = Math.floor(secondsLeft / 60);
+    var seconds = secondsLeft % 60;
+    var el = document.getElementById('timer');
+    if(el) el.textContent = minutes + ':' + String(seconds).padStart(2, '0');
+}
+
+/* =========================================================
+   LOGIN STEP NAVIGATION
+   ========================================================= */
+function resetLoginToStep1(){
+    document.getElementById('loginStep1').classList.remove('hidden');
+    document.getElementById('loginStep2').classList.add('hidden');
+    var otp = document.getElementById('loginOtp'); if(otp) otp.value = '';
+    tempLoginData = null;
+    clearInterval(loginTimerInterval);
+    var lt = document.getElementById('loginTimer'); if(lt) lt.textContent = '4:58';
+    var rb = document.getElementById('resendLoginOtpBtn');
+    if(rb){ rb.classList.remove('disabled'); }
+    renderLoginSteps(1);
+    clearMessages();
+}
+
+function goToLoginStep2(emailMasked){
+    document.getElementById('loginStep1').classList.add('hidden');
+    document.getElementById('loginStep2').classList.remove('hidden');
+    document.getElementById('loginOtpEmailDisplay').textContent = emailMasked;
+    renderLoginSteps(2);
+    clearMessages();
+    startLoginTimer();
+    startLoginResendCooldown();
+    setTimeout(function(){ var el = document.getElementById('loginOtp'); if(el) el.focus(); }, 300);
+}
+
+function backToLoginStep1(){
+    resetLoginToStep1();
+}
+
+function renderLoginSteps(active){
+    var el = document.getElementById('loginSteps');
+    if(!el) return;
+    var names = ['Credentials','Verify'];
+    var html = '';
+    names.forEach(function(name, index){
+        var number = index + 1;
+        var cls = '';
+        if(number < active) cls = 'done';
+        if(number === active) cls = 'active';
+        var content = number < active ? '<i class="fas fa-check"></i>' : number;
+        html += '<div class="step ' + cls + '" title="' + name + '"><div class="step-number">' + content + '</div></div>';
+        if(index < names.length - 1) html += '<div class="step-line ' + (number < active ? 'done' : '') + '"></div>';
+    });
+    el.innerHTML = html;
+}
+
+/* =========================================================
+   LOGIN RESEND COOLDOWN
+   ========================================================= */
+function startLoginResendCooldown(){
+    var btn = document.getElementById('resendLoginOtpBtn');
+    if(!btn) return;
+    btn.classList.add('disabled');
+    var endTime = Date.now() + COOLDOWN_MS;
+    clearInterval(loginCooldownInterval);
+    loginCooldownInterval = setInterval(function(){
+        if(Date.now() >= endTime){
+            clearInterval(loginCooldownInterval);
+            btn.classList.remove('disabled');
+        }
+    }, 1000);
+}
+
+/* =========================================================
+   REGISTER STEP NAVIGATION
+   ========================================================= */
+function resetRegisterToStep1(){
+    var ids = ['regName','regEmail','regMobile','newPassword','confirmPassword','regTelegramId','telegramOtp'];
+    ids.forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
+    var tc = document.getElementById('termsCheckbox'); if(tc) tc.checked = false;
+    var ss = document.getElementById('strengthStatus'); if(ss){ ss.textContent = '—'; ss.style.color = 'var(--muted)'; }
+    for(var i=1;i<=4;i++){ var b = document.getElementById('bar'+i); if(b) b.classList.remove('good'); }
+    ['ruleLength','ruleNumber','ruleSpecial','ruleCase'].forEach(function(id){ var r = document.getElementById(id); if(r) r.classList.remove('ok'); });
+    clearMessages();
+    clearInterval(timerInterval);
+    var timerEl = document.getElementById('timer'); if(timerEl) timerEl.textContent = '4:58';
+    registerTelegramCooldownEnd = 0;
+    showRegisterStep1();
+}
+
+function updateRegisterStepDots(active){
+    var names = ['Personal','Password','Telegram','Verify'];
+    [1,2,3,4].forEach(function(num){
+        var el = document.getElementById('steps' + num);
+        if(!el) return;
+        var html = '';
+        names.forEach(function(name, index){
+            var number = index + 1;
+            var cls = '';
+            if(number < active) cls = 'done';
+            if(number === active) cls = 'active';
+            var content = number < active ? '<i class="fas fa-check"></i>' : number;
+            html += '<div class="step ' + cls + '" title="' + name + '"><div class="step-number">' + content + '</div></div>';
+            if(index < names.length - 1) html += '<div class="step-line ' + (number < active ? 'done' : '') + '"></div>';
+        });
+        el.innerHTML = html;
+    });
+}
+
+/* =========================================================
+   GET TELEGRAM ID
+   ========================================================= */
+function getTelegramId(){
+    window.open('https://t.me/Universal_Wallet_iBot?start=getid', '_blank');
+    showToast('Telegram opened. Copy your numeric ID and paste it here.', 'info');
+}
+
+/* =========================================================
+   STEP 1 → STEP 2
+   ========================================================= */
+function goToStep2(){
+    var name = document.getElementById('regName').value.trim();
+    var email = document.getElementById('regEmail').value.trim();
+    var mobile = document.getElementById('regMobile').value.trim();
+
+    if(!name || name.length < 2){ showMessage('registerMsg', 'Please enter your full name (min 2 chars).', 'error'); return; }
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showMessage('registerMsg', 'Please enter a valid email address.', 'error'); return; }
+    if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showMessage('registerMsg', 'Please enter a valid 10-digit mobile number.', 'error'); return; }
+
+    tempRegistrationData = { name: name, email: email, mobile: mobile };
+    clearMessages();
+    showRegisterStep2();
+}
+
+/* =========================================================
+   STEP 2 → STEP 3
+   ========================================================= */
+function goToStep3(){
+    var password = document.getElementById('newPassword').value;
+    var confirm = document.getElementById('confirmPassword').value;
+
+    if(!password || !validatePassword(password)){ showToast('Password does not meet requirements.','error'); return; }
+    if(password !== confirm){ showToast('Passwords do not match.','error'); return; }
+
+    tempRegistrationData.password = password;
+    showRegisterStep3();
+}
+
+/* =========================================================
+   STEP 3 → STEP 4 (auto-send OTP)
+   ========================================================= */
+async function goToStep4(){
+    var telegramId = document.getElementById('regTelegramId').value.trim();
+    if(!telegramId || !/^\d{6,15}$/.test(telegramId)){ showToast('Please enter a valid Telegram numeric ID (6-15 digits).','error'); return; }
+
+    tempRegistrationData.telegramId = telegramId;
+
+    try {
+        await apiRequest('/auth/send-telegram-otp', {
+            method: 'POST',
+            body: JSON.stringify({ telegramId: telegramId, name: tempRegistrationData.name })
+        });
+        showToast('OTP sent to your Telegram.', 'success');
+        showRegisterStep4();
+        startTimer();
+        registerTelegramCooldownEnd = Date.now() + COOLDOWN_MS;
+    } catch(err) {
+        showToast(err.message || 'Failed to send OTP. Please try again.', 'error');
+    }
+}
+
+/* =========================================================
+   PASSWORD VALIDATION
+   ========================================================= */
+function validatePassword(password){
+    var checks = {
+        length: password.length >= 8 && password.length <= 20,
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password),
+        case: /[A-Z]/.test(password) && /[a-z]/.test(password)
+    };
+    updateRule('ruleLength', checks.length);
+    updateRule('ruleNumber', checks.number);
+    updateRule('ruleSpecial', checks.special);
+    updateRule('ruleCase', checks.case);
+    return checks.length && checks.number && checks.special && checks.case;
+}
+
+function updateRule(id, ok){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.classList.toggle('ok', ok);
+    var icon = el.querySelector('i');
+    if(icon) icon.className = ok ? 'fas fa-check-circle' : 'fas fa-circle';
+}
+
+/* Live password strength */
+document.addEventListener('DOMContentLoaded', function(){
+    var np = document.getElementById('newPassword');
+    if(np) np.addEventListener('input', function(){
+        var password = this.value;
+        var rules = { length: password.length >= 8 && password.length <= 20, number: /\d/.test(password), special: /[^A-Za-z0-9]/.test(password), case: /[A-Z]/.test(password) && /[a-z]/.test(password) };
+        updateRule('ruleLength', rules.length);
+        updateRule('ruleNumber', rules.number);
+        updateRule('ruleSpecial', rules.special);
+        updateRule('ruleCase', rules.case);
+        var score = Object.values(rules).filter(Boolean).length;
+        for(var i=1;i<=4;i++){ document.getElementById('bar'+i).classList.toggle('good', i <= score); }
+        var status = document.getElementById('strengthStatus');
+        if(score === 0){ status.textContent = '—'; status.style.color = 'var(--muted)'; }
+        else if(score <= 2){ status.textContent = 'Weak'; status.style.color = '#ef5350'; }
+        else if(score === 3){ status.textContent = 'Medium'; status.style.color = '#e6a82e'; }
+        else { status.textContent = 'Strong'; status.style.color = '#17b989'; }
+    });
+});
+
+/* =========================================================
+   TOGGLE PASSWORD
+   ========================================================= */
+function togglePassword(inputId, btn){
+    var input = document.getElementById(inputId);
+    var icon = btn.querySelector('i');
+    if(input.type === 'password'){ input.type = 'text'; icon.className = 'fas fa-eye'; }
+    else { input.type = 'password'; icon.className = 'fas fa-eye-slash'; }
+}
+
+/* =========================================================
+   LOGIN — STEP 1
+   ========================================================= */
+async function loginUser(){
+    var mobile = document.getElementById('loginMobile').value.trim();
+    var password = document.getElementById('loginPassword').value;
+
+    if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showMessage('loginMsg', 'Please enter a valid 10-digit mobile number.', 'error'); return; }
+    if(!password || password.length < 4){ showMessage('loginMsg', 'Please enter your password.', 'error'); return; }
+
+    var btn = document.getElementById('loginBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    clearMessages();
+
+    try {
+        var data = await apiRequest('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ mobile: mobile, password: password })
+        });
+        if(!data.user) throw new Error('Invalid credentials.');
+
+        tempLoginData = { userId: data.user.id, mobile: mobile, email: data.user.email };
+
+        var otpRes = await apiRequest('/auth/send-login-otp', {
+            method: 'POST',
+            body: JSON.stringify({ mobile: mobile })
+        });
+
+        var emailToShow = otpRes.email || maskEmail(data.user.email);
+        goToLoginStep2(emailToShow);
+        showToast('OTP sent to your Email', 'info');
+
+        btn.classList.remove('loading'); btn.disabled = false;
+    } catch (err) {
+        showMessage('loginMsg', err.message, 'error');
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+}
+
+/* =========================================================
+   LOGIN — STEP 2 (Verify OTP)
+   ========================================================= */
+async function verifyLoginOtp(){
+    var otp = document.getElementById('loginOtp').value.trim();
+    if(!otp || !/^[0-9]{6}$/.test(otp)){ showMessage('loginOtpMsg', 'Please enter a valid 6-digit OTP.', 'error'); return; }
+    if(!tempLoginData){ showMessage('loginOtpMsg', 'Session expired. Please login again.', 'error'); return; }
+
+    var btn = document.getElementById('verifyOtpBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    clearMessages();
+
+    try {
+        var data = await apiRequest('/auth/login-with-otp', {
+            method: 'POST',
+            body: JSON.stringify({ mobile: tempLoginData.mobile, otp: otp })
+        });
+
+        if(data.user){
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.removeItem('pin_verified');
+            showMessage('loginOtpMsg', 'Login successful! Redirecting...', 'success');
+            setTimeout(function(){
+                if(data.user.pin_set) window.location.href = '/dashboard';
+                else window.location.href = '/pin';
+            }, 1000);
+        } else throw new Error('Invalid OTP.');
+    } catch (err) {
+        showMessage('loginOtpMsg', err.message, 'error');
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+}
+
+/* =========================================================
+   LOGIN — RESEND OTP
+   ========================================================= */
+async function resendLoginOtp(){
+    if(!tempLoginData){ showMessage('loginOtpMsg', 'Session expired. Please login again.', 'error'); return; }
+    var btn = document.getElementById('resendLoginOtpBtn');
+    if(btn.classList.contains('disabled')) return;
+    btn.classList.add('disabled');
+    clearMessages();
+
+    try {
+        var data = await apiRequest('/auth/send-login-otp', {
+            method: 'POST',
+            body: JSON.stringify({ mobile: tempLoginData.mobile })
+        });
+        showToast('OTP sent to your Email', 'info');
+        var otpEl = document.getElementById('loginOtp'); if(otpEl) otpEl.value = '';
+        startLoginTimer();
+        startLoginResendCooldown();
+    } catch (err) {
+        showMessage('loginOtpMsg', err.message, 'error');
+        btn.classList.remove('disabled');
+    }
+}
+
+/* =========================================================
+   REGISTER — RESEND OTP (Step 4)
+   ========================================================= */
+async function resendOTP(){
+    if(!tempRegistrationData || !tempRegistrationData.telegramId){
+        showToast('Session expired. Please start again.', 'error'); return;
+    }
+    if(registerTelegramCooldownEnd && Date.now() < registerTelegramCooldownEnd){
+        var remaining = Math.ceil((registerTelegramCooldownEnd - Date.now()) / 1000);
+        var mins = Math.floor(remaining / 60);
+        var secs = remaining % 60;
+        showToast('Please wait ' + mins + ':' + String(secs).padStart(2,'0') + ' before resending.', 'info');
+        return;
+    }
+    try {
+        await apiRequest('/auth/send-telegram-otp', {
+            method: 'POST',
+            body: JSON.stringify({ telegramId: tempRegistrationData.telegramId, name: tempRegistrationData.name })
+        });
+        var otpEl = document.getElementById('telegramOtp'); if(otpEl) otpEl.value = '';
+        startTimer();
+        registerTelegramCooldownEnd = Date.now() + COOLDOWN_MS;
+        showToast('New OTP sent to your Telegram.', 'success');
+    } catch(err) {
+        showToast(err.message || 'Failed to resend OTP.', 'error');
+    }
+}
+
+/* =========================================================
+   REGISTER — CREATE ACCOUNT (Step 4)
+   ========================================================= */
+async function registerUser(){
+    var otp = document.getElementById('telegramOtp').value.trim();
+    var termsChecked = document.getElementById('termsCheckbox').checked;
+
+    if(!otp || !/^[0-9]{6}$/.test(otp)){ showToast('Please enter a valid 6-digit OTP.', 'error'); return; }
+    if(!termsChecked){ showToast('Please agree to the Terms & Conditions.', 'error'); return; }
+    if(!tempRegistrationData){ showToast('Session expired. Please start again.', 'error'); return; }
+
+    var btn = document.getElementById('registerBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+        var data = await apiRequest('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: tempRegistrationData.name,
+                mobile: tempRegistrationData.mobile,
+                email: tempRegistrationData.email,
+                password: tempRegistrationData.password,
+                telegramId: tempRegistrationData.telegramId,
+                otp: otp
+            })
+        });
+
+        if(data.user){
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.removeItem('pin_verified');
+            showToast('Welcome ' + tempRegistrationData.name + '! Account created!', 'success');
+            setTimeout(function(){ window.location.href = '/pin'; }, 1500);
+        } else throw new Error('Registration failed.');
+    } catch (err) {
+        showToast(err.message, 'error');
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+}
+
+function forgotPassword(){ window.location.href = '/forgot-password'; }
+
+/* =========================================================
+   PHONE INPUT — DIGITS ONLY
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('input[type="tel"]').forEach(function(input){
+        input.addEventListener('input', function(){ this.value = this.value.replace(/\D/g, ''); });
+    });
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+if(localStorage.getItem('token')){
+    var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if(cachedUser.pin_set) window.location.href = '/dashboard';
+    else window.location.href = '/pin';
+}
+
+renderLoginSteps(1);
+updateRegisterStepDots(1);
+showLogin();
+</script>
+
+</body>
+</html>
