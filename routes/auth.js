@@ -44,6 +44,23 @@ const verifyToken = async (req, res, next) => {
         if (!user) {
             return res.status(200).json({ success: false, message: 'User Not Found' });
         }
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
+        // ✅ FIX: Blocked user check
+        if (user.isBlocked) {
+            return res.status(200).json({
+                success: false,
+                message: 'Your account has been blocked. Please contact support.'
+            });
+        }
+
         req.user = user;
         next();
     } catch (error) {
@@ -278,6 +295,14 @@ router.post('/login', loginLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid Password. Please Try Again.' });
         }
 
+        // ✅ FIX: Deleted user check (blocked check এর আগে)
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
         if (user.isBlocked) {
             return res.status(200).json({ success: false, message: 'Your Account Has Been Blocked. Please Contact Support.' });
         }
@@ -321,6 +346,22 @@ router.post('/send-login-otp', otpLimiter, async (req, res) => {
 
         if (!user) {
             return res.status(200).json({ success: false, message: 'User not found' });
+        }
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
+        // ✅ FIX: Blocked user check
+        if (user.isBlocked) {
+            return res.status(200).json({
+                success: false,
+                message: 'Your account has been blocked. Please contact support.'
+            });
         }
 
         if (!user.email) {
@@ -376,6 +417,14 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
         const user = await User.findOne({ mobile });
         if (!user) {
             return res.status(200).json({ success: false, message: 'User not found' });
+        }
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
         }
 
         const storedData = await getOtp(user._id.toString(), 'login');
@@ -455,6 +504,14 @@ router.post('/verify-login-otp', loginLimiter, async (req, res) => {
 
         if (!user) return res.status(200).json({ success: false, message: 'User not found' });
 
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
         const storedData = await getOtp(user._id.toString(), 'login');
         if (!storedData) return res.status(200).json({ success: false, message: 'No OTP found. Please request a new OTP.' });
         if (storedData.otp !== otp) return res.status(200).json({ success: false, message: 'Invalid OTP.' });
@@ -506,8 +563,16 @@ router.post('/send-registration-otp', otpLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'Please enter a valid email address.' });
         }
 
+        // ✅ FIX: Deleted user-কে বাদ দিয়ে duplicate check
+        // কারণ deleted user-এর email দিয়ে আবার register করা উচিত নয়
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            if (existingUser.isDeleted) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'This email belongs to a deleted account. Please contact support.'
+                });
+            }
             return res.status(200).json({ success: false, message: 'This email is already registered. Please login.' });
         }
 
@@ -558,8 +623,15 @@ router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'Please enter a valid Telegram numeric ID (6-15 digits).' });
         }
 
+        // ✅ FIX: Deleted user-কে বাদ দিয়ে duplicate check
         const existingUser = await User.findOne({ telegramId: tgId });
         if (existingUser) {
+            if (existingUser.isDeleted) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'This Telegram ID belongs to a deleted account. Please contact support.'
+                });
+            }
             return res.status(200).json({ success: false, message: 'This Telegram ID is already registered. Please use a different ID or login.' });
         }
 
@@ -648,8 +720,17 @@ router.post('/send-reg-otp-legacy', otpLimiter, async (req, res) => {
 
         if (!tg_id) return res.status(200).json({ success: false, message: 'Telegram ID is required.' });
 
+        // ✅ FIX: Deleted user-কে বাদ দিয়ে duplicate check
         const existingUser = await User.findOne({ telegramId: tg_id });
-        if (existingUser) return res.status(200).json({ success: false, message: 'This Telegram ID is already registered.' });
+        if (existingUser) {
+            if (existingUser.isDeleted) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'This Telegram ID belongs to a deleted account. Please contact support.'
+                });
+            }
+            return res.status(200).json({ success: false, message: 'This Telegram ID is already registered.' });
+        }
 
         if (!BOT_TOKEN) return res.status(200).json({ success: false, message: 'OTP service is not configured.' });
 
@@ -740,9 +821,21 @@ router.post('/register', async (req, res) => {
             console.log('⚠️ Telegram OTP missing - assuming already verified or expired');
         }
 
-        // Check duplicates
+        // ✅ FIX: Duplicate check with deleted-account awareness
         const existingUser = await User.findOne({ $or: [{ mobile }, { telegramId: tgId }, { email: normalizedEmail }] });
         if (existingUser) {
+            // যদি existing user deleted হয় → সঠিক message দাও
+            if (existingUser.isDeleted) {
+                let fieldMsg = 'this information';
+                if (existingUser.mobile === mobile) fieldMsg = 'This mobile number';
+                else if (existingUser.telegramId === tgId) fieldMsg = 'This Telegram ID';
+                else if (existingUser.email === normalizedEmail) fieldMsg = 'This email';
+                return res.status(200).json({
+                    success: false,
+                    message: `${fieldMsg} belongs to a deleted account. Please contact support.`
+                });
+            }
+
             let errorMsg = 'User already exists';
             if (existingUser.mobile === mobile && existingUser.telegramId === tgId) {
                 errorMsg = 'User already exists with this mobile and Telegram ID. Please login.';
@@ -775,7 +868,8 @@ router.post('/register', async (req, res) => {
             pin_set: false,
             isNewUser: true,
             isAdmin: false,
-            isBlocked: false
+            isBlocked: false,
+            isDeleted: false  // ✅ explicitly set
         });
 
         // Clean up OTPs
@@ -869,6 +963,22 @@ router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'No account found with this ' + (mobile ? 'mobile number' : 'Telegram ID') + '.' });
         }
 
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
+        // ✅ FIX: Blocked user check
+        if (user.isBlocked) {
+            return res.status(200).json({
+                success: false,
+                message: 'Your account has been blocked. Please contact support.'
+            });
+        }
+
         if (!user.telegramId) {
             return res.status(200).json({ success: false, message: 'Telegram ID not linked to your account. Please contact support.' });
         }
@@ -953,6 +1063,14 @@ router.post('/reset-password', async (req, res) => {
             return res.status(200).json({ success: false, message: 'User not found. Please check your details.' });
         }
 
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
         const storedData = await getOtp(identifier, 'reset');
         if (!storedData) {
             return res.status(200).json({ success: false, message: 'No OTP found. Please request a new OTP.' });
@@ -1029,6 +1147,11 @@ router.get('/user-by-apikey/:apiKey', async (req, res) => {
         const user = await User.findOne({ apiKey: apiKey });
         if (!user) return res.status(200).json({ success: false, message: 'User not found with this API Key' });
 
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({ success: false, message: 'This account has been deleted.' });
+        }
+
         return res.status(200).json({
             success: true,
             mobile: user.mobile,
@@ -1050,6 +1173,11 @@ router.get('/user-by-telegram/:tgid', async (req, res) => {
 
         const user = await User.findOne({ telegramId: tgid });
         if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({ success: false, message: 'This account has been deleted.' });
+        }
 
         return res.status(200).json({
             success: true,
@@ -1101,6 +1229,15 @@ router.post('/telegram-login', async (req, res) => {
 
         const user = await User.findOne({ telegramId: telegramId });
         if (!user) return res.status(200).json({ success: false, message: 'No account found with this Telegram ID' });
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
         if (user.isBlocked) return res.status(200).json({ success: false, message: 'Your account has been blocked' });
 
         const token = jwt.sign({ userId: user._id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '90d' });
@@ -1135,6 +1272,11 @@ router.get('/user-by-mobile/:mobile', async (req, res) => {
 
         const user = await User.findOne({ mobile: mobile });
         if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+
+        // ✅ FIX: Deleted user check
+        if (user.isDeleted) {
+            return res.status(200).json({ success: false, message: 'This account has been deleted.' });
+        }
 
         return res.status(200).json({
             success: true,
