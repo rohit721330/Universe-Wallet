@@ -13,9 +13,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
-const MONGO_URI = process.env.MONGODB_URI;
-
 // ✅ ADMIN_WALLET_ID
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'UWLN427970';
 
@@ -26,51 +23,84 @@ global.resetOtpStore = new Map();
 global.tgIdStore = new Map();
 global.emailOtpStore = new Map();
 
-// Connect to MongoDB
-const connectWithRetry = async (retries = 5) => {
-    for (let i = 0; i < retries; i++) {
-        try {
-            await mongoose.connect(MONGO_URI, {
-                serverSelectionTimeoutMS: 5000,
-                socketTimeoutMS: 45000,
-                family: 4,
-                maxPoolSize: 10,
-                minPoolSize: 2,
-                retryWrites: true,
-                retryReads: true
-            });
-            console.log('✅ MongoDB Connected Successfully');
-            
-            // Email index
-            try {
-                const User = require('./models/User');
-                await User.collection.createIndex({ email: 1 }, { unique: true, sparse: true });
-                console.log('✅ Email index verified');
-            } catch (indexError) {
-                console.log('ℹ️ Email index check skipped');
-            }
-            
-            return;
-        } catch (error) {
-            console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
-            if (i < retries - 1) {
-                const waitTime = (i + 1) * 2;
-                console.log(`⏳ Retrying in ${waitTime} seconds...`);
-                await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-            }
-        }
-    }
-    console.error('❌ All connection attempts failed');
-};
+const MONGO_URI = process.env.MONGODB_URI;
 
-connectWithRetry();
+// =========================================================
+// ✅ VERCEL-SAFE MongoDB Connection with Global Cache
+// =========================================================
+let cached = global.mongoose;
+
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+    // Already connected → reuse
+    if (cached.conn) {
+        return cached.conn;
+    }
+
+    // Connection in progress → wait for it
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: false,           // ⭐ CRITICAL — timeout এড়ায়
+            serverSelectionTimeoutMS: 10000, // 10s
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            family: 4,
+            maxPoolSize: 10,
+            minPoolSize: 1,
+            retryWrites: true,
+            retryReads: true
+        };
+
+        console.log('🔌 Connecting to MongoDB...');
+
+        cached.promise = mongoose.connect(MONGO_URI, opts)
+            .then((mongooseInstance) => {
+                console.log('✅ MongoDB Connected Successfully');
+                return mongooseInstance;
+            })
+            .catch((err) => {
+                console.error('❌ MongoDB Connection Error:', err.message);
+                cached.promise = null;
+                throw err;
+            });
+    }
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (err) {
+        cached.promise = null;
+        throw err;
+    }
+
+    return cached.conn;
+}
+
+// =========================================================
+// ✅ DB Connection Middleware — প্রতিটা /api request-এ
+// =========================================================
+app.use('/api', async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error('❌ DB Middleware Error:', error.message);
+        return res.status(200).json({
+            success: false,
+            message: 'Database connection failed. Please try again in a moment.'
+        });
+    }
+});
 
 // ============================================================
 // ⚠️⚠️⚠️ TEMPORARY ROUTE — DELETE AFTER CREATING ADMIN ⚠️⚠️⚠️
 // ============================================================
 app.get('/setup-admin', async (req, res) => {
     try {
-        // Check MongoDB connection
+        await connectDB();
+
         if (mongoose.connection.readyState !== 1) {
             return res.status(503).json({
                 success: false,
@@ -81,7 +111,6 @@ app.get('/setup-admin', async (req, res) => {
 
         const Admin = require('./models/Admin');
 
-        // Check if any admin exists
         const existing = await Admin.findOne({ role: 'super_admin' });
         if (existing) {
             return res.json({
@@ -112,15 +141,15 @@ app.get('/setup-admin', async (req, res) => {
             success: true,
             message: '✅ Super Admin Created Successfully!',
             credentials: {
-                adminId: 'superadmin',
-                password: 'ChangeMe123!',
-                mobile: '9999999999'
+                adminId: 'UWLN427970',
+                password: 'Universe@330',
+                mobile: '9517532486'
             },
             nextSteps: [
                 '1. Go to /rohit (admin panel)',
                 '2. Enter your 6-digit pattern',
-                '3. Admin ID: superadmin',
-                '4. Password: ChangeMe123!',
+                '3. Admin ID: UWLN427970',
+                '4. Password: Universe@330',
                 '5. ⚠️ Change password immediately after login!',
                 '6. ⚠️ DELETE this /setup-admin route from server.js NOW!'
             ]
@@ -222,68 +251,76 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ==================== CRON JOB: CLEANUP EXPIRED INVOICES ====================
-const Invoice = require('./models/Invoice');
-setInterval(async () => {
-    try {
-        const result = await Invoice.cleanupExpired();
-        if (result.modifiedCount > 0) {
-            console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
-        }
-    } catch (error) {
-        console.error('❌ Cleanup cron error:', error.message);
-    }
-}, 5 * 60 * 1000);
-
-// ==================== CLEANUP EXPIRED TG ID SESSIONS ====================
-setInterval(() => {
-    try {
-        if (global.tgIdStore) {
-            const now = Date.now();
-            let deletedCount = 0;
-            for (const [key, value] of global.tgIdStore.entries()) {
-                if (value.expires && value.expires < now) {
-                    global.tgIdStore.delete(key);
-                    deletedCount++;
-                }
-            }
-            if (deletedCount > 0) {
-                console.log(`🧹 Cleaned up ${deletedCount} expired TG ID sessions`);
-            }
-        }
-    } catch (error) {
-        console.error('❌ TG ID cleanup error:', error.message);
-    }
-}, 2 * 60 * 1000);
-
-// ==================== CLEANUP EXPIRED EMAIL OTP ====================
-setInterval(() => {
-    try {
-        if (global.emailOtpStore) {
-            const now = Date.now();
-            let deletedCount = 0;
-            for (const [key, value] of global.emailOtpStore.entries()) {
-                if (value.expires && value.expires < now) {
-                    global.emailOtpStore.delete(key);
-                    deletedCount++;
-                }
-            }
-            if (deletedCount > 0) {
-                console.log(`🧹 Cleaned up ${deletedCount} expired email OTP sessions`);
-            }
-        }
-    } catch (error) {
-        console.error('❌ Email OTP cleanup error:', error.message);
-    }
-}, 5 * 60 * 1000);
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server Running On Port ${PORT}`);
-    console.log(`🌐 http://localhost:${PORT}`);
-    console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
-    console.log(`📌 TG ID Store: ${global.tgIdStore ? '✅ Initialized' : '❌ Not initialized'}`);
-    console.log(`⚠️  /setup-admin route is ACTIVE — DELETE after creating admin!`);
+// ==================== ERROR HANDLER ====================
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled Error:', err.message);
+    res.status(200).json({ success: false, message: 'Something went wrong. Please try again.' });
 });
+
+// ==================== LOCAL DEVELOPMENT ONLY ====================
+// Vercel-এ app.listen() call হবে না। শুধু local-এ চলবে।
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    
+    // Cron jobs — only for local dev
+    const Invoice = require('./models/Invoice');
+    setInterval(async () => {
+        try {
+            const result = await Invoice.cleanupExpired();
+            if (result.modifiedCount > 0) {
+                console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
+            }
+        } catch (error) {
+            console.error('❌ Cleanup cron error:', error.message);
+        }
+    }, 5 * 60 * 1000);
+
+    setInterval(() => {
+        try {
+            if (global.tgIdStore) {
+                const now = Date.now();
+                let deletedCount = 0;
+                for (const [key, value] of global.tgIdStore.entries()) {
+                    if (value.expires && value.expires < now) {
+                        global.tgIdStore.delete(key);
+                        deletedCount++;
+                    }
+                }
+                if (deletedCount > 0) {
+                    console.log(`🧹 Cleaned up ${deletedCount} expired TG ID sessions`);
+                }
+            }
+        } catch (error) {
+            console.error('❌ TG ID cleanup error:', error.message);
+        }
+    }, 2 * 60 * 1000);
+
+    setInterval(() => {
+        try {
+            if (global.emailOtpStore) {
+                const now = Date.now();
+                let deletedCount = 0;
+                for (const [key, value] of global.emailOtpStore.entries()) {
+                    if (value.expires && value.expires < now) {
+                        global.emailOtpStore.delete(key);
+                        deletedCount++;
+                    }
+                }
+                if (deletedCount > 0) {
+                    console.log(`🧹 Cleaned up ${deletedCount} expired email OTP sessions`);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Email OTP cleanup error:', error.message);
+        }
+    }, 5 * 60 * 1000);
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server Running On Port ${PORT}`);
+        console.log(`🌐 http://localhost:${PORT}`);
+        console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
+        console.log(`⚠️  /setup-admin route is ACTIVE — DELETE after creating admin!`);
+    });
+}
 
 module.exports = app;
