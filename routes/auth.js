@@ -9,6 +9,31 @@ const axios = require('axios');
 require('dotenv').config();
 
 // =========================================================
+// ✅ ADD THIS: Ensure DB is connected for every request
+// =========================================================
+router.use(async (req, res, next) => {
+    try {
+        // Access the same global cache
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState === 1) {
+            return next();  // Already connected
+        }
+
+        const cached = global.mongoose;
+        if (cached && cached.promise) {
+            await cached.promise;
+        }
+        next();
+    } catch (error) {
+        console.error('❌ auth.js DB middleware error:', error.message);
+        return res.status(200).json({
+            success: false,
+            message: 'Database connection failed. Please try again.'
+        });
+    }
+});
+
+// =========================================================
 // RATE LIMITERS
 // =========================================================
 const otpLimiter = rateLimit({
