@@ -3,6 +3,8 @@
 // ============================================
 // GET /api/check-status/:mobile
 // Mobile number দিয়ে user status check (No Auth Required)
+// ✅ FIX: active user-কে priority দেওয়া হয়
+// ✅ FIX: deleted/blocked user ignore করা হয় — যদি active user থাকে
 // ============================================
 
 const express = require('express');
@@ -30,13 +32,47 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // ===== User খুঁজি =====
-        const user = await User.findOne({ mobile: mobile }).select(
-            'mobile isBlocked isDeleted isActive deletedAt blockedAt blockReason'
-        );
+        // =========================================================
+        // ✅ FIX: Step 1 — আগে ACTIVE user খুঁজি
+        // (deleted/blocked user ignore করে)
+        // =========================================================
+        const activeUser = await User.findOne({
+            mobile: mobile,
+            isDeleted: false,
+            isActive: true
+        }).select('mobile isBlocked isDeleted isActive');
 
-        // ===== User নেই =====
-        if (!user) {
+        if (activeUser) {
+            // Active user পাওয়া গেছে — status check
+            if (activeUser.isBlocked === true) {
+                return res.status(200).json({
+                    success: true,
+                    allowed: false,
+                    reason: 'blocked',
+                    message: 'Your account has been blocked by administrator.',
+                    canReregister: false
+                });
+            }
+
+            // সব ঠিক আছে
+            return res.status(200).json({
+                success: true,
+                allowed: true,
+                reason: null,
+                message: 'Account is active.',
+                canReregister: false
+            });
+        }
+
+        // =========================================================
+        // ✅ FIX: Step 2 — Active user নেই, এখন deleted/blocked check করি
+        // (এখানে সবচেয়ে recent user খুঁজি)
+        // =========================================================
+        const anyUser = await User.findOne({ mobile: mobile })
+            .sort({ createdAt: -1 })  // ⭐ সবচেয়ে recent user আগে
+            .select('mobile isBlocked isDeleted isActive deletedAt blockedAt blockReason');
+
+        if (!anyUser) {
             return res.status(404).json({
                 success: false,
                 allowed: false,
@@ -45,48 +81,49 @@ router.get('/:mobile', async (req, res) => {
             });
         }
 
-        // ============================================
-        // ✅ STATUS CHECK — Priority Order
-        // ============================================
-
-        // ✅ Priority 1: DELETED (সবার আগে check)
-        if (user.isDeleted === true || user.deletedAt) {
+        // ✅ Priority 1: DELETED
+        if (anyUser.isDeleted === true || anyUser.deletedAt) {
             return res.status(200).json({
                 success: true,
                 allowed: false,
                 reason: 'deleted',
-                message: 'Your account has been deleted. Please contact support.'
+                message: 'Your account has been deleted. You can register again with the same details.',
+                canReregister: true,
+                deletedAt: anyUser.deletedAt || null
             });
         }
 
         // ✅ Priority 2: BLOCKED
-        if (user.isBlocked === true) {
+        if (anyUser.isBlocked === true) {
             return res.status(200).json({
                 success: true,
                 allowed: false,
                 reason: 'blocked',
                 message: 'Your account has been blocked by administrator.',
-                blockedAt: user.blockedAt || null,
-                blockReason: user.blockReason || null
+                canReregister: false,
+                blockedAt: anyUser.blockedAt || null,
+                blockReason: anyUser.blockReason || null
             });
         }
 
         // ✅ Priority 3: DEACTIVATED
-        if (user.isActive === false) {
+        if (anyUser.isActive === false) {
             return res.status(200).json({
                 success: true,
                 allowed: false,
                 reason: 'inactive',
-                message: 'Your account has been deactivated. Please contact support.'
+                message: 'Your account has been deactivated. Please contact support.',
+                canReregister: false
             });
         }
 
-        // ===== All Good =====
+        // Fallback (shouldn't reach here)
         return res.status(200).json({
             success: true,
             allowed: true,
             reason: null,
-            message: 'Account is active.'
+            message: 'Account status unknown.',
+            canReregister: false
         });
 
     } catch (error) {
