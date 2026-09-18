@@ -4,6 +4,10 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -11,9 +15,9 @@
       "src": "/service-worker.js",
       "dest": "/public/service-worker.js",
       "headers": {
+        "Content-Type": "application/javascript; charset=utf-8",
         "Cache-Control": "public, max-age=0, must-revalidate",
         "Service-Worker-Allowed": "/",
-        "Content-Type": "application/javascript; charset=utf-8",
         "Access-Control-Allow-Origin": "*"
       }
     },
@@ -23,14 +27,6 @@
       "headers": {
         "Content-Type": "application/manifest+json; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
-        "Access-Control-Allow-Origin": "*"
-      }
-    },
-    {
-      "src": "/(universe-wallet-logo-192|universe-wallet-logo-512|prime_wallet_logo_192x|prime_wallet_logo_512x)\\.png",
-      "dest": "/public/$1.png",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
         "Access-Control-Allow-Origin": "*"
       }
     },
@@ -109,6 +105,21 @@
       }
     },
     {
+      "src": "/(universe-wallet-logo-192|universe-wallet-logo-512|prime_wallet_logo_192x|prime_wallet_logo_512x)\\.png",
+      "dest": "/public/$1.png",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt|webmanifest|woff|woff2|ttf)$",
+      "dest": "/public/$1.$2",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
       "src": "/(normal|dice|toss|scratch)(/?)",
       "dest": "/server.js",
       "headers": {
@@ -116,14 +127,7 @@
       }
     },
     {
-      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt|webmanifest)$",
-      "dest": "/public/$1.$2",
-      "headers": {
-        "Access-Control-Allow-Origin": "*"
-      }
-    },
-    {
-      "src": "/(a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|normal|dice|toss|scratch|gift|forgot-password|tg|game|game-settings|profile|qr|invoice|invoice-pay|txn)(/?)",
+      "src": "/(a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|gift|forgot-password|tg|game|game-settings|profile|qr|invoice|invoice-pay|txn)(/?)$",
       "dest": "/server.js",
       "headers": {
         "Access-Control-Allow-Origin": "*"
