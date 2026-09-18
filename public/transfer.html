@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transfer • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+/* ===== THEME VARIABLES (LIGHT) ===== */
+:root { --bg: #f5f8fd; --bg-pattern-1: rgba(255,255,255,.7); --bg-pattern-2: rgba(245,248,253,.9); --grid-color: rgba(90,120,170,.08); --header-bg: rgba(255,255,255,.95); --header-border: #e9edf4; --card-bg: #ffffff; --card-2: #f8fafc; --text: #172033; --text-title: #172033; --muted: #a0a9b6; --muted-2: #a2aab5; --border: #e9edf4; --border-2: #edf0f5; --border-3: #e4e9f0; --input-bg: #ffffff; --menu-btn-bg: #ffffff; --menu-btn-border: #e4e9f0; --menu-btn-color: #607080; --icon-btn-bg: #ffffff; --icon-btn-border: #e5eaf1; --overview-small: #2778d9; --overview-span: #2275df; --section-title-color: #a2aab5; --section-title-bar: #2378df; --sidebar-bg: #ffffff; --sidebar-border: #e9edf4; --sidebar-menu-color: #1a3a6b; --sidebar-menu-hover: #eef3fa; --sidebar-menu-icon: #1a56db; --sidebar-username: #1a3a6b; --sidebar-mobile: #5a7a9a; --sidebar-balance-bg: #eef3fa; --sidebar-balance-color: #1a56db; --bottom-nav-bg: rgba(255,255,255,.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --modal-bg: #ffffff; --modal-border: #e9edf4; --modal-title: #1a3a6b; --modal-sub: #5a7a9a; --modal-cancel-bg: #eef3fa; --modal-cancel-color: #1a3a6b; --modal-cancel-hover: #e2eaf3; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #e9edf4; --blocked-title: #1a3a6b; --blocked-sub: #5a7a9a; --toast-bg: #1a3a6b; --toast-color: #ffffff; --qr-badge-bg: linear-gradient(135deg, #1a56db, #0088ff); --scan-border: #1a56db; --scan-glow: rgba(26,86,219,.2); --result-icon-bg: linear-gradient(135deg, #16a34a, #22c55e); --green: #16a34a; --green-bg: #dcfce7; --red: #dc2626; --red-bg: #fee2e2; }
+body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20,30,50,.7); --bg-pattern-2: rgba(13,21,38,.9); --grid-color: rgba(90,120,170,.06); --header-bg: rgba(26,38,57,.95); --header-border: #2b3a50; --card-bg: #1a2639; --card-2: #202d42; --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8491a6; --border: #2b3a50; --border-2: #2b3a50; --border-3: #2b3a50; --input-bg: #101a2c; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --icon-btn-bg: #202d42; --icon-btn-border: #2b3a50; --overview-small: #60a5fa; --overview-span: #60a5fa; --section-title-color: #8491a6; --section-title-bar: #3b82f6; --sidebar-bg: #1a2639; --sidebar-border: #2b3a50; --sidebar-menu-color: #edf3ff; --sidebar-menu-hover: #202d42; --sidebar-menu-icon: #60a5fa; --sidebar-username: #edf3ff; --sidebar-mobile: #8491a6; --sidebar-balance-bg: #172b55; --sidebar-balance-color: #60a5fa; --bottom-nav-bg: rgba(26,38,57,.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --modal-bg: #1a2639; --modal-border: #2b3a50; --modal-title: #edf3ff; --modal-sub: #8491a6; --modal-cancel-bg: #202d42; --modal-cancel-color: #edf3ff; --modal-cancel-hover: #2b3a50; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; --blocked-title: #edf3ff; --blocked-sub: #8491a6; --toast-bg: #1e293b; --toast-color: #ffffff; --qr-badge-bg: linear-gradient(135deg, #2563eb, #3b82f6); --scan-border: #3b82f6; --scan-glow: rgba(59,130,246,.3); --result-icon-bg: linear-gradient(135deg, #16a34a, #22c55e); --green: #10c993; --green-bg: #12352f; --red: #f87171; --red-bg: #3a2025; }
+
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
+
+/* ===== APP ===== */
+.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; background: linear-gradient(var(--bg-pattern-1), var(--bg-pattern-2)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, var(--grid-color) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--grid-color) 39px); padding-bottom: 130px; transition: background .3s ease; }
+
+/* ===== HEADER ===== */
+.header { height: 66px; background: var(--header-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s ease, border .3s ease; }
+.header-left { display: flex; align-items: center; gap: 13px; }
+.menu-btn { width: 39px; height: 39px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--menu-btn-bg); border: 1px solid var(--menu-btn-border); box-shadow: 0 4px 12px rgba(30,50,80,.08); cursor: pointer; transition: background .2s ease, border .2s ease; }
+.menu-btn span { font-size: 22px; color: var(--menu-btn-color); }
+.title { font-size: 20px; font-weight: 700; color: var(--text-title); }
+.title span { color: var(--overview-span); }
+.header-right { display: flex; gap: 8px; align-items: center; }
+.theme-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--icon-btn-bg); border: 1px solid var(--icon-btn-border); font-size: 17px; cursor: pointer; color: var(--text); transition: transform .25s ease, background .3s ease, border .3s ease, color .3s ease; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--overview-span); color: var(--overview-span); }
+.theme-btn:active { transform: scale(0.95); }
+.user-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 16px; font-weight: 800; cursor: pointer; border: 2px solid #d9e5ef; overflow: hidden; position: relative; box-shadow: 0 3px 10px rgba(26,86,219,.25); transition: transform 0.2s; }
+body.dark .user-avatar { border-color: #2b3a50; }
+.user-avatar:hover { transform: scale(1.05); }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
+/* ===== MAIN ===== */
+.main { padding: 20px; }
+
+/* ===== BALANCE CARD ===== */
+.balance-card { position: relative; min-height: 150px; padding: 20px; overflow: hidden; border-radius: 16px; color: #fff; background: radial-gradient(circle at 90% 20%, rgba(100,170,255,.45), transparent 35%), linear-gradient(135deg, #1269e9, #3c82ed); box-shadow: 0 10px 25px rgba(35,105,220,.22); margin-bottom: 20px; }
+.balance-card::after { content: ""; position: absolute; width: 220px; height: 120px; right: -50px; bottom: -65px; border-radius: 50%; background: rgba(255,255,255,.10); }
+.balance-content { position: relative; z-index: 2; }
+.balance-label { font-size: 9px; letter-spacing: 1px; opacity: .8; }
+.balance { margin-top: 5px; font-size: 25px; font-weight: 700; }
+.balance-text { margin-top: 5px; font-size: 8px; opacity: .78; }
+.add-funds { margin-top: 13px; padding: 7px 13px; border: 1px solid rgba(255,255,255,.25); border-radius: 9px; background: rgba(255,255,255,.14); color: #fff; font-size: 9px; cursor: pointer; font-family: inherit; font-weight: 700; }
+.add-funds:active { transform: scale(0.95); }
+
+/* ===== CARD ===== */
+.card { margin-bottom: 20px; padding: 16px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 5px 18px rgba(30,60,100,.08); border: 1px solid var(--border); transition: background .3s ease, border .3s ease; }
+.card-title { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.card-title::before { content: ""; width: 4px; height: 13px; border-radius: 5px; background: #2779e8; }
+
+/* ===== TABS ===== */
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 16px; }
+.tab-btn { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--card-2); color: var(--muted-2); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-family: inherit; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.tab-btn.active { background: var(--qr-badge-bg); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(26,86,219,.3); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== FORM ===== */
+.input-label { display: block; margin-bottom: 7px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
+.input-box { position: relative; margin-bottom: 14px; }
+.input-box span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+.input-box input { width: 100%; height: 42px; padding: 0 12px 0 32px; border: none; outline: none; border-radius: 10px; background: var(--card-2); color: var(--text); font-size: 12px; font-weight: 600; font-family: inherit; transition: 0.2s; }
+.input-box input:focus { box-shadow: 0 0 0 2px #cfe1ff; background: var(--card-bg); }
+.input-box input::placeholder { color: var(--muted); font-weight: 500; }
+
+/* ===== USER STATUS ===== */
+.user-status { display: none; align-items: center; gap: 6px; margin-top: -8px; margin-bottom: 12px; padding: 7px 12px; border-radius: 20px; font-size: 9px; font-weight: 700; }
+.user-status.active { display: inline-flex; }
+.user-status.verified { background: var(--green-bg); color: var(--green); }
+.user-status.error { background: var(--red-bg); color: var(--red); }
+.user-status.loading { background: #dbeafe; color: #1a56db; }
+body.dark .user-status.loading { background: #172b55; color: #60a5fa; }
+
+/* ===== QUICK AMOUNTS ===== */
+.quick-amounts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: -3px; margin-bottom: 14px; }
+.amount-btn { padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-2); color: var(--muted-2); font-size: 9px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; }
+.amount-btn:hover, .amount-btn.active { background: #e5efff; border-color: #b9d2fb; color: #2676e6; }
+body.dark .amount-btn:hover, body.dark .amount-btn.active { background: #172b55; color: #60a5fa; }
+.amount-btn:active { transform: scale(0.95); }
+
+/* ===== SUMMARY ===== */
+.summary { padding: 13px; border: 1px solid var(--border); border-radius: 11px; background: var(--card-2); margin-top: 12px; }
+.summary-title { margin-bottom: 12px; color: var(--muted-2); font-size: 8px; letter-spacing: 1px; font-weight: 700; }
+.summary-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--muted-2); font-size: 9px; font-weight: 600; }
+.summary-row:last-child { border-bottom: none; }
+.summary-row strong { color: var(--text-title); font-weight: 700; }
+.free { color: #13a675 !important; }
+.total { margin-top: 3px; color: var(--text-title) !important; font-weight: 700; }
+.total span { color: #2879e8; font-size: 17px; font-weight: 800; }
+
+/* ===== PAY BUTTON ===== */
+.pay-btn { width: 100%; height: 44px; margin-top: 14px; border: none; border-radius: 10px; background: var(--qr-badge-bg); color: white; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(26,86,219,.3); }
+.pay-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,86,219,.4); }
+.pay-btn:active:not(:disabled) { transform: scale(.98); }
+.pay-btn:disabled { opacity: 0.5; cursor: not-allowed; background: linear-gradient(135deg, #a9c8fa, #86adf2); box-shadow: none; transform: none; }
+.pay-btn .spinner { display: none; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin 0.6s linear infinite; }
+.pay-btn.loading .spinner { display: inline-block; }
+.pay-btn.loading i, .pay-btn.loading span { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.gallery-btn { background: var(--card-2) !important; color: var(--muted-2) !important; border: 1.5px solid var(--border) !important; box-shadow: none !important; }
+.gallery-btn:hover { background: #eef2f7 !important; }
+body.dark .gallery-btn:hover { background: #253449 !important; }
+
+.security-text { margin-top: 10px; text-align: center; color: var(--muted); font-size: 8px; font-weight: 600; }
+
+/* ===== QR SCANNER MODAL ===== */
+.scanner-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 200; align-items: flex-end; justify-content: center; }
+.scanner-modal.open { display: flex; }
+.scanner-card-modal { background: var(--card-bg); border-radius: 24px 24px 0 0; padding: 1.5rem; width: 100%; max-width: 430px; animation: slideUp 0.3s ease; transition: background .3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.scanner-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.scanner-header h3 { font-size: 0.9rem; font-weight: 900; color: var(--text-title); text-transform: uppercase; letter-spacing: 0.05em; }
+.close-scanner { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--card-2); color: var(--muted-2); }
+.close-scanner:hover { background: var(--red-bg); color: var(--red); }
+.scanner-wrapper { position: relative; border-radius: 16px; overflow: hidden; border: 3px solid var(--scan-border); box-shadow: 0 0 30px var(--scan-glow); }
+#qr-reader-area { border-radius: 14px; overflow: hidden; background: #000; }
+.scan-line { height: 3px; background: linear-gradient(90deg, transparent, var(--scan-border), transparent); position: absolute; width: 80%; left: 10%; top: 0; animation: scanAnim 2s infinite; box-shadow: 0 0 20px var(--scan-border); z-index: 10; border-radius: 2px; }
+@keyframes scanAnim { 0% { top: 5%; } 50% { top: 85%; } 100% { top: 5%; } }
+.scanner-corner { position: absolute; width: 30px; height: 30px; border: 3px solid var(--scan-border); z-index: 11; }
+.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+.cancel-scanner-btn { width: 100%; margin-top: 1rem; padding: 0.85rem; border: none; border-radius: 12px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; background: var(--red-bg); color: var(--red); }
+
+/* ===== RESULT MODAL ===== */
+.result-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 250; align-items: center; justify-content: center; padding: 1.5rem; }
+.result-modal.open { display: flex; }
+.result-box { background: var(--card-bg); border-radius: 24px; padding: 28px; width: 100%; max-width: 380px; text-align: center; animation: modalPopIn 0.3s ease-out; border: 1px solid var(--border); transition: background .3s ease, border .3s ease; }
+@keyframes modalPopIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.result-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--result-icon-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 30px; color: white; box-shadow: 0 4px 15px rgba(22,163,74,.3); }
+.result-icon.error { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 4px 15px rgba(220,38,38,.3); }
+.result-title { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.result-mobile { font-size: 22px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
+.result-name { font-size: 14px; font-weight: 700; color: var(--overview-span); margin-bottom: 20px; min-height: 20px; }
+.result-error-text { font-size: 13px; color: var(--muted-2); margin-bottom: 20px; line-height: 1.5; }
+.result-actions { display: flex; gap: 10px; }
+.result-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.result-btn.primary { background: var(--qr-badge-bg); color: white; box-shadow: 0 4px 15px rgba(26,86,219,.3); }
+.result-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,86,219,.4); }
+.result-btn.secondary { background: var(--card-2); color: var(--muted-2); border: 2px solid var(--border); }
+.result-btn.secondary:hover { background: var(--sidebar-menu-hover); }
+.result-btn.full { width: 100%; flex: none; }
+
+/* ===== TOAST ===== */
+.toast-message { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 24px; border-radius: 50px; font-size: 12px; font-weight: 700; z-index: 10000; box-shadow: 0 8px 30px rgba(0,0,0,.2); animation: fadeInUp 0.3s ease; max-width: 90%; text-align: center; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.toast-message.info { background: var(--toast-bg); color: var(--toast-color); }
+.toast-message.success { background: linear-gradient(135deg, #16a34a, #22c55e); color: #ffffff; }
+.toast-message.error { background: linear-gradient(135deg, #dc2626, #ef4444); color: #ffffff; }
+.toast-message i { font-size: 13px; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ===== SIDEBAR ===== */
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(15,30,60,.4); z-index: 998; display: none; backdrop-filter: blur(3px); }
+.sidebar-overlay.active { display: block; }
+.sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; z-index: 999; background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); box-shadow: 4px 0 20px rgba(0,50,100,.08); padding: 16px 14px; overflow-y: auto; transition: left .3s cubic-bezier(.4,0,.2,1), background .3s ease, border .3s ease; }
+.sidebar.open { left: 0; }
+.sidebar-profile { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--sidebar-border); }
+.profile-pic-container { width: 55px; height: 55px; margin: 0 auto 7px; cursor: pointer; }
+.profile-pic { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(26,86,219,.3); }
+.profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.sidebar-username { font-size: 14px; font-weight: 800; color: var(--sidebar-username); margin-bottom: 2px; }
+.sidebar-mobile { font-size: 10px; font-weight: 600; color: var(--sidebar-mobile); margin-bottom: 6px; }
+.sidebar-balance { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px; border-radius: 40px; background: var(--sidebar-balance-bg); color: var(--sidebar-balance-color); border: 1px solid var(--sidebar-border); transition: background .3s ease, color .3s ease; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--sidebar-menu-color); text-decoration: none; transition: all 0.2s; }
+.sidebar-menu-item:hover { background: var(--sidebar-menu-hover); }
+.sidebar-menu-item i { width: 18px; font-size: 13px; text-align: center; color: var(--sidebar-menu-icon); }
+.sidebar-menu-item.active { background: var(--sidebar-menu-hover); color: var(--sidebar-menu-icon); font-weight: 700; }
+.sidebar-menu-item.logout-item { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--sidebar-border); border-radius: 0; color: #dc2626; }
+.sidebar-menu-item.logout-item i { color: #dc2626 !important; }
+.sidebar-menu-item.logout-item:hover { background: rgba(220,38,38,.1); }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30,100,220,.15), inset 0 0 25px rgba(30,100,220,.03); z-index: 1000; transition: background .3s ease, border .3s ease; }
+.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; transition: color 0.25s ease, transform 0.25s ease; }
+.bottom-nav .nav-item:hover { color: var(--bottom-nav-active); transform: translateY(-2px); }
+.bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
+.bottom-nav .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.bottom-nav .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; transition: .25s ease; }
+.bottom-nav .nav-item.active .nav-icon svg { filter: drop-shadow(0 0 5px rgba(18,100,255,.45)); }
+.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: var(--bottom-nav-active); z-index: 10; }
+.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(145deg, #ffffff, #eaf3ff); border: 5px solid var(--card-bg); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 10px 25px rgba(18,100,255,.25), 0 0 25px rgba(18,100,255,.15); transition: transform .25s ease, box-shadow .25s ease, background .3s ease, border .3s ease; }
+body.dark .bottom-nav .scan-circle { background: linear-gradient(145deg, #1a2639, #202d42); }
+.bottom-nav .scan-item:hover .scan-circle { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 12px 30px rgba(18,100,255,.32), 0 0 35px rgba(18,100,255,.25); }
+.bottom-nav .qr-icon { width: 30px; height: 30px; fill: var(--bottom-nav-active); stroke: none; filter: drop-shadow(0 0 4px rgba(18,100,255,.3)); }
+.bottom-nav .scan-item span { color: var(--bottom-nav-active); font-size: 9px; font-weight: 800; letter-spacing: 0.8px; margin-top: 2px; }
+.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); box-shadow: 0 0 8px rgba(18,100,255,.5); }
+.bottom-nav .scan-item::after { display: none; }
+
+/* ===== SUCCESS MODAL (Receipt) ===== */
+.success-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 1.5rem; }
+.success-modal.open { display: flex; }
+.receipt-wrapper { width: 100%; max-width: 380px; border-radius: 24px; overflow: hidden; animation: modalPopIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); background: var(--card-bg); }
+.receipt-header { padding: 2rem 1.5rem; text-align: center; color: white; background: var(--qr-badge-bg); position: relative; }
+.receipt-header::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 30px; border-radius: 50% / 100% 100% 0 0; background: var(--card-bg); }
+.success-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.6rem; }
+.receipt-header h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 0.2rem; }
+.receipt-header p { font-size: 0.65rem; font-weight: 600; opacity: 0.85; letter-spacing: 0.05em; }
+.receipt-details { padding: 1.5rem 1.5rem 1rem; background: var(--card-bg); }
+.detail-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; padding: 0.2rem 0; }
+.detail-row span:first-child { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--muted-2); }
+.detail-row span:last-child { font-size: 0.75rem; font-weight: 800; text-align: right; word-break: break-all; color: var(--text-title); }
+.receipt-footer { padding: 0 1.5rem 1.5rem; background: var(--card-bg); }
+.close-modal-btn { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; background: var(--qr-badge-bg); color: white; }
+.close-modal-btn:active { transform: scale(0.95); }
+
+/* ===== BLOCKED OVERLAY ===== */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; transition: background .3s ease; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); box-shadow: 0 20px 60px rgba(0,50,100,.2); animation: modalPopIn 0.4s ease-out; transition: background .3s ease, border .3s ease; }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
+.blocked-title { font-size: 24px; font-weight: 900; color: var(--blocked-title); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: var(--blocked-sub); line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: var(--qr-badge-bg); color: #ffffff; box-shadow: 0 4px 15px rgba(26,86,219,.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,86,219,.4); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) { .main { padding: 14px; } .balance-card { min-height: 145px; padding: 18px; } .card { padding: 14px; } .amount-btn { padding: 6px 8px; } .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; } .bottom-nav .nav-item { font-size: 8px; letter-spacing: .4px; gap: 2px; } .bottom-nav .nav-icon { width: 22px; height: 22px; } .bottom-nav .nav-icon svg { width: 20px; height: 20px; } .bottom-nav .scan-circle { width: 48px; height: 48px; margin-top: -28px; border-width: 4px; } .bottom-nav .qr-icon { width: 26px; height: 26px; } .bottom-nav .scan-item span { font-size: 8px; margin-top: 1px; } .bottom-nav .nav-item.active::after { width: 16px; height: 2.5px; bottom: 2px; } }
+</style>
+</head>
+
+<body>
+
+<!-- ===== BLOCKED OVERLAY ===== -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+        <div class="profile-pic-container" onclick="goToProfile()">
+            <div class="profile-pic" id="sidebarProfilePic"></div>
+        </div>
+        <div class="sidebar-username" id="sidebarUsername">Loading...</div>
+        <div class="sidebar-mobile" id="sidebarMobile">---</div>
+        <div class="sidebar-balance"><i class="fa-solid fa-indian-rupee-sign"></i> <span id="sidebarBalanceAmount">0.00</span></div>
+    </div>
+    <div class="sidebar-menu">
+        <div class="sidebar-menu-item" onclick="location.href='/dashboard'"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></div>
+        <div class="sidebar-menu-item active" onclick="location.href='/transfer'"><i class="fa-solid fa-paper-plane"></i> <span>Transfer</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/deposit'"><i class="fa-solid fa-plus-circle"></i> <span>Add Fund</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/withdraw'"><i class="fa-solid fa-arrow-up"></i> <span>Withdraw</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transactions'"><i class="fa-solid fa-receipt"></i> <span>Transactions</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/gift'"><i class="fa-solid fa-gift"></i> <span>Gift Code</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/qr'"><i class="fa-solid fa-qrcode"></i> <span>My QR</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/profile'"><i class="fa-solid fa-user-circle"></i> <span>Profile</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/api'"><i class="fa-solid fa-code"></i> <span>API Settings</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/ai'"><i class="fa-solid fa-brain"></i> <span>AI Assistant</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/tg'"><i class="fa-brands fa-telegram"></i> <span>Join Telegram</span></div>
+        <div class="sidebar-menu-item" onclick="window.open('https://t.me/UNIVERSAL_OFC_SUPPORT', '_blank')"><i class="fa-solid fa-headset"></i> <span>Contact Support</span></div>
+        <div class="sidebar-menu-item logout-item" onclick="showLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></div>
+    </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="menu-btn" onclick="toggleSidebar()"><span>☰</span></div>
+            <div class="title">Send <span>Money</span></div>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- BALANCE -->
+        <section class="balance-card">
+            <div class="balance-content">
+                <div class="balance-label">● AVAILABLE BALANCE</div>
+                <div class="balance">₹<span id="userBalance">0.00</span></div>
+                <div class="balance-text">Ready for instant payments</div>
+                <button class="add-funds" onclick="location.href='/deposit'">＋ Add Funds</button>
+            </div>
+        </section>
+
+        <!-- QUICK PAYMENT -->
+        <section class="card">
+            <div class="card-title">QUICK PAYMENT</div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('number')">
+                    <i class="fa-solid fa-mobile-alt"></i> By Number
+                </button>
+                <button class="tab-btn" onclick="switchTab('qr')">
+                    <i class="fa-solid fa-qrcode"></i> By QR
+                </button>
+            </div>
+
+            <!-- TAB 1: NUMBER -->
+            <div id="tabNumber" class="tab-panel active">
+                <label class="input-label">Wallet Number</label>
+                <div class="input-box">
+                    <span>▣</span>
+                    <input type="tel" id="wallet" maxlength="10" placeholder="Enter 10-digit wallet number" oninput="onWalletInput(this.value)">
+                </div>
+                <div id="userStatusBadge" class="user-status">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="userStatusText"></span>
+                </div>
+
+                <label class="input-label">Amount</label>
+                <div class="input-box">
+                    <span>₹</span>
+                    <input type="number" id="amount" placeholder="0.00" min="1" step="1" oninput="onAmountInput(this.value)">
+                </div>
+
+                <div class="quick-amounts">
+                    <button class="amount-btn" data-value="100">₹ 100</button>
+                    <button class="amount-btn" data-value="500">₹ 500</button>
+                    <button class="amount-btn" data-value="1000">₹ 1K</button>
+                    <button class="amount-btn" data-value="2000">₹ 2K</button>
+                    <button class="amount-btn" data-value="5000">₹ 5K</button>
+                </div>
+
+                <div class="summary">
+                    <div class="summary-title">PAYMENT SUMMARY</div>
+                    <div class="summary-row">
+                        <span>Sending To</span>
+                        <strong id="sendingTo">—</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Amount</span>
+                        <strong id="summaryAmount">₹0.00</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Processing Fee</span>
+                        <strong class="free">● Free</strong>
+                    </div>
+                    <div class="summary-row total">
+                        <strong>Total Debit</strong>
+                        <span id="totalDebit">₹0.00</span>
+                    </div>
+                </div>
+
+                <button class="pay-btn" id="payBtn" onclick="initiateTransfer()" disabled>
+                    <div class="spinner"></div>
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Pay Now</span>
+                </button>
+
+                <div class="security-text">🛡 256-bit encrypted • Instant transfer</div>
+            </div>
+
+            <!-- TAB 2: QR -->
+            <div id="tabQr" class="tab-panel">
+                <div style="text-align: center; padding: 1.5rem 0;">
+                    <div style="margin-bottom: 1rem;">
+                        <i class="fa-solid fa-qrcode" style="font-size: 4rem; color: var(--overview-span); opacity: 0.6;"></i>
+                    </div>
+                    <p style="font-size: 0.85rem; font-weight: 700; color: var(--muted-2); margin-bottom: 0.5rem;">Scan or Upload Recipient's QR</p>
+                    <p style="font-size: 0.7rem; color: var(--muted); margin-bottom: 1.5rem;">
+                        <i class="fa-solid fa-shield-alt"></i> QR must contain 10-digit mobile number
+                    </p>
+
+                    <button class="pay-btn gallery-btn" onclick="chooseFromGallery()" style="margin-bottom: 12px;">
+                        <i class="fa-solid fa-images"></i>
+                        <span>Choose From Gallery</span>
+                    </button>
+
+                    <div style="margin: 12px 0;">
+                        <span style="color: var(--muted); font-size: 0.7rem; font-weight: 600;">───── Or ─────</span>
+                    </div>
+
+                    <button class="pay-btn" onclick="openQRScanner()">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Scan QR Code</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ===== QR SCANNER MODAL ===== -->
+<div id="qrScannerModal" class="scanner-modal">
+    <div class="scanner-card-modal">
+        <div class="scanner-header">
+            <h3><i class="fa-solid fa-qrcode"></i> Scan Recipient QR</h3>
+            <button class="close-scanner" onclick="closeQRScanner()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="scanner-wrapper">
+            <div id="qr-reader-area"></div>
+            <div class="scan-line"></div>
+            <div class="scanner-corner tl"></div>
+            <div class="scanner-corner tr"></div>
+            <div class="scanner-corner bl"></div>
+            <div class="scanner-corner br"></div>
+        </div>
+        <button class="cancel-scanner-btn" onclick="closeQRScanner()"><i class="fa-solid fa-times"></i> Cancel</button>
+    </div>
+</div>
+
+<!-- ===== RESULT MODAL ===== -->
+<div id="resultModal" class="result-modal">
+    <div class="result-box">
+        <div class="result-icon" id="resultIcon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="result-title" id="resultTitle">QR Scanned!</div>
+        <div class="result-mobile" id="resultMobile">— — —</div>
+        <div class="result-name" id="resultName">Fetching...</div>
+        <div class="result-actions" id="resultActions">
+            <button class="result-btn secondary" onclick="closeResultModal()">
+                <i class="fa-solid fa-times"></i> Cancel
+            </button>
+            <button class="result-btn primary" id="sendToUserBtn" onclick="fillAndProceed()">
+                <i class="fa-solid fa-paper-plane"></i> Send
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SUCCESS MODAL (Receipt) ===== -->
+<div id="successModal" class="success-modal">
+    <div class="receipt-wrapper">
+        <div class="receipt-header">
+            <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+            <h2 id="modalAmount">₹0.00</h2>
+            <p>Transfer Completed</p>
+        </div>
+        <div class="receipt-details">
+            <div class="detail-row"><span>Transaction ID</span><span id="modalTxId">—</span></div>
+            <div class="detail-row"><span>Receiver</span><span id="modalReceiver">—</span></div>
+            <div class="detail-row"><span>Amount</span><span id="modalAmountDisplay">—</span></div>
+            <div class="detail-row"><span>New Balance</span><span id="modalNewBalance">—</span></div>
+            <div class="detail-row"><span>Date &amp; Time</span><span id="modalDateTime">—</span></div>
+        </div>
+        <div class="receipt-footer">
+            <button class="close-modal-btn" onclick="dismissSuccessModal()">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== HIDDEN QR READER (for gallery uploads) ===== -->
+<div id="reader" style="display: none;"></div>
+
+<!-- ===== HIDDEN FILE INPUT ===== -->
+<input type="file" id="galleryFileInput" accept="image/*" style="display: none;" onchange="handleGalleryImage(this)">
+
+<!-- ===== BOTTOM NAV ===== -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item" data-nav="dashboard">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+        <span>Home</span>
+    </a>
+    <a href="/transfer" class="nav-item" data-nav="transfer">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div>
+        <span>Send</span>
+    </a>
+    <a href="/qr" class="nav-item scan-item" data-nav="qr">
+        <div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div>
+        <span>Scan</span>
+    </a>
+    <a href="/deposit" class="nav-item" data-nav="deposit">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+        <span>Add</span>
+    </a>
+    <a href="/transactions" class="nav-item" data-nav="transactions">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+        <span>History</span>
+    </a>
+</div>
+
+<!-- ===== LOGOUT MODAL ===== -->
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal-box">
+        <i class="fas fa-sign-out-alt modal-icon"></i>
+        <div class="modal-title">Logout Confirmation</div>
+        <div class="modal-sub">Are you sure you want to logout from your account?</div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeLogoutModal()">No</button>
+            <button class="modal-btn logout" onclick="confirmLogout()">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var API_BASE = '/api';
+var token = localStorage.getItem('token');
+var user = JSON.parse(localStorage.getItem('user') || '{}');
+var isAccountBlocked = false;
+var blockCheckDone = false;
+
+if (!token) { window.location.href = '/'; }
+
+var currentReceiverMobile = '';
+var currentReceiverName = '';
+var isVerified = false;
+var searchTimeout = null;
+var html5QrCode = null;
+var scannedMobile = '';
+var scannedUserName = '';
+
+/* ============================================
+   DEFAULT PROFILE PICTURE (SVG Inline)
+   ============================================ */
+var DEFAULT_PROFILE_PICTURE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+        '<defs>' +
+            '<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" stop-color="#1a56db"/>' +
+                '<stop offset="100%" stop-color="#0088ff"/>' +
+            '</linearGradient>' +
+        '</defs>' +
+        '<rect width="100" height="100" fill="url(#g)"/>' +
+        '<circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.95"/>' +
+        '<path d="M 50 62 C 30 62 18 75 18 92 L 82 92 C 82 75 70 62 50 62 Z" fill="#ffffff" opacity="0.95"/>' +
+    '</svg>'
+);
+
+window.handleAvatarError = function(imgEl) {
+    if (imgEl.src !== DEFAULT_PROFILE_PICTURE) {
+        imgEl.src = DEFAULT_PROFILE_PICTURE;
+    }
+};
+
+/* ============================================
+   THEME SYSTEM
+   ============================================ */
+(function initTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+})();
+
+function toggleTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    if (isDark) {
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('uwTheme', 'dark');
+    } else {
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('uwTheme', 'light');
+    }
+}
+
+/* ============================================
+   CHECK STATUS BY MOBILE (Token ছাড়া)
+   ============================================ */
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+            cleanMobile = cleanMobile.slice(2);
+        }
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        var data = await res.json();
+        return data;
+    } catch (err) {
+        return { allowed: true, reason: 'network_error' };
+    }
+}
+
+/* ============================================
+   HANDLE BLOCK REASON
+   ============================================ */
+function handleBlockReason(reason) {
+    if (reason === 'blocked') {
+        showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
+    } else if (reason === 'deleted') {
+        showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
+    } else if (reason === 'inactive') {
+        showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
+    } else if (reason === 'notfound') {
+        showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    } else {
+        showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
+    }
+}
+
+/* ============================================
+   SHOW BLOCKED OVERLAY
+   ============================================ */
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    if (html5QrCode) {
+        html5QrCode.stop().catch(function(){});
+        html5QrCode = null;
+    }
+}
+
+/* ============================================
+   LOGOUT
+   ============================================ */
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); closeSidebar(); }
+function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+function confirmLogout() { closeLogoutModal(); setTimeout(logout, 200); }
+document.getElementById('logoutModal').addEventListener('click', function(e){ if(e.target === this) closeLogoutModal(); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLogoutModal(); });
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+function goToProfile(){ window.location.href = '/profile'; }
+
+/* ============================================
+   SET AVATAR
+   ============================================ */
+function setAvatar(u) {
+    var avatarEl = document.getElementById('userAvatar');
+    var sidebarPic = document.getElementById('sidebarProfilePic');
+    if (!avatarEl) return;
+    var imgSrc = DEFAULT_PROFILE_PICTURE;
+    if (u && u.profilePicture && typeof u.profilePicture === 'string') {
+        var pp = u.profilePicture.trim();
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) {
+            imgSrc = pp;
+        }
+    }
+    avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+    if (sidebarPic) sidebarPic.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+}
+
+/* ============================================
+   UPDATE SIDEBAR PROFILE
+   ============================================ */
+function updateSidebarProfile(u) {
+    if (!u) return;
+    var usernameEl = document.getElementById('sidebarUsername');
+    var mobileEl = document.getElementById('sidebarMobile');
+    var picEl = document.getElementById('sidebarProfilePic');
+    if (usernameEl) usernameEl.textContent = u.fullName || 'User';
+    if (mobileEl) {
+        var mob = u.mobile || '---';
+        mobileEl.textContent = (mob.length === 10) ? '+91 ' + mob.slice(0,5) + ' ' + mob.slice(5) : mob;
+    }
+    if (picEl) {
+        var imgSrc = DEFAULT_PROFILE_PICTURE;
+        if (u.profilePicture && typeof u.profilePicture === 'string') {
+            var pp = u.profilePicture.trim();
+            if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) {
+                imgSrc = pp;
+            }
+        }
+        picEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+    }
+    var balEl = document.getElementById('sidebarBalanceAmount');
+    if (balEl) balEl.textContent = (parseFloat(u.balance) || 0).toFixed(2);
+}
+
+/* ============================================
+   UNIVERSAL USER EXTRACTOR
+   ============================================ */
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload;
+    var safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+
+/* ============================================
+   SAFE FETCH
+   ============================================ */
+async function safeFetch(url, options) {
+    options = options || {};
+    try {
+        var response = await fetch(url, options);
+        var data = {};
+        try { data = await response.json(); } catch(e) { data = {}; }
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            throw new Error('Account deleted');
+        }
+        return { response: response, data: data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+/* ============================================
+   VERIFY USER STATE
+   ============================================ */
+async function verifyUserState() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        var res = await fetch(API_BASE + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        var data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            return false;
+        }
+
+        var u = extractUser(data);
+        if (!u || (!u.id && !u._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+        if (u.isBlocked === true) {
+            showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (u.isDeleted === true || u.deletedAt) {
+            showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+            return false;
+        }
+        if (u.isActive === false) {
+            showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+            return false;
+        }
+
+        if (u.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(u.mobile);
+            if (status && status.allowed === false) {
+                handleBlockReason(status.reason);
+                return false;
+            }
+        }
+
+        user = u;
+        localStorage.setItem('user', JSON.stringify(u));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+/* ============================================
+   TOAST
+   ============================================ */
+function showToast(msg, type) {
+    if (isAccountBlocked) return;
+    type = type || 'info';
+    var existing = document.querySelector('.toast-message');
+    if (existing) existing.remove();
+    var iconClass = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+    var t = document.createElement('div');
+    t.className = 'toast-message ' + type;
+    t.innerHTML = '<i class="fas ' + iconClass + '"></i> ' + msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 3000);
+}
+
+/* ============================================
+   TAB SWITCHING
+   ============================================ */
+function switchTab(tab) {
+    if (isAccountBlocked) return;
+    var tabNumber = document.getElementById('tabNumber');
+    var tabQr = document.getElementById('tabQr');
+    var btnNumber = document.querySelector('.tab-btn:first-child');
+    var btnQr = document.querySelector('.tab-btn:last-child');
+    if (tab === 'number') {
+        tabNumber.classList.add('active');
+        tabQr.classList.remove('active');
+        btnNumber.classList.add('active');
+        btnQr.classList.remove('active');
+    } else {
+        tabNumber.classList.remove('active');
+        tabQr.classList.add('active');
+        btnNumber.classList.remove('active');
+        btnQr.classList.add('active');
+    }
+}
+
+/* ============================================
+   WALLET INPUT
+   ============================================ */
+function onWalletInput(value) {
+    if (isAccountBlocked) return;
+    updateSummary();
+    clearTimeout(searchTimeout);
+    updateUserStatus('', '');
+    var clean = value.toString().replace(/\D/g, '');
+    document.getElementById('wallet').value = clean;
+    if (!/^\d{10}$/.test(clean)) {
+        isVerified = false;
+        if (clean.length > 0) updateUserStatus('error', 'Invalid mobile number');
+        updatePayButtonState();
+        return;
+    }
+    currentReceiverMobile = clean;
+    updateUserStatus('loading', 'Verifying...');
+    updatePayButtonState();
+    searchTimeout = setTimeout(function(){ fetchUserDetails(clean); }, 500);
+}
+
+/* ============================================
+   FETCH USER DETAILS
+   ============================================ */
+async function fetchUserDetails(mobileNumber) {
+    if (isAccountBlocked) return;
+    updateUserStatus('loading', 'Fetching user details...');
+    try {
+        var result = await safeFetch(API_BASE + '/transfer/view?number=' + encodeURIComponent(mobileNumber), {
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        if (isAccountBlocked) return;
+
+        if (result.data && result.data.status === 'success') {
+            currentReceiverName = result.data.name || result.data.fullName || 'Unknown User';
+            currentReceiverMobile = mobileNumber;
+            isVerified = true;
+            updateUserStatus('verified', currentReceiverName);
+            updateSummary();
+        } else {
+            updateUserStatus('error', result.data.error || result.data.message || 'Account not found');
+            isVerified = false;
+        }
+    } catch (err) {
+        if (!isAccountBlocked) {
+            updateUserStatus('error', 'Network Error');
+            isVerified = false;
+        }
+    }
+    updatePayButtonState();
+}
+
+/* ============================================
+   UPDATE USER STATUS
+   ============================================ */
+function updateUserStatus(status, message) {
+    if (isAccountBlocked) return;
+    var badge = document.getElementById('userStatusBadge');
+    var textSpan = document.getElementById('userStatusText');
+    var icon = badge.querySelector('i');
+    badge.classList.remove('active', 'verified', 'error', 'loading');
+    if (status === 'loading') {
+        badge.classList.add('active', 'loading');
+        icon.className = 'fa-solid fa-spinner fa-pulse';
+        textSpan.textContent = ' ' + message;
+        isVerified = false;
+    } else if (status === 'verified') {
+        badge.classList.add('active', 'verified');
+        icon.className = 'fa-solid fa-circle-check';
+        textSpan.textContent = ' ' + message;
+        isVerified = true;
+    } else if (status === 'error') {
+        badge.classList.add('active', 'error');
+        icon.className = 'fa-solid fa-circle-exclamation';
+        textSpan.textContent = ' ' + message;
+        isVerified = false;
+    } else {
+        badge.classList.remove('active');
+        textSpan.textContent = '';
+        isVerified = false;
+    }
+    updatePayButtonState();
+}
+
+/* ============================================
+   AMOUNT INPUT & SUMMARY
+   ============================================ */
+function onAmountInput(value) {
+    if (isAccountBlocked) return;
+    document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('active'); });
+    updateSummary();
+}
+
+function updateSummary() {
+    var amt = parseFloat(document.getElementById('amount').value) || 0;
+    var wallet = document.getElementById('wallet').value.trim();
+    document.getElementById('summaryAmount').textContent = '₹' + amt.toFixed(2);
+    document.getElementById('totalDebit').textContent = '₹' + amt.toFixed(2);
+    if (wallet.length === 10 && isVerified && currentReceiverName) {
+        document.getElementById('sendingTo').textContent = currentReceiverName + ' (' + wallet + ')';
+    } else if (wallet.length > 0) {
+        document.getElementById('sendingTo').textContent = wallet;
+    } else {
+        document.getElementById('sendingTo').textContent = '—';
+    }
+    updatePayButtonState();
+}
+
+document.querySelectorAll('.amount-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+        if (isAccountBlocked) return;
+        var value = this.dataset.value;
+        document.getElementById('amount').value = value;
+        document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        updateSummary();
+    });
+});
+
+/* ============================================
+   PAY BUTTON STATE
+   ============================================ */
+function updatePayButtonState() {
+    if (isAccountBlocked) return;
+    var payBtn = document.getElementById('payBtn');
+    if (!payBtn) return;
+    var mobile = document.getElementById('wallet').value.trim();
+    var amountVal = parseFloat(document.getElementById('amount').value) || 0;
+    var balance = parseFloat(document.getElementById('userBalance').textContent) || 0;
+    var isMobileValid = /^\d{10}$/.test(mobile);
+    var isUserVerified = isVerified === true;
+    var isAmountValid = amountVal > 0;
+    var isBalanceSufficient = amountVal <= balance;
+    var canPay = isMobileValid && isUserVerified && isAmountValid && isBalanceSufficient;
+    if (canPay) {
+        payBtn.disabled = false;
+    } else {
+        payBtn.disabled = true;
+    }
+}
+
+/* ============================================
+   REFRESH WALLET BALANCE
+   ============================================ */
+async function refreshWalletBalance() {
+    if (isAccountBlocked) return;
+    try {
+        var result = await safeFetch(API_BASE + '/transfer/balance', {
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        if (isAccountBlocked) return;
+        if (result.data && result.data.status === 'success') {
+            var bal = parseFloat(result.data.balance).toFixed(2);
+            document.getElementById('userBalance').textContent = bal;
+            var balEl = document.getElementById('sidebarBalanceAmount');
+            if (balEl) balEl.textContent = bal;
+            updatePayButtonState();
+        }
+    } catch (error) {}
+}
+
+/* ============================================
+   OPEN QR SCANNER (Camera)
+   ============================================ */
+function openQRScanner() {
+    if (isAccountBlocked) return;
+    var modal = document.getElementById('qrScannerModal');
+    modal.classList.add('open');
+    if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode = null; }
+    document.getElementById('qr-reader-area').innerHTML = '';
+    try {
+        html5QrCode = new Html5Qrcode('qr-reader-area');
+        html5QrCode.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+            onCameraScanSuccess,
+            function(){}
+        ).catch(function() {
+            showToast('Camera permission denied!', 'error');
+            closeQRScanner();
+        });
+    } catch (error) {
+        showToast('Failed to initialize camera', 'error');
+        closeQRScanner();
+    }
+}
+
+/* ============================================
+   CAMERA SCAN SUCCESS
+   ============================================ */
+function onCameraScanSuccess(decodedText) {
+    if (isAccountBlocked) return;
+    if (html5QrCode) {
+        html5QrCode.stop().then(function(){
+            closeQRScanner();
+            processQRData(decodedText.trim());
+        }).catch(function(){
+            closeQRScanner();
+            processQRData(decodedText.trim());
+        });
+    } else {
+        closeQRScanner();
+        processQRData(decodedText.trim());
+    }
+}
+
+/* ============================================
+   CLOSE QR SCANNER
+   ============================================ */
+function closeQRScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().catch(function(){}).then(function(){
+            document.getElementById('qrScannerModal').classList.remove('open');
+            html5QrCode = null;
+        });
+    } else {
+        document.getElementById('qrScannerModal').classList.remove('open');
+    }
+}
+
+/* ============================================
+   CHOOSE FROM GALLERY
+   ============================================ */
+function chooseFromGallery() {
+    if (isAccountBlocked) return;
+    document.getElementById('galleryFileInput').click();
+}
+
+/* ============================================
+   HANDLE GALLERY IMAGE (QR from gallery)
+   ============================================ */
+function handleGalleryImage(input) {
+    if (isAccountBlocked) { input.value = ''; return; }
+
+    var file = input.files[0];
+    if (!file) return;
+
+    if (!file.type.match(/image\/(jpeg|png|gif|webp|bmp)/i)) {
+        showToast('Invalid file type. Please select an image.', 'error');
+        input.value = '';
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('File too large! Max 5MB', 'error');
+        input.value = '';
+        return;
+    }
+
+    showToast('Processing image...', 'info');
+
+    var qrScanner = new Html5Qrcode('reader', false);
+
+    qrScanner.scanFile(file, true)
+        .then(function(decodedText) {
+            console.log('✅ QR Decoded:', decodedText);
+            processQRData(decodedText.trim());
+            input.value = '';
+        })
+        .catch(function(err) {
+            console.error('❌ QR scan error:', err);
+            showToast('No QR code found in the image', 'error');
+            input.value = '';
+        });
+}
+
+/* ============================================
+   PROCESS QR DATA
+   ============================================ */
+function processQRData(decodedText) {
+    if (isAccountBlocked) return;
+
+    var cleanedText = String(decodedText).replace(/\D/g, '');
+
+    if (cleanedText.length === 12 && cleanedText.startsWith('91')) {
+        cleanedText = cleanedText.slice(2);
+    }
+
+    if (cleanedText.length >= 10) {
+        var mobileNumber = cleanedText.slice(0, 10);
+
+        switchTab('number');
+
+        var mobileInput = document.getElementById('wallet');
+        if (mobileInput) {
+            mobileInput.value = mobileNumber;
+            mobileInput.style.borderColor = '#16a34a';
+            mobileInput.style.boxShadow = '0 0 0 3px rgba(22, 163, 74, 0.2)';
+            setTimeout(function(){
+                mobileInput.style.borderColor = '';
+                mobileInput.style.boxShadow = '';
+            }, 2000);
+        }
+
+        scannedMobile = mobileNumber;
+        onWalletInput(mobileNumber);
+        showToast('QR scanned! Fetching user details...', 'success');
+    } else {
+        showToast('Invalid QR. No 10-digit mobile found.', 'error');
+    }
+}
+
+/* ============================================
+   RESULT MODAL
+   ============================================ */
+function showResultModal(mobile, name) {
+    var modal = document.getElementById('resultModal');
+    document.getElementById('resultMobile').textContent = mobile;
+    document.getElementById('resultName').textContent = name || 'User not found';
+    modal.classList.add('open');
+}
+
+function closeResultModal() {
+    document.getElementById('resultModal').classList.remove('open');
+}
+
+function fillAndProceed() {
+    if (scannedMobile) {
+        switchTab('number');
+        var mobileInput = document.getElementById('wallet');
+        if (mobileInput) mobileInput.value = scannedMobile;
+        onWalletInput(scannedMobile);
+        closeResultModal();
+        showToast('Mobile number filled', 'success');
+    }
+}
+
+/* ============================================
+   INITIATE TRANSFER
+   ============================================ */
+async function initiateTransfer() {
+    if (isAccountBlocked) return;
+    var payBtn = document.getElementById('payBtn');
+    if (payBtn.disabled) return;
+
+    var mobile = document.getElementById('wallet').value.trim();
+    var amount = document.getElementById('amount').value;
+
+    if (!mobile || mobile.length < 10) { showToast('Enter a valid 10-digit mobile', 'error'); return; }
+    if (!isVerified) { showToast('Please wait, verifying recipient...', 'error'); return; }
+    if (!amount || amount <= 0) { showToast('Enter a valid amount', 'error'); return; }
+
+    var currentBalance = parseFloat(document.getElementById('userBalance').textContent);
+    if (parseFloat(amount) > currentBalance) {
+        showToast('Insufficient balance! ₹' + currentBalance.toFixed(2) + ' available', 'error');
+        return;
+    }
+
+    payBtn.classList.add('loading');
+    payBtn.disabled = true;
+
+    try {
+        var result = await safeFetch(API_BASE + '/transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ mobile: mobile, amount: parseFloat(amount), note: '' })
+        });
+        if (isAccountBlocked) return;
+
+        if (result.data.success === true || result.data.status === 'success') {
+            var now = new Date();
+            var formattedDateTime = now.toLocaleString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: true
+            });
+            document.getElementById('modalAmount').textContent = '-₹' + parseFloat(amount).toFixed(2);
+            document.getElementById('modalAmountDisplay').textContent = '₹' + parseFloat(amount).toFixed(2);
+            document.getElementById('modalTxId').textContent = result.data.txnId || 'TXN' + Date.now();
+            document.getElementById('modalReceiver').textContent = mobile + ' (' + currentReceiverName + ')';
+            document.getElementById('modalNewBalance').textContent = '₹' + (result.data.newBalance || 0).toFixed(2);
+            document.getElementById('modalDateTime').textContent = formattedDateTime;
+            document.getElementById('successModal').classList.add('open');
+
+            document.getElementById('wallet').value = '';
+            document.getElementById('amount').value = '';
+            updateUserStatus('', '');
+            isVerified = false;
+            currentReceiverName = '';
+            document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('active'); });
+            updateSummary();
+            showToast('Transfer successful!', 'success');
+            refreshWalletBalance();
+        } else {
+            showToast(result.data.message || result.data.error || 'Transfer Failed', 'error');
+        }
+    } catch (error) {
+        if (!isAccountBlocked) showToast(error.message, 'error');
+    } finally {
+        payBtn.classList.remove('loading');
+        payBtn.disabled = false;
+        updatePayButtonState();
+    }
+}
+
+function dismissSuccessModal() {
+    document.getElementById('successModal').classList.remove('open');
+}
+
+/* ============================================
+   BOTTOM NAV — ACTIVE STATE
+   ============================================ */
+(function setActiveNav(){
+    var path = window.location.pathname;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
+    var active = null;
+    if (path.indexOf('/dashboard') === 0 || path === '/' || path === '') active = document.querySelector('.bottom-nav .nav-item[data-nav="dashboard"]');
+    else if (path.indexOf('/transfer') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transfer"]');
+    else if (path.indexOf('/qr') === 0 || path.indexOf('/scan') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="qr"]');
+    else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="deposit"]');
+    else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transactions"]');
+    if (active) active.classList.add('active');
+})();
+
+/* ============================================
+   CHECK URL FOR RECEIVER MOBILE
+   ============================================ */
+function checkUrlForReceiver() {
+    var params = new URLSearchParams(window.location.search);
+    var to = params.get('to');
+    if (to && /^\d{10}$/.test(to)) {
+        switchTab('number');
+        var mobileInput = document.getElementById('wallet');
+        if (mobileInput) mobileInput.value = to;
+        onWalletInput(to);
+    }
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+document.addEventListener('DOMContentLoaded', async function() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return; }
+
+    var themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+    try {
+        var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setAvatar(cachedUser);
+        updateSidebarProfile(cachedUser);
+    } catch(e) {
+        setAvatar({});
+    }
+
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    setAvatar(user);
+    updateSidebarProfile(user);
+
+    refreshWalletBalance();
+    updatePayButtonState();
+    updateSummary();
+    checkUrlForReceiver();
+});
+</script>
+
+</body>
+</html>
