@@ -1,14 +1,19 @@
 {
-  "name": "Pʀɪᴍᴇ Wᴀʟʟᴇᴛ",
-  "short_name": "Pʀɪᴍᴇ",
-  "description": "Dɪɢɪᴛᴀʟ • Fᴀꜱᴛ • Sᴇᴄᴜʀᴇ",
+  "name": "Universe Wallet",
+  "short_name": "Universe",
+  "description": "Universe Wallet - Digital, Fast, and Secure wallet for instant money transfers, deposits, withdrawals, and rewards.",
   "start_url": "/",
   "scope": "/",
   "id": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["finance", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/universe-wallet-logo-192.png",
