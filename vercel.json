@@ -12,6 +12,15 @@
   ],
   "routes": [
     {
+      "src": "/.well-known/assetlinks.json",
+      "dest": "/public/.well-known/assetlinks.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
       "src": "/service-worker.js",
       "dest": "/public/service-worker.js",
       "headers": {
