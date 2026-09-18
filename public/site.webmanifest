@@ -4,22 +4,35 @@
   "description": "Dɪɢɪᴛᴀʟ • Fᴀꜱᴛ • Sᴇᴄᴜʀᴇ",
   "start_url": "/",
   "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
   "icons": [
     {
-      "src": "/prime_wallet_logo_192x192.png",
+      "src": "/universe-wallet-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/prime_wallet_logo_512x512.png",
+      "src": "/universe-wallet-logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/universe-wallet-logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/universe-wallet-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
