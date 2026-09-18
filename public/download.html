@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download • Universe Wallet</title>
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f8fd 0%, #e8f0fe 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #172033;
+}
+.card {
+    background: #ffffff;
+    max-width: 440px;
+    width: 100%;
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 20px 60px rgba(30,60,120,.15);
+    text-align: center;
+    animation: slideIn .5s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+    margin: 0 auto 18px;
+    background: linear-gradient(135deg, #3972f5, #5b4bea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    box-shadow: 0 10px 30px rgba(57,114,245,.35);
+    overflow: hidden;
+}
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+h1 {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1a3a6b;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+.subtitle {
+    font-size: 13px;
+    color: #7a8ba5;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.info-box {
+    background: #f4f8ff;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: left;
+}
+.info-box small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #7a8ba5;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.info-box span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a3a6b;
+}
+.download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 56px;
+    background: linear-gradient(135deg, #3972f5, #5b4bea);
+    color: white;
+    text-decoration: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    box-shadow: 0 10px 25px rgba(57,114,245,.35);
+    transition: transform .2s, box-shadow .2s;
+    margin-bottom: 14px;
+    border: none;
+    cursor: pointer;
+}
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 35px rgba(57,114,245,.45);
+}
+.download-btn:active {
+    transform: scale(.98);
+}
+.download-btn i {
+    font-size: 20px;
+}
+.file-info {
+    font-size: 11px;
+    color: #7a8ba5;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+.install-steps {
+    background: #f4f8ff;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+.install-steps h3 {
+    font-size: 14px;
+    color: #1a3a6b;
+    margin-bottom: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.install-steps h3 i {
+    color: #3972f5;
+}
+.install-steps ol {
+    margin-left: 20px;
+    font-size: 12.5px;
+    color: #526072;
+    line-height: 1.8;
+}
+.install-steps ol li {
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.install-steps ol li strong {
+    color: #1a3a6b;
+}
+.qr-section {
+    background: #ffffff;
+    border: 2px dashed #dce6f6;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+.qr-section h4 {
+    font-size: 12px;
+    color: #7a8ba5;
+    margin-bottom: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.qr-section img {
+    width: 140px;
+    height: 140px;
+}
+.trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    padding-top: 20px;
+    border-top: 1px solid #e9edf4;
+}
+.trust-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.trust-item i {
+    font-size: 18px;
+    color: #3972f5;
+}
+.trust-item small {
+    font-size: 9px;
+    color: #7a8ba5;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+@media (max-width: 480px) {
+    .card { padding: 26px 20px; border-radius: 20px; }
+    h1 { font-size: 22px; }
+    .logo { width: 75px; height: 75px; font-size: 36px; }
+    .download-btn { height: 52px; font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+    <div class="logo">
+        <img src="/universe-wallet-logo-192.png" alt="Universe Wallet" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
+    </div>
+
+    <h1>Universe Wallet</h1>
+    <p class="subtitle">Download the official Android app</p>
+
+    <div class="info-grid">
+        <div class="info-box">
+            <small>Version</small>
+            <span>1.0.0</span>
+        </div>
+        <div class="info-box">
+            <small>Size</small>
+            <span>3.04 MB</span>
+        </div>
+        <div class="info-box">
+            <small>Updated</small>
+            <span>Sept 2026</span>
+        </div>
+        <div class="info-box">
+            <small>Requires</small>
+            <span>Android 5+</span>
+        </div>
+    </div>
+
+    <!-- ⚠️ এই href-এ আপনার APK-র সঠিক path দিন -->
+    <a href="/Universe Wallet.apk" download class="download-btn" id="downloadBtn">
+        <i class="fas fa-download"></i>
+        <span>DOWNLOAD APK</span>
+    </a>
+    <div class="file-info">Universe Wallet.apk • 3.04 MB</div>
+
+    <div class="install-steps">
+        <h3><i class="fas fa-list-ol"></i> How to Install</h3>
+        <ol>
+            <li>Tap <strong>DOWNLOAD APK</strong> above</li>
+            <li>Open the downloaded file from <strong>Files / Downloads</strong></li>
+            <li>Tap <strong>Install</strong> and allow <strong>"Unknown Sources"</strong> if asked</li>
+            <li>Open <strong>Universe Wallet</strong> from home screen 🎉</li>
+        </ol>
+    </div>
+
+    <div class="qr-section">
+        <h4>Scan to Download</h4>
+        <img id="qrCode" src="" alt="QR Code">
+    </div>
+
+    <div class="trust-badges">
+        <div class="trust-item">
+            <i class="fas fa-shield-alt"></i>
+            <small>Secure</small>
+        </div>
+        <div class="trust-item">
+            <i class="fas fa-bolt"></i>
+            <small>Fast</small>
+        </div>
+        <div class="trust-item">
+            <i class="fas fa-lock"></i>
+            <small>Private</small>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Auto-generate QR code for the APK download URL
+(function() {
+    var apkUrl = window.location.origin + '/Universe Wallet.apk';
+    var qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(apkUrl);
+    var qrImg = document.getElementById('qrCode');
+    if (qrImg) qrImg.src = qrApi;
+})();
+</script>
+
+</body>
+</html>
