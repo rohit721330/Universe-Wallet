@@ -201,6 +201,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==================== HTML ROUTES ====================
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
+app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', 'download.html')));
+app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
 app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
 app.get('/index', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/pin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pin.html')));
