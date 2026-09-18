@@ -1,8 +1,8 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.universe_wallet.twa",
-        "sha256_cert_fingerprints": ["F7:97:E3:6C:A3:88:E8:0F:8B:FB:12:B8:FC:2D:DF:5F:82:D4:E4:A0:49:85:88:61:D8:81:6A:FD:71:3F:A8:BD"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.universe_wallet.twa",
+    "sha256_cert_fingerprints": ["F7:97:E3:6C:A3:88:E8:0F:8B:FB:12:B8:FC:2D:DF:5F:82:D4:E4:A0:49:85:88:61:D8:81:6A:FD:71:3F:A8:BD"]
+  }
+}]
