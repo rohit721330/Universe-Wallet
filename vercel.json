@@ -122,10 +122,11 @@
       }
     },
     {
-      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt|webmanifest|woff|woff2|ttf)$",
+      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt|webmanifest|woff|woff2|ttf|apk|zip|pdf)$",
       "dest": "/public/$1.$2",
       "headers": {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=3600"
       }
     },
     {
@@ -136,7 +137,7 @@
       }
     },
     {
-      "src": "/(universe-wallet.apk|download|refund|privacy|a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|gift|forgot-password|tg|game|game-settings|profile|qr|invoice|invoice-pay|txn)(/?)$",
+      "src": "/(download|refund|privacy|a|ai|terms|index|pin|api|dashboard|more|rohit|admin-gift|admin-lifafa|admin-settings|admin-users|admin-withdraw|admin-deposit|admin-transactions|admin-invoice|recent-transactions|transfer|deposit|withdraw|transactions|lifafa|my-lifafa|gift|forgot-password|tg|game|game-settings|profile|qr|invoice|invoice-pay|txn)(/?)$",
       "dest": "/server.js",
       "headers": {
         "Access-Control-Allow-Origin": "*"
