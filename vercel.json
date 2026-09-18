@@ -8,6 +8,33 @@
   ],
   "routes": [
     {
+      "src": "/service-worker.js",
+      "dest": "/public/service-worker.js",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Service-Worker-Allowed": "/",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/site.webmanifest",
+      "dest": "/public/site.webmanifest",
+      "headers": {
+        "Content-Type": "application/manifest+json; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(universe-wallet-logo-192|universe-wallet-logo-512|prime_wallet_logo_192x|prime_wallet_logo_512x)\\.png",
+      "dest": "/public/$1.png",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
       "src": "/api/auth/store-telegram-id",
       "dest": "/server.js",
       "methods": ["GET", "POST", "OPTIONS"],
@@ -89,7 +116,7 @@
       }
     },
     {
-      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt)$",
+      "src": "/(.*)\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|json|xml|txt|webmanifest)$",
       "dest": "/public/$1.$2",
       "headers": {
         "Access-Control-Allow-Origin": "*"
