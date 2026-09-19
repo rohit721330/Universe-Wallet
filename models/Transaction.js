@@ -45,9 +45,8 @@ const transactionSchema = new mongoose.Schema({
 // INDEXES FOR BETTER PERFORMANCE
 // ============================================
 
-// ✅ CRITICAL FIX: Compound unique index
-// একই tx_id দুইবার থাকতে পারবে, কিন্তু আলাদা type-এ
-// (transfer_send + transfer_receive)
+// ✅ CRITICAL: Compound unique index
+// একই tx_id থাকতে পারবে, কিন্তু আলাদা type-এ
 transactionSchema.index({ tx_id: 1, type: 1 }, { unique: true });
 
 // Regular performance indexes
@@ -57,14 +56,14 @@ transactionSchema.index({ receiver_id: 1, tx_time: -1 });
 transactionSchema.index({ type: 1, status: 1 });
 
 // ============================================
-// VIRTUAL: Get formatted amount with currency
+// VIRTUAL: Formatted Amount
 // ============================================
 transactionSchema.virtual('formattedAmount').get(function() {
     return `₹${this.amount.toFixed(2)}`;
 });
 
 // ============================================
-// VIRTUAL: Get transaction type label
+// VIRTUAL: Type Label
 // ============================================
 transactionSchema.virtual('typeLabel').get(function() {
     const labels = {
@@ -90,7 +89,7 @@ transactionSchema.virtual('typeLabel').get(function() {
 });
 
 // ============================================
-// VIRTUAL: Get transaction direction for user
+// VIRTUAL: Direction
 // ============================================
 transactionSchema.virtual('direction').get(function() {
     if (this.sender_id && this.receiver_id) {
@@ -101,15 +100,15 @@ transactionSchema.virtual('direction').get(function() {
             return 'received';
         }
     }
-    if (this.type === 'lifafa_creation' || 
-        this.type === 'admin_deduct' || 
+    if (this.type === 'lifafa_creation' ||
+        this.type === 'admin_deduct' ||
         this.type === 'game_loss' ||
         this.type === 'invoice_pay_send') {
         return 'sent';
     }
-    if (this.type === 'lifafa_claim' || 
-        this.type === 'lifafa_referral' || 
-        this.type === 'admin_add' || 
+    if (this.type === 'lifafa_claim' ||
+        this.type === 'lifafa_referral' ||
+        this.type === 'admin_add' ||
         this.type === 'game_win' ||
         this.type === 'deposit' ||
         this.type === 'api' ||
@@ -120,7 +119,7 @@ transactionSchema.virtual('direction').get(function() {
 });
 
 // ============================================
-// METHOD: Check if transaction is debit
+// METHOD: isDebit
 // ============================================
 transactionSchema.methods.isDebit = function(userId) {
     if (!userId) return false;
@@ -132,21 +131,21 @@ transactionSchema.methods.isDebit = function(userId) {
 };
 
 // ============================================
-// METHOD: Check if transaction is credit
+// METHOD: isCredit
 // ============================================
 transactionSchema.methods.isCredit = function(userId) {
     if (!userId) return false;
     if (this.receiver_id && this.receiver_id.toString() === userId.toString()) {
         return true;
     }
-    const creditTypes = ['lifafa_claim', 'lifafa_referral', 'admin_add', 'game_win', 
+    const creditTypes = ['lifafa_claim', 'lifafa_referral', 'admin_add', 'game_win',
                          'deposit', 'api',
                          'invoice_pay_receive'];
     return creditTypes.includes(this.type);
 };
 
 // ============================================
-// METHOD: Get transaction summary
+// METHOD: getSummary
 // ============================================
 transactionSchema.methods.getSummary = function() {
     return {
@@ -165,7 +164,7 @@ transactionSchema.methods.getSummary = function() {
 };
 
 // ============================================
-// STATIC: Get user transaction summary
+// STATIC: Get User Summary
 // ============================================
 transactionSchema.statics.getUserSummary = async function(userId) {
     const result = await this.aggregate([
@@ -220,7 +219,7 @@ transactionSchema.statics.getUserSummary = async function(userId) {
             }
         }
     ]);
-    
+
     return result[0] || {
         totalTransactions: 0,
         totalAmount: 0,
@@ -230,14 +229,14 @@ transactionSchema.statics.getUserSummary = async function(userId) {
 };
 
 // ============================================
-// STATIC: Get daily summary
+// STATIC: Get Daily Summary
 // ============================================
 transactionSchema.statics.getDailySummary = async function(date) {
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(date);
     endDate.setHours(23, 59, 59, 999);
-    
+
     const result = await this.aggregate([
         {
             $match: {
@@ -267,7 +266,7 @@ transactionSchema.statics.getDailySummary = async function(date) {
             }
         }
     ]);
-    
+
     return result[0] || {
         types: [],
         totalTransactions: 0,
@@ -276,7 +275,7 @@ transactionSchema.statics.getDailySummary = async function(date) {
 };
 
 // ============================================
-// PRE-SAVE MIDDLEWARE: Update timestamps
+// PRE-SAVE MIDDLEWARE
 // ============================================
 transactionSchema.pre('save', function(next) {
     this.updatedAt = new Date();
@@ -287,7 +286,7 @@ transactionSchema.pre('save', function(next) {
 });
 
 // ============================================
-// PRE-VALIDATE: Ensure required fields
+// PRE-VALIDATE
 // ============================================
 transactionSchema.pre('validate', function(next) {
     if (!this.tx_id) {
@@ -297,7 +296,7 @@ transactionSchema.pre('validate', function(next) {
 });
 
 // ============================================
-// TRANSFORM: Remove sensitive fields when toJSON
+// TRANSFORM: Remove sensitive fields
 // ============================================
 transactionSchema.set('toJSON', {
     virtuals: true,
