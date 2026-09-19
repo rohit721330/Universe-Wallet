@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    tx_id: { type: String, required: true, unique: true, trim: true },
+    tx_id: { type: String, required: true, trim: true, index: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     sender_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     receiver_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -44,6 +44,13 @@ const transactionSchema = new mongoose.Schema({
 // ============================================
 // INDEXES FOR BETTER PERFORMANCE
 // ============================================
+
+// ✅ CRITICAL FIX: Compound unique index
+// একই tx_id দুইবার থাকতে পারবে, কিন্তু আলাদা type-এ
+// (transfer_send + transfer_receive)
+transactionSchema.index({ tx_id: 1, type: 1 }, { unique: true });
+
+// Regular performance indexes
 transactionSchema.index({ user_id: 1, tx_time: -1 });
 transactionSchema.index({ sender_id: 1, tx_time: -1 });
 transactionSchema.index({ receiver_id: 1, tx_time: -1 });
