@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transactions • Universe Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+
+<!-- ✅ PWA META TAGS -->
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/universe-wallet-logo-512.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Universe">
+
+<style>
+/* =========================================================
+   RESET
+========================================================= */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
+
+/* ============================================
+   ✅ THEME VARIABLES (LIGHT)
+   ============================================ */
+:root {
+    --bg: #f3f6fc;
+    --bg-pattern-1: rgba(244,247,252,.90);
+    --bg-pattern-2: rgba(244,247,252,.90);
+    --grid-color: rgba(87,120,170,.075);
+    --text: #182133;
+    --text-title: #202a3a;
+    --muted: #7a8594;
+    --muted-2: #9aa5b2;
+    --header-bg: rgba(255,255,255,.96);
+    --header-border: #e5eaf1;
+    --card-bg: #ffffff;
+    --card-border: #e6ebf1;
+    --card-shadow: 0 4px 15px rgba(35,60,95,.06);
+    --back-btn-bg: #fff;
+    --back-btn-border: #e3e8ee;
+    --back-btn-color: #687587;
+    --icon-btn-bg: #fff;
+    --icon-btn-border: #e3e8ee;
+    --icon-btn-color: #229ED9;
+    --theme-btn-bg: #fff;
+    --theme-btn-border: #e3e8ee;
+    --theme-btn-color: #718096;
+    --avatar-border: #dce6ef;
+    --filter-bg: #fff;
+    --filter-border: #e7ecf2;
+    --filter-input-bg: #f8f9fb;
+    --filter-input-border: #e5e9ef;
+    --bottom-nav-bg: rgba(255, 255, 255, 0.98);
+    --bottom-nav-border: #dce9ff;
+    --bottom-nav-color: #8a9bb8;
+    --bottom-nav-active: #1264ff;
+    --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff);
+    --scan-circle-border: #ffffff;
+    --scan-circle-shadow: #d9e7ff;
+    --modal-bg: #ffffff;
+    --modal-border: #c5d9f0;
+    --modal-close-bg: #f0f7ff;
+    --modal-close-border: #c5d9f0;
+    --modal-close-color: #5a7a9a;
+    --modal-label-color: #5a7a9a;
+    --modal-value-color: #172033;
+    --modal-divider: #e8f0fe;
+    --blocked-bg-1: #ffffff;
+    --blocked-bg-2: #e8f0fe;
+    --blocked-bg-3: #d4e4f7;
+    --blocked-card-bg: #ffffff;
+    --blocked-card-border: #c5d9f0;
+    --blocked-title: #1a3a6b;
+    --blocked-sub: #5a7a9a;
+}
+
+/* ============================================
+   ✅ THEME VARIABLES (DARK)
+   ============================================ */
+body.dark {
+    --bg: #0d1526;
+    --bg-pattern-1: rgba(13, 21, 38, 0.92);
+    --bg-pattern-2: rgba(13, 21, 38, 0.92);
+    --grid-color: rgba(90, 120, 170, 0.05);
+    --text: #edf3ff;
+    --text-title: #edf3ff;
+    --muted: #8491a6;
+    --muted-2: #8491a6;
+    --header-bg: rgba(26, 38, 57, 0.96);
+    --header-border: #2b3a50;
+    --card-bg: #1a2639;
+    --card-border: #2b3a50;
+    --card-shadow: 0 4px 15px rgba(0,0,0,.25);
+    --back-btn-bg: #202d42;
+    --back-btn-border: #2b3a50;
+    --back-btn-color: #b8c5d6;
+    --icon-btn-bg: #202d42;
+    --icon-btn-border: #2b3a50;
+    --icon-btn-color: #60a5fa;
+    --theme-btn-bg: #202d42;
+    --theme-btn-border: #2b3a50;
+    --theme-btn-color: #cbd5e1;
+    --avatar-border: #334155;
+    --filter-bg: #1a2639;
+    --filter-border: #2b3a50;
+    --filter-input-bg: #101a2c;
+    --filter-input-border: #2b3a50;
+    --bottom-nav-bg: rgba(26, 38, 57, 0.98);
+    --bottom-nav-border: #2b3a50;
+    --bottom-nav-color: #8491a6;
+    --bottom-nav-active: #60a5fa;
+    --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42);
+    --scan-circle-border: #1a2639;
+    --scan-circle-shadow: #2b3a50;
+    --modal-bg: #1a2639;
+    --modal-border: #2b3a50;
+    --modal-close-bg: #202d42;
+    --modal-close-border: #2b3a50;
+    --modal-close-color: #8491a6;
+    --modal-label-color: #8491a6;
+    --modal-value-color: #edf3ff;
+    --modal-divider: #2b3a50;
+    --blocked-bg-1: #0d1526;
+    --blocked-bg-2: #1a2639;
+    --blocked-bg-3: #202d42;
+    --blocked-card-bg: #1a2639;
+    --blocked-card-border: #2b3a50;
+    --blocked-title: #edf3ff;
+    --blocked-sub: #8491a6;
+}
+
+/* ============================================
+   ✅ DISABLE TEXT SELECTION & LONG PRESS MENU
+   ============================================ */
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+input, textarea, select, [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
+}
+.modal-btn-copy, .copy-text {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
+}
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; padding-bottom: 130px; background: linear-gradient(var(--bg-pattern-1), var(--bg-pattern-2)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, var(--grid-color) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--grid-color) 39px); transition: background .3s ease; }
+
+/* =========================================================
+   HEADER
+========================================================= */
+.header { height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; background: var(--header-bg); border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s ease, border .3s ease; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.back-btn { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--back-btn-border); border-radius: 10px; background: var(--back-btn-bg); color: var(--back-btn-color); font-size: 15px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+.back-btn:hover { background: var(--card-bg); }
+.back-btn:active { transform: scale(0.95); }
+.header-title { font-size: 14px; font-weight: 700; color: var(--text-title); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+
+/* ===== THEME BUTTON ===== */
+.theme-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--theme-btn-border); border-radius: 50%; background: var(--theme-btn-bg); color: var(--theme-btn-color); font-size: 15px; cursor: pointer; transition: all 0.25s ease; flex-shrink: 0; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--bottom-nav-active); color: var(--bottom-nav-active); }
+.theme-btn:active { transform: scale(0.95); }
+
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; border: 2px solid var(--avatar-border); overflow: hidden; box-shadow: 0 3px 10px rgba(26, 86, 219, 0.25); transition: transform 0.2s; flex-shrink: 0; }
+.user-avatar:hover { transform: scale(1.05); }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
+/* =========================================================
+   MAIN
+========================================================= */
+.main { width: 100%; padding: 16px 12px 30px; }
+
+/* =========================================================
+   PAGE TOP
+========================================================= */
+.page-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
+.page-heading small { display: block; margin-bottom: 5px; color: #3985d7; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.page-heading h1 { font-size: 21px; color: var(--text-title); }
+.page-heading h1 span { color: #2878dc; }
+
+/* =========================================================
+   EXPORT BUTTONS
+========================================================= */
+.export-buttons { display: flex; gap: 6px; }
+.export-btn { height: 32px; padding: 0 12px; border: none; border-radius: 8px; font-size: 9px; font-weight: 800; cursor: pointer; font-family: inherit; transition: 0.2s; display: flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+.export-btn:active { transform: scale(0.95); }
+.csv-btn { background: #dff8ec; color: #159a6a; }
+.csv-btn:hover { background: #c9f0dd; }
+.pdf-btn { background: #ffe2e4; color: #e6535a; }
+.pdf-btn:hover { background: #ffd0d3; }
+.export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-card { min-height: 90px; position: relative; padding: 14px; background: var(--card-bg); border-radius: 13px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); overflow: hidden; transition: background .3s ease, border .3s ease; }
+.stat-card::before { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 3px; background: #2779e8; }
+.stat-card.success-card::before { background: #27bd88; }
+.stat-card.transaction-card::before { background: #eab62b; }
+.stat-card.debit-card::before { background: #e45a60; }
+.stat-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; border-radius: 8px; background: #eaf3ff; color: #287ce2; font-size: 12px; }
+body.dark .stat-icon { background: #172b55; color: #60a5fa; }
+.success-card .stat-icon { background: #ddf8ec; color: #16a874; }
+body.dark .success-card .stat-icon { background: #12352f; color: #10c993; }
+.transaction-card .stat-icon { background: #fff2cf; color: #d99b12; }
+body.dark .transaction-card .stat-icon { background: #39331d; color: #fbbf24; }
+.debit-card .stat-icon { background: #ffe3e5; color: #dc4f57; }
+body.dark .debit-card .stat-icon { background: #3a2025; color: #f87171; }
+.stat-value { font-size: 16px; font-weight: 800; color: var(--text-title); }
+.stat-label { margin-top: 3px; color: var(--muted-2); font-size: 8px; font-weight: 600; }
+
+/* =========================================================
+   FILTER PANEL
+========================================================= */
+.filter-panel { padding: 14px; background: var(--filter-bg); border: 1px solid var(--filter-border); border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 14px; transition: background .3s ease, border .3s ease; }
+.filter-buttons { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.filter-btn { height: 27px; padding: 0 12px; border: 1px solid var(--filter-input-border); border-radius: 15px; background: var(--filter-bg); color: var(--muted); font-size: 8px; font-weight: 700; cursor: pointer; transition: .2s; font-family: inherit; text-transform: uppercase; letter-spacing: 0.3px; }
+.filter-btn:hover { border-color: #b9d3f6; color: #2778dd; }
+.filter-btn.active { background: #2378e7; border-color: #2378e7; color: #fff; box-shadow: 0 4px 10px rgba(35,120,231,.18); }
+
+.filter-row { display: flex; flex-direction: column; gap: 8px; }
+.search-box { position: relative; }
+.search-box span { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted-2); font-size: 12px; }
+.filter-input { width: 100%; height: 38px; padding: 0 10px 0 30px; border: 1px solid var(--filter-input-border); border-radius: 8px; outline: none; background: var(--filter-input-bg); color: var(--text); font-size: 11px; font-family: inherit; font-weight: 600; transition: background .3s ease, border .3s ease; }
+.filter-input:focus { border-color: #9ec4f4; background: var(--card-bg); box-shadow: 0 0 0 2px rgba(50,125,224,.08); }
+.filter-input::placeholder { color: var(--muted-2); font-weight: 500; }
+
+.filter-summary { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--card-border); gap: 6px; }
+.summary-item { text-align: center; }
+.summary-label { display: block; margin-bottom: 4px; color: var(--muted-2); font-size: 7px; letter-spacing: .5px; font-weight: 700; }
+.summary-value { color: #16a779; font-size: 10px; font-weight: 800; }
+.summary-item:nth-child(2) .summary-value { color: #dc565b; }
+.summary-item:nth-child(3) .summary-value { color: var(--text-title); }
+.summary-item:nth-child(4) .summary-value { color: #159f72; }
+
+/* =========================================================
+   TRANSACTIONS CARD
+========================================================= */
+.transactions-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 15px; box-shadow: var(--card-shadow); overflow: hidden; transition: background .3s ease, border .3s ease; }
+.transactions-header { height: 49px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--card-border); }
+.transactions-title { display: flex; align-items: center; gap: 7px; color: var(--text-title); font-size: 10px; font-weight: 700; }
+.transactions-title-icon { color: #2878dd; font-size: 12px; }
+.showing { padding: 4px 8px; border-radius: 10px; background: #eef6ff; color: #4283cf; font-size: 7px; font-weight: 700; }
+body.dark .showing { background: #172b55; color: #60a5fa; }
+
+/* =========================================================
+   TRANSACTION LIST
+========================================================= */
+.txn-list { padding: 8px; }
+.txn-item { display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-bottom: 1px solid var(--card-border); cursor: pointer; transition: 0.15s; border-radius: 8px; }
+.txn-item:last-child { border-bottom: none; }
+.txn-item:hover { background: var(--bg); }
+.txn-item:active { transform: scale(0.99); }
+.txn-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.txn-icon.credit { background: #dcf8eb; color: #15a473; }
+body.dark .txn-icon.credit { background: #12352f; color: #10c993; }
+.txn-icon.debit { background: #ffe1e4; color: #dc5058; }
+body.dark .txn-icon.debit { background: #3a2025; color: #f87171; }
+.txn-icon.pending { background: #fff2cf; color: #d99b12; }
+.txn-icon.failed { background: #f1f5f9; color: #8a9ab0; }
+
+.txn-info { flex: 1; min-width: 0; }
+.txn-title { display: block; margin-bottom: 3px; color: var(--text-title); font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.txn-sub { display: block; margin-bottom: 3px; color: var(--muted); font-size: 9px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.txn-id { display: block; font-family: 'Courier New', monospace; color: var(--muted-2); font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.txn-right { text-align: right; flex-shrink: 0; margin-left: 6px; }
+.txn-amount { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 800; }
+.txn-amount.credit { color: #159f70; }
+body.dark .txn-amount.credit { color: #10c993; }
+.txn-amount.debit { color: #df4f57; }
+body.dark .txn-amount.debit { color: #f87171; }
+.txn-status { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 7px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
+.txn-status.success { background: #dff8eb; color: #159b6b; }
+body.dark .txn-status.success { background: #12352f; color: #10c993; }
+.txn-status.pending { background: #fff2cf; color: #c58600; }
+body.dark .txn-status.pending { background: #39331d; color: #fbbf24; }
+.txn-status.failed { background: #ffe1e4; color: #dc5058; }
+body.dark .txn-status.failed { background: #3a2025; color: #f87171; }
+.txn-status.cancelled { background: #f1f5f9; color: #8a9ab0; }
+body.dark .txn-status.cancelled { background: #202d42; color: #8491a6; }
+
+/* =========================================================
+   LOADING / EMPTY
+========================================================= */
+.loading-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.loading-state i { font-size: 28px; display: block; margin-bottom: 10px; color: #1a56db; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.3; color: #1a56db; }
+.empty-state p { font-size: 11px; font-weight: 600; }
+
+/* =========================================================
+   BOTTOM NAV
+========================================================= */
+.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30, 100, 220, 0.15), inset 0 0 25px rgba(30, 100, 220, 0.03); z-index: 1000; transition: background .3s ease, border .3s ease; }
+.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; transition: color 0.25s ease, transform 0.25s ease; }
+.bottom-nav .nav-item:hover { color: var(--bottom-nav-active); transform: translateY(-2px); }
+.bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
+.bottom-nav .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.bottom-nav .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; transition: 0.25s ease; }
+.bottom-nav .nav-item.active .nav-icon svg { filter: drop-shadow(0 0 5px rgba(18, 100, 255, 0.45)); }
+.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: var(--bottom-nav-active); z-index: 10; }
+.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--scan-circle-bg); border: 5px solid var(--scan-circle-border); box-shadow: 0 0 0 2px var(--scan-circle-shadow), 0 10px 25px rgba(18, 100, 255, 0.25), 0 0 25px rgba(18, 100, 255, 0.15); transition: transform 0.25s ease, box-shadow 0.25s ease, background .3s ease, border .3s ease; }
+.bottom-nav .scan-item:hover .scan-circle { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 2px var(--scan-circle-shadow), 0 12px 30px rgba(18, 100, 255, 0.32), 0 0 35px rgba(18, 100, 255, 0.25); }
+.bottom-nav .qr-icon { width: 30px; height: 30px; fill: var(--bottom-nav-active); stroke: none; filter: drop-shadow(0 0 4px rgba(18, 100, 255, 0.3)); }
+.bottom-nav .scan-item span { color: var(--bottom-nav-active); font-size: 9px; font-weight: 800; letter-spacing: 0.8px; margin-top: 2px; }
+.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); box-shadow: 0 0 8px rgba(18, 100, 255, 0.5); }
+.bottom-nav .scan-item::after { display: none; }
+
+/* =========================================================
+   MODAL
+========================================================= */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 30, 60, 0.5); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 1.2rem; }
+.modal-overlay.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.modal-content { background: var(--modal-bg); border: 1px solid var(--modal-border); border-radius: 1.5rem; padding: 1.5rem; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: slideUp 0.3s ease; position: relative; transition: background .3s ease, border .3s ease; }
+.modal-close { position: absolute; top: 0.75rem; right: 0.75rem; width: 32px; height: 32px; border-radius: 50%; background: var(--modal-close-bg); border: 1px solid var(--modal-close-border); color: var(--modal-close-color); font-size: 1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { border-color: #dc2626; color: #dc2626; background: #fee2e2; }
+.modal-tx-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 0.5rem; }
+.modal-tx-icon.credit { background: #dcfce7; color: #16a34a; }
+.modal-tx-icon.debit { background: #fee2e2; color: #dc2626; }
+.modal-tx-title { text-align: center; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.2rem; color: var(--text-title); }
+.modal-tx-amount { text-align: center; font-size: 2.2rem; font-weight: 900; margin: 0.3rem 0 0.8rem; }
+.modal-tx-amount.credit { color: #16a34a; }
+.modal-tx-amount.debit { color: #dc2626; }
+.modal-tx-amount .currency { font-size: 1.2rem; font-weight: 700; opacity: 0.6; }
+.modal-status { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.85rem; border-radius: 2rem; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 auto 0.8rem; }
+.modal-status.success { background: #dcfce7; color: #16a34a; }
+.modal-status.pending { background: #fef3c7; color: #d97706; }
+.modal-status.failed { background: #fee2e2; color: #dc2626; }
+.modal-status.cancelled { background: #f1f5f9; color: #8a9ab0; }
+.modal-divider { height: 1px; background: var(--modal-divider); margin: 0.8rem 0; }
+.modal-row { display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--modal-divider); gap: 10px; }
+.modal-row:last-child { border-bottom: none; }
+.modal-label { font-size: 0.65rem; color: var(--modal-label-color); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 700; flex-shrink: 0; }
+.modal-value { font-size: 0.8rem; color: var(--modal-value-color); font-weight: 600; text-align: right; word-break: break-all; }
+.modal-value.highlight { color: #1a56db; font-weight: 700; }
+body.dark .modal-value.highlight { color: #60a5fa; }
+.modal-value.credit { color: #16a34a; }
+.modal-value.debit { color: #dc2626; }
+.modal-btn-copy { background: var(--modal-close-bg); border: 1px solid var(--modal-close-border); color: var(--modal-close-color); padding: 0.2rem 0.55rem; border-radius: 0.4rem; font-size: 0.6rem; cursor: pointer; transition: all 0.2s; font-family: inherit; display: inline-flex; align-items: center; gap: 0.2rem; margin-left: 0.3rem; font-weight: 600; }
+.modal-btn-copy:hover { border-color: #1a56db; color: #1a56db; background: #e2eaf3; }
+.modal-center { text-align: center; }
+
+/* =========================================================
+   TOAST
+========================================================= */
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 90%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+.toast.success { background: #16a34a; color: #fff; }
+.toast.error { background: #dc2626; color: #fff; }
+.toast.warning { background: #d97706; color: #fff; }
+.toast.info { background: #1a56db; color: #fff; }
+
+/* =========================================================
+   BLOCKED OVERLAY
+========================================================= */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; transition: background .3s ease; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); animation: fadeIn 0.4s ease-out; }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
+.blocked-title { font-size: 24px; font-weight: 900; color: var(--blocked-title); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: var(--blocked-sub); line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26, 86, 219, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 480px) {
+    .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; }
+    .bottom-nav .nav-item { font-size: 8px; letter-spacing: 0.4px; gap: 2px; }
+    .bottom-nav .nav-icon { width: 22px; height: 22px; }
+    .bottom-nav .nav-icon svg { width: 20px; height: 20px; }
+    .bottom-nav .scan-circle { width: 48px; height: 48px; margin-top: -28px; border-width: 4px; }
+    .bottom-nav .qr-icon { width: 26px; height: 26px; }
+    .bottom-nav .scan-item span { font-size: 8px; margin-top: 1px; }
+    .bottom-nav .nav-item.active::after { width: 16px; height: 2.5px; bottom: 2px; }
+    .filter-summary { grid-template-columns: repeat(2, 1fr); row-gap: 10px; }
+    .modal-content { padding: 1.2rem; margin: 0.5rem; }
+    .modal-tx-amount { font-size: 1.8rem; }
+    .export-btn { height: 28px; padding: 0 8px; font-size: 8px; }
+}
+@media (max-width: 380px) {
+    .bottom-nav { height: 66px; }
+    .bottom-nav .nav-item { font-size: 7px; }
+    .bottom-nav .scan-circle { width: 44px; height: 44px; margin-top: -25px; }
+    .bottom-nav .qr-icon { width: 22px; height: 22px; }
+    .page-heading h1 { font-size: 17px; }
+    .filter-btn { padding: 0 8px; font-size: 7px; }
+    .theme-btn, .user-avatar { width: 32px; height: 32px; }
+    .back-btn { width: 32px; height: 32px; font-size: 14px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= BLOCKED OVERLAY ================= -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<div class="app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+            <div class="header-title">Transactions</div>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main">
+
+        <div class="page-top">
+            <div class="page-heading">
+                <small>↻ HISTORY</small>
+                <h1>Transaction <span>Ledger</span></h1>
+            </div>
+            <div class="export-buttons">
+                <button class="export-btn csv-btn" onclick="exportCSV()" title="Download CSV">
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+                <button class="export-btn pdf-btn" onclick="exportPDF()" title="Download PDF Statement">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </div>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                <div class="stat-value" id="totalCredit">₹0.00</div>
+                <div class="stat-label">Total Credit</div>
+            </div>
+            <div class="stat-card success-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value" id="totalSuccess">0</div>
+                <div class="stat-label">Successful Txns</div>
+            </div>
+            <div class="stat-card transaction-card">
+                <div class="stat-icon"><i class="fas fa-list-ul"></i></div>
+                <div class="stat-value" id="totalTxns">0</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="stat-card debit-card">
+                <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                <div class="stat-value" id="totalDebit">₹0.00</div>
+                <div class="stat-label">Total Debit</div>
+            </div>
+        </section>
+
+        <section class="filter-panel">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" onclick="filterTransactions('all')">▦ All</button>
+                <button class="filter-btn" data-filter="credit" onclick="filterTransactions('credit')">↗ Credit</button>
+                <button class="filter-btn" data-filter="debit" onclick="filterTransactions('debit')">↘ Debit</button>
+                <button class="filter-btn" data-filter="success" onclick="filterTransactions('success')">● Success</button>
+                <button class="filter-btn" data-filter="pending" onclick="filterTransactions('pending')">● Pending</button>
+                <button class="filter-btn" data-filter="failed" onclick="filterTransactions('failed')">● Failed</button>
+            </div>
+
+            <div class="filter-row">
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input type="text" class="filter-input" id="searchInput" placeholder="Search ID, title, notes..." oninput="handleSearch()">
+                </div>
+            </div>
+
+            <div class="filter-summary">
+                <div class="summary-item">
+                    <span class="summary-label">CREDIT</span>
+                    <span class="summary-value" id="summaryCredit">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">DEBIT</span>
+                    <span class="summary-value" id="summaryDebit">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">TOTAL</span>
+                    <span class="summary-value" id="summaryTotal">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">SUCCESS</span>
+                    <span class="summary-value" id="summarySuccess">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="transactions-card">
+            <div class="transactions-header">
+                <div class="transactions-title">
+                    <span class="transactions-title-icon"><i class="fas fa-list-ul"></i></span>
+                    All Transactions
+                </div>
+                <div class="showing">Showing <strong id="showingCount">0</strong> of <strong id="totalCount">0</strong></div>
+            </div>
+
+            <div id="txnList" class="txn-list">
+                <div class="loading-state">
+                    <i class="fas fa-bolt"></i>
+                    <p>Loading Transactions...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-content" id="modalContent" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ================= BOTTOM NAV ================= -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item" data-nav="dashboard">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+        <span>Home</span>
+    </a>
+    <a href="/transfer" class="nav-item" data-nav="transfer">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div>
+        <span>Send</span>
+    </a>
+    <a href="/qr" class="nav-item scan-item" data-nav="qr">
+        <div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div>
+        <span>Scan</span>
+    </a>
+    <a href="/deposit" class="nav-item" data-nav="deposit">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+        <span>Add</span>
+    </a>
+    <a href="/transactions" class="nav-item" data-nav="transactions">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+        <span>History</span>
+    </a>
+</div>
+
+<script>
+// ============================================
+// CONFIG & STATE
+// ============================================
+var API_BASE = '/api';
+var AUTH_TOKEN = localStorage.getItem('token');
+var isAccountBlocked = false;
+var blockCheckDone = false;
+
+if (!AUTH_TOKEN) { window.location.href = '/'; }
+
+var state = {
+    allTransactions: [],
+    filteredTransactions: [],
+    filter: 'all',
+    searchQuery: '',
+    userId: null,
+    user: {}
+};
+
+// ============================================
+// ✅ THEME SYSTEM — inline onclick only
+// ============================================
+(function initTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.classList.remove('dark');
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+})();
+
+function toggleTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    if (isDark) {
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('uwTheme', 'dark');
+    } else {
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('uwTheme', 'light');
+    }
+}
+
+// ============================================
+// ✅ DEFAULT PROFILE PICTURE
+// ============================================
+var DEFAULT_PROFILE_PICTURE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+        '<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1a56db"/><stop offset="100%" stop-color="#0088ff"/></linearGradient></defs>' +
+        '<rect width="100" height="100" fill="url(#g)"/>' +
+        '<circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.95"/>' +
+        '<path d="M 50 62 C 30 62 18 75 18 92 L 82 92 C 82 75 70 62 50 62 Z" fill="#ffffff" opacity="0.95"/>' +
+    '</svg>'
+);
+window.handleAvatarError = function(imgEl) {
+    if (imgEl.src !== DEFAULT_PROFILE_PICTURE) imgEl.src = DEFAULT_PROFILE_PICTURE;
+};
+
+// ============================================
+// USER EXTRACTOR
+// ============================================
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload;
+    var safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+
+function setAvatar(user) {
+    var avatarEl = document.getElementById('userAvatar');
+    if (!avatarEl) return;
+    var imgSrc = DEFAULT_PROFILE_PICTURE;
+    if (user && user.profilePicture && typeof user.profilePicture === 'string') {
+        var pp = user.profilePicture.trim();
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
+    }
+    avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+}
+
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) cleanMobile = cleanMobile.slice(2);
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        return await res.json();
+    } catch (err) {
+        return { allowed: true, reason: 'network_error' };
+    }
+}
+
+function handleBlockReason(reason) {
+    if (reason === 'blocked') showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+    else if (reason === 'deleted') showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+    else if (reason === 'inactive') showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+    else if (reason === 'notfound') showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    else showBlockedOverlay('Access Denied', 'Your account is not accessible.');
+}
+
+function goBack() { window.location.href = '/dashboard'; }
+function goToProfile() { window.location.href = '/profile'; }
+
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    closeModal();
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+
+async function safeFetch(url, options) {
+    options = options || {};
+    try {
+        var response = await fetch(url, options);
+        var data = {};
+        try { data = await response.json(); } catch (e) { data = {}; }
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            throw new Error('Account deleted');
+        }
+        return { response: response, data: data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+async function verifyUserState() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        var res = await fetch(API_BASE + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        var data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) { showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.'); return false; }
+        if (res.status === 404) { showBlockedOverlay('Account Not Found', 'Your account has been deleted.'); return false; }
+
+        var user = extractUser(data);
+        if (!user || (!user.id && !user._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+
+        if (user.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(user.mobile);
+            if (status && status.allowed === false) {
+                handleBlockReason(status.reason);
+                return false;
+            }
+        }
+
+        state.userId = (user.id || user._id).toString();
+        state.user = user;
+        localStorage.setItem('user', JSON.stringify(user));
+        setAvatar(user);
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+function showToast(message, type) {
+    if (isAccountBlocked) return;
+    type = type || 'info';
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function(){ toast.className = 'toast'; }, 3000);
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function getUserId(f){ if(!f) return null; if(typeof f==='string') return f; if(f._id) return f._id.toString(); if(f.toString) return f.toString(); return null; }
+function getUserName(o){ if(!o) return ''; if(typeof o === 'string') return o; return o.fullName || o.name || o.username || ''; }
+function fmtMobile(m){ if(!m) return ''; var s = m.toString(); if(s.length === 10) return s.slice(0,3)+'••••'+s.slice(7); return s; }
+
+// ============================================
+// IS CREDIT — Priority: type first, then sender/receiver
+// ============================================
+function isCredit(tx, uid) {
+    if (!tx) return false;
+
+    if (tx.type === 'deposit') return true;
+    if (tx.type === 'manual-deposit') return true;
+    if (tx.type === 'auto-deposit') return true;
+    if (tx.type === 'web-deposit') return true;
+    if (tx.type === 'admin_add') return true;
+    if (tx.type === 'admin_deduct') return false;
+    if (tx.type === 'game_win') return true;
+    if (tx.type === 'game_loss') return false;
+    if (tx.type === 'lifafa_claim' || tx.type === 'lifafa_referral') return true;
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_edit') return false;
+    if (tx.type === 'transfer_send') return false;
+    if (tx.type === 'transfer_receive') return true;
+    if (tx.type === 'invoice_pay_send') return false;
+    if (tx.type === 'invoice_pay_receive') return true;
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') return false;
+    if (tx.type === 'gift') {
+        if (tx.metadata && tx.metadata.category) {
+            if (tx.metadata.category === 'gift_received') return true;
+            if (tx.metadata.category === 'gift_created') return false;
+        }
+    }
+
+    var rid = getUserId(tx.receiver || tx.receiver_id);
+    var sid = getUserId(tx.sender || tx.sender_id);
+    var tuid = getUserId(tx.user_id);
+
+    if (sid === uid && rid !== uid) return false;
+    if (rid === uid && sid !== uid) return true;
+    if (sid === uid && rid === uid) {
+        if (['deposit', 'admin_add'].includes(tx.type)) return true;
+        return false;
+    }
+    if (tuid === uid && rid === uid) return true;
+    if (tuid === uid && sid === uid) return false;
+    if (!sid && rid) return true;
+    if (!sid && !rid) return true;
+    if (!sid) return true;
+    return false;
+}
+
+function getDisplayName(tx, uid) {
+    var rid = getUserId(tx.receiver || tx.receiver_id);
+    var sid = getUserId(tx.sender || tx.sender_id);
+    var tuid = getUserId(tx.user_id);
+    var isS = sid === uid, isR = rid === uid, isU = tuid === uid;
+    var sn = '', rn = '';
+    if (tx.sender_id && typeof tx.sender_id === 'object') sn = getUserName(tx.sender_id);
+    else if (tx.sender && typeof tx.sender === 'object') sn = getUserName(tx.sender);
+    if (tx.receiver_id && typeof tx.receiver_id === 'object') rn = getUserName(tx.receiver_id);
+    else if (tx.receiver && typeof tx.receiver === 'object') rn = getUserName(tx.receiver);
+    if (tx.metadata) {
+        if (!sn && tx.metadata.senderName) sn = tx.metadata.senderName;
+        if (!rn && tx.metadata.receiverName) rn = tx.metadata.receiverName;
+    }
+
+    if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive') {
+        if (tx.type === 'transfer_send' || (tx.type === 'transfer' && isS)) return 'Money Sent' + (rn ? ' to ' + rn : '');
+        if (tx.type === 'transfer_receive' || (tx.type === 'transfer' && isR)) return 'Money Received' + (sn ? ' from ' + sn : '');
+        return 'Transfer';
+    }
+    if (tx.type === 'invoice_payment' || tx.type === 'invoice_pay' || tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive') {
+        if (tx.type === 'invoice_pay_send' || isS) return 'Invoice Paid' + (rn ? ' to ' + rn : '');
+        if (tx.type === 'invoice_pay_receive' || isR) return 'Invoice Received' + (sn ? ' from ' + sn : '');
+        return 'Invoice Payment';
+    }
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Balance Added';
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') return 'Withdrawal Request';
+    if (tx.type === 'lifafa' || tx.type === 'lifafa_creation') return (isS||isU) ? 'Lifafa Created' : 'Lifafa Claimed';
+    if (tx.type === 'lifafa_claim') return 'Lifafa Claimed';
+    if (tx.type === 'gift') return (isS||isU) ? 'Gift Created' : 'Gift Received';
+    if (tx.type === 'game_win') return 'Game Win';
+    if (tx.type === 'game_loss') return 'Game Loss';
+    if (tx.type === 'admin_add') return 'Balance Added';
+    if (tx.type === 'admin_deduct') return 'Balance Deducted';
+    if (isS) return 'Payment Sent';
+    if (isR) return 'Payment Received';
+    return 'Transaction';
+}
+
+function getCounterparty(tx, uid) {
+    var isC = isCredit(tx, uid);
+    if (isC) {
+        if (tx.sender_id && typeof tx.sender_id === 'object') {
+            var n1 = getUserName(tx.sender_id);
+            if (n1) return n1 + (tx.sender_id.mobile ? ' (' + fmtMobile(tx.sender_id.mobile) + ')' : '');
+        }
+        if (tx.sender && typeof tx.sender === 'object') {
+            var n2 = getUserName(tx.sender);
+            if (n2) return n2 + (tx.sender.mobile ? ' (' + fmtMobile(tx.sender.mobile) + ')' : '');
+        }
+        if (tx.metadata && tx.metadata.senderName) {
+            return tx.metadata.senderName + (tx.metadata.senderMobile ? ' (' + fmtMobile(tx.metadata.senderMobile) + ')' : '');
+        }
+        return 'System';
+    } else {
+        if (tx.receiver_id && typeof tx.receiver_id === 'object') {
+            var n3 = getUserName(tx.receiver_id);
+            if (n3) return n3 + (tx.receiver_id.mobile ? ' (' + fmtMobile(tx.receiver_id.mobile) + ')' : '');
+        }
+        if (tx.receiver && typeof tx.receiver === 'object') {
+            var n4 = getUserName(tx.receiver);
+            if (n4) return n4 + (tx.receiver.mobile ? ' (' + fmtMobile(tx.receiver.mobile) + ')' : '');
+        }
+        if (tx.metadata && tx.metadata.receiverName) {
+            return tx.metadata.receiverName + (tx.metadata.receiverMobile ? ' (' + fmtMobile(tx.metadata.receiverMobile) + ')' : '');
+        }
+        return 'System';
+    }
+}
+
+function getMethod(tx) {
+    if (tx.method) return tx.method;
+    if (tx.metadata && tx.metadata.method) return tx.metadata.method;
+    if (tx.type === 'api') return 'API Transfer';
+    if (tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive' || tx.type === 'invoice_payment' || tx.type === 'invoice_pay') return 'Invoice';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add' || tx.type === 'admin_deduct') return 'Admin';
+    if (tx.type === 'game_win' || tx.type === 'game_loss') return 'Game';
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'Lifafa';
+    if (tx.type === 'gift') return 'Gift';
+    return 'Transfer';
+}
+
+function getCategory(tx) {
+    if (tx.category) return tx.category;
+    if (tx.metadata && tx.metadata.category) return tx.metadata.category;
+    if (tx.type === 'transfer_send') return 'P2P sent';
+    if (tx.type === 'transfer_receive') return 'P2P received';
+    if (tx.type === 'api') return 'P2P';
+    if (tx.type === 'invoice_pay_send') return 'Invoice sent';
+    if (tx.type === 'invoice_pay_receive') return 'Invoice received';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add') return 'Admin credit';
+    if (tx.type === 'admin_deduct') return 'Admin debit';
+    if (tx.type === 'game_win') return 'Game win';
+    if (tx.type === 'game_loss') return 'Game loss';
+    if (tx.type === 'lifafa_creation') return 'Lifafa created';
+    if (tx.type === 'lifafa_claim') return 'Lifafa claimed';
+    if (tx.type === 'gift') return 'Gift';
+    return 'transfer';
+}
+
+function getBalanceAfter(tx) {
+    if (tx.balanceAfter !== undefined && tx.balanceAfter !== null) return tx.balanceAfter;
+    if (tx.metadata && tx.metadata.balanceAfter !== undefined && tx.metadata.balanceAfter !== null) return tx.metadata.balanceAfter;
+    return null;
+}
+
+function getIconClass(tx, uid) {
+    if (tx.type === 'invoice_payment' || tx.type === 'invoice_pay' || tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive') return 'fa-file-invoice';
+    if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive' || tx.type === 'api') return 'fa-paper-plane';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit' || tx.type === 'admin_add') return 'fa-arrow-down';
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw' || tx.type === 'admin_deduct') return 'fa-arrow-up';
+    if (tx.type === 'game_win') return 'fa-trophy';
+    if (tx.type === 'game_loss') return 'fa-times-circle';
+    if (tx.type === 'lifafa' || tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'fa-envelope-open-text';
+    if (tx.type === 'gift') return 'fa-gift';
+    return isCredit(tx, uid) ? 'fa-arrow-down' : 'fa-arrow-up';
+}
+
+// ============================================
+// FETCH TRANSACTIONS
+// ============================================
+async function fetchTransactions() {
+    if (isAccountBlocked) return;
+    var listEl = document.getElementById('txnList');
+    listEl.innerHTML = '<div class="loading-state"><i class="fas fa-bolt"></i><p>Loading Transactions...</p></div>';
+
+    try {
+        var result = await safeFetch(API_BASE + '/wallet/transactions?limit=500', {
+            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+        });
+        if (isAccountBlocked) return;
+
+        if (!result.response || !result.response.ok) throw new Error('Failed to fetch');
+
+        var txns = result.data.transactions || (result.data.data && result.data.data.transactions) || result.data.data || [];
+        if (!Array.isArray(txns)) txns = [];
+
+        var uid = state.userId;
+        txns = txns.filter(function(tx) {
+            if (tx.type === 'transfer_send') {
+                var sid = getUserId(tx.sender_id || tx.sender);
+                return sid === uid;
+            }
+            if (tx.type === 'transfer_receive') {
+                var rid = getUserId(tx.receiver_id || tx.receiver);
+                return rid === uid;
+            }
+            var tuid = getUserId(tx.user_id);
+            if (tuid === uid) return true;
+            var sid2 = getUserId(tx.sender_id || tx.sender);
+            var rid2 = getUserId(tx.receiver_id || tx.receiver);
+            return sid2 === uid || rid2 === uid;
+        });
+
+        state.allTransactions = txns;
+        applyFilters();
+        updateStats();
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Fetch error:', error);
+            listEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed To Load Transactions</p></div>';
+            showToast('Failed To Load Transactions', 'error');
+        }
+    }
+}
+
+// ============================================
+// FILTER
+// ============================================
+function applyFilters() {
+    if (isAccountBlocked) return;
+    var filtered = state.allTransactions.slice();
+    var uid = state.userId;
+
+    if (state.filter !== 'all') {
+        filtered = filtered.filter(function(tx){
+            var status = (tx.status || 'success').toLowerCase();
+            if (state.filter === 'credit') return isCredit(tx, uid);
+            if (state.filter === 'debit') return !isCredit(tx, uid);
+            if (state.filter === 'success') return status === 'success';
+            if (state.filter === 'pending') return status === 'pending';
+            if (state.filter === 'failed') return status === 'failed' || status === 'cancelled';
+            return true;
+        });
+    }
+
+    if (state.searchQuery.trim()) {
+        var q = state.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(function(tx){
+            var id = (tx.tx_id || tx._id || '').toLowerCase();
+            var remark = (tx.remark || tx.description || '').toLowerCase();
+            var name = getDisplayName(tx, uid).toLowerCase();
+            var cp = getCounterparty(tx, uid).toLowerCase();
+            return id.includes(q) || remark.includes(q) || name.includes(q) || cp.includes(q);
+        });
+    }
+
+    state.filteredTransactions = filtered;
+    renderTransactions();
+    renderSummary();
+}
+
+function filterTransactions(filter) {
+    if (isAccountBlocked) return;
+    state.filter = filter;
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btn = document.querySelector('.filter-btn[data-filter="' + filter + '"]');
+    if (btn) btn.classList.add('active');
+    applyFilters();
+}
+
+function handleSearch() {
+    if (isAccountBlocked) return;
+    state.searchQuery = document.getElementById('searchInput').value;
+    applyFilters();
+}
+
+// ============================================
+// RENDER
+// ============================================
+function renderTransactions() {
+    if (isAccountBlocked) return;
+    var listEl = document.getElementById('txnList');
+    var txns = state.filteredTransactions;
+    var uid = state.userId;
+
+    document.getElementById('showingCount').textContent = txns.length;
+    document.getElementById('totalCount').textContent = state.allTransactions.length;
+
+    if (!txns || txns.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>' + (state.searchQuery ? 'No Transactions Match Your Search.' : 'No Transactions Found.') + '</p></div>';
+        return;
+    }
+
+    var html = '';
+    txns.forEach(function(tx){
+        var isC = isCredit(tx, uid);
+        var displayName = getDisplayName(tx, uid);
+        var status = (tx.status || 'success').toLowerCase();
+        var amount = tx.amount || 0;
+        var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var time = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        var sign = isC ? '+' : '-';
+        var amountClass = isC ? 'credit' : 'debit';
+        var iconClass = isC ? 'credit' : 'debit';
+        var icon = getIconClass(tx, uid);
+
+        var statusClass = 'success';
+        var statusText = 'Success';
+        if (status === 'pending') { statusClass = 'pending'; statusText = 'Pending'; }
+        else if (status === 'failed') { statusClass = 'failed'; statusText = 'Failed'; }
+        else if (status === 'cancelled') { statusClass = 'cancelled'; statusText = 'Cancelled'; }
+
+        var subText = '';
+        if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive' || tx.type === 'api' || tx.type === 'invoice_payment' || tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive') {
+            var cp = getCounterparty(tx, uid);
+            subText = (isC ? 'From: ' : 'To: ') + cp;
+        } else if (tx.remark || tx.description) {
+            subText = (tx.remark || tx.description).substring(0, 45);
+        }
+
+        var txnId = tx.tx_id || tx._id || 'N/A';
+
+        html +=
+            '<div class="txn-item" onclick="openTransactionDetails(\'' + txnId + '\')">' +
+                '<div class="txn-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
+                '<div class="txn-info">' +
+                    '<span class="txn-title">' + displayName + '</span>' +
+                    (subText ? '<span class="txn-sub">' + subText + '</span>' : '') +
+                    '<span class="txn-id">' + txnId + '</span>' +
+                '</div>' +
+                '<div class="txn-right">' +
+                    '<span class="txn-amount ' + amountClass + '">' + sign + '₹' + amount.toFixed(2) + '</span>' +
+                    '<span class="txn-status ' + statusClass + '">' + statusText + '</span>' +
+                '</div>' +
+            '</div>';
+    });
+    listEl.innerHTML = html;
+}
+
+// ============================================
+// STATS
+// ============================================
+function updateStats() {
+    if (isAccountBlocked) return;
+    var uid = state.userId;
+    var tCr = 0, tDb = 0, tSuccess = 0, tCount = 0;
+    state.allTransactions.forEach(function(tx){
+        tCount++;
+        if ((tx.status || 'success').toLowerCase() === 'success') tSuccess++;
+        if (isCredit(tx, uid)) tCr += tx.amount || 0;
+        else tDb += tx.amount || 0;
+    });
+    document.getElementById('totalCredit').textContent = '₹' + tCr.toFixed(2);
+    document.getElementById('totalDebit').textContent = '₹' + tDb.toFixed(2);
+    document.getElementById('totalSuccess').textContent = tSuccess;
+    document.getElementById('totalTxns').textContent = tCount;
+}
+
+function renderSummary() {
+    if (isAccountBlocked) return;
+    var uid = state.userId;
+    var txns = state.filteredTransactions;
+    var tCr = 0, tDb = 0, tSuccess = 0;
+    txns.forEach(function(tx){
+        if ((tx.status || 'success').toLowerCase() === 'success') tSuccess++;
+        if (isCredit(tx, uid)) tCr += tx.amount || 0;
+        else tDb += tx.amount || 0;
+    });
+    document.getElementById('summaryCredit').textContent = '₹' + tCr.toFixed(2);
+    document.getElementById('summaryDebit').textContent = '₹' + tDb.toFixed(2);
+    document.getElementById('summaryTotal').textContent = txns.length;
+    document.getElementById('summarySuccess').textContent = tSuccess;
+}
+
+// ============================================
+// MODAL
+// ============================================
+function openTransactionDetails(txnId) {
+    if (isAccountBlocked) return;
+    var tx = state.allTransactions.find(function(t){ return (t.tx_id || t._id) === txnId; });
+    if (!tx) { showToast('Transaction not found', 'error'); return; }
+    renderModal(tx);
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function renderModal(tx) {
+    var uid = state.userId;
+    var isC = isCredit(tx, uid);
+    var displayName = getDisplayName(tx, uid);
+    var iconClass = isC ? 'credit' : 'debit';
+    var amountClass = isC ? 'credit' : 'debit';
+    var sign = isC ? '+' : '-';
+    var status = (tx.status || 'success').toLowerCase();
+    var amount = tx.amount || 0;
+    var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+    var time = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+
+    var cp = getCounterparty(tx, uid);
+    var cpType = isC ? 'From' : 'To';
+    var txnId = tx.tx_id || tx._id || 'N/A';
+
+    var statusClass = status === 'success' ? 'success' : (status === 'pending' ? 'pending' : 'failed');
+    var statusIcon = status === 'success' ? 'fa-check-circle' : (status === 'pending' ? 'fa-clock' : 'fa-times-circle');
+
+    var html =
+        '<div class="modal-center">' +
+            '<div class="modal-tx-icon ' + iconClass + '"><i class="fas ' + getIconClass(tx, uid) + '"></i></div>' +
+            '<div class="modal-tx-title">' + displayName + '</div>' +
+            '<div class="modal-tx-amount ' + amountClass + '"><span class="currency">₹</span>' + sign + ' ' + amount.toFixed(2) + '</div>' +
+            '<div class="modal-status ' + statusClass + '"><i class="fas ' + statusIcon + '"></i> ' + status + '</div>' +
+        '</div>' +
+        '<div class="modal-divider"></div>' +
+        '<div class="modal-row"><span class="modal-label">Transaction ID</span><span class="modal-value">' + txnId + '<button class="modal-btn-copy" onclick="copyToClipboard(\'' + txnId + '\')"><i class="fas fa-copy"></i></button></span></div>' +
+        '<div class="modal-row"><span class="modal-label">' + cpType + '</span><span class="modal-value highlight">' + cp + '</span></div>' +
+        '<div class="modal-row"><span class="modal-label">Method</span><span class="modal-value">' + getMethod(tx) + '</span></div>' +
+        '<div class="modal-row"><span class="modal-label">Amount</span><span class="modal-value ' + amountClass + '">₹' + amount.toFixed(2) + '</span></div>' +
+        '<div class="modal-row"><span class="modal-label">Date &amp; Time</span><span class="modal-value">' + time + '</span></div>';
+
+    if (tx.remark || tx.description) {
+        html += '<div class="modal-row"><span class="modal-label">Note</span><span class="modal-value">' + (tx.remark || tx.description) + '</span></div>';
+    }
+
+    document.getElementById('modalBody').innerHTML = html;
+}
+
+// ============================================
+// COPY
+// ============================================
+function copyToClipboard(text) {
+    if (isAccountBlocked || !text) return;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function(){ showToast('Copied To Clipboard', 'success'); }).catch(function(){ fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+}
+
+function fallbackCopy(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); showToast('Copied To Clipboard', 'success'); }
+    catch (e) { showToast('Copy failed', 'error'); }
+    document.body.removeChild(textarea);
+}
+
+// ============================================
+// EXPORT CSV
+// ============================================
+function exportCSV() {
+    if (isAccountBlocked) return;
+    var txns = state.filteredTransactions;
+    if (!txns || txns.length === 0) { showToast('No transactions to export', 'warning'); return; }
+
+    var uid = state.userId;
+    var allTxns = state.allTransactions;
+    var balanceMap = {};
+    var sortedAsc = allTxns.slice().sort(function(a, b) { return new Date(a.tx_time || a.createdAt) - new Date(b.tx_time || b.createdAt); });
+    var runningBalance = 0;
+    sortedAsc.forEach(function(tx) {
+        var isC = isCredit(tx, uid);
+        var amt = tx.amount || 0;
+        if (isC) runningBalance += amt; else runningBalance -= amt;
+        var key = tx.tx_id || tx._id;
+        var storedBalance = getBalanceAfter(tx);
+        balanceMap[key] = (storedBalance !== null) ? storedBalance : runningBalance;
+    });
+
+    var csvRows = [];
+    csvRows.push(['TXN ID', 'Title', 'Type', 'Amount', 'Method', 'Status', 'Category', 'Net Balance', 'Date', 'Notes'].join(','));
+
+    txns.forEach(function(tx){
+        var key = tx.tx_id || tx._id;
+        var isC = isCredit(tx, uid);
+        var amount = tx.amount || 0;
+        var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var dtStr = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+        var title = getDisplayName(tx, uid);
+        var type = isC ? 'credit' : 'debit';
+        var method = getMethod(tx);
+        var status = (tx.status || 'success').toLowerCase();
+        var category = getCategory(tx);
+        var netBalance = balanceMap[key] !== undefined ? balanceMap[key] : '';
+        var notes = tx.remark || tx.description || '';
+        if (!notes) {
+            var cp = getCounterparty(tx, uid);
+            if (cp && cp !== 'System') notes = (isC ? 'Received from ' : 'Sent to ') + cp;
+            else notes = title;
+        }
+        csvRows.push([
+            csvEscape(tx.tx_id || tx._id || 'N/A'),
+            csvEscape(title),
+            csvEscape(type),
+            csvEscape(amount.toFixed(2).replace(/\.00$/, '')),
+            csvEscape(method),
+            csvEscape(status),
+            csvEscape(category),
+            csvEscape(typeof netBalance === 'number' ? netBalance.toFixed(2).replace(/\.00$/, '') : netBalance),
+            csvEscape(dtStr),
+            csvEscape(notes)
+        ].join(','));
+    });
+
+    var csv = csvRows.join('\n');
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = 'transactions_' + dateStr + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showToast('CSV Downloaded ✓', 'success');
+}
+
+function csvEscape(str) {
+    if (str === null || str === undefined) return '""';
+    var s = String(str);
+    return '"' + s.replace(/"/g, '""') + '"';
+}
+
+// ============================================
+// EXPORT PDF
+// ============================================
+function exportPDF() {
+    if (isAccountBlocked) return;
+    if (typeof window.jspdf === 'undefined') { showToast('PDF library loading, please wait...', 'warning'); return; }
+    var txns = state.filteredTransactions;
+    if (!txns || txns.length === 0) { showToast('No transactions to export', 'warning'); return; }
+
+    var uid = state.userId;
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+
+    var totalCredit = 0, totalDebit = 0, totalSuccess = 0, totalCount = txns.length;
+    txns.forEach(function(tx){
+        if ((tx.status || 'success').toLowerCase() === 'success') totalSuccess++;
+        if (isCredit(tx, uid)) totalCredit += tx.amount || 0;
+        else totalDebit += tx.amount || 0;
+    });
+    var successRate = totalCount > 0 ? Math.round((totalSuccess / totalCount) * 100) : 100;
+
+    doc.setFillColor(26, 86, 219);
+    doc.rect(0, 0, pageWidth, 26, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('Transaction Statement', 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    var now = new Date();
+    var dateStr = now.toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    doc.text('Generated: ' + dateStr, pageWidth - 14, 16, { align: 'right' });
+
+    var y = 38;
+    var boxWidth = (pageWidth - 28) / 4;
+    var boxGap = 2;
+    var statY = y;
+    var statHeight = 22;
+
+    doc.setFillColor(230, 248, 238);
+    doc.roundedRect(14, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Total Credit', 14 + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 160, 110);
+    doc.text('Rs.' + totalCredit.toFixed(2), 14 + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+
+    var b2X = 14 + boxWidth;
+    doc.setFillColor(255, 232, 234);
+    doc.roundedRect(b2X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Total Debit', b2X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(220, 60, 60);
+    doc.text('Rs.' + totalDebit.toFixed(2), b2X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+
+    var b3X = 14 + boxWidth * 2;
+    doc.setFillColor(238, 246, 255);
+    doc.roundedRect(b3X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Successful', b3X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(40, 120, 220);
+    doc.text(String(totalSuccess), b3X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+
+    var b4X = 14 + boxWidth * 3;
+    doc.setFillColor(245, 240, 255);
+    doc.roundedRect(b4X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Success Rate', b4X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(120, 60, 200);
+    doc.text(successRate + '%', b4X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    y = statY + statHeight + 8;
+
+    var tableRows = [];
+    txns.forEach(function(tx){
+        var isC = isCredit(tx, uid);
+        var amount = tx.amount || 0;
+        var title = getDisplayName(tx, uid);
+        if (title.length > 30) title = title.substring(0, 27) + '...';
+        var txnId = tx.tx_id || tx._id || '';
+        if (txnId.length > 18) txnId = txnId.substring(0, 18) + '...';
+        tableRows.push([
+            title, txnId, getMethod(tx),
+            isC ? 'Credit' : 'Debit',
+            (tx.status || 'success').charAt(0).toUpperCase() + (tx.status || 'success').slice(1),
+            (isC ? '+ Rs.' : '- Rs.') + amount.toFixed(2)
+        ]);
+    });
+
+    doc.autoTable({
+        startY: y,
+        head: [['Title', 'TXN ID', 'Method', 'Type', 'Status', 'Amount']],
+        body: tableRows,
+        theme: 'grid',
+        styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2, overflow: 'linebreak', textColor: [40, 40, 40], lineColor: [220, 225, 232], lineWidth: 0.1 },
+        headStyles: { fillColor: [240, 245, 250], textColor: [60, 70, 90], fontStyle: 'bold', fontSize: 7.5, halign: 'left' },
+        alternateRowStyles: { fillColor: [250, 252, 255] },
+        columnStyles: {
+            0: { cellWidth: 50 }, 1: { cellWidth: 40, font: 'courier' },
+            2: { cellWidth: 26 }, 3: { cellWidth: 18, halign: 'center' },
+            4: { cellWidth: 20, halign: 'center' }, 5: { cellWidth: 28, halign: 'right', fontStyle: 'bold' }
+        },
+        didParseCell: function(data) {
+            if (data.section === 'body') {
+                if (data.column.index === 5) {
+                    var val = String(data.cell.raw || '');
+                    if (val.indexOf('+') === 0) data.cell.styles.textColor = [20, 160, 110];
+                    else if (val.indexOf('-') === 0) data.cell.styles.textColor = [220, 60, 60];
+                }
+                if (data.column.index === 3) {
+                    var typeVal = String(data.cell.raw || '');
+                    if (typeVal === 'Credit') data.cell.styles.textColor = [20, 160, 110];
+                    else if (typeVal === 'Debit') data.cell.styles.textColor = [220, 60, 60];
+                }
+            }
+        },
+        margin: { left: 14, right: 14 }
+    });
+
+    var pageCount = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+        doc.text('Universe Wallet • Secure • Fast', 14, pageHeight - 8);
+        doc.text('Page ' + i + ' of ' + pageCount, pageWidth - 14, pageHeight - 8, { align: 'right' });
+    }
+
+    var dateFileStr = new Date().toISOString().slice(0, 10);
+    doc.save('statement_' + dateFileStr + '.pdf');
+    showToast('PDF Downloaded ✓', 'success');
+}
+
+// ============================================
+// KEYBOARD
+// ============================================
+document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeModal();
+});
+
+// ============================================
+// BOTTOM NAV
+// ============================================
+(function setActiveNav(){
+    var path = window.location.pathname;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
+    var active = null;
+    if (path.indexOf('/dashboard') === 0 || path === '/' || path === '') active = document.querySelector('.bottom-nav .nav-item[data-nav="dashboard"]');
+    else if (path.indexOf('/transfer') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transfer"]');
+    else if (path.indexOf('/qr') === 0 || path.indexOf('/scan') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="qr"]');
+    else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="deposit"]');
+    else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transactions"]');
+    if (active) active.classList.add('active');
+})();
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', async function(){
+    var token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/'; return; }
+
+    // ⚠️ Theme button handled via inline onclick="toggleTheme()" in HTML
+
+    try {
+        var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setAvatar(cachedUser);
+        state.user = cachedUser;
+    } catch(e){ setAvatar({}); }
+
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    fetchTransactions();
+});
+
+/* ============================================
+   SERVICE WORKER REGISTER
+   ============================================ */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(function(reg) { console.log('✅ SW Registered:', reg.scope); })
+            .catch(function(err) { console.error('❌ SW Failed:', err); });
+    });
+}
+</script>
+
+</body>
+</html>
