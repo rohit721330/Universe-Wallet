@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="theme-color" content="#080d18">
+<title>Withdraw Funds - Universal Wallet</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#080d18;--header:#0b101b;--card:#101622;--card2:#151b29;--border:rgba(255,255,255,.10);--text:#f2f4f8;--muted:#858da0;--muted2:#687084;--gold:#e8b83e;--gold-dark:#b78b25;--green:#20d39a;--blue:#4d82ff;--red:#ff5e6c;--input:#151b27}
+body.light{--bg:#f3f5f9;--header:#fff;--card:#fff;--card2:#f6f7fa;--border:rgba(0,0,0,.10);--text:#161a23;--muted:#707887;--muted2:#8a919d;--input:#f4f5f8}
+body{min-height:100vh;background:radial-gradient(circle at 85% 18%,rgba(232,184,62,.08),transparent 25%),var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;transition:background .25s ease,color .25s ease;padding-bottom:85px}
+button,input{font-family:inherit}
+button{cursor:pointer}
+.app-header{height:74px;width:100%;display:flex;align-items:center;padding:0 18px;background:rgba(11,16,27,.94);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(18px)}
+body.light .app-header{background:rgba(255,255,255,.94)}
+.menu-btn,.header-action{width:42px;height:42px;border:1px solid var(--border);border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--text);background:transparent;font-size:18px;transition:.2s ease}
+.menu-btn:active,.header-action:active{transform:scale(.94)}
+.header-title{flex:1;margin-left:14px;font-size:19px;font-weight:650;letter-spacing:.1px}
+.header-right{display:flex;gap:8px}
+.theme-btn{color:var(--gold)}
+.profile-btn{color:var(--green)}
+.container{width:100%;max-width:520px;margin:auto;padding:20px 18px 40px}
+.balance-card{position:relative;overflow:hidden;padding:28px 26px 25px;border-radius:29px;background:radial-gradient(circle at 90% 12%,rgba(232,184,62,.13),transparent 25%),linear-gradient(145deg,#171d2c,#121827);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 45px rgba(0,0,0,.22)}
+body.light .balance-card{background:radial-gradient(circle at 90% 12%,rgba(232,184,62,.12),transparent 25%),#fff}
+.balance-label{color:var(--muted);font-size:12px;letter-spacing:2px;font-weight:600;margin-bottom:10px}
+.balance-amount{font-family:Georgia,"Times New Roman",serif;font-size:32px;font-weight:700;margin-bottom:5px}
+.balance-amount span{color:var(--gold)}
+.ready{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+.ready i{color:var(--green);font-size:9px}
+.balance-stats{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:25px}
+.stat{padding:14px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+body.light .stat{background:#f7f8fa}
+.stat-label{color:var(--muted);font-size:11px;letter-spacing:1.2px;margin-bottom:8px}
+.stat-value{color:var(--green);font-size:16px;font-weight:700}
+.stat.pending .stat-value{color:var(--gold)}
+.why-card{margin-top:18px;padding:25px 23px 20px;background:var(--card);border:1px solid var(--border);border-radius:25px;box-shadow:0 15px 35px rgba(0,0,0,.12)}
+.section-label{color:var(--muted);font-size:12px;font-weight:650;letter-spacing:1.6px;margin-bottom:20px}
+.benefit{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border)}
+.benefit:last-of-type{border-bottom:none}
+.benefit-icon{width:40px;height:40px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(232,184,62,.13);color:var(--gold);font-size:16px}
+.benefit:nth-child(3) .benefit-icon{background:rgba(32,211,154,.10);color:var(--green)}
+.benefit:nth-child(4) .benefit-icon{background:rgba(77,130,255,.11);color:#5c91ff}
+.benefit-title{font-size:14px;font-weight:650;margin-bottom:5px}
+.benefit-text{color:var(--muted);font-size:13px}
+.charge{margin-top:16px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:22px;background:rgba(232,184,62,.12);border:1px solid rgba(232,184,62,.38);color:var(--gold);font-size:13px;font-weight:600}
+.withdraw-card{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:27px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.14)}
+.withdraw-heading{padding:36px 23px 29px;border-bottom:1px solid var(--border)}
+.withdraw-heading h1{font-family:Georgia,"Times New Roman",serif;font-size:26px;line-height:1.2;margin-bottom:11px}
+.withdraw-heading p{color:var(--muted);font-size:15px;line-height:1.55;max-width:310px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);padding:20px 21px;border-bottom:1px solid var(--border)}
+.step{display:flex;align-items:center;gap:8px;min-width:0}
+.step-number{width:36px;height:36px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #303746;color:var(--muted);font-size:13px;font-weight:600}
+.step.active .step-number{border-color:var(--gold);background:rgba(232,184,62,.08);color:var(--gold)}
+.step.completed .step-number{border-color:var(--green);background:rgba(32,211,154,.08);color:var(--green)}
+.step-text{color:var(--muted);font-size:12px;line-height:1.3}
+.step.active .step-text{color:var(--gold);font-weight:600}
+.step.completed .step-text{color:var(--green)}
+.form-area{padding:28px 23px 31px}
+.form-heading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;letter-spacing:1.5px;font-weight:650;margin-bottom:23px}
+.form-heading::before{content:"";width:4px;height:17px;border-radius:5px;background:var(--gold)}
+.field-label{display:block;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:12px}
+.amount-box{height:59px;display:flex;align-items:center;padding:0 15px;border:1px solid #343b4a;background:var(--input);border-radius:15px;transition:.2s ease}
+.amount-box:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,184,62,.08)}
+.rupee{color:var(--gold);font-size:19px;font-weight:700;margin-right:14px}
+#amount{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:16px;font-weight:500}
+#amount::placeholder{color:var(--muted2)}
+.max-btn{margin-top:15px;width:160px;height:46px;border-radius:9px;border:1px solid #343b4a;background:transparent;color:var(--muted);font-size:14px;font-weight:600}
+.max-btn:active{transform:scale(.98)}
+.limits{display:flex;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted2);font-size:13px}
+.limits .balance{color:var(--muted)}
+.error{display:none;margin-top:10px;color:var(--red);font-size:12px}
+.error.show{display:block}
+.continue-btn{width:100%;height:58px;margin-top:32px;border:0;border-radius:16px;background:linear-gradient(135deg,#e4b63d,#dca82c);color:#080b10;font-size:15px;font-weight:750;box-shadow:0 8px 20px rgba(218,169,43,.16);transition:.2s ease}
+.continue-btn i{margin-left:7px}
+.continue-btn:active{transform:translateY(1px) scale(.99)}
+.continue-btn:disabled{opacity:.6;cursor:not-allowed}
+.upi-section,.confirm-section,.bank-section{display:none}
+.upi-section.active,.confirm-section.active,.bank-section.active{display:block}
+.step-content-title{font-size:18px;font-weight:650;margin-bottom:8px}
+.step-content-description{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:22px}
+.input-group{margin-bottom:17px}
+.text-input{width:100%;height:55px;border:1px solid #343b4a;border-radius:14px;padding:0 15px;background:var(--input);color:var(--text);outline:none;font-size:15px}
+.text-input:focus{border-color:var(--gold)}
+.text-input::placeholder{color:var(--muted2)}
+.back-btn{width:100%;height:52px;margin-top:12px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--muted);font-weight:600}
+.summary{padding:18px;border-radius:15px;background:var(--card2);border:1px solid var(--border);margin-bottom:20px}
+.summary-row{display:flex;justify-content:space-between;padding:9px 0;font-size:14px}
+.summary-row span:first-child{color:var(--muted)}
+.summary-row span:last-child{font-weight:600}
+.success-box{padding:25px 18px;text-align:center;border:1px solid rgba(32,211,154,.2);border-radius:18px;background:rgba(32,211,154,.05)}
+.success-icon{width:60px;height:60px;margin:0 auto 15px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(32,211,154,.12);color:var(--green);font-size:25px}
+.success-box h2{font-size:20px;margin-bottom:8px}
+.success-box p{color:var(--muted);font-size:13px;line-height:1.5}
+
+/* ====== TAB STYLES (Bank/UPI) ====== */
+.method-tabs{display:flex;gap:8px;margin-bottom:20px}
+.method-tab{flex:1;padding:14px 10px;border-radius:14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;transition:.2s ease;background:var(--input);border:2px solid #343b4a;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.method-tab.active{background:linear-gradient(135deg,#e4b63d,#dca82c);border-color:transparent;color:#080b10;box-shadow:0 4px 12px rgba(218,169,43,.25)}
+.method-tab:active{transform:scale(.97)}
+.method-tab i{margin-right:6px}
+
+/* ====== SETTINGS STATUS ====== */
+.settings-status{text-align:center;font-size:12px;padding:12px;border-radius:12px;margin-bottom:16px;font-weight:700;letter-spacing:.3px}
+.settings-status.enabled{color:var(--green);background:rgba(32,211,154,.10);border:1px solid rgba(32,211,154,.25)}
+.settings-status.disabled{color:var(--red);background:rgba(255,94,108,.10);border:1px solid rgba(255,94,108,.25)}
+.settings-status i{margin-right:6px}
+
+/* ====== FEE & TOTAL DISPLAY ====== */
+.fee-display{border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;background:rgba(232,184,62,.08);border:1px solid rgba(232,184,62,.25)}
+.fee-display .label{font-weight:700;color:var(--muted)}
+.fee-display .value{font-weight:800;color:var(--gold)}
+.total-display{border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;background:rgba(32,211,154,.08);border:1px solid rgba(32,211,154,.25)}
+.total-display .label{font-weight:700;color:var(--muted)}
+.total-display .value{font-weight:800;color:var(--green)}
+
+/* ====== BOTTOM NAV ====== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:10px 0 20px;z-index:50;background:rgba(11,16,27,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);max-width:520px;margin:0 auto}
+body.light .bottom-nav{background:rgba(255,255,255,.96)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;cursor:pointer;text-decoration:none;flex:1;color:var(--muted2);transition:color .2s;letter-spacing:.3px}
+.nav-item i{font-size:20px}
+.nav-item.active{color:var(--gold)}
+.nav-item:active{transform:scale(.95)}
+
+/* ====== TOAST ====== */
+.toast-message{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:60px;font-size:13px;font-weight:700;z-index:10000;animation:fadeInUp .3s ease;max-width:90%;text-align:center;background:var(--gold);color:#080b10;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.toast-message.error{background:var(--red)!important;color:#fff!important}
+.toast-message.success{background:var(--green)!important;color:#080b10!important}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ====== SPINNER ====== */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-radius:50%;border-top-color:#080b10;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ====== BLOCKED OVERLAY ====== */
+.blocked-overlay{position:fixed;inset:0;z-index:99999;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px}
+.blocked-overlay.active{display:flex}
+.blocked-card{background:var(--card);border-radius:24px;padding:40px 30px;max-width:420px;width:100%;text-align:center;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5);animation:blockedIn .4s ease-out}
+@keyframes blockedIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.blocked-icon{width:90px;height:90px;border-radius:24px;background:rgba(255,94,108,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:42px;color:var(--red);border:2px solid rgba(255,94,108,.3)}
+.blocked-title{font-size:24px;font-weight:900;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.blocked-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px;font-weight:500}
+.blocked-btn{width:100%;padding:15px;border-radius:16px;font-size:14px;font-weight:800;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit;transition:all .2s;background:var(--gold);color:#080b10;box-shadow:0 4px 15px rgba(232,184,62,.3);display:flex;align-items:center;justify-content:center;gap:8px}
+.blocked-btn:hover{background:var(--gold-dark);transform:translateY(-2px);box-shadow:0 8px 25px rgba(232,184,62,.4)}
+.blocked-btn:active{transform:scale(.98)}
+
+@media(max-width:380px){.container{padding-left:13px;padding-right:13px}.app-header{padding:0 13px}.steps{padding-left:14px;padding-right:14px}.step{gap:5px}.step-number{width:33px;height:33px}.step-text{font-size:11px}.limits{font-size:11px}.withdraw-heading h1{font-size:24px}.method-tab{font-size:10px;padding:10px 6px}.balance-amount{font-size:28px}}
+</style>
+</head>
+
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="header-title">Withdraw</div>
+    <div class="header-right">
+        <button class="header-action theme-btn" id="themeBtn" aria-label="Change theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="header-action profile-btn" id="profileBtn" aria-label="Profile">
+            <i class="fa-solid fa-user"></i>
+        </button>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- AVAILABLE BALANCE -->
+    <section class="balance-card">
+        <div class="balance-label">AVAILABLE BALANCE</div>
+        <div class="balance-amount">
+            <span>₹</span><span id="balance">0.00</span>
+        </div>
+        <div class="ready">
+            <i class="fa-solid fa-circle"></i>
+            Ready for instant withdrawal
+        </div>
+        <div class="balance-stats">
+            <div class="stat">
+                <div class="stat-label">WITHDRAWN</div>
+                <div class="stat-value">₹0</div>
+            </div>
+            <div class="stat pending">
+                <div class="stat-label">PENDING</div>
+                <div class="stat-value">0 reqs</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY WITHDRAW -->
+    <section class="why-card">
+        <div class="section-label">WHY WITHDRAW WITH US</div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="benefit-title">Processing Time</div>
+                <div class="benefit-text">UPI payouts in 24–72 Hours</div>
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+                <div class="benefit-title">Bank-Grade Security</div>
+                <div class="benefit-text">256-bit encrypted transfers</div>
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="benefit-title">Full Transparency</div>
+                <div class="benefit-text">Live status updates & UTR tracking</div>
+            </div>
+        </div>
+        <div class="charge">
+            <i class="fa-solid fa-percent"></i>
+            &nbsp; 0.00% service charge per withdrawal
+        </div>
+    </section>
+
+    <!-- WITHDRAW CARD -->
+    <section class="withdraw-card">
+
+        <div class="withdraw-heading">
+            <h1>Withdraw Funds</h1>
+            <p>Complete the steps below to transfer money to your account</p>
+        </div>
+
+        <!-- STEPS -->
+        <div class="steps">
+            <div class="step active" id="step1Indicator">
+                <div class="step-number">1</div>
+                <div class="step-text">Amount</div>
+            </div>
+            <div class="step" id="step2Indicator">
+                <div class="step-number">2</div>
+                <div class="step-text">Details</div>
+            </div>
+            <div class="step" id="step3Indicator">
+                <div class="step-number">3</div>
+                <div class="step-text">Confirm</div>
+            </div>
+        </div>
+
+        <!-- STEP 1: AMOUNT -->
+        <div class="form-area" id="amountSection">
+            <div class="form-heading">ENTER WITHDRAWAL AMOUNT</div>
+
+            <div id="settingsStatus" class="settings-status enabled">
+                <i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled
+            </div>
+
+            <label class="field-label">AMOUNT (₹)</label>
+            <div class="amount-box">
+                <span class="rupee">₹</span>
+                <input type="number" id="amount" placeholder="0" min="1" max="50000" inputmode="decimal" step="1">
+            </div>
+
+            <button class="max-btn" id="maxBtn">Max ₹<span id="maxBtnValue">0.00</span></button>
+
+            <div class="limits">
+                <span>Min: ₹<span id="minLimit">1</span></span>
+                <span>Max: ₹<span id="maxLimit">5,000</span></span>
+                <span class="balance">Balance: ₹<span id="limitBalance">0.00</span></span>
+            </div>
+
+            <div class="error" id="amountError"></div>
+
+            <button class="continue-btn" id="amountContinue">
+                Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- STEP 2: DETAILS (UPI / BANK TABS) -->
+        <div class="form-area upi-section" id="detailsSection">
+            <div class="form-heading">ENTER WITHDRAWAL DETAILS</div>
+
+            <!-- METHOD TABS -->
+            <div class="method-tabs">
+                <button class="method-tab active" onclick="switchMethod('upi')" id="tabUpi">
+                    <i class="fa-solid fa-mobile-screen-button"></i> UPI
+                </button>
+                <button class="method-tab" onclick="switchMethod('bank')" id="tabBank">
+                    <i class="fa-solid fa-building-columns"></i> Bank
+                </button>
+            </div>
+
+            <!-- UPI METHOD -->
+            <div id="upiMethod">
+                <div class="step-content-title">UPI Account</div>
+                <div class="step-content-description">
+                    Enter the UPI ID where you want to receive your withdrawal.
+                </div>
+                <div class="input-group">
+                    <label class="field-label">UPI ID</label>
+                    <input class="text-input" type="text" id="upiId" placeholder="example@upi" autocomplete="off">
+                </div>
+            </div>
+
+            <!-- BANK METHOD -->
+            <div id="bankMethod" style="display: none;">
+                <div class="step-content-title">Bank Account</div>
+                <div class="step-content-description">
+                    Enter your bank account details where you want to receive your withdrawal.
+                </div>
+                <div class="input-group">
+                    <label class="field-label">BANK NAME</label>
+                    <input class="text-input" type="text" id="bankName" placeholder="Enter Bank Name" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label class="field-label">ACCOUNT HOLDER NAME</label>
+                    <input class="text-input" type="text" id="accountHolderName" placeholder="Enter Holder Name" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label class="field-label">ACCOUNT NUMBER</label>
+                    <input class="text-input" type="text" id="accountNumber" placeholder="Enter Account Number" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label class="field-label">IFSC CODE</label>
+                    <input class="text-input" type="text" id="ifscCode" placeholder="Enter IFSC Code" autocomplete="off" style="text-transform:uppercase">
+                </div>
+            </div>
+
+            <div class="error" id="detailError"></div>
+
+            <button class="continue-btn" id="detailsContinue">
+                Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+            <button class="back-btn" id="detailsBack">
+                <i class="fa-solid fa-arrow-left"></i> &nbsp; Back
+            </button>
+        </div>
+
+        <!-- STEP 3: CONFIRM -->
+        <div class="form-area confirm-section" id="confirmSection">
+            <div class="form-heading">CONFIRM WITHDRAWAL</div>
+
+            <div class="step-content-title">Review Details</div>
+            <div class="step-content-description">
+                Please verify your withdrawal information before submitting.
+            </div>
+
+            <div class="summary">
+                <div class="summary-row">
+                    <span>Method</span>
+                    <span id="summaryMethod">UPI</span>
+                </div>
+                <div class="summary-row">
+                    <span>Amount</span>
+                    <span id="summaryAmount">₹0</span>
+                </div>
+                <div class="summary-row">
+                    <span id="summaryDetailLabel">UPI ID</span>
+                    <span id="summaryDetail">—</span>
+                </div>
+                <div class="summary-row">
+                    <span>Service Fee</span>
+                    <span id="summaryFee">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>You Will Receive</span>
+                    <span id="summaryTotal" style="color:var(--green)">₹0</span>
+                </div>
+            </div>
+
+            <button class="continue-btn" id="confirmBtn">
+                Confirm Withdrawal <i class="fa-solid fa-check"></i>
+            </button>
+
+            <button class="back-btn" id="confirmBack">
+                <i class="fa-solid fa-arrow-left"></i> &nbsp; Back
+            </button>
+        </div>
+
+        <!-- SUCCESS -->
+        <div class="form-area" id="successSection" style="display:none;">
+            <div class="success-box">
+                <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                <h2>Withdrawal Submitted</h2>
+                <p>
+                    Your withdrawal request has been submitted successfully.
+                    You can track its status from your transactions.
+                </p>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Home</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Send</a>
+    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i>QR</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Add</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>Logs</a>
+</div>
+
+<script>
+// ============================================
+// CONFIGURATION
+// ============================================
+const AUTH_TOKEN = localStorage.getItem('token');
+if (!AUTH_TOKEN) { window.location.replace('/'); }
+
+let currentMethod = 'upi';
+let isAccountBlocked = false;
+let _blockedShownAt = 0;
+
+let settings = {
+    minAmount: 1,
+    maxAmount: 5000,
+    enabled: true,
+    fee: 0,
+    feeType: 'percentage',
+    maxDailyWithdrawals: 10,
+    maxMonthlyWithdrawals: 50,
+    requireBankDetails: true,
+    requireUpiDetails: true,
+    autoApproveBelow: 0,
+    approvalRequired: true
+};
+
+// ============================================
+// BLOCKED OVERLAY (debounced + freezes UI)
+// ============================================
+function showBlockedOverlay(title, message) {
+    const now = Date.now();
+    if (isAccountBlocked && now - _blockedShownAt < 1000) return;
+    _blockedShownAt = now;
+    isAccountBlocked = true;
+
+    if (title)   document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent   = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+    document.querySelectorAll('button, input, a, .nav-item, .method-tab').forEach(el => {
+        el.style.pointerEvents = 'none';
+        el.style.opacity = '0.5';
+    });
+}
+
+// ============================================
+// LOGOUT
+// ============================================
+function logout() {
+    isAccountBlocked = false;
+    _blockedShownAt = 0;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    document.body.style.overflow = '';
+    window.location.replace('/');
+}
+
+// ============================================
+// SAFE FETCH
+// ============================================
+async function safeFetch(url, options = {}) {
+    let response, data = {};
+    try {
+        response = await fetch(url, options);
+    } catch (netErr) {
+        const err = new Error('Network error: ' + netErr.message);
+        err.network = true;
+        throw err;
+    }
+    try { data = await response.json(); } catch (e) { data = {}; }
+
+    if (response.status === 401) {
+        logout();
+        const err = new Error(data.message || 'Session expired');
+        err.auth = true;
+        throw err;
+    }
+    if (response.status === 403) {
+        showBlockedOverlay('Access Denied',
+            data.message || data.error || 'Your account has been blocked by administrator.');
+        const err = new Error('Account blocked'); err.blocked = true; throw err;
+    }
+    if (response.status === 404 && (data.userNotFound || data.isDeleted || data.deleted)) {
+        showBlockedOverlay('Account Not Found',
+            data.message || 'Your account has been deleted. Please contact support.');
+        const err = new Error('Account deleted'); err.deleted = true; throw err;
+    }
+    if (response.status === 423) {
+        showBlockedOverlay('Account Locked',
+            data.message || 'Your account has been temporarily locked.');
+        const err = new Error('Account locked'); err.locked = true; throw err;
+    }
+    return { response, data };
+}
+
+// ============================================
+// VERIFY USER STATE
+// ============================================
+async function verifyUserState() {
+    const t = localStorage.getItem('token');
+    if (!t) { window.location.replace('/'); return false; }
+    try {
+        const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        const user = data.user || data.data?.user || data.data || data.result || data;
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked',
+                data.message || data.error || user?.blockReason || 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found',
+                data.message || 'Your account has been deleted. Please contact support.');
+            return false;
+        }
+        if (res.status === 423) {
+            showBlockedOverlay('Account Locked',
+                data.message || 'Your account has been temporarily locked.');
+            return false;
+        }
+        if (!res.ok) {
+            showBlockedOverlay('Access Denied', data.message || 'Unable to verify your account.');
+            return false;
+        }
+
+        if (!user || typeof user !== 'object' || (!user.id && !user._id && !user.mobile)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found. Please login again.');
+            return false;
+        }
+
+        const isBlocked   = user.isBlocked === true || user.blocked === true || user.status === 'blocked';
+        const isDeleted   = user.isDeleted === true || user.deleted === true || !!user.deletedAt || user.status === 'deleted';
+        const isInactive  = user.isActive === false || user.status === 'inactive' || user.status === 'deactivated' || user.isDeactivated === true;
+        const isSuspended = user.status === 'suspended' || user.isSuspended === true;
+
+        if (isDeleted)   { showBlockedOverlay('Account Deleted',     'Your account has been permanently deleted. Please contact support.'); return false; }
+        if (isBlocked)   { showBlockedOverlay('Account Blocked',     user.blockReason || 'Your account has been blocked by administrator.'); return false; }
+        if (isSuspended) { showBlockedOverlay('Account Suspended',   'Your account has been suspended. Please contact support.'); return false; }
+        if (isInactive)  { showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support to reactivate.'); return false; }
+
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(message, type = '') {
+    if (isAccountBlocked) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    if (type) toast.classList.add(type);
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============================================
+// METHOD SWITCHING (UPI / BANK TABS)
+// ============================================
+function switchMethod(method) {
+    if (isAccountBlocked) return;
+    currentMethod = method;
+
+    const tabUpi = document.getElementById('tabUpi');
+    const tabBank = document.getElementById('tabBank');
+    const upiMethod = document.getElementById('upiMethod');
+    const bankMethod = document.getElementById('bankMethod');
+
+    if (method === 'upi') {
+        tabUpi.classList.add('active');
+        tabBank.classList.remove('active');
+        upiMethod.style.display = 'block';
+        bankMethod.style.display = 'none';
+    } else {
+        tabBank.classList.add('active');
+        tabUpi.classList.remove('active');
+        upiMethod.style.display = 'none';
+        bankMethod.style.display = 'block';
+    }
+    // Clear error on switch
+    document.getElementById('detailError').classList.remove('show');
+}
+
+// ============================================
+// UPDATE FEE DISPLAY
+// ============================================
+function updateFeeDisplay() {
+    if (isAccountBlocked) return;
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value) || 0;
+
+    const feeRate = settings.fee || 0;
+    const feeType = settings.feeType || 'percentage';
+
+    let feeAmount = 0;
+    let feeText = '';
+
+    if (feeRate > 0) {
+        if (feeType === 'percentage') {
+            feeAmount = (amount * feeRate) / 100;
+            feeText = `${feeRate}% (₹${feeAmount.toFixed(2)})`;
+        } else if (feeType === 'fixed') {
+            feeAmount = feeRate;
+            feeText = `₹${feeRate.toFixed(2)} (Fixed)`;
+        }
+    } else {
+        feeText = '₹0.00 (No Fee)';
+    }
+
+    const userReceives = Math.round((amount - feeAmount) * 100) / 100;
+
+    // Update summary in confirm step
+    document.getElementById('summaryFee').textContent = feeText;
+    const totalEl = document.getElementById('summaryTotal');
+    if (amount > 0) {
+        totalEl.textContent = `₹${userReceives.toFixed(2)}`;
+        if (userReceives > 0) {
+            totalEl.style.color = 'var(--green)';
+        } else if (userReceives === 0) {
+            totalEl.style.color = 'var(--gold)';
+        } else {
+            totalEl.style.color = 'var(--red)';
+        }
+    } else {
+        totalEl.textContent = '₹0.00';
+        totalEl.style.color = 'var(--green)';
+    }
+
+    // Update charge display in why-card
+    const chargeEl = document.querySelector('.charge');
+    if (chargeEl && settings.fee > 0) {
+        const chargeText = settings.feeType === 'percentage' ? `${settings.fee}%` : `₹${settings.fee}`;
+        chargeEl.innerHTML = `<i class="fa-solid fa-percent"></i>&nbsp; ${chargeText} service charge per withdrawal`;
+    }
+}
+
+// ============================================
+// LOAD SETTINGS
+// ============================================
+async function loadSettings() {
+    if (isAccountBlocked) return;
+    try {
+        const { response, data } = await safeFetch('/api/withdraw-settings/', {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (isAccountBlocked) return;
+
+        if (data?.isBlocked === true || data?.blocked === true) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return;
+        }
+        if (data?.isDeleted === true || data?.deleted === true) {
+            showBlockedOverlay('Account Deleted', data.message || 'Your account has been deleted.');
+            return;
+        }
+        if (data?.isActive === false) {
+            showBlockedOverlay('Account Deactivated', data.message || 'Your account has been deactivated.');
+            return;
+        }
+
+        if (response && response.ok && data.success && data.settings) {
+            settings = {
+                minAmount: data.settings.minAmount || 1,
+                maxAmount: data.settings.maxAmount || 5000,
+                enabled: data.settings.enabled !== undefined ? data.settings.enabled : true,
+                fee: data.settings.fee || 0,
+                feeType: data.settings.feeType || 'percentage',
+                maxDailyWithdrawals: data.settings.maxDailyWithdrawals || 10,
+                maxMonthlyWithdrawals: data.settings.maxMonthlyWithdrawals || 50,
+                requireBankDetails: data.settings.requireBankDetails !== undefined ? data.settings.requireBankDetails : true,
+                requireUpiDetails: data.settings.requireUpiDetails !== undefined ? data.settings.requireUpiDetails : true,
+                autoApproveBelow: data.settings.autoApproveBelow || 0,
+                approvalRequired: data.settings.approvalRequired !== undefined ? data.settings.approvalRequired : true
+            };
+            updateSettingsUI();
+            updateFeeDisplay();
+        } else {
+            useDefaultSettings();
+            showToast('Using Default Settings', 'error');
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+        if (isAccountBlocked) return;
+        console.error('Load Settings Error:', error.message);
+        useDefaultSettings();
+        showToast('Connection Error - Using Defaults', 'error');
+    }
+}
+
+// ============================================
+// USE DEFAULT SETTINGS
+// ============================================
+function useDefaultSettings() {
+    settings = {
+        minAmount: 1,
+        maxAmount: 5000,
+        enabled: true,
+        fee: 0,
+        feeType: 'percentage',
+        maxDailyWithdrawals: 10,
+        maxMonthlyWithdrawals: 50,
+        requireBankDetails: true,
+        requireUpiDetails: true,
+        autoApproveBelow: 0,
+        approvalRequired: true
+    };
+    updateSettingsUI();
+    updateFeeDisplay();
+}
+
+// ============================================
+// UPDATE SETTINGS UI
+// ============================================
+function updateSettingsUI() {
+    if (isAccountBlocked) return;
+    const minLimit = document.getElementById('minLimit');
+    const maxLimit = document.getElementById('maxLimit');
+    const amountInput = document.getElementById('amount');
+    const statusEl = document.getElementById('settingsStatus');
+    const btn = document.getElementById('amountContinue');
+
+    if (minLimit) minLimit.textContent = settings.minAmount || 0;
+    if (maxLimit) maxLimit.textContent = (settings.maxAmount || 0).toLocaleString('en-IN');
+    if (maxBtnValue) maxBtnValue.textContent = (settings.maxAmount || 0).toLocaleString('en-IN');
+
+    if (amountInput) {
+        amountInput.min = settings.minAmount || 0;
+        amountInput.max = settings.maxAmount || 0;
+    }
+
+    if (statusEl && btn) {
+        const isEnabled = settings.enabled !== undefined ? settings.enabled : true;
+
+        if (isEnabled) {
+            statusEl.className = 'settings-status enabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled';
+            btn.disabled = false;
+            btn.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
+        } else {
+            statusEl.className = 'settings-status disabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Withdraw Is Currently Disabled';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
+        }
+    }
+}
+
+// ============================================
+// LOAD USER DATA
+// ============================================
+async function loadUserData() {
+    if (isAccountBlocked) return;
+    try {
+        const { response, data } = await safeFetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN, 'Content-Type': 'application/json' }
+        });
+        if (isAccountBlocked) return;
+
+        if (data?.isBlocked === true || data?.blocked === true) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return;
+        }
+        if (data?.isDeleted === true || data?.deleted === true) {
+            showBlockedOverlay('Account Deleted', data.message || 'Your account has been deleted.');
+            return;
+        }
+        if (data?.isActive === false) {
+            showBlockedOverlay('Account Deactivated', data.message || 'Your account has been deactivated.');
+            return;
+        }
+
+        const user = data.user || data.data?.user || data.data || data.result || data;
+        if (response && response.ok && user && typeof user.balance === 'number') {
+            document.getElementById('balance').textContent = user.balance.toFixed(2);
+            document.getElementById('limitBalance').textContent = user.balance.toFixed(2);
+            document.getElementById('maxBtnValue').textContent = user.balance.toFixed(2);
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+        if (isAccountBlocked) return;
+        console.error('Load Error:', error);
+        showToast(error.message || 'Failed to load user data', 'error');
+    }
+}
+
+// ============================================
+// STEP FUNCTIONS
+// ============================================
+function activateStep(step) {
+    const step1 = document.getElementById('step1Indicator');
+    const step2 = document.getElementById('step2Indicator');
+    const step3 = document.getElementById('step3Indicator');
+    const amountSection = document.getElementById('amountSection');
+    const detailsSection = document.getElementById('detailsSection');
+    const confirmSection = document.getElementById('confirmSection');
+    const successSection = document.getElementById('successSection');
+
+    step1.classList.remove('active', 'completed');
+    step2.classList.remove('active', 'completed');
+    step3.classList.remove('active', 'completed');
+
+    if (step === 1) {
+        step1.classList.add('active');
+        amountSection.style.display = 'block';
+        detailsSection.style.display = 'none';
+        confirmSection.style.display = 'none';
+        successSection.style.display = 'none';
+    }
+    if (step === 2) {
+        step1.classList.add('completed');
+        step2.classList.add('active');
+        amountSection.style.display = 'none';
+        detailsSection.style.display = 'block';
+        confirmSection.style.display = 'none';
+        successSection.style.display = 'none';
+    }
+    if (step === 3) {
+        step1.classList.add('completed');
+        step2.classList.add('completed');
+        step3.classList.add('active');
+        amountSection.style.display = 'none';
+        detailsSection.style.display = 'none';
+        confirmSection.style.display = 'block';
+        successSection.style.display = 'none';
+    }
+}
+
+// ============================================
+// AMOUNT VALIDATION (Step 1 → Step 2)
+// ============================================
+document.getElementById('amountContinue').addEventListener('click', function () {
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value);
+    const amountError = document.getElementById('amountError');
+    amountError.classList.remove('show');
+
+    if (!amount || amount <= 0) {
+        amountError.textContent = 'Please enter a withdrawal amount.';
+        amountError.classList.add('show');
+        return;
+    }
+
+    if (amount < settings.minAmount) {
+        amountError.textContent = `Minimum withdrawal amount is ₹${settings.minAmount}.`;
+        amountError.classList.add('show');
+        return;
+    }
+
+    if (amount > settings.maxAmount) {
+        amountError.textContent = `Maximum withdrawal amount is ₹${settings.maxAmount}.`;
+        amountError.classList.add('show');
+        return;
+    }
+
+    const currentBalance = parseFloat(document.getElementById('balance').textContent);
+    if (amount > currentBalance) {
+        amountError.textContent = `Insufficient balance. Available: ₹${currentBalance.toFixed(2)}.`;
+        amountError.classList.add('show');
+        return;
+    }
+
+    if (!settings.enabled) {
+        showToast('Withdraw Is Currently Disabled', 'error');
+        return;
+    }
+
+    // Update summary
+    document.getElementById('summaryAmount').textContent = '₹' + amount.toFixed(2);
+    document.getElementById('summaryTotal').textContent = '₹' + amount.toFixed(2);
+
+    activateStep(2);
+});
+
+// ============================================
+// DETAILS VALIDATION (Step 2 → Step 3)
+// ============================================
+document.getElementById('detailsContinue').addEventListener('click', function () {
+    const detailError = document.getElementById('detailError');
+    detailError.classList.remove('show');
+
+    const amount = parseFloat(document.getElementById('amount').value);
+
+    if (currentMethod === 'upi') {
+        const upiId = document.getElementById('upiId').value.trim();
+        if (!upiId) {
+            detailError.textContent = 'Please enter your UPI ID.';
+            detailError.classList.add('show');
+            return;
+        }
+        if (!upiId.includes('@')) {
+            detailError.textContent = 'Please enter a valid UPI ID.';
+            detailError.classList.add('show');
+            return;
+        }
+        document.getElementById('summaryDetailLabel').textContent = 'UPI ID';
+        document.getElementById('summaryDetail').textContent = upiId;
+        document.getElementById('summaryMethod').textContent = 'UPI';
+    } else {
+        const bankName = document.getElementById('bankName').value.trim();
+        const accountHolderName = document.getElementById('accountHolderName').value.trim();
+        const accountNumber = document.getElementById('accountNumber').value.trim();
+        const ifscCode = document.getElementById('ifscCode').value.trim().toUpperCase();
+
+        if (!bankName || !accountHolderName || !accountNumber || !ifscCode) {
+            detailError.textContent = 'Please fill all bank details.';
+            detailError.classList.add('show');
+            return;
+        }
+        if (ifscCode.length < 7) {
+            detailError.textContent = 'Please enter a valid IFSC code.';
+            detailError.classList.add('show');
+            return;
+        }
+        document.getElementById('summaryDetailLabel').textContent = 'Bank';
+        document.getElementById('summaryDetail').textContent = bankName + ' • ' + accountNumber.slice(-4).padStart(accountNumber.length, '•');
+        document.getElementById('summaryMethod').textContent = 'Bank Transfer';
+    }
+
+    activateStep(3);
+});
+
+// ============================================
+// BACK BUTTONS
+// ============================================
+document.getElementById('detailsBack').addEventListener('click', function () {
+    activateStep(1);
+});
+
+document.getElementById('confirmBack').addEventListener('click', function () {
+    activateStep(2);
+});
+
+// ============================================
+// CONFIRM & SUBMIT (Step 3 → Success)
+// ============================================
+document.getElementById('confirmBtn').addEventListener('click', async function () {
+    if (isAccountBlocked) return;
+
+    if (!settings.enabled) {
+        showToast('Withdraw Is Currently Disabled', 'error');
+        return;
+    }
+
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        showToast('Please Enter A Valid Amount', 'error');
+        return;
+    }
+
+    const currentBalance = parseFloat(document.getElementById('balance').textContent);
+
+    if (amount < settings.minAmount) {
+        showToast(`Minimum Amount Is ₹${settings.minAmount}`, 'error');
+        return;
+    }
+
+    if (amount > settings.maxAmount) {
+        showToast(`Maximum Amount Is ₹${settings.maxAmount}`, 'error');
+        return;
+    }
+
+    const feeAmount = settings.fee > 0 ? 
+        (settings.feeType === 'percentage' ? (amount * settings.fee) / 100 : settings.fee) : 0;
+    const userReceives = Math.round((amount - feeAmount) * 100) / 100;
+
+    if (amount > currentBalance) {
+        showToast(`Insufficient Balance. Required: ₹${amount.toFixed(2)}. Available: ₹${currentBalance.toFixed(2)}`, 'error');
+        return;
+    }
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Processing...';
+
+    try {
+        let endpoint = '';
+        let requestBody = { amount: amount };
+
+        if (currentMethod === 'upi') {
+            const upiId = document.getElementById('upiId').value.trim();
+            if (!upiId) {
+                showToast('Please Enter UPI ID', 'error');
+                return;
+            }
+            if (!upiId.includes('@')) {
+                showToast('Please Enter A Valid UPI ID', 'error');
+                return;
+            }
+            endpoint = '/api/withdraw/upi';
+            requestBody.upiId = upiId;
+            requestBody.note = 'UPI Withdrawal';
+        } else {
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountHolderName = document.getElementById('accountHolderName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const ifscCode = document.getElementById('ifscCode').value.trim().toUpperCase();
+
+            if (!bankName || !accountHolderName || !accountNumber || !ifscCode) {
+                showToast('Please Fill All Bank Details', 'error');
+                return;
+            }
+            if (ifscCode.length < 7) {
+                showToast('Please Enter A Valid IFSC Code', 'error');
+                return;
+            }
+            endpoint = '/api/withdraw/bank';
+            requestBody.bankName = bankName;
+            requestBody.accountHolderName = accountHolderName;
+            requestBody.accountNumber = accountNumber;
+            requestBody.ifscCode = ifscCode;
+            requestBody.note = 'Bank Withdrawal';
+        }
+
+        console.log('Submitting Withdrawal:', { endpoint, requestBody });
+
+        const { response, data } = await safeFetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + AUTH_TOKEN
+            },
+            body: JSON.stringify(requestBody)
+        });
+        if (isAccountBlocked) return;
+
+        console.log('Response Data:', data);
+
+        if (data?.isBlocked === true || data?.blocked === true) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return;
+        }
+        if (data?.isDeleted === true || data?.deleted === true) {
+            showBlockedOverlay('Account Deleted', data.message || 'Your account has been deleted.');
+            return;
+        }
+        if (data?.isActive === false) {
+            showBlockedOverlay('Account Deactivated', data.message || 'Your account has been deactivated.');
+            return;
+        }
+
+        if (data.success) {
+            const methodText = currentMethod === 'upi' ? 'UPI' : 'Bank';
+            const feeText = data.fee > 0 ? ` (Fee: ₹${data.fee.toFixed(2)})` : '';
+            showToast(`${methodText} Withdrawal Submitted!${feeText}`, 'success');
+
+            if (data.newBalance !== undefined) {
+                document.getElementById('balance').textContent = parseFloat(data.newBalance).toFixed(2);
+                document.getElementById('limitBalance').textContent = parseFloat(data.newBalance).toFixed(2);
+                document.getElementById('maxBtnValue').textContent = parseFloat(data.newBalance).toFixed(2);
+            } else {
+                loadUserData();
+            }
+
+            amountInput.value = '';
+            updateFeeDisplay();
+
+            if (currentMethod === 'upi') {
+                document.getElementById('upiId').value = '';
+            } else {
+                document.getElementById('bankName').value = '';
+                document.getElementById('accountHolderName').value = '';
+                document.getElementById('accountNumber').value = '';
+                document.getElementById('ifscCode').value = '';
+            }
+
+            // Show success
+            document.getElementById('confirmSection').style.display = 'none';
+            document.getElementById('successSection').style.display = 'block';
+            document.getElementById('step1Indicator').classList.add('completed');
+            document.getElementById('step2Indicator').classList.add('completed');
+            document.getElementById('step3Indicator').classList.add('completed');
+        } else {
+            showToast(data.message || data.error || 'Withdraw Failed', 'error');
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+        if (isAccountBlocked) return;
+        console.error('Withdraw Error:', error);
+        showToast(error.message || 'Network Error', 'error');
+    } finally {
+        if (!isAccountBlocked) {
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm Withdrawal <i class="fa-solid fa-check"></i>';
+            if (!settings.enabled) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
+            }
+        }
+    }
+});
+
+// ============================================
+// MAX BUTTON
+// ============================================
+document.getElementById('maxBtn').addEventListener('click', function () {
+    const balance = parseFloat(document.getElementById('balance').textContent);
+    const maxAllowed = Math.min(balance, settings.maxAmount);
+    document.getElementById('amount').value = maxAllowed.toFixed(2);
+    updateFeeDisplay();
+});
+
+// ============================================
+// INPUT EVENTS
+// ============================================
+document.getElementById('amount').addEventListener('input', function () {
+    if (Number(this.value) < 0) {
+        this.value = 0;
+    }
+    document.getElementById('amountError').classList.remove('show');
+    updateFeeDisplay();
+});
+
+document.getElementById('amount').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') document.getElementById('amountContinue').click();
+});
+
+document.getElementById('upiId').addEventListener('input', function () {
+    document.getElementById('detailError').classList.remove('show');
+});
+
+['bankName', 'accountHolderName', 'accountNumber', 'ifscCode'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', function () {
+            document.getElementById('detailError').classList.remove('show');
+        });
+    }
+});
+
+// ============================================
+// THEME TOGGLE
+// ============================================
+const themeBtn = document.getElementById('themeBtn');
+const savedTheme = localStorage.getItem("walletTheme");
+
+if (savedTheme === "light") {
+    document.body.classList.add("light");
+    themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+}
+
+themeBtn.addEventListener("click", function () {
+    document.body.classList.toggle("light");
+    const light = document.body.classList.contains("light");
+    localStorage.setItem("walletTheme", light ? "light" : "dark");
+    themeBtn.innerHTML = light
+        ? '<i class="fa-solid fa-sun"></i>'
+        : '<i class="fa-solid fa-moon"></i>';
+});
+
+// ============================================
+// HEADER BUTTONS
+// ============================================
+document.getElementById('menuBtn').addEventListener('click', function () {
+    alert("Menu clicked");
+});
+
+document.getElementById('profileBtn').addEventListener('click', function () {
+    window.location.href = "profile.html";
+});
+
+// ============================================
+// INITIALIZE
+// ============================================
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log('Withdraw Page Loaded');
+
+    const isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    loadSettings();
+    loadUserData();
+
+    // Set initial method tab
+    switchMethod('upi');
+});
+</script>
+
+</body>
+</html>
