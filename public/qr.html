@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>QR • Universe Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<!-- ✅ PWA META TAGS -->
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/universe-wallet-logo-512.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Universe">
+
+<style>
+/* ===== THEME VARIABLES (LIGHT) ===== */
+:root { --bg: #f5f8fd; --bg-pattern-1: rgba(255,255,255,.7); --bg-pattern-2: rgba(245,248,253,.9); --grid-color: rgba(90,120,170,.08); --header-bg: rgba(255,255,255,.95); --header-border: #e9edf4; --card-bg: #ffffff; --card-2: #f8fafc; --text: #172033; --text-title: #172033; --muted: #a0a9b6; --muted-2: #a2aab5; --border: #e9edf4; --border-2: #edf0f5; --border-3: #e4e9f0; --input-bg: #ffffff; --menu-btn-bg: #ffffff; --menu-btn-border: #e4e9f0; --menu-btn-color: #607080; --icon-btn-bg: #ffffff; --icon-btn-border: #e5eaf1; --overview-small: #2778d9; --overview-span: #2275df; --sidebar-bg: #ffffff; --sidebar-border: #e9edf4; --sidebar-menu-color: #1a3a6b; --sidebar-menu-hover: #eef3fa; --sidebar-menu-icon: #1a56db; --sidebar-username: #1a3a6b; --sidebar-mobile: #5a7a9a; --sidebar-balance-bg: #eef3fa; --sidebar-balance-color: #1a56db; --bottom-nav-bg: rgba(255,255,255,.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --modal-bg: #ffffff; --modal-border: #e9edf4; --modal-title: #1a3a6b; --modal-sub: #5a7a9a; --modal-cancel-bg: #eef3fa; --modal-cancel-color: #1a3a6b; --modal-cancel-hover: #e2eaf3; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #e9edf4; --blocked-title: #1a3a6b; --blocked-sub: #5a7a9a; --toast-bg: #1a3a6b; --toast-color: #ffffff; --qr-badge-bg: linear-gradient(135deg, #1a56db, #0088ff); --scan-border: #1a56db; --scan-glow: rgba(26,86,219,.2); --result-icon-bg: linear-gradient(135deg, #16a34a, #22c55e); --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --user-avatar-border: #d9e5ef; }
+
+/* ===== THEME VARIABLES (DARK) ===== */
+body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20,30,50,.7); --bg-pattern-2: rgba(13,21,38,.9); --grid-color: rgba(90,120,170,.06); --header-bg: rgba(26,38,57,.95); --header-border: #2b3a50; --card-bg: #1a2639; --card-2: #202d42; --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8491a6; --border: #2b3a50; --border-2: #2b3a50; --border-3: #2b3a50; --input-bg: #101a2c; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --icon-btn-bg: #202d42; --icon-btn-border: #2b3a50; --overview-small: #60a5fa; --overview-span: #60a5fa; --sidebar-bg: #1a2639; --sidebar-border: #2b3a50; --sidebar-menu-color: #edf3ff; --sidebar-menu-hover: #202d42; --sidebar-menu-icon: #60a5fa; --sidebar-username: #edf3ff; --sidebar-mobile: #8491a6; --sidebar-balance-bg: #172b55; --sidebar-balance-color: #60a5fa; --bottom-nav-bg: rgba(26,38,57,.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --modal-bg: #1a2639; --modal-border: #2b3a50; --modal-title: #edf3ff; --modal-sub: #8491a6; --modal-cancel-bg: #202d42; --modal-cancel-color: #edf3ff; --modal-cancel-hover: #2b3a50; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; --blocked-title: #edf3ff; --blocked-sub: #8491a6; --toast-bg: #1e293b; --toast-color: #ffffff; --qr-badge-bg: linear-gradient(135deg, #2563eb, #3b82f6); --scan-border: #3b82f6; --scan-glow: rgba(59,130,246,.3); --result-icon-bg: linear-gradient(135deg, #16a34a, #22c55e); --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --user-avatar-border: #2b3a50; }
+
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
+
+/* ============================================
+   ✅ DISABLE TEXT SELECTION & LONG PRESS MENU
+   ============================================ */
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+input, textarea, select, [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
+}
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+/* ===== APP ===== */
+.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; background: linear-gradient(var(--bg-pattern-1), var(--bg-pattern-2)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, var(--grid-color) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--grid-color) 39px); padding-bottom: 130px; transition: background .3s ease; }
+
+/* ===== HEADER ===== */
+.header { height: 66px; background: var(--header-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s ease, border .3s ease; }
+.header-left { display: flex; align-items: center; gap: 13px; }
+.menu-btn { width: 39px; height: 39px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--menu-btn-bg); border: 1px solid var(--menu-btn-border); box-shadow: 0 4px 12px rgba(30,50,80,.08); cursor: pointer; transition: background .2s ease, border .2s ease; }
+.menu-btn span { font-size: 22px; color: var(--menu-btn-color); }
+.title { font-size: 20px; font-weight: 700; color: var(--text-title); }
+.title span { color: var(--overview-span); }
+.header-right { display: flex; gap: 8px; align-items: center; }
+.theme-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--icon-btn-bg); border: 1px solid var(--icon-btn-border); font-size: 17px; cursor: pointer; color: var(--text); transition: transform .25s ease, background .3s ease, border .3s ease, color .3s ease; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--overview-span); color: var(--overview-span); }
+.theme-btn:active { transform: scale(0.95); }
+.user-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 16px; font-weight: 800; cursor: pointer; border: 2px solid var(--user-avatar-border); overflow: hidden; position: relative; box-shadow: 0 3px 10px rgba(26,86,219,.25); transition: transform 0.2s, border .3s ease; }
+.user-avatar:hover { transform: scale(1.05); }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
+/* ===== MAIN ===== */
+.main { padding: 20px; }
+
+/* ===== QR CARD ===== */
+.qr-card { background: var(--card-bg); border-radius: 24px; padding: 32px 24px; box-shadow: 0 4px 20px rgba(0,50,100,.08); border: 1px solid var(--border); text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; transition: background .3s ease, border .3s ease; }
+body.dark .qr-card { box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.qr-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--qr-badge-bg); }
+.my-qr-badge { position: absolute; top: 16px; right: 16px; background: var(--qr-badge-bg); color: white; font-size: 10px; font-weight: 800; padding: 5px 14px; border-radius: 40px; text-transform: uppercase; letter-spacing: .05em; box-shadow: 0 2px 8px rgba(26,86,219,.3); display: flex; align-items: center; gap: 5px; }
+.qr-wrap { width: 190px; height: 190px; margin: 0 auto 20px; padding: 8px; border: 2px dashed var(--border); border-radius: 20px; background: var(--card-2); display: flex; align-items: center; justify-content: center; transition: background .3s ease, border .3s ease; }
+.qr-wrap img { width: 100%; height: 100%; border-radius: 12px; object-fit: contain; }
+.user-name { font-size: 18px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
+.user-mobile { font-size: 14px; font-weight: 700; color: var(--overview-span); }
+.download-btn { margin-top: 18px; background: var(--qr-badge-bg); border: none; color: white; padding: 12px 30px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.3s; letter-spacing: .05em; box-shadow: 0 4px 15px rgba(26,86,219,.3); display: inline-flex; align-items: center; gap: 8px; }
+.download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,86,219,.4); }
+.download-btn:active { transform: scale(0.95); }
+
+/* ===== SCANNER CARD ===== */
+.scanner-card { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0,50,100,.08); border: 1px solid var(--border); margin-bottom: 20px; display: none; transition: background .3s ease, border .3s ease; }
+body.dark .scanner-card { box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.scanner-wrapper { position: relative; border-radius: 20px; overflow: hidden; border: 3px solid var(--scan-border); box-shadow: 0 0 30px var(--scan-glow); }
+#reader { border-radius: 12px; overflow: hidden; background: #000; }
+.scan-line { height: 3px; background: linear-gradient(90deg, transparent, var(--scan-border), transparent); position: absolute; width: 80%; left: 10%; top: 0; animation: scanAnim 2s infinite; box-shadow: 0 0 20px var(--scan-border); z-index: 10; border-radius: 2px; }
+@keyframes scanAnim { 0% { top: 5%; } 50% { top: 85%; } 100% { top: 5%; } }
+.scanner-corner { position: absolute; width: 30px; height: 30px; border: 3px solid var(--scan-border); z-index: 11; }
+.scanner-corner.tl { top: 15px; left: 15px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.scanner-corner.tr { top: 15px; right: 15px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.scanner-corner.bl { bottom: 15px; left: 15px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.scanner-corner.br { bottom: 15px; right: 15px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+.stop-btn { width: 100%; margin-top: 16px; padding: 12px; background: #fee2e2; border: none; color: #dc2626; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.3s; letter-spacing: .05em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+body.dark .stop-btn { background: #3a2025; color: #f87171; }
+.stop-btn:hover { background: #fecaca; }
+body.dark .stop-btn:hover { background: #4a282e; }
+
+/* ===== RESULT CARD ===== */
+.result-card { background: var(--card-bg); border-radius: 24px; padding: 28px; box-shadow: 0 4px 20px rgba(0,50,100,.08); border: 1px solid var(--border); margin-bottom: 20px; display: none; text-align: center; transition: background .3s ease, border .3s ease; }
+body.dark .result-card { box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.result-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--result-icon-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; color: white; box-shadow: 0 4px 15px rgba(22,163,74,.3); }
+.result-title { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.result-mobile { font-size: 22px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
+.result-name { font-size: 14px; font-weight: 700; color: var(--overview-span); margin-bottom: 20px; }
+.pay-btn { width: 100%; padding: 16px; background: var(--qr-badge-bg); color: white; border: none; border-radius: 20px; font-size: 14px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; letter-spacing: .05em; box-shadow: 0 4px 15px rgba(26,86,219,.3); }
+.pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,86,219,.4); }
+.pay-btn:active { transform: scale(0.95); }
+.scan-again-btn { width: 100%; padding: 12px; background: var(--card-2); border: 2px solid var(--border); color: var(--muted); border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; margin-top: 10px; transition: all 0.3s; letter-spacing: .05em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.scan-again-btn:hover { background: var(--sidebar-menu-hover); }
+
+/* ===== ACTION GRID ===== */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.action-btn { border-radius: 24px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s; border: none; font-family: inherit; position: relative; overflow: hidden; }
+.action-btn:active { transform: scale(0.95); }
+.action-btn.primary { background: var(--qr-badge-bg); color: white; box-shadow: 0 8px 25px rgba(26,86,219,.3); }
+.action-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(26,86,219,.4); }
+.action-btn.secondary { background: var(--card-bg); color: var(--text); box-shadow: 0 4px 15px rgba(0,50,100,.08); border: 2px solid var(--border); }
+body.dark .action-btn.secondary { box-shadow: 0 4px 15px rgba(0,0,0,.3); }
+.action-btn.secondary:hover { background: var(--sidebar-menu-hover); transform: translateY(-2px); border-color: var(--scan-border); }
+.action-btn.secondary i { color: var(--overview-span); }
+.action-btn i { font-size: 26px; }
+.action-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.footer-text { text-align: center; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .2em; margin-top: 16px; }
+.footer-text i { color: var(--overview-span); margin-right: 6px; }
+
+/* ===== SIDEBAR ===== */
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(15,30,60,.4); z-index: 998; display: none; backdrop-filter: blur(3px); }
+.sidebar-overlay.active { display: block; }
+.sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; z-index: 999; background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); box-shadow: 4px 0 20px rgba(0,50,100,.08); padding: 16px 14px; overflow-y: auto; transition: left .3s cubic-bezier(.4,0,.2,1), background .3s ease, border .3s ease; }
+body.dark .sidebar { box-shadow: 4px 0 20px rgba(0,0,0,.4); }
+.sidebar.open { left: 0; }
+.sidebar-profile { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--sidebar-border); }
+.profile-pic-container { width: 55px; height: 55px; margin: 0 auto 7px; cursor: pointer; }
+.profile-pic { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(26,86,219,.3); }
+.profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.sidebar-username { font-size: 14px; font-weight: 800; color: var(--sidebar-username); margin-bottom: 2px; }
+.sidebar-mobile { font-size: 10px; font-weight: 600; color: var(--sidebar-mobile); margin-bottom: 6px; }
+.sidebar-balance { font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px; border-radius: 40px; background: var(--sidebar-balance-bg); color: var(--sidebar-balance-color); border: 1px solid var(--sidebar-border); transition: background .3s ease, color .3s ease; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--sidebar-menu-color); text-decoration: none; transition: all 0.2s; }
+.sidebar-menu-item:hover { background: var(--sidebar-menu-hover); }
+.sidebar-menu-item i { width: 18px; font-size: 13px; text-align: center; color: var(--sidebar-menu-icon); }
+.sidebar-menu-item.active { background: var(--sidebar-menu-hover); color: var(--sidebar-menu-icon); font-weight: 700; }
+.sidebar-menu-item.logout-item { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--sidebar-border); border-radius: 0; color: #dc2626; }
+.sidebar-menu-item.logout-item i { color: #dc2626 !important; }
+.sidebar-menu-item.logout-item:hover { background: rgba(220,38,38,.1); }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30,100,220,.15), inset 0 0 25px rgba(30,100,220,.03); z-index: 1000; transition: background .3s ease, border .3s ease; }
+.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; transition: color 0.25s ease, transform 0.25s ease; }
+.bottom-nav .nav-item:hover { color: var(--bottom-nav-active); transform: translateY(-2px); }
+.bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
+.bottom-nav .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.bottom-nav .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; transition: .25s ease; }
+.bottom-nav .nav-item.active .nav-icon svg { filter: drop-shadow(0 0 5px rgba(18,100,255,.45)); }
+.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: var(--bottom-nav-active); z-index: 10; }
+.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--scan-circle-bg); border: 5px solid var(--card-bg); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 10px 25px rgba(18,100,255,.25), 0 0 25px rgba(18,100,255,.15); transition: transform .25s ease, box-shadow .25s ease, background .3s ease, border .3s ease; }
+.bottom-nav .scan-item:hover .scan-circle { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 12px 30px rgba(18,100,255,.32), 0 0 35px rgba(18,100,255,.25); }
+.bottom-nav .qr-icon { width: 30px; height: 30px; fill: var(--bottom-nav-active); stroke: none; filter: drop-shadow(0 0 4px rgba(18,100,255,.3)); }
+.bottom-nav .scan-item span { color: var(--bottom-nav-active); font-size: 9px; font-weight: 800; letter-spacing: .8px; margin-top: 2px; }
+.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); box-shadow: 0 0 8px rgba(18,100,255,.5); }
+.bottom-nav .scan-item::after { display: none; }
+
+/* ===== TOAST ===== */
+.toast-message { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 50px; font-size: 12px; font-weight: 700; z-index: 10000; background: var(--toast-bg); color: var(--toast-color); box-shadow: 0 8px 30px rgba(0,0,0,.2); animation: fadeInUp 0.3s ease; max-width: 90%; text-align: center; font-family: 'Inter', sans-serif; letter-spacing: .5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.toast-message i { font-size: 13px; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ===== LOGOUT MODAL ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,30,60,.5); backdrop-filter: blur(6px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--modal-bg); border-radius: 24px; padding: 30px 24px; max-width: 380px; width: 100%; text-align: center; border: 1px solid var(--modal-border); box-shadow: 0 20px 50px rgba(0,50,100,.2); animation: modalIn 0.3s ease-out; transition: background .3s ease, border .3s ease; }
+body.dark .modal-box { box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-icon { font-size: 46px; color: #dc2626; margin-bottom: 12px; display: block; }
+.modal-title { font-size: 20px; font-weight: 900; color: var(--modal-title); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.modal-sub { font-size: 13px; color: var(--modal-sub); margin-bottom: 24px; line-height: 1.5; font-weight: 500; }
+.modal-buttons { display: flex; gap: 12px; }
+.modal-btn { padding: 13px 24px; border-radius: 14px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; flex: 1; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+.modal-btn.cancel { background: var(--modal-cancel-bg); color: var(--modal-cancel-color); border: 1px solid var(--modal-border); }
+.modal-btn.cancel:hover { background: var(--modal-cancel-hover); }
+.modal-btn.logout { background: #dc2626; color: #ffffff; box-shadow: 0 4px 12px rgba(220,38,38,.3); }
+.modal-btn.logout:hover { background: #b91c1c; }
+
+/* ===== BLOCKED OVERLAY ===== */
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; transition: background .3s ease; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); box-shadow: 0 20px 60px rgba(0,50,100,.2); animation: modalIn 0.4s ease-out; transition: background .3s ease, border .3s ease; }
+body.dark .blocked-card { box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
+.blocked-title { font-size: 24px; font-weight: 900; color: var(--blocked-title); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.blocked-sub { font-size: 14px; color: var(--blocked-sub); line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Inter', sans-serif; transition: all 0.2s; background: #1a56db; color: #ffffff; box-shadow: 0 4px 15px rgba(26,86,219,.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blocked-btn:hover { background: #1a4ac0; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,86,219,.4); }
+.blocked-btn:active { transform: scale(0.98); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) { .main { padding: 14px; } .qr-card { padding: 24px 18px; } .qr-wrap { width: 160px; height: 160px; } .action-grid { gap: 8px; } .action-btn { padding: 20px 12px; } .result-mobile { font-size: 18px; } .title { font-size: 15px; } .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; } .bottom-nav .nav-item { font-size: 8px; letter-spacing: .4px; gap: 2px; } .bottom-nav .nav-icon { width: 22px; height: 22px; } .bottom-nav .nav-icon svg { width: 20px; height: 20px; } .bottom-nav .scan-circle { width: 48px; height: 48px; margin-top: -28px; border-width: 4px; } .bottom-nav .qr-icon { width: 26px; height: 26px; } .bottom-nav .scan-item span { font-size: 8px; margin-top: 1px; } .bottom-nav .nav-item.active::after { width: 16px; height: 2.5px; bottom: 2px; } }
+@media (max-width: 380px) { .qr-wrap { width: 140px; height: 140px; } .user-name { font-size: 15px; } .action-btn i { font-size: 22px; } .action-label { font-size: 9px; } .bottom-nav { height: 66px; } .bottom-nav .nav-item { font-size: 7px; } .bottom-nav .scan-circle { width: 44px; height: 44px; margin-top: -25px; } .bottom-nav .qr-icon { width: 22px; height: 22px; } }
+</style>
+</head>
+
+<body>
+
+<!-- ===== BLOCKED OVERLAY ===== -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+        <div class="profile-pic-container" onclick="goToProfile()">
+            <div class="profile-pic" id="sidebarProfilePic"></div>
+        </div>
+        <div class="sidebar-username" id="sidebarUsername">Loading...</div>
+        <div class="sidebar-mobile" id="sidebarMobile">---</div>
+        <div class="sidebar-balance"><i class="fa-solid fa-indian-rupee-sign"></i> <span id="sidebarBalanceAmount">0.00</span></div>
+    </div>
+    <div class="sidebar-menu">
+        <div class="sidebar-menu-item" onclick="location.href='/dashboard'"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transfer'"><i class="fa-solid fa-paper-plane"></i> <span>Transfer</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/deposit'"><i class="fa-solid fa-plus-circle"></i> <span>Add Fund</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/withdraw'"><i class="fa-solid fa-arrow-up"></i> <span>Withdraw</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/transactions'"><i class="fa-solid fa-receipt"></i> <span>Transactions</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/gift'"><i class="fa-solid fa-gift"></i> <span>Gift Code</span></div>
+        <div class="sidebar-menu-item active" onclick="location.href='/qr'"><i class="fa-solid fa-qrcode"></i> <span>My QR</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/profile'"><i class="fa-solid fa-user-circle"></i> <span>Profile</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/api'"><i class="fa-solid fa-code"></i> <span>API Settings</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/ai'"><i class="fa-solid fa-brain"></i> <span>AI Assistant</span></div>
+        <div class="sidebar-menu-item" onclick="location.href='/tg'"><i class="fa-brands fa-telegram"></i> <span>Join Telegram</span></div>
+        <div class="sidebar-menu-item" onclick="window.open('https://t.me/UNIVERSAL_OFC_SUPPORT', '_blank')"><i class="fa-solid fa-headset"></i> <span>Contact Support</span></div>
+        <div class="sidebar-menu-item logout-item" onclick="showLogoutModal()"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></div>
+    </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="menu-btn" onclick="toggleSidebar()"><span>☰</span></div>
+            <div class="title">My <span>QR</span></div>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- MY QR CARD -->
+        <div class="qr-card">
+            <div class="my-qr-badge"><i class="fa-solid fa-qrcode"></i> My QR</div>
+            <div class="qr-wrap">
+                <img id="qr-img" src="" alt="Your QR Code">
+            </div>
+            <div class="user-name" id="qr-name">Loading...</div>
+            <div class="user-mobile" id="qr-mobile"></div>
+            <button class="download-btn" onclick="downloadQR()">
+                <i class="fa-solid fa-download"></i> Download QR
+            </button>
+        </div>
+
+        <!-- SCANNER -->
+        <div class="scanner-card" id="scanner-card">
+            <div class="scanner-wrapper">
+                <div id="reader"></div>
+                <div class="scan-line"></div>
+                <div class="scanner-corner tl"></div>
+                <div class="scanner-corner tr"></div>
+                <div class="scanner-corner bl"></div>
+                <div class="scanner-corner br"></div>
+            </div>
+            <button class="stop-btn" onclick="stopScanner()">
+                <i class="fa-solid fa-xmark"></i> Cancel Scan
+            </button>
+        </div>
+
+        <!-- SCAN RESULT -->
+        <div class="result-card" id="result-card">
+            <div class="result-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="result-title">QR Scanned!</div>
+            <div class="result-mobile" id="result-mobile"></div>
+            <div class="result-name" id="result-name"></div>
+            <button class="pay-btn" onclick="goToTransfer()">
+                <i class="fa-solid fa-paper-plane"></i> Send Money
+            </button>
+            <button class="scan-again-btn" onclick="scanAgain()">
+                <i class="fa-solid fa-rotate-right"></i> Scan Again
+            </button>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-grid" id="action-buttons">
+            <button class="action-btn primary" onclick="startScanner()">
+                <i class="fa-solid fa-qrcode"></i>
+                <span class="action-label">Scan QR</span>
+            </button>
+            <label class="action-btn secondary">
+                <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)">
+                <i class="fa-solid fa-image"></i>
+                <span class="action-label">From Gallery</span>
+            </label>
+        </div>
+
+        <div class="footer-text">
+            <i class="fa-solid fa-lock"></i> Secure Encryption · Universal Wallet
+        </div>
+
+    </main>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item" data-nav="dashboard">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+        <span>Home</span>
+    </a>
+    <a href="/transfer" class="nav-item" data-nav="transfer">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div>
+        <span>Send</span>
+    </a>
+    <a href="/qr" class="nav-item scan-item active" data-nav="qr">
+        <div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div>
+        <span>QR</span>
+    </a>
+    <a href="/deposit" class="nav-item" data-nav="deposit">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+        <span>Add</span>
+    </a>
+    <a href="/transactions" class="nav-item" data-nav="transactions">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+        <span>History</span>
+    </a>
+</div>
+
+<!-- ===== LOGOUT MODAL ===== -->
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal-box">
+        <i class="fas fa-sign-out-alt modal-icon"></i>
+        <div class="modal-title">Logout Confirmation</div>
+        <div class="modal-sub">Are you sure you want to logout from your account?</div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeLogoutModal()">No</button>
+            <button class="modal-btn logout" onclick="confirmLogout()">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var API_BASE = '/api';
+var token = localStorage.getItem('token');
+var user = JSON.parse(localStorage.getItem('user') || '{}');
+var isAccountBlocked = false;
+var blockCheckDone = false;
+
+if (!token) { window.location.href = '/'; }
+
+var scannedMobile = '';
+var scannedUserData = null;
+var html5QrCode = null;
+
+/* ============================================
+   DEFAULT PROFILE PICTURE (SVG Inline)
+   ============================================ */
+var DEFAULT_PROFILE_PICTURE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+        '<defs>' +
+            '<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" stop-color="#1a56db"/>' +
+                '<stop offset="100%" stop-color="#0088ff"/>' +
+            '</linearGradient>' +
+        '</defs>' +
+        '<rect width="100" height="100" fill="url(#g)"/>' +
+        '<circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.95"/>' +
+        '<path d="M 50 62 C 30 62 18 75 18 92 L 82 92 C 82 75 70 62 50 62 Z" fill="#ffffff" opacity="0.95"/>' +
+    '</svg>'
+);
+
+window.handleAvatarError = function(imgEl) {
+    if (imgEl.src !== DEFAULT_PROFILE_PICTURE) {
+        imgEl.src = DEFAULT_PROFILE_PICTURE;
+    }
+};
+
+/* ============================================
+   ✅ THEME SYSTEM — সব পেজে একই রকম কাজ করবে
+   ============================================ */
+
+/**
+ * Theme apply করে body + documentElement এ
+ * @param {string} theme - 'dark' অথবা 'light'
+ */
+function applyTheme(theme) {
+    var isDark = (theme === 'dark');
+    if (isDark) {
+        document.body.classList.add('dark');
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.body.classList.remove('dark');
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    // Update button icon
+    var themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) {
+        themeBtn.innerHTML = isDark 
+            ? '<i class="fas fa-sun"></i>' 
+            : '<i class="fas fa-moon"></i>';
+    }
+}
+
+/**
+ * localStorage থেকে theme পড়ে apply করে
+ */
+function initTheme() {
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+        applyTheme(savedTheme);
+    } else {
+        // System preference detect
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+    }
+}
+
+/**
+ * Toggle করে এবং localStorage এ save করে
+ */
+function toggleTheme() {
+    var isCurrentlyDark = document.body.classList.contains('dark');
+    var newTheme = isCurrentlyDark ? 'light' : 'dark';
+    applyTheme(newTheme);
+    localStorage.setItem('uwTheme', newTheme);
+}
+
+// ✅ Cross-tab sync — অন্য tab এ theme change হলে এই tab এ auto update
+window.addEventListener('storage', function(e) {
+    if (e.key === 'uwTheme' && e.newValue) {
+        applyTheme(e.newValue);
+    }
+});
+
+// ✅ System preference change listener
+if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('uwTheme')) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+}
+
+/* ============================================
+   CHECK STATUS BY MOBILE (Token ছাড়া)
+   ============================================ */
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+            cleanMobile = cleanMobile.slice(2);
+        }
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        var data = await res.json();
+        return data;
+    } catch (err) {
+        return { allowed: true, reason: 'network_error' };
+    }
+}
+
+/* ============================================
+   HANDLE BLOCK REASON
+   ============================================ */
+function handleBlockReason(reason) {
+    if (reason === 'blocked') {
+        showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
+    } else if (reason === 'deleted') {
+        showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
+    } else if (reason === 'inactive') {
+        showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
+    } else if (reason === 'notfound') {
+        showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    } else {
+        showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
+    }
+}
+
+/* ============================================
+   SHOW BLOCKED OVERLAY
+   ============================================ */
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    if (html5QrCode) {
+        html5QrCode.stop().catch(function(){});
+        html5QrCode = null;
+    }
+}
+
+/* ============================================
+   LOGOUT
+   ============================================ */
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); closeSidebar(); }
+function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+function confirmLogout() { closeLogoutModal(); setTimeout(logout, 200); }
+document.getElementById('logoutModal').addEventListener('click', function(e){ if(e.target === this) closeLogoutModal(); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLogoutModal(); });
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+function goToProfile(){ window.location.href = '/profile'; }
+
+/* ============================================
+   SET AVATAR
+   ============================================ */
+function setAvatar(u) {
+    var avatarEl = document.getElementById('userAvatar');
+    var sidebarPic = document.getElementById('sidebarProfilePic');
+    if (!avatarEl) return;
+    var imgSrc = DEFAULT_PROFILE_PICTURE;
+    if (u && u.profilePicture && typeof u.profilePicture === 'string') {
+        var pp = u.profilePicture.trim();
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) {
+            imgSrc = pp;
+        }
+    }
+    avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+    if (sidebarPic) sidebarPic.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+}
+
+/* ============================================
+   UPDATE SIDEBAR PROFILE
+   ============================================ */
+function updateSidebarProfile(u) {
+    if (!u) return;
+    var usernameEl = document.getElementById('sidebarUsername');
+    var mobileEl = document.getElementById('sidebarMobile');
+    var picEl = document.getElementById('sidebarProfilePic');
+    if (usernameEl) usernameEl.textContent = u.fullName || 'User';
+    if (mobileEl) {
+        var mob = u.mobile || '---';
+        mobileEl.textContent = (mob.length === 10) ? '+91 ' + mob.slice(0,5) + ' ' + mob.slice(5) : mob;
+    }
+    if (picEl) {
+        var imgSrc = DEFAULT_PROFILE_PICTURE;
+        if (u.profilePicture && typeof u.profilePicture === 'string') {
+            var pp = u.profilePicture.trim();
+            if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) {
+                imgSrc = pp;
+            }
+        }
+        picEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+    }
+    var balEl = document.getElementById('sidebarBalanceAmount');
+    if (balEl) balEl.textContent = (parseFloat(u.balance) || 0).toFixed(2);
+}
+
+/* ============================================
+   UNIVERSAL USER EXTRACTOR
+   ============================================ */
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload;
+    var safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+
+/* ============================================
+   SAFE FETCH
+   ============================================ */
+async function safeFetch(url, options) {
+    options = options || {};
+    try {
+        var response = await fetch(url, options);
+        var data = {};
+        try { data = await response.json(); } catch(e) { data = {}; }
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) {
+            showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.');
+            throw new Error('Account blocked');
+        }
+        if (response.status === 404 && data.userNotFound) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted. Please contact support.');
+            throw new Error('Account deleted');
+        }
+        return { response: response, data: data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+
+/* ============================================
+   VERIFY USER STATE
+   ============================================ */
+async function verifyUserState() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        var res = await fetch(API_BASE + '/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        var data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', 'Your account has been deleted.');
+            return false;
+        }
+
+        var u = extractUser(data);
+        if (!u || (!u.id && !u._id)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found.');
+            return false;
+        }
+        if (u.isBlocked === true) {
+            showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+            return false;
+        }
+        if (u.isDeleted === true || u.deletedAt) {
+            showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+            return false;
+        }
+        if (u.isActive === false) {
+            showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+            return false;
+        }
+
+        if (u.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(u.mobile);
+            if (status && status.allowed === false) {
+                handleBlockReason(status.reason);
+                return false;
+            }
+        }
+
+        user = u;
+        localStorage.setItem('user', JSON.stringify(u));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+/* ============================================
+   TOAST
+   ============================================ */
+function showToast(msg, icon) {
+    if (isAccountBlocked) return;
+    var existing = document.querySelector('.toast-message');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.className = 'toast-message';
+    t.innerHTML = (icon ? '<i class="' + icon + '"></i> ' : '') + msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 3000);
+}
+
+/* ============================================
+   LOAD QR CODE
+   ============================================ */
+function loadQR() {
+    if (isAccountBlocked) return;
+    var mobile = user.mobile || '';
+    var name = user.fullName || user.name || 'User';
+
+    document.getElementById('qr-name').textContent = name;
+    document.getElementById('qr-mobile').textContent = mobile;
+
+    var qrData = mobile || 'universal-user';
+    document.getElementById('qr-img').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrData) + '&bgcolor=ffffff&color=1a56db&margin=10';
+}
+
+/* ============================================
+   DOWNLOAD QR
+   ============================================ */
+function downloadQR() {
+    if (isAccountBlocked) return;
+    var link = document.createElement('a');
+    link.href = document.getElementById('qr-img').src;
+    link.download = 'UNIVERSAL_QR_' + (user.mobile || 'user') + '.png';
+    link.click();
+    showToast('QR Downloaded', 'fas fa-check-circle');
+}
+
+/* ============================================
+   START SCANNER
+   ============================================ */
+function startScanner() {
+    if (isAccountBlocked) return;
+    document.getElementById('scanner-card').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'none';
+    document.getElementById('result-card').style.display = 'none';
+
+    html5QrCode = new Html5Qrcode('reader');
+    html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
+        onScanSuccess
+    ).catch(function() {
+        showToast('Camera permission denied', 'fas fa-times-circle');
+        stopScanner();
+    });
+}
+
+/* ============================================
+   STOP SCANNER
+   ============================================ */
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(function() {
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+            html5QrCode = null;
+        }).catch(function() {
+            document.getElementById('scanner-card').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'grid';
+            html5QrCode = null;
+        });
+    } else {
+        document.getElementById('scanner-card').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'grid';
+    }
+}
+
+/* ============================================
+   SCAN SUCCESS
+   ============================================ */
+async function onScanSuccess(decodedText) {
+    if (isAccountBlocked) return;
+    if (html5QrCode) {
+        await html5QrCode.stop().catch(function(){});
+        html5QrCode = null;
+    }
+
+    document.getElementById('scanner-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
+
+    var mobile = decodedText.trim();
+
+    if (!/^\d{10}$/.test(mobile)) {
+        showToast('Invalid QR Code! Must be 10-digit mobile', 'fas fa-times-circle');
+        scanAgain();
+        return;
+    }
+
+    scannedMobile = mobile;
+    document.getElementById('result-mobile').textContent = mobile;
+    document.getElementById('result-name').textContent = 'Fetching user details...';
+    document.getElementById('result-card').style.display = 'block';
+
+    try {
+        var result = await safeFetch(API_BASE + '/transfer/view?number=' + mobile, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (isAccountBlocked) return;
+
+        if (result.data.status === 'success' && result.data.name) {
+            scannedUserData = result.data;
+            document.getElementById('result-name').textContent = result.data.name;
+        } else {
+            document.getElementById('result-name').textContent = 'User not found';
+            scannedUserData = null;
+        }
+    } catch (error) {
+        if (!isAccountBlocked) {
+            console.error('Error fetching user:', error);
+            document.getElementById('result-name').textContent = 'Error fetching user';
+            scannedUserData = null;
+        }
+    }
+}
+
+/* ============================================
+   UPLOAD QR FROM GALLERY
+   ============================================ */
+function uploadQR(input) {
+    if (isAccountBlocked) { input.value = ''; return; }
+    if (input.files && input.files[0]) {
+        var qrScanner = new Html5Qrcode('reader');
+        qrScanner.scanFile(input.files[0], true)
+            .then(function(decoded) {
+                onScanSuccess(decoded);
+                input.value = '';
+            })
+            .catch(function() {
+                showToast('No valid QR code found', 'fas fa-times-circle');
+                input.value = '';
+            });
+    }
+}
+
+/* ============================================
+   GO TO TRANSFER
+   ============================================ */
+function goToTransfer() {
+    if (isAccountBlocked) return;
+    if (scannedMobile) {
+        window.location.href = '/transfer?to=' + scannedMobile;
+    } else {
+        showToast('No user scanned', 'fas fa-times-circle');
+    }
+}
+
+/* ============================================
+   SCAN AGAIN
+   ============================================ */
+function scanAgain() {
+    if (isAccountBlocked) return;
+    scannedMobile = '';
+    scannedUserData = null;
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'grid';
+}
+
+/* ============================================
+   BOTTOM NAV — ACTIVE STATE
+   ============================================ */
+(function setActiveNav(){
+    var path = window.location.pathname;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
+    var active = null;
+    if (path.indexOf('/dashboard') === 0 || path === '/' || path === '') active = document.querySelector('.bottom-nav .nav-item[data-nav="dashboard"]');
+    else if (path.indexOf('/transfer') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transfer"]');
+    else if (path.indexOf('/qr') === 0 || path.indexOf('/scan') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="qr"]');
+    else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="deposit"]');
+    else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transactions"]');
+    if (active) active.classList.add('active');
+})();
+
+/* ============================================
+   ✅ INIT — DOMContentLoaded এ theme + app চালু
+   ============================================ */
+document.addEventListener('DOMContentLoaded', async function() {
+    // ✅ প্রথমে theme apply করুন
+    initTheme();
+
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return; }
+
+    try {
+        var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setAvatar(cachedUser);
+        updateSidebarProfile(cachedUser);
+    } catch(e) {
+        setAvatar({});
+    }
+
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    setAvatar(user);
+    updateSidebarProfile(user);
+    loadQR();
+});
+
+/* ============================================
+   SERVICE WORKER REGISTER
+   ============================================ */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(function(reg) { console.log('✅ SW Registered:', reg.scope); })
+            .catch(function(err) { console.error('❌ SW Failed:', err); });
+    });
+}
+</script>
+
+</body>
+</html>
