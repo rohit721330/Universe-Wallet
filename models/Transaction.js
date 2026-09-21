@@ -19,7 +19,7 @@ const transactionSchema = new mongoose.Schema({
             'game_win', 'game_loss',
             'gift',
             'admin_add', 'admin_deduct',
-            'api',
+            'api', 'api_send', 'api_receive',
             'invoice_pay',
             'invoice_pay_send',
             'invoice_pay_receive'
@@ -46,8 +46,8 @@ const transactionSchema = new mongoose.Schema({
 // ============================================
 
 // ✅ CRITICAL: Compound unique index
-// একই tx_id থাকতে পারবে, কিন্তু আলাদা type-এ
-transactionSchema.index({ tx_id: 1, type: 1 }, { unique: true });
+// একই user-এর under-এ tx_id unique — sender এবং receiver আলাদা user, তাই conflict হবে না
+transactionSchema.index({ tx_id: 1, user_id: 1 }, { unique: true });
 
 // Regular performance indexes
 transactionSchema.index({ user_id: 1, tx_time: -1 });
@@ -81,6 +81,8 @@ transactionSchema.virtual('typeLabel').get(function() {
         'admin_add': 'Admin Add',
         'admin_deduct': 'Admin Deduct',
         'api': 'API Transaction',
+        'api_send': 'API Payment Sent',
+        'api_receive': 'API Payment Received',
         'invoice_pay': 'Invoice Payment',
         'invoice_pay_send': 'Invoice Payment Sent',
         'invoice_pay_receive': 'Invoice Payment Received'
@@ -103,6 +105,7 @@ transactionSchema.virtual('direction').get(function() {
     if (this.type === 'lifafa_creation' ||
         this.type === 'admin_deduct' ||
         this.type === 'game_loss' ||
+        this.type === 'api_send' ||
         this.type === 'invoice_pay_send') {
         return 'sent';
     }
@@ -111,7 +114,7 @@ transactionSchema.virtual('direction').get(function() {
         this.type === 'admin_add' ||
         this.type === 'game_win' ||
         this.type === 'deposit' ||
-        this.type === 'api' ||
+        this.type === 'api_receive' ||
         this.type === 'invoice_pay_receive') {
         return 'received';
     }
@@ -126,7 +129,7 @@ transactionSchema.methods.isDebit = function(userId) {
     if (this.sender_id && this.sender_id.toString() === userId.toString()) {
         return true;
     }
-    const debitTypes = ['lifafa_creation', 'admin_deduct', 'game_loss', 'invoice_pay_send'];
+    const debitTypes = ['lifafa_creation', 'admin_deduct', 'game_loss', 'api_send', 'invoice_pay_send'];
     return debitTypes.includes(this.type);
 };
 
@@ -139,7 +142,7 @@ transactionSchema.methods.isCredit = function(userId) {
         return true;
     }
     const creditTypes = ['lifafa_claim', 'lifafa_referral', 'admin_add', 'game_win',
-                         'deposit', 'api',
+                         'deposit', 'api_receive',
                          'invoice_pay_receive'];
     return creditTypes.includes(this.type);
 };
@@ -190,6 +193,7 @@ transactionSchema.statics.getUserSummary = async function(userId) {
                                 { $eq: ['$type', 'lifafa_creation'] },
                                 { $eq: ['$type', 'admin_deduct'] },
                                 { $eq: ['$type', 'game_loss'] },
+                                { $eq: ['$type', 'api_send'] },
                                 { $eq: ['$type', 'invoice_pay_send'] },
                                 { $eq: ['$sender_id', mongoose.Types.ObjectId(userId)] }
                             ]},
@@ -207,7 +211,7 @@ transactionSchema.statics.getUserSummary = async function(userId) {
                                 { $eq: ['$type', 'admin_add'] },
                                 { $eq: ['$type', 'game_win'] },
                                 { $eq: ['$type', 'deposit'] },
-                                { $eq: ['$type', 'api'] },
+                                { $eq: ['$type', 'api_receive'] },
                                 { $eq: ['$type', 'invoice_pay_receive'] },
                                 { $eq: ['$receiver_id', mongoose.Types.ObjectId(userId)] }
                             ]},
