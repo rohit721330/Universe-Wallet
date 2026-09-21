@@ -12,9 +12,13 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ============================================
 // Helper: Generate Transaction ID (TXN + 10 mixed chars)
+// Format: TXN + 10 random chars (A-Z, 0-9)
+// Example: TXN7K2M9PX4QA
 // ============================================
 function generateTxnId(existingTxnId) {
-    if (existingTxnId) return existingTxnId;
+    if (existingTxnId) {
+        return existingTxnId;
+    }
     return 'TXN' + generateRandomString(10);
 }
 
@@ -67,8 +71,8 @@ function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================
-// Helper: Validate Sender API Key
-// Checks: format, existence, apiKeyActive, isBlocked
+// Helper: Validate API Key (with apiKeyActive check)
+// Used for SENDER when paying via API key
 // ============================================
 async function validateApiKey(apiKey) {
     if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
@@ -82,47 +86,20 @@ async function validateApiKey(apiKey) {
         return { status: 'failed', message: 'Invalid API Key' };
     }
     
+    // ✅ Check apiKeyActive
     if (user.apiKeyActive === false) {
-        return { status: 'failed', message: 'Your API Key is disabled' };
+        return { status: 'failed', message: 'API Key is disabled' };
     }
     
     if (user.isBlocked) {
-        return { status: 'failed', message: 'Your account is blocked' };
+        return { status: 'failed', message: 'User account is blocked' };
     }
     
     return { status: 'success', user };
 }
 
 // ============================================
-// Helper: Validate Receiver API Key
-// Checks: format, existence, apiKeyActive, isBlocked
-// ============================================
-async function validateReceiverApiKey(apiKey) {
-    if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
-        return { status: 'failed', message: 'Invalid receiver API Key format' };
-    }
-    
-    const user = await User.findOne({ apiKey })
-        .select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
-    
-    if (!user) {
-        return { status: 'failed', message: 'Receiver not found' };
-    }
-    
-    if (user.apiKeyActive === false) {
-        return { status: 'failed', message: 'Receiver API Key is disabled' };
-    }
-    
-    if (user.isBlocked) {
-        return { status: 'failed', message: 'Receiver account is blocked' };
-    }
-    
-    return { status: 'success', user };
-}
-
-// ============================================
-// Helper: Find User By Mobile
-// Checks: format, existence, apiKeyActive, isBlocked
+// Helper: Find user by mobile (RECEIVER lookup)
 // ============================================
 async function findUserByMobile(mobile) {
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
@@ -130,14 +107,10 @@ async function findUserByMobile(mobile) {
     }
     
     const user = await User.findOne({ mobile })
-        .select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
+        .select('_id fullName mobile walletId balance isBlocked telegramId');
     
     if (!user) {
         return { status: 'failed', message: 'User not found with this mobile number' };
-    }
-    
-    if (user.apiKeyActive === false) {
-        return { status: 'failed', message: 'Receiver API Key is disabled' };
     }
     
     if (user.isBlocked) {
@@ -148,7 +121,7 @@ async function findUserByMobile(mobile) {
 }
 
 // ============================================
-// Auth middleware (JWT for /make, /history etc.)
+// Auth middleware (always returns 200 with status field)
 // ============================================
 async function auth(req, res, next) {
     try {
@@ -169,10 +142,6 @@ async function auth(req, res, next) {
             return res.json({ status: 'failed', message: 'Account blocked' });
         }
         
-        if (user.apiKeyActive === false) {
-            return res.json({ status: 'failed', message: 'Your API Key is disabled' });
-        }
-        
         req.user = user;
         next();
     } catch (error) {
@@ -185,7 +154,7 @@ async function auth(req, res, next) {
 }
 
 // ============================================
-// Standard JSON Response Helper
+// Helper: Always return 200 with JSON structure
 // ============================================
 function sendResponse(res, status, message, data = null, extra = {}) {
     const body = { status, message };
@@ -195,7 +164,9 @@ function sendResponse(res, status, message, data = null, extra = {}) {
 }
 
 // ============================================
-// GET PAYMENT (API - GET Method)
+// GET PAYMENT (API Payment - GET Method)
+// Sender: identified by API key (apiKeyActive check)
+// Receiver: identified by mobile number
 // ============================================
 router.get('/', async (req, res) => {
     const session = await mongoose.startSession();
@@ -218,7 +189,10 @@ router.get('/', async (req, res) => {
         console.log('  Key:', key ? '***' + key.slice(-4) : 'MISSING');
         console.log('  Number:', number);
         console.log('  Amount:', amount);
+        console.log('  Comment:', comment);
+        console.log('  URL Length:', fullUrl.length);
 
+        // Validation
         if (!key) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'API Key is required');
@@ -243,7 +217,12 @@ router.get('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
         }
 
-        // ✅ Single combined check: sender (format + apiKeyActive + isBlocked)
+        if (!key || key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+            await session.abortTransaction();
+            return sendResponse(res, 'failed', 'Invalid API Key format');
+        }
+
+        // ✅ Sender API key validation (includes apiKeyActive check)
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
@@ -251,7 +230,7 @@ router.get('/', async (req, res) => {
         }
         const sender = senderResult.user;
 
-        // ✅ Receiver check: (mobile format + apiKeyActive + isBlocked)
+        // Receiver by mobile (no API key status check needed)
         const receiverResult = await findUserByMobile(number);
         if (receiverResult.status === 'failed') {
             await session.abortTransaction();
@@ -279,7 +258,7 @@ router.get('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender txn: type 'api_send'
+        // Sender Transaction
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -303,7 +282,7 @@ router.get('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver txn: type 'api_receive'
+        // Receiver Transaction
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
@@ -330,7 +309,7 @@ router.get('/', async (req, res) => {
         await session.commitTransaction();
         console.log('Payment Successful:', txn_Id);
 
-        // Telegram notifications
+        // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
 `✅ <b>API Payment Successful</b>
@@ -401,7 +380,7 @@ router.get('/', async (req, res) => {
 });
 
 // ============================================
-// POST PAYMENT (API - POST Method)
+// POST PAYMENT (API Payment - POST Method)
 // ============================================
 router.post('/', async (req, res) => {
     const session = await mongoose.startSession();
@@ -414,7 +393,9 @@ router.post('/', async (req, res) => {
         console.log('  Key:', key ? '***' + key.slice(-4) : 'MISSING');
         console.log('  Number:', number);
         console.log('  Amount:', amount);
+        console.log('  Comment:', comment);
 
+        // Validation
         if (!key) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'API Key is required');
@@ -439,6 +420,12 @@ router.post('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
         }
 
+        if (!key || key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+            await session.abortTransaction();
+            return sendResponse(res, 'failed', 'Invalid API Key format');
+        }
+
+        // ✅ Sender API key validation (includes apiKeyActive check)
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
@@ -473,6 +460,7 @@ router.post('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
+        // Sender Transaction
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -496,6 +484,7 @@ router.post('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
+        // Receiver Transaction
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
@@ -522,6 +511,7 @@ router.post('/', async (req, res) => {
         await session.commitTransaction();
         console.log('Payment Successful (POST):', txn_Id);
 
+        // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
 `✅ <b>API Payment Successful</b>
@@ -592,181 +582,7 @@ router.post('/', async (req, res) => {
 });
 
 // ============================================
-// GET: MAKE PAYMENT (JWT Auth)
-// ============================================
-router.get('/make', auth, async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    
-    try {
-        const { receiverApiKey, amount, note = '' } = req.query;
-        const sender = req.user;
-
-        console.log('Payment Request From:', sender._id);
-
-        if (!receiverApiKey || !amount) {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', 'Receiver API Key and amount are required');
-        }
-
-        const paymentAmount = parseFloat(amount);
-
-        if (isNaN(paymentAmount) || paymentAmount < 1) {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', 'Minimum payment amount is ₹1');
-        }
-
-        if (paymentAmount > 5000) {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
-        }
-
-        if (sender.apiKey === receiverApiKey) {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', 'You cannot pay yourself');
-        }
-
-        // ✅ Receiver full check (format + apiKeyActive + isBlocked)
-        const receiverResult = await validateReceiverApiKey(receiverApiKey);
-        if (receiverResult.status === 'failed') {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', receiverResult.message);
-        }
-        const receiver = receiverResult.user;
-
-        if (sender.balance < paymentAmount) {
-            await session.abortTransaction();
-            return sendResponse(res, 'failed', 'Insufficient balance', { balance: sender.balance });
-        }
-
-        const txn_Id = generateTxnId(null);
-        const senderOldBalance = sender.balance;
-        const receiverOldBalance = receiver.balance;
-
-        sender.balance = senderOldBalance - paymentAmount;
-        receiver.balance = receiverOldBalance + paymentAmount;
-
-        await sender.save({ session });
-        await receiver.save({ session });
-
-        const senderTransaction = new Transaction({
-            user_id: sender._id,
-            sender_id: sender._id,
-            receiver_id: receiver._id,
-            amount: paymentAmount,
-            type: 'transfer_send',
-            status: 'success',
-            remark: note || `Payment to ${receiver.fullName}`,
-            description: note || `Payment to ${receiver.fullName}`,
-            tx_id: txn_Id,
-            metadata: {
-                transactionType: 'payment_sent',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                note: note || '',
-                apiEndpoint: 'GET'
-            }
-        });
-        await senderTransaction.save({ session });
-
-        const receiverTransaction = new Transaction({
-            user_id: receiver._id,
-            sender_id: sender._id,
-            receiver_id: receiver._id,
-            amount: paymentAmount,
-            type: 'transfer_receive',
-            status: 'success',
-            remark: note || `Payment from ${sender.fullName}`,
-            description: note || `Payment from ${sender.fullName}`,
-            tx_id: txn_Id,
-            metadata: {
-                transactionType: 'payment_received',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                note: note || '',
-                apiEndpoint: 'GET'
-            }
-        });
-        await receiverTransaction.save({ session });
-
-        await session.commitTransaction();
-        console.log('Payment Successful:', txn_Id);
-
-        if (sender.telegramId) {
-            const senderMessage = 
-`✅ <b>Payment Sent Successfully</b>
-
-👤 Dear <b>${sender.fullName}</b>, Your Payment Has Been Processed Successfully.
-
-💰 <b>Amount:</b> ₹${paymentAmount}
-📤 <b>To:</b> ${receiver.fullName}
-💼 <b>New Balance:</b> ₹${sender.balance}
-🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
-📝 <b>Note:</b> ${note || 'N/A'}
-🕒 <b>Date:</b> ${new Date().toLocaleString()}
-
-⚠️ If This Wasn't You, Please Contact Support Immediately.`;
-            sendTelegramMessage(sender.telegramId, senderMessage).catch(() => {});
-        }
-
-        if (receiver.telegramId) {
-            const receiverMessage = 
-`💵 <b>Payment Received</b>
-
-👤 Dear <b>${receiver.fullName}</b>, You Have Received A Payment In Your Wallet.
-
-💰 <b>Amount:</b> ₹${paymentAmount}
-📥 <b>From:</b> ${sender.fullName}
-💼 <b>New Balance:</b> ₹${receiver.balance}
-🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
-📝 <b>Note:</b> ${note || 'N/A'}
-🕒 <b>Date:</b> ${new Date().toLocaleString()}
-
-✅ Amount Credited To Your Wallet Successfully.`;
-            sendTelegramMessage(receiver.telegramId, receiverMessage).catch(() => {});
-        }
-
-        return sendResponse(res, 'success', 'Payment sent successfully', {
-            transaction_id: txn_Id,
-            amount: paymentAmount,
-            sender: {
-                name: sender.fullName,
-                number: sender.mobile
-            },
-            receiver: {
-                name: receiver.fullName,
-                number: receiver.mobile
-            },
-            comment: note || 'Paid',
-            timestamp: new Date().toLocaleString('en-IN', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            }).replace(/\//g, '-')
-        }, { newBalance: sender.balance });
-
-    } catch (error) {
-        await session.abortTransaction();
-        console.error('Payment Error:', error);
-        if (error.code === 11000) {
-            return sendResponse(res, 'failed', 'Transaction ID conflict. Please retry');
-        }
-        return sendResponse(res, 'failed', 'Failed to process payment');
-    } finally {
-        session.endSession();
-    }
-});
-
-// ============================================
-// GET USER BY API KEY (Lookup)
+// GET USER BY API KEY (For Payment Lookup)
 // ============================================
 router.get('/lookup', auth, async (req, res) => {
     try {
@@ -781,18 +597,19 @@ router.get('/lookup', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'You cannot lookup yourself');
         }
 
-        const receiver = await User.findOne({ apiKey }).select('fullName mobile walletId apiKeyActive isBlocked');
+        const receiver = await User.findOne({ apiKey })
+            .select('fullName mobile walletId apiKeyActive isBlocked');
         
         if (!receiver) {
             return sendResponse(res, 'failed', 'User not found');
         }
 
-        if (receiver.apiKeyActive === false) {
-            return sendResponse(res, 'failed', 'This API Key is disabled');
+        if (receiver.isBlocked) {
+            return sendResponse(res, 'failed', 'User account is blocked');
         }
 
-        if (receiver.isBlocked) {
-            return sendResponse(res, 'failed', 'This account is blocked');
+        if (receiver.apiKeyActive === false) {
+            return sendResponse(res, 'failed', 'This user\'s API Key is disabled');
         }
 
         return sendResponse(res, 'success', 'User found', {
@@ -881,7 +698,8 @@ router.get('/my-apikey', auth, async (req, res) => {
             apiKey: user.apiKey,
             walletId: user.walletId,
             fullName: user.fullName,
-            mobile: user.mobile
+            mobile: user.mobile,
+            apiKeyActive: user.apiKeyActive !== false
         });
     } catch (error) {
         console.error('Get My API Key Error:', error);
@@ -900,18 +718,19 @@ router.get('/validate-key/:apiKey', async (req, res) => {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
         
-        const user = await User.findOne({ apiKey }).select('fullName walletId mobile balance apiKeyActive isBlocked');
+        const user = await User.findOne({ apiKey })
+            .select('fullName walletId mobile balance apiKeyActive isBlocked');
         
         if (!user) {
             return sendResponse(res, 'failed', 'Invalid API Key');
         }
+
+        if (user.isBlocked) {
+            return sendResponse(res, 'failed', 'User account is blocked');
+        }
         
         if (user.apiKeyActive === false) {
             return sendResponse(res, 'failed', 'API Key is disabled');
-        }
-        
-        if (user.isBlocked) {
-            return sendResponse(res, 'failed', 'Account is blocked');
         }
         
         return sendResponse(res, 'success', 'API Key validated', {
@@ -964,6 +783,9 @@ router.get('/:txnId', auth, async (req, res) => {
         
         delete txnObj.metadata?.senderApiKey;
         delete txnObj.metadata?.receiverApiKey;
+
+        console.log('Transaction Found:', txnObj.tx_id);
+        console.log('Transaction Type:', txnObj.metadata?.transactionType);
 
         return sendResponse(res, 'success', 'Transaction found', {
             transaction: txnObj
