@@ -18,14 +18,13 @@ const userSchema = new mongoose.Schema({
     isBlocked: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
-    apiKey: { type: String, unique: true, sparse: true, default: null },
-    profilePicture: { type: String, default: default_logo },
-    walletId: { type: String, unique: true, required: true, uppercase: true },
-    lastOTPTime: { type: Number, default: 0 },
-    apiKey: { type: String,  unique: true, sparse: true, default: null, uppercase: true, trim: true },
+    apiKey: { type: String, unique: true, sparse: true, default: null, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
+    profilePicture: { type: String, default: default_logo },
+    walletId: { type: String, unique: true, required: true, uppercase: true },
+    lastOTPTime: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
@@ -133,7 +132,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // API Key generate
+        // API Key generate (শুধু প্রথমবার)
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -151,6 +150,15 @@ userSchema.pre('save', async function(next) {
                 return next(new Error('Failed to generate unique API Key. Please try again.'));
             }
             this.apiKey = newKey;
+            
+            // apiKeyActive default true
+            if (this.apiKeyActive === undefined || this.apiKeyActive === null) {
+                this.apiKeyActive = true;
+            }
+            if (!this.apiKeyCreatedAt) {
+                this.apiKeyCreatedAt = new Date();
+            }
+            this.apiKeyUpdatedAt = new Date();
         }
 
         next();
@@ -191,10 +199,54 @@ userSchema.methods.canLogin = function() {
 };
 
 // ============================================
+// INSTANCE METHODS — API Key Management
+// ============================================
+userSchema.methods.isApiKeyActive = function() {
+    if (!this.apiKey) return false;
+    if (this.apiKeyActive === undefined || this.apiKeyActive === null) return true;
+    return this.apiKeyActive === true;
+};
+
+userSchema.methods.toggleApiKey = async function(active) {
+    if (typeof active !== 'boolean') {
+        throw new Error('active must be a boolean');
+    }
+    if (!this.apiKey) {
+        throw new Error('No API Key found. Generate one first.');
+    }
+    this.apiKeyActive = active;
+    this.apiKeyUpdatedAt = new Date();
+    return await this.save();
+};
+
+userSchema.methods.regenerateApiKey = async function() {
+    const User = this.constructor;
+    let attempts = 0;
+    const maxAttempts = 10;
+    let newKey;
+    let exists = true;
+
+    while (exists && attempts < maxAttempts) {
+        newKey = generateApiKey();
+        exists = await User.exists({ apiKey: newKey });
+        attempts++;
+    }
+
+    if (exists) {
+        throw new Error('Failed to generate unique API Key');
+    }
+
+    this.apiKey = newKey;
+    this.apiKeyActive = true;
+    this.apiKeyUpdatedAt = new Date();
+    return await this.save();
+};
+
+// ============================================
 // INSTANCE METHODS — Soft Delete / Restore
 // ============================================
 
-// ✅ FIXED: isBlocked আর touch করা হয় না
+// ✅ isBlocked আর touch করা হয় না
 userSchema.methods.softDelete = async function(adminName = 'Admin') {
     this.isDeleted = true;
     this.deletedAt = new Date();
@@ -203,7 +255,7 @@ userSchema.methods.softDelete = async function(adminName = 'Admin') {
     return await this.save();
 };
 
-// ✅ FIXED: restore সব reset করে
+// ✅ restore সব reset করে
 userSchema.methods.restore = async function() {
     this.isDeleted = false;
     this.isActive = true;
@@ -230,7 +282,7 @@ userSchema.methods.unblockAccount = async function() {
 };
 
 // ============================================
-// STATIC METHODS — Find by fields (active only)
+// STATIC METHODS — Find by fields
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
@@ -254,10 +306,19 @@ userSchema.statics.findByTelegramId = function(telegramId) {
 
 userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
-    return this.findOne({ apiKey: apiKey });
+    return this.findOne({ apiKey: apiKey.toUpperCase() });
 };
 
-// ✅ নতুন: active (non-deleted) user খোঁজা
+userSchema.statics.findActiveByApiKey = function(apiKey) {
+    if (!apiKey) return null;
+    return this.findOne({
+        apiKey: apiKey.toUpperCase(),
+        isDeleted: false,
+        isBlocked: false
+    });
+};
+
+// ✅ active (non-deleted) user খোঁজা
 userSchema.statics.findActiveByMobile = function(mobile) {
     if (!mobile) return null;
     return this.findOne({ mobile: mobile, isDeleted: false });
