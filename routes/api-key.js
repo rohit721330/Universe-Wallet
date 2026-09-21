@@ -102,6 +102,20 @@ async function verifyToken(req, res, next) {
             });
         }
         
+        if (user.isDeleted === true) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Account Deleted' 
+            });
+        }
+        
+        if (user.isBlocked === true) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Account Blocked' 
+            });
+        }
+        
         req.user = user;
         next();
     } catch (error) {
@@ -132,6 +146,7 @@ router.get('/', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         
+        // যদি API key না থাকে, নতুন generate করুন
         if (!user.apiKey) {
             const newKey = generateRandomApiKey();
             const existingUser = await User.findOne({ apiKey: newKey, _id: { $ne: user._id } });
@@ -141,18 +156,28 @@ router.get('/', verifyToken, async (req, res) => {
             } else {
                 user.apiKey = newKey;
             }
+            
+            // ✅ নতুন key generate হলে active করে দিন
+            user.apiKeyActive = true;
+            user.apiKeyCreatedAt = new Date();
+            user.apiKeyUpdatedAt = new Date();
             await user.save();
             
             return res.json({
                 success: true,
                 apiKey: user.apiKey,
+                apiKeyActive: true,
                 message: 'API Key Generated Successfully'
             });
         }
         
+        // ✅ apiKeyActive status return করুন
         res.json({
             success: true,
-            apiKey: user.apiKey
+            apiKey: user.apiKey,
+            apiKeyActive: user.apiKeyActive !== false,
+            apiKeyCreatedAt: user.apiKeyCreatedAt || null,
+            apiKeyUpdatedAt: user.apiKeyUpdatedAt || null
         });
     } catch (error) {
         console.error('Get API key error:', error);
@@ -190,43 +215,47 @@ router.post('/regenerate', verifyToken, async (req, res) => {
         
         const oldKey = user.apiKey;
         user.apiKey = newKey;
+        user.apiKeyActive = true;   // ✅ নতুন key সবসময় active
+        user.apiKeyCreatedAt = new Date();
+        user.apiKeyUpdatedAt = new Date();
         user.updatedAt = Date.now();
         await user.save();
         
-        // Send notification to user only when regenerated
+        // Send notification to user
         if (user.telegramId) {
             const message = 
-`API Key Regenerated
+`🔄 <b>API Key Regenerated</b>
 
-Dear ${user.fullName}, Your API Key Has Been Regenerated Successfully.
+👤 Dear <b>${user.fullName}</b>, Your API Key Has Been Regenerated Successfully.
 
-Old Key: ${oldKey || 'N/A'}
-New Key: ${newKey}
-Wallet Id: ${user.walletId}
-Time: ${dateTime}
+🔑 <b>Old Key:</b> <code>${oldKey || 'N/A'}</code>
+🆕 <b>New Key:</b> <code>${newKey}</code>
+💼 <b>Wallet Id:</b> ${user.walletId}
+🕒 <b>Time:</b> ${dateTime}
 
-Keep This New Key Secret. Do Not Share It With Anyone.`;
+⚠️ Keep This New Key Secret. Do Not Share It With Anyone.`;
             
             await sendTelegramMessage(user.telegramId, message);
         }
         
         // Notify admin
         const adminMessage = 
-`API Key Regenerated
+`🔄 <b>API Key Regenerated</b>
 
-User: ${user.fullName}
-Mobile: ${user.mobile}
-Wallet Id: ${user.walletId}
-Old Key: ${oldKey || 'N/A'}
-New Key: ${newKey}
-Time: ${dateTime}`;
+👤 <b>User:</b> ${user.fullName}
+📱 <b>Mobile:</b> ${user.mobile}
+💼 <b>Wallet Id:</b> ${user.walletId}
+🔑 <b>Old Key:</b> <code>${oldKey || 'N/A'}</code>
+🆕 <b>New Key:</b> <code>${newKey}</code>
+🕒 <b>Time:</b> ${dateTime}`;
         
         await notifyAdmin(adminMessage);
         
         res.json({
             success: true,
             message: 'API Key Regenerated Successfully',
-            apiKey: newKey
+            apiKey: newKey,
+            apiKeyActive: true
         });
     } catch (error) {
         console.error('Regenerate API key error:', error);
@@ -238,12 +267,109 @@ Time: ${dateTime}`;
 });
 
 // ============================================
+// TOGGLE API KEY STATUS (Enable/Disable)
+// ============================================
+router.post('/toggle', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        const { active } = req.body;
+        const dateTime = getCurrentDateTime();
+        
+        // ✅ Validate input
+        if (typeof active !== 'boolean') {
+            return res.status(400).json({
+                success: false,
+                message: 'active must be true or false'
+            });
+        }
+        
+        if (!user.apiKey) {
+            return res.status(400).json({
+                success: false,
+                message: 'No API Key found. Generate one first.'
+            });
+        }
+        
+        // ✅ Toggle
+        user.apiKeyActive = active;
+        user.apiKeyUpdatedAt = new Date();
+        await user.save();
+        
+        // Send notification to user
+        if (user.telegramId) {
+            const emoji = active ? '🟢' : '🔴';
+            const statusText = active ? 'Enabled' : 'Disabled';
+            const message = 
+`${emoji} <b>API Key ${statusText}</b>
+
+👤 Dear <b>${user.fullName}</b>, Your API Key Has Been ${statusText}.
+
+🔑 <b>API Key:</b> <code>${user.apiKey}</code>
+📊 <b>Status:</b> ${statusText}
+💼 <b>Wallet Id:</b> ${user.walletId}
+🕒 <b>Time:</b> ${dateTime}
+
+${active ? '✅ You Can Now Use Your API Key For Payments.' : '⚠️ Your API Key Will Not Work Until You Enable It Again.'}`;
+            
+            await sendTelegramMessage(user.telegramId, message);
+        }
+        
+        res.json({
+            success: true,
+            message: active ? 'API Key Enabled' : 'API Key Disabled',
+            apiKey: user.apiKey,
+            apiKeyActive: user.apiKeyActive
+        });
+    } catch (error) {
+        console.error('Toggle API key error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to toggle API Key: ' + error.message
+        });
+    }
+});
+
+// ============================================
+// GET API KEY STATUS
+// ============================================
+router.get('/status', verifyToken, async (req, res) => {
+    try {
+        const user = req.user;
+        
+        if (!user.apiKey) {
+            return res.json({
+                success: true,
+                hasApiKey: false,
+                apiKeyActive: false,
+                message: 'No API Key generated yet'
+            });
+        }
+        
+        res.json({
+            success: true,
+            hasApiKey: true,
+            apiKey: user.apiKey,
+            apiKeyActive: user.apiKeyActive !== false,
+            apiKeyCreatedAt: user.apiKeyCreatedAt || null,
+            apiKeyUpdatedAt: user.apiKeyUpdatedAt || null
+        });
+    } catch (error) {
+        console.error('Get API key status error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch API Key status'
+        });
+    }
+});
+
+// ============================================
 // VALIDATE API KEY (for external use)
 // ============================================
 router.get('/validate/:apiKey', async (req, res) => {
     try {
         const { apiKey } = req.params;
         
+        // Format check
         if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
             return res.status(400).json({ 
                 success: false, 
@@ -251,12 +377,37 @@ router.get('/validate/:apiKey', async (req, res) => {
             });
         }
         
-        const user = await User.findOne({ apiKey }).select('fullName walletId mobile balance');
+        // ═══ STEP 1: Key exists? ═══
+        const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
+            .select('fullName walletId mobile balance apiKeyActive isBlocked isDeleted');
         
         if (!user) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'Invalid API Key' 
+            });
+        }
+        
+        if (user.isDeleted === true) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Invalid API Key' 
+            });
+        }
+        
+        // ═══ STEP 2: Key active? ═══
+        if (user.apiKeyActive === false) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'API Key is disabled' 
+            });
+        }
+        
+        // ═══ STEP 3: User blocked? ═══
+        if (user.isBlocked === true) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'User account is blocked' 
             });
         }
         
