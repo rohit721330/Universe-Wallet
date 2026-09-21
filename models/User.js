@@ -19,14 +19,13 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
     apiKey: { type: String, unique: true, sparse: true, default: null },
-
-    // ✅ ডিফল্ট ছবি
     profilePicture: { type: String, default: default_logo },
-
     walletId: { type: String, unique: true, required: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
-
-    // ✅ Account Status Flags
+    apiKey: { type: String,  unique: true, sparse: true, default: null, uppercase: true, trim: true },
+    apiKeyActive: { type: Boolean, default: true, index: true },
+    apiKeyCreatedAt: { type: Date, default: null },
+    apiKeyUpdatedAt: { type: Date, default: null },
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
