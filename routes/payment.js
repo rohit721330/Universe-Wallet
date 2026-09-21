@@ -493,7 +493,6 @@ router.post('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction (type: 'api_send')
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -517,7 +516,6 @@ router.post('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction (type: 'api_receive')
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
