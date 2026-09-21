@@ -5,28 +5,29 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ============================================
-// Helper: Generate Transaction ID (API vs Regular)
+// Helper: Generate Transaction ID (TXN + 10 mixed chars)
+// Format: TXN + 10 random chars (A-Z, 0-9)
+// Example: TXN7K2M9PX4QA
 // ============================================
-function generateTxnId(existingTxnId, isApi = false) {
+function generateTxnId(existingTxnId) {
     if (existingTxnId) {
         return existingTxnId;
     }
-    if (isApi) {
-        return 'TXN_API_' + generateRandomString(20);
-    }
-    return 'TXN' + Date.now() + Math.floor(Math.random() * 99999);
+    return 'TXN' + generateRandomString(10);
 }
 
 function generateRandomString(length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
+    const bytes = crypto.randomBytes(length);
     for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        result += chars.charAt(bytes[i] % chars.length);
     }
     return result;
 }
@@ -190,7 +191,7 @@ function sendResponse(res, status, message, data = null, extra = {}) {
 }
 
 // ============================================
-// GET PAYMENT (API Payment - TXN_API_)
+// GET PAYMENT (API Payment - GET Method)
 // ============================================
 router.get('/', async (req, res) => {
     const session = await mongoose.startSession();
@@ -231,6 +232,11 @@ router.get('/', async (req, res) => {
         }
 
         const paymentAmount = parseFloat(amount);
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            await session.abortTransaction();
+            return sendResponse(res, 'failed', 'Invalid amount');
+        }
+
         if (paymentAmount > 5000) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
@@ -276,7 +282,7 @@ router.get('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Account is blocked');
         }
 
-        const txn_Id = generateTxnId(null, true);
+        const txn_Id = generateTxnId(null);
         const senderOldBalance = sender.balance;
         const receiverOldBalance = receiver.balance;
 
@@ -340,35 +346,35 @@ router.get('/', async (req, res) => {
         // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
-`API Payment Successfully
+`✅ <b>API Payment Successful</b>
 
-Dear ${sender.fullName}, Your Payment Has Been Processed Successfully.
+👤 Dear <b>${sender.fullName}</b>, Your Payment Has Been Processed Successfully.
 
-Amount: ₹${paymentAmount}
-To: ${receiver.fullName}
-New Balance: ₹${sender.balance}
-Txn Id: ${txn_Id}
-Comment: ${comment || 'N/A'}
-Date: ${new Date().toLocaleString()}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📤 <b>To:</b> ${receiver.fullName}
+💼 <b>New Balance:</b> ₹${sender.balance}
+🧾 <b>Txn Id:</b> <code>${txn_Id}</code>
+📝 <b>Comment:</b> ${comment || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-If This Wasn't You, Please Contact Support Immediately.`;
+⚠️ If This Wasn't You, Please Contact Support Immediately.`;
             sendTelegramMessage(sender.telegramId, senderMessage).catch(() => {});
         }
 
         if (receiver.telegramId) {
             const receiverMessage = 
-`API Payment Received
+`💵 <b>API Payment Received</b>
 
-Dear ${receiver.fullName}, You Have Received A Payment In Your Wallet.
+👤 Dear <b>${receiver.fullName}</b>, You Have Received A Payment In Your Wallet.
 
-Amount: ₹${paymentAmount}
-From: ${sender.fullName}
-New Balance: ₹${receiver.balance}
-Transaction Id: ${txn_Id}
-Comment: ${comment || 'N/A'}
-Date: ${new Date().toLocaleString()}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📥 <b>From:</b> ${sender.fullName}
+💼 <b>New Balance:</b> ₹${receiver.balance}
+🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
+📝 <b>Comment:</b> ${comment || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-Amount Credited To Your Wallet Successfully.`;
+✅ Amount Credited To Your Wallet Successfully.`;
             sendTelegramMessage(receiver.telegramId, receiverMessage).catch(() => {});
         }
 
@@ -438,6 +444,11 @@ router.post('/', async (req, res) => {
         }
 
         const paymentAmount = parseFloat(amount);
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            await session.abortTransaction();
+            return sendResponse(res, 'failed', 'Invalid amount');
+        }
+
         if (paymentAmount > 5000) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
@@ -483,7 +494,7 @@ router.post('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Account is blocked');
         }
 
-        const txn_Id = generateTxnId(null, true);
+        const txn_Id = generateTxnId(null);
         const senderOldBalance = sender.balance;
         const receiverOldBalance = receiver.balance;
 
@@ -547,32 +558,35 @@ router.post('/', async (req, res) => {
         // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
-`API Payment Successfully
+`✅ <b>API Payment Successful</b>
 
-Dear ${sender.fullName}, Your Payment Has Been Processed.
+👤 Dear <b>${sender.fullName}</b>, Your Payment Has Been Processed.
 
-Amount: ₹${paymentAmount}
-To: ${receiver.fullName}
-New Balance: ₹${sender.balance}
-Txn Id: ${txn_Id}
-Comment: ${comment || 'N/A'}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📤 <b>To:</b> ${receiver.fullName}
+💼 <b>New Balance:</b> ₹${sender.balance}
+🧾 <b>Txn Id:</b> <code>${txn_Id}</code>
+📝 <b>Comment:</b> ${comment || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-If This Wasn't You, Contact Support.`;
+⚠️ If This Wasn't You, Contact Support.`;
             sendTelegramMessage(sender.telegramId, senderMessage).catch(() => {});
         }
 
         if (receiver.telegramId) {
             const receiverMessage = 
-`API Payment Received
+`💵 <b>API Payment Received</b>
 
-Dear ${receiver.fullName}, You Have Received A Payment.
+👤 Dear <b>${receiver.fullName}</b>, You Have Received A Payment.
 
-Amount: ₹${paymentAmount}
-From: ${sender.fullName}
-New Balance: ₹${receiver.balance}
-Transaction Id: ${txn_Id}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📥 <b>From:</b> ${sender.fullName}
+💼 <b>New Balance:</b> ₹${receiver.balance}
+🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
+📝 <b>Comment:</b> ${comment || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-Amount Credited To Your Wallet.`;
+✅ Amount Credited To Your Wallet.`;
             sendTelegramMessage(receiver.telegramId, receiverMessage).catch(() => {});
         }
 
@@ -629,12 +643,14 @@ router.get('/make', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'Receiver API Key and amount are required');
         }
 
-        if (amount < 1) {
+        const paymentAmount = parseFloat(amount);
+
+        if (isNaN(paymentAmount) || paymentAmount < 1) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Minimum payment amount is ₹1');
         }
 
-        if (amount > 5000) {
+        if (paymentAmount > 5000) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Maximum payment amount is ₹5,000');
         }
@@ -656,7 +672,7 @@ router.get('/make', auth, async (req, res) => {
         }
         const receiver = receiverResult.user;
 
-        if (sender.balance < amount) {
+        if (sender.balance < paymentAmount) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Insufficient balance', { balance: sender.balance });
         }
@@ -666,12 +682,12 @@ router.get('/make', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'Account is blocked');
         }
 
-        const txn_Id = generateTxnId(null, false);
+        const txn_Id = generateTxnId(null);
         const senderOldBalance = sender.balance;
         const receiverOldBalance = receiver.balance;
 
-        sender.balance = senderOldBalance - amount;
-        receiver.balance = receiverOldBalance + amount;
+        sender.balance = senderOldBalance - paymentAmount;
+        receiver.balance = receiverOldBalance + paymentAmount;
 
         await sender.save({ session });
         await receiver.save({ session });
@@ -681,7 +697,7 @@ router.get('/make', auth, async (req, res) => {
             user_id: sender._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
-            amount: amount,
+            amount: paymentAmount,
             type: 'transfer',
             status: 'success',
             remark: note || `Payment to ${receiver.fullName}`,
@@ -704,7 +720,7 @@ router.get('/make', auth, async (req, res) => {
             user_id: receiver._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
-            amount: amount,
+            amount: paymentAmount,
             type: 'transfer',
             status: 'success',
             remark: note || `Payment from ${sender.fullName}`,
@@ -728,41 +744,41 @@ router.get('/make', auth, async (req, res) => {
         // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
-`API Payment Sent
+`✅ <b>API Payment Sent</b>
 
-Dear ${sender.fullName}, Your Payment Has Been Processed Successfully.
+👤 Dear <b>${sender.fullName}</b>, Your Payment Has Been Processed Successfully.
 
-Amount: ₹${amount}
-To: ${receiver.fullName}
-New Balance: ₹${sender.balance}
-Transaction Id: ${txn_Id}
-Note: ${note || 'N/A'}
-Date: ${new Date().toLocaleString()}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📤 <b>To:</b> ${receiver.fullName}
+💼 <b>New Balance:</b> ₹${sender.balance}
+🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
+📝 <b>Note:</b> ${note || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-If This Wasn't You, Please Contact Support Immediately.`;
+⚠️ If This Wasn't You, Please Contact Support Immediately.`;
             sendTelegramMessage(sender.telegramId, senderMessage).catch(() => {});
         }
 
         if (receiver.telegramId) {
             const receiverMessage = 
-`API Payment Received
+`💵 <b>API Payment Received</b>
 
-Dear ${receiver.fullName}, You Have Received A Payment In Your Wallet.
+👤 Dear <b>${receiver.fullName}</b>, You Have Received A Payment In Your Wallet.
 
-Amount: ₹${amount}
-From: ${sender.fullName}
-New Balance: ₹${receiver.balance}
-Transaction Id: ${txn_Id}
-Note: ${note || 'N/A'}
-Date: ${new Date().toLocaleString()}
+💰 <b>Amount:</b> ₹${paymentAmount}
+📥 <b>From:</b> ${sender.fullName}
+💼 <b>New Balance:</b> ₹${receiver.balance}
+🧾 <b>Transaction Id:</b> <code>${txn_Id}</code>
+📝 <b>Note:</b> ${note || 'N/A'}
+🕒 <b>Date:</b> ${new Date().toLocaleString()}
 
-Amount Credited To Your Wallet Successfully.`;
+✅ Amount Credited To Your Wallet Successfully.`;
             sendTelegramMessage(receiver.telegramId, receiverMessage).catch(() => {});
         }
 
         return sendResponse(res, 'success', 'Payment sent successfully', {
             transaction_id: txn_Id,
-            amount: amount,
+            amount: paymentAmount,
             sender: {
                 name: sender.fullName,
                 number: sender.mobile
@@ -889,149 +905,6 @@ router.get('/history', auth, async (req, res) => {
 });
 
 // ============================================
-// GET PAYMENT DETAILS BY TRANSACTION ID
-// ============================================
-router.get('/:txnId', auth, async (req, res) => {
-    try {
-        const { txnId } = req.params;
-        const user = req.user;
-
-        console.log('Fetching Transaction:', txnId);
-
-        const transaction = await Transaction.findOne({
-            tx_id: txnId,
-            user_id: user._id
-        })
-        .populate('sender_id', 'fullName mobile walletId')
-        .populate('receiver_id', 'fullName mobile walletId');
-
-        if (!transaction) {
-            return sendResponse(res, 'failed', 'Transaction not found');
-        }
-
-        const txnObj = transaction.toObject();
-        
-        if (txnObj.metadata && txnObj.metadata.transactionType) {
-            // Keep as is
-        } else {
-            if (txnObj.sender_id && txnObj.sender_id._id.toString() === user._id.toString()) {
-                txnObj.userRole = 'sender';
-                txnObj.transactionType = 'payment_sent';
-            } else if (txnObj.receiver_id && txnObj.receiver_id._id.toString() === user._id.toString()) {
-                txnObj.userRole = 'receiver';
-                txnObj.transactionType = 'payment_received';
-            }
-        }
-        
-        delete txnObj.metadata?.senderApiKey;
-        delete txnObj.metadata?.receiverApiKey;
-
-        console.log('Transaction Found:', txnObj.tx_id);
-        console.log('Transaction Type:', txnObj.metadata?.transactionType);
-
-        return sendResponse(res, 'success', 'Transaction found', {
-            transaction: txnObj
-        });
-
-    } catch (error) {
-        console.error('Get Transaction Error:', error);
-        return sendResponse(res, 'failed', 'Failed to fetch transaction');
-    }
-});
-
-// ============================================
-// GET REQUEST PAYMENT (User Requests Payment)
-// ============================================
-router.get('/request', auth, async (req, res) => {
-    try {
-        const { receiverApiKey, amount, note = '' } = req.query;
-        const requester = req.user;
-
-        console.log('Payment Request From:', requester._id);
-
-        if (!receiverApiKey || !amount) {
-            return sendResponse(res, 'failed', 'Receiver API Key and amount are required');
-        }
-
-        if (amount < 1) {
-            return sendResponse(res, 'failed', 'Minimum request amount is ₹1');
-        }
-
-        if (!receiverApiKey || receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
-            return sendResponse(res, 'failed', 'Invalid receiver API Key format');
-        }
-
-        const receiverResult = await validateReceiverApiKey(receiverApiKey);
-        if (receiverResult.status === 'failed') {
-            return sendResponse(res, 'failed', receiverResult.message);
-        }
-        const receiver = receiverResult.user;
-
-        if (requester.apiKey === receiverApiKey) {
-            return sendResponse(res, 'failed', 'You cannot request payment from yourself');
-        }
-
-        if (receiver.isBlocked || requester.isBlocked) {
-            return sendResponse(res, 'failed', 'Account is blocked');
-        }
-
-        // Fire-and-forget Telegram notifications
-        if (receiver.telegramId) {
-            const requestMessage = 
-`API Payment Request
-
-Dear ${receiver.fullName}, You Have Received A Payment Request.
-
-Requester: ${requester.fullName}
-Amount: ₹${amount}
-Note: ${note || 'N/A'}
-Date: ${new Date().toLocaleString()}
-
-Please Approve This Request To Complete The Transaction.
-If This Wasn't You, Please Ignore This Message.`;
-            sendTelegramMessage(receiver.telegramId, requestMessage).catch(() => {});
-        }
-
-        if (requester.telegramId) {
-            const confirmMessage = 
-`API Payment Request Sent
-
-Dear ${requester.fullName}, Your Payment Request Has Been Sent Successfully.
-
-To: ${receiver.fullName}
-Amount: ₹${amount}
-Note: ${note || 'N/A'}
-Date: ${new Date().toLocaleString()}
-
-Your Request Has Been Sent To The Receiver.
-You Will Be Notified When The Request Is Approved.`;
-            sendTelegramMessage(requester.telegramId, confirmMessage).catch(() => {});
-        }
-
-        return sendResponse(res, 'success', 'Payment request sent successfully', {
-            requester: requester.fullName,
-            receiver: receiver.fullName,
-            receiverMobile: receiver.mobile,
-            amount: amount,
-            note: note || '',
-            timestamp: new Date().toLocaleString('en-IN', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            }).replace(/\//g, '-')
-        });
-
-    } catch (error) {
-        console.error('Payment Request Error:', error);
-        return sendResponse(res, 'failed', 'Failed to send payment request');
-    }
-});
-
-// ============================================
 // GET MY API KEY
 // ============================================
 router.get('/my-apikey', auth, async (req, res) => {
@@ -1084,6 +957,58 @@ router.get('/validate-key/:apiKey', async (req, res) => {
     } catch (error) {
         console.error('Validate API Key Error:', error);
         return sendResponse(res, 'failed', 'Server error');
+    }
+});
+
+// ============================================
+// GET PAYMENT DETAILS BY TRANSACTION ID
+// (Must be LAST to avoid route conflicts)
+// ============================================
+router.get('/:txnId', auth, async (req, res) => {
+    try {
+        const { txnId } = req.params;
+        const user = req.user;
+
+        console.log('Fetching Transaction:', txnId);
+
+        const transaction = await Transaction.findOne({
+            tx_id: txnId,
+            user_id: user._id
+        })
+        .populate('sender_id', 'fullName mobile walletId')
+        .populate('receiver_id', 'fullName mobile walletId');
+
+        if (!transaction) {
+            return sendResponse(res, 'failed', 'Transaction not found');
+        }
+
+        const txnObj = transaction.toObject();
+        
+        if (txnObj.metadata && txnObj.metadata.transactionType) {
+            // Keep as is
+        } else {
+            if (txnObj.sender_id && txnObj.sender_id._id.toString() === user._id.toString()) {
+                txnObj.userRole = 'sender';
+                txnObj.transactionType = 'payment_sent';
+            } else if (txnObj.receiver_id && txnObj.receiver_id._id.toString() === user._id.toString()) {
+                txnObj.userRole = 'receiver';
+                txnObj.transactionType = 'payment_received';
+            }
+        }
+        
+        delete txnObj.metadata?.senderApiKey;
+        delete txnObj.metadata?.receiverApiKey;
+
+        console.log('Transaction Found:', txnObj.tx_id);
+        console.log('Transaction Type:', txnObj.metadata?.transactionType);
+
+        return sendResponse(res, 'success', 'Transaction found', {
+            transaction: txnObj
+        });
+
+    } catch (error) {
+        console.error('Get Transaction Error:', error);
+        return sendResponse(res, 'failed', 'Failed to fetch transaction');
     }
 });
 
