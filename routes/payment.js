@@ -71,27 +71,52 @@ function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================
-// Helper: Validate API Key (with apiKeyActive check)
-// Used for SENDER when paying via API key
+// Helper: Validate API Key — TWO STEP
+// Step 1: Key database-এ আছে কি না
+// Step 2: User deleted কি না
+// Step 3: Key active কি না
+// Step 4: User blocked কি না
 // ============================================
 async function validateApiKey(apiKey) {
+    // Format check
     if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
         return { status: 'failed', message: 'Invalid API Key format' };
     }
     
-    const user = await User.findOne({ apiKey })
-        .select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
+    // ═══ STEP 1: Key database-এ আছে কি না ═══
+    const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
+        .select('_id fullName mobile walletId balance isBlocked isDeleted isActive telegramId apiKey apiKeyActive');
+    
+    console.log('🔍 STEP 1 - Key exists:', {
+        inputKey: '***' + apiKey.slice(-4),
+        found: !!user,
+        mobile: user?.mobile
+    });
     
     if (!user) {
         return { status: 'failed', message: 'Invalid API Key' };
     }
     
-    // ✅ Check apiKeyActive
-    if (user.apiKeyActive === false) {
+    // ═══ STEP 2: User deleted কি না ═══
+    if (user.isDeleted === true) {
+        return { status: 'failed', message: 'Invalid API Key' };
+    }
+    
+    // ═══ STEP 3: Key active কি না ═══
+    const isActive = user.apiKeyActive !== false;
+    
+    console.log('🔍 STEP 3 - Key active:', {
+        raw: user.apiKeyActive,
+        rawType: typeof user.apiKeyActive,
+        isActive
+    });
+    
+    if (isActive === false) {
         return { status: 'failed', message: 'API Key is disabled' };
     }
     
-    if (user.isBlocked) {
+    // ═══ STEP 4: User blocked কি না ═══
+    if (user.isBlocked === true) {
         return { status: 'failed', message: 'User account is blocked' };
     }
     
@@ -107,13 +132,17 @@ async function findUserByMobile(mobile) {
     }
     
     const user = await User.findOne({ mobile })
-        .select('_id fullName mobile walletId balance isBlocked telegramId');
+        .select('_id fullName mobile walletId balance isBlocked isDeleted telegramId');
     
     if (!user) {
         return { status: 'failed', message: 'User not found with this mobile number' };
     }
     
-    if (user.isBlocked) {
+    if (user.isDeleted === true) {
+        return { status: 'failed', message: 'User not found with this mobile number' };
+    }
+    
+    if (user.isBlocked === true) {
         return { status: 'failed', message: 'Receiver account is blocked' };
     }
     
@@ -138,7 +167,11 @@ async function auth(req, res, next) {
             return res.json({ status: 'failed', message: 'User not found' });
         }
         
-        if (user.isBlocked) {
+        if (user.isDeleted === true) {
+            return res.json({ status: 'failed', message: 'Account deleted' });
+        }
+        
+        if (user.isBlocked === true) {
             return res.json({ status: 'failed', message: 'Account blocked' });
         }
         
@@ -222,7 +255,7 @@ router.get('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
 
-        // ✅ Sender API key validation (includes apiKeyActive check)
+        // ✅ Sender API key validation (two-step with apiKeyActive check)
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
@@ -230,7 +263,7 @@ router.get('/', async (req, res) => {
         }
         const sender = senderResult.user;
 
-        // Receiver by mobile (no API key status check needed)
+        // Receiver by mobile
         const receiverResult = await findUserByMobile(number);
         if (receiverResult.status === 'failed') {
             await session.abortTransaction();
@@ -258,7 +291,7 @@ router.get('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction
+        // Sender Transaction (type: 'api_send')
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -282,7 +315,7 @@ router.get('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction
+        // Receiver Transaction (type: 'api_receive')
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
@@ -425,7 +458,7 @@ router.post('/', async (req, res) => {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
 
-        // ✅ Sender API key validation (includes apiKeyActive check)
+        // ✅ Sender API key validation (two-step with apiKeyActive check)
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
@@ -460,7 +493,7 @@ router.post('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction
+        // Sender Transaction (type: 'api_send')
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -484,7 +517,7 @@ router.post('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction
+        // Receiver Transaction (type: 'api_receive')
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
@@ -593,23 +626,30 @@ router.get('/lookup', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'API Key required');
         }
 
-        if (user.apiKey === apiKey) {
+        if (user.apiKey === apiKey.toUpperCase()) {
             return sendResponse(res, 'failed', 'You cannot lookup yourself');
         }
 
-        const receiver = await User.findOne({ apiKey })
-            .select('fullName mobile walletId apiKeyActive isBlocked');
+        // ═══ STEP 1: Key exists? ═══
+        const receiver = await User.findOne({ apiKey: apiKey.toUpperCase() })
+            .select('fullName mobile walletId apiKeyActive isBlocked isDeleted');
         
         if (!receiver) {
-            return sendResponse(res, 'failed', 'User not found');
+            return sendResponse(res, 'failed', 'Invalid API Key');
         }
-
-        if (receiver.isBlocked) {
-            return sendResponse(res, 'failed', 'User account is blocked');
+        
+        if (receiver.isDeleted === true) {
+            return sendResponse(res, 'failed', 'Invalid API Key');
         }
-
+        
+        // ═══ STEP 2: Key active? ═══
         if (receiver.apiKeyActive === false) {
-            return sendResponse(res, 'failed', 'This user\'s API Key is disabled');
+            return sendResponse(res, 'failed', 'API Key is disabled');
+        }
+        
+        // ═══ STEP 3: User blocked? ═══
+        if (receiver.isBlocked === true) {
+            return sendResponse(res, 'failed', 'User account is blocked');
         }
 
         return sendResponse(res, 'success', 'User found', {
@@ -718,19 +758,26 @@ router.get('/validate-key/:apiKey', async (req, res) => {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
         
-        const user = await User.findOne({ apiKey })
-            .select('fullName walletId mobile balance apiKeyActive isBlocked');
+        // ═══ STEP 1: Key exists? ═══
+        const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
+            .select('fullName walletId mobile balance apiKeyActive isBlocked isDeleted');
         
         if (!user) {
             return sendResponse(res, 'failed', 'Invalid API Key');
         }
-
-        if (user.isBlocked) {
-            return sendResponse(res, 'failed', 'User account is blocked');
+        
+        if (user.isDeleted === true) {
+            return sendResponse(res, 'failed', 'Invalid API Key');
         }
         
+        // ═══ STEP 2: Key active? ═══
         if (user.apiKeyActive === false) {
             return sendResponse(res, 'failed', 'API Key is disabled');
+        }
+        
+        // ═══ STEP 3: User blocked? ═══
+        if (user.isBlocked === true) {
+            return sendResponse(res, 'failed', 'User account is blocked');
         }
         
         return sendResponse(res, 'success', 'API Key validated', {
