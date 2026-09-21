@@ -292,13 +292,13 @@ router.get('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction
+        // Sender Transaction (type: 'api_send')
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'api',
+            type: 'api_send',
             status: 'success',
             remark: comment || 'API Transfer',
             description: comment || 'API Transfer',
@@ -316,13 +316,13 @@ router.get('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction
+        // Receiver Transaction (type: 'api_receive')
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'api',
+            type: 'api_receive',
             status: 'success',
             remark: comment || 'API Transfer',
             description: comment || 'API Transfer',
@@ -504,13 +504,13 @@ router.post('/', async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction
+        // Sender Transaction (type: 'api_send')
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'api',
+            type: 'api_send',
             status: 'success',
             remark: comment || 'API Transfer',
             description: comment || 'API Transfer',
@@ -528,13 +528,13 @@ router.post('/', async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction
+        // Receiver Transaction (type: 'api_receive')
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'api',
+            type: 'api_receive',
             status: 'success',
             remark: comment || 'API Transfer',
             description: comment || 'API Transfer',
@@ -626,7 +626,7 @@ router.post('/', async (req, res) => {
 });
 
 // ============================================
-// GET: MAKE PAYMENT (AUTHENTICATED - Regular TXN)
+// GET: MAKE PAYMENT (AUTHENTICATED - Regular Transfer)
 // ============================================
 router.get('/make', auth, async (req, res) => {
     const session = await mongoose.startSession();
@@ -692,13 +692,13 @@ router.get('/make', auth, async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction - transfer type (payment_sent)
+        // Sender Transaction - transfer_send
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'transfer',
+            type: 'transfer_send',
             status: 'success',
             remark: note || `Payment to ${receiver.fullName}`,
             description: note || `Payment to ${receiver.fullName}`,
@@ -715,13 +715,13 @@ router.get('/make', auth, async (req, res) => {
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction - transfer type (payment_received)
+        // Receiver Transaction - transfer_receive
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
             receiver_id: receiver._id,
             amount: paymentAmount,
-            type: 'transfer',
+            type: 'transfer_receive',
             status: 'success',
             remark: note || `Payment from ${sender.fullName}`,
             description: note || `Payment from ${sender.fullName}`,
@@ -744,7 +744,7 @@ router.get('/make', auth, async (req, res) => {
         // Fire-and-forget Telegram notifications
         if (sender.telegramId) {
             const senderMessage = 
-`✅ <b>API Payment Sent</b>
+`✅ <b>Payment Sent Successfully</b>
 
 👤 Dear <b>${sender.fullName}</b>, Your Payment Has Been Processed Successfully.
 
@@ -761,7 +761,7 @@ router.get('/make', auth, async (req, res) => {
 
         if (receiver.telegramId) {
             const receiverMessage = 
-`💵 <b>API Payment Received</b>
+`💵 <b>Payment Received</b>
 
 👤 Dear <b>${receiver.fullName}</b>, You Have Received A Payment In Your Wallet.
 
