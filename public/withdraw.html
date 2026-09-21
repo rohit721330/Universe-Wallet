@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Withdraw • Universe Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<!-- ✅ PWA META TAGS -->
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/universe-wallet-logo-512.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Universe">
+<meta name="mobile-web-app-capable" content="yes">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f5f8fc;--header:#ffffff;--card:#ffffff;--card2:#f5f8fd;--border:#dfe6ef;--text:#172033;--muted:#758197;--muted2:#909bad;--primary:#1769e0;--primary-dark:#0d55bd;--primary-soft:#eaf3ff;--input:#f8fbff;--danger:#e53935}
+body.dark{--bg:#081426;--header:#0b1b31;--card:#0e2038;--card2:#122944;--border:#203957;--text:#f4f8ff;--muted:#94a6bd;--muted2:#70839c;--primary:#3d8bfd;--primary-dark:#2675e8;--primary-soft:#102e52;--input:#0b1b30;--danger:#ff6262}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Inter',Arial,"Segoe UI",Roboto,sans-serif;transition:background .25s ease,color .25s ease;padding-bottom:85px}
+button,input,select{font-family:'Inter',Arial,"Segoe UI",Roboto,sans-serif}
+button{cursor:pointer}
+
+/* ✅ DISABLE TEXT SELECTION */
+*{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select,[contenteditable="true"]{-webkit-user-select:text !important;user-select:text !important;-webkit-touch-callout:default !important}
+img{-webkit-user-drag:none;user-drag:none}
+
+/* HEADER */
+.app-header{height:68px;width:100%;display:flex;align-items:center;padding:0 18px;background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.menu-btn,.header-action{width:40px;height:40px;border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;color:var(--text);font-size:17px;transition:.2s ease}
+.menu-btn:active,.header-action:active{transform:scale(.94)}
+.header-title{flex:1;margin-left:13px;font-size:19px;font-weight:600;color:var(--text)}
+.header-right{display:flex;gap:8px}
+.theme-btn{color:var(--primary)}
+.profile-btn{color:var(--primary)}
+
+/* CONTAINER */
+.container{width:100%;max-width:520px;margin:auto;padding:20px 18px 40px;position:relative;z-index:1}
+
+/* BALANCE CARD */
+.balance-card{position:relative;overflow:hidden;padding:27px 25px 24px;border-radius:27px;background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(30,65,110,.07)}
+.balance-label{color:var(--muted);font-size:12px;letter-spacing:1.7px;font-weight:600;margin-bottom:10px}
+.balance-amount{font-size:32px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.balance-amount span{color:var(--primary)}
+.ready{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+.ready i{color:var(--primary);font-size:8px}
+.balance-stats{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:24px}
+.stat{padding:14px;border-radius:11px;background:var(--card2);border:1px solid var(--border)}
+.stat-label{color:var(--muted);font-size:11px;letter-spacing:1.1px;margin-bottom:8px}
+.stat-value{color:var(--primary);font-size:16px;font-weight:700}
+
+/* WHY CARD */
+.why-card{margin-top:18px;padding:24px 22px 20px;background:var(--card);border:1px solid var(--border);border-radius:24px;box-shadow:0 10px 30px rgba(30,65,110,.06)}
+.section-label{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1.5px;margin-bottom:18px}
+.benefit{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border)}
+.benefit:last-of-type{border-bottom:none}
+.benefit-icon{width:40px;height:40px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--primary-soft);color:var(--primary);font-size:16px}
+.benefit-title{font-size:14px;font-weight:600;margin-bottom:5px;color:var(--text)}
+.benefit-text{color:var(--muted);font-size:13px}
+.charge{margin-top:16px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:21px;background:var(--primary-soft);border:1px solid rgba(23,105,224,.25);color:var(--primary);font-size:13px;font-weight:600}
+
+/* WITHDRAW CARD */
+.withdraw-card{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:26px;overflow:hidden;box-shadow:0 10px 30px rgba(30,65,110,.06)}
+.withdraw-heading{padding:34px 22px 27px;border-bottom:1px solid var(--border)}
+.withdraw-heading h1{font-size:26px;line-height:1.2;font-weight:700;margin-bottom:10px;color:var(--text)}
+.withdraw-heading p{color:var(--muted);font-size:15px;line-height:1.55;max-width:320px}
+
+/* FORM */
+.form-area{padding:28px 22px 31px}
+.form-heading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;letter-spacing:1.4px;font-weight:600;margin-bottom:23px}
+.form-heading:before{content:"";width:4px;height:17px;border-radius:4px;background:var(--primary)}
+.field-label{display:block;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:11px}
+
+/* AMOUNT */
+.amount-box{height:59px;display:flex;align-items:center;padding:0 15px;border:1px solid var(--border);background:var(--input);border-radius:14px;transition:.2s ease}
+.amount-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(23,105,224,.08)}
+.rupee{color:var(--primary);font-size:19px;font-weight:700;margin-right:14px}
+#amount{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:16px;font-weight:500}
+#amount::placeholder{color:var(--muted2)}
+.limits{display:flex;justify-content:space-between;gap:8px;margin-top:12px;color:var(--muted2);font-size:12px}
+.limits .balance{color:var(--muted)}
+
+/* METHOD TABS */
+.method-tabs{display:flex;gap:8px;margin-bottom:16px}
+.method-tab{flex:1;padding:12px 10px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;text-align:center;transition:all .3s ease;background:var(--card2);border:2px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.method-tab.active{background:linear-gradient(135deg,#1a56db,#0088ff);border-color:transparent;color:#ffffff;box-shadow:0 4px 12px rgba(26,86,219,.3)}
+
+/* SETTINGS STATUS */
+.settings-status{text-align:center;font-size:12px;padding:10px;border-radius:10px;margin-bottom:16px;font-weight:700}
+.settings-status.enabled{color:#16a34a;background:#dcfce7;border:1px solid #86efac}
+.settings-status.disabled{color:#dc2626;background:#fee2e2;border:1px solid #fecaca}
+
+/* INPUT */
+.input-group{margin-bottom:16px}
+.text-input{width:100%;height:55px;border:1px solid var(--border);border-radius:14px;padding:0 15px;background:var(--input);color:var(--text);outline:none;font-size:15px}
+.text-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(23,105,224,.08)}
+.text-input::placeholder{color:var(--muted2)}
+
+/* FEE & TOTAL */
+.fee-display{border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;background:var(--card2);border:1px solid var(--border)}
+.fee-display .label{font-weight:700;color:var(--muted)}
+.fee-display .value{font-weight:800;color:var(--primary)}
+.total-display{border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;background:var(--card2);border:1px solid var(--border)}
+.total-display .label{font-weight:700;color:var(--muted)}
+.total-display .value{font-weight:800;color:var(--primary)}
+
+/* SUBMIT */
+.continue-btn{width:100%;height:57px;margin-top:20px;border:0;border-radius:15px;background:linear-gradient(135deg,#287bea,#1769e0);color:#fff;font-size:15px;font-weight:700;box-shadow:0 8px 20px rgba(23,105,224,.18);transition:.2s ease;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.continue-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* TOAST */
+.toast-message{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:60px;font-size:13px;font-weight:700;z-index:10000;animation:fadeInUp .3s ease;max-width:90%;text-align:center;background:var(--primary);color:#ffffff;box-shadow:0 4px 15px rgba(0,0,0,.15)}
+.toast-message.error{background:#dc2626 !important;color:#ffffff !important}
+.toast-message.success{background:#16a34a !important;color:#ffffff !important}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:white;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:10px 0 20px;z-index:50;background:rgba(255,255,255,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);max-width:520px;margin:0 auto;box-shadow:0 -4px 20px rgba(0,50,100,.08)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;cursor:pointer;text-decoration:none;flex:1;color:var(--muted);transition:color .2s;letter-spacing:.3px}
+.nav-item i{font-size:20px}
+.nav-item.active{color:var(--primary)}
+body.dark .bottom-nav{background:rgba(11,27,49,.98);border-top-color:var(--border)}
+
+/* BLOCKED OVERLAY */
+.blocked-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#ffffff 0%,#e8f0fe 50%,#d4e4f7 100%);display:none;align-items:center;justify-content:center;padding:20px}
+body.dark .blocked-overlay{background:linear-gradient(135deg,#081426 0%,#0e2038 50%,#122944 100%)}
+.blocked-overlay.active{display:flex}
+.blocked-card{background:#ffffff;border-radius:24px;padding:40px 30px;max-width:420px;width:100%;text-align:center;border:1px solid #c5d9f0;box-shadow:0 20px 60px rgba(0,50,100,.2);animation:blockedIn .4s ease-out}
+body.dark .blocked-card{background:#0e2038;border-color:#203957}
+@keyframes blockedIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.blocked-icon{width:90px;height:90px;border-radius:24px;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:42px;color:#dc2626;border:2px solid #fca5a5}
+.blocked-title{font-size:24px;font-weight:900;color:#1a3a6b;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+body.dark .blocked-title{color:#f4f8ff}
+.blocked-sub{font-size:14px;color:#5a7a9a;line-height:1.6;margin-bottom:24px;font-weight:500}
+body.dark .blocked-sub{color:#94a6bd}
+.blocked-btn{width:100%;padding:15px;border-radius:16px;font-size:14px;font-weight:800;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif;transition:all .2s;background:#1a56db;color:#ffffff;box-shadow:0 4px 15px rgba(26,86,219,.3);display:flex;align-items:center;justify-content:center;gap:8px}
+.blocked-btn:hover{background:#1a4ac0;transform:translateY(-2px)}
+
+/* PIN MODAL */
+.pin-modal-overlay{position:fixed;inset:0;z-index:20000;background:rgba(10,25,50,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.5rem;animation:fadeInOverlay .3s ease}
+.pin-modal-overlay.active{display:flex}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+.pin-modal-card{background:#ffffff;border-radius:24px;padding:28px 22px;max-width:400px;width:100%;text-align:center;box-shadow:0 30px 70px rgba(0,50,100,.35);animation:pinModalIn .35s cubic-bezier(.34,1.2,.64,1);position:relative}
+body.dark .pin-modal-card{background:#0e2038;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+@keyframes pinModalIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.pin-modal-icon{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#1a56db,#0088ff);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:26px;box-shadow:0 8px 25px rgba(26,86,219,.4)}
+.pin-modal-title{font-size:20px;font-weight:900;color:#1a3a6b;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+body.dark .pin-modal-title{color:#f4f8ff}
+.pin-modal-sub{font-size:13px;color:#5a7a9a;margin-bottom:20px;line-height:1.5;font-weight:600}
+body.dark .pin-modal-sub{color:#94a6bd}
+.pin-modal-amount{font-size:26px;font-weight:900;color:#1a56db;margin-bottom:20px;padding:14px;background:#eaf3ff;border-radius:14px;border:2px dashed #c5d9f0;display:flex;align-items:center;justify-content:center;gap:4px}
+body.dark .pin-modal-amount{background:#102e52;border-color:#203957;color:#60a5fa}
+.pin-modal-dots{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
+.pin-modal-dot{width:48px;height:48px;border-radius:14px;background:#fafcff;border:2px solid #c5d9f0;display:flex;align-items:center;justify-content:center;font-size:20px;transition:.2s}
+body.dark .pin-modal-dot{background:#0b1b30;border-color:#203957}
+.pin-modal-dot.filled{border-color:#1a56db;background:#dbeafe;color:#1a56db}
+.pin-modal-dot.filled::after{content:'●'}
+body.dark .pin-modal-dot.filled{background:#102e52;border-color:#3d8bfd;color:#60a5fa}
+.pin-modal-dot.error{border-color:#dc2626;background:#fee2e2;animation:pinShake .3s ease}
+@keyframes pinShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-modal-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pin-modal-key{padding:15px;border-radius:14px;font-size:21px;font-weight:700;cursor:pointer;background:#fafcff;border:2px solid #c5d9f0;color:#172033;text-align:center;font-family:inherit;transition:all .15s}
+body.dark .pin-modal-key{background:#0b1b30;border-color:#203957;color:#f4f8ff}
+.pin-modal-key:active{transform:scale(.94)}
+.pin-modal-key.del{color:#dc2626}
+.pin-modal-actions{display:flex;gap:10px;margin-top:8px}
+.pin-modal-btn{flex:1;padding:13px;border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;border:none;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+.pin-modal-btn.cancel{background:#eef3fa;color:#1a3a6b;border:1px solid #c5d9f0}
+body.dark .pin-modal-btn.cancel{background:#202d42;color:#edf3ff;border-color:#2b3a50}
+.pin-modal-loading{position:absolute;inset:0;background:rgba(255,255,255,.95);border-radius:24px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:10}
+body.dark .pin-modal-loading{background:rgba(14,32,56,.95)}
+.pin-modal-loading.active{display:flex}
+.pin-modal-loading .spinner-big{width:44px;height:44px;border:4px solid rgba(26,86,219,.2);border-radius:50%;border-top-color:#1a56db;animation:spin .8s linear infinite}
+
+@media(max-width:380px){
+  .container{padding-left:13px;padding-right:13px}
+  .app-header{padding:0 13px}
+  .withdraw-heading h1{font-size:24px}
+  .method-tab{font-size:11px;padding:10px 8px}
+  .pin-modal-dot{width:44px;height:44px;font-size:18px}
+  .pin-modal-key{padding:13px;font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- BLOCKED OVERLAY -->
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<!-- PIN CONFIRM MODAL -->
+<div class="pin-modal-overlay" id="pinConfirmOverlay">
+    <div class="pin-modal-card">
+        <div class="pin-modal-icon"><i class="fas fa-shield-halved"></i></div>
+        <div class="pin-modal-title">Confirm Withdraw</div>
+        <div class="pin-modal-sub">Enter your 4-digit PIN to confirm this withdrawal</div>
+        <div class="pin-modal-amount" id="pinConfirmAmount">
+            <i class="fa-solid fa-indian-rupee-sign"></i><span id="pinConfirmAmountValue">0.00</span>
+        </div>
+        <div class="pin-modal-dots">
+            <div class="pin-modal-dot" id="pc-dot-0"></div>
+            <div class="pin-modal-dot" id="pc-dot-1"></div>
+            <div class="pin-modal-dot" id="pc-dot-2"></div>
+            <div class="pin-modal-dot" id="pc-dot-3"></div>
+        </div>
+        <div class="pin-modal-keypad">
+            <div class="pin-modal-key" onclick="pinConfirmPress('1')">1</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('2')">2</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('3')">3</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('4')">4</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('5')">5</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('6')">6</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('7')">7</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('8')">8</div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('9')">9</div>
+            <div class="pin-modal-key del" onclick="pinConfirmDel()"><i class="fa-solid fa-delete-left"></i></div>
+            <div class="pin-modal-key" onclick="pinConfirmPress('0')">0</div>
+            <div class="pin-modal-key del" onclick="pinConfirmClear()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div class="pin-modal-actions">
+            <button class="pin-modal-btn cancel" onclick="closePinConfirm()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+        <div class="pin-modal-loading" id="pinConfirmLoading">
+            <div class="spinner-big"></div>
+            <p>Verifying PIN...</p>
+        </div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="header-title">Withdraw</div>
+    <div class="header-right">
+        <button class="header-action theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="header-action profile-btn" id="profileBtn" aria-label="Profile" onclick="goToProfile()">
+            <i class="fa-solid fa-user"></i>
+        </button>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="container">
+
+    <!-- BALANCE CARD -->
+    <section class="balance-card">
+        <div class="balance-label">AVAILABLE BALANCE</div>
+        <div class="balance-amount">
+            <span>₹</span><span id="balance">0.00</span>
+        </div>
+        <div class="ready">
+            <i class="fa-solid fa-circle"></i>
+            Ready for instant withdrawal
+        </div>
+        <div class="balance-stats">
+            <div class="stat">
+                <div class="stat-label">WITHDRAWN</div>
+                <div class="stat-value">₹0</div>
+            </div>
+            <div class="stat pending">
+                <div class="stat-label">PENDING</div>
+                <div class="stat-value">0 reqs</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CARD -->
+    <section class="why-card">
+        <div class="section-label">WHY WITHDRAW WITH US</div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="benefit-title">Processing Time</div>
+                <div class="benefit-text">UPI payouts in 24–72 Hours</div>
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+                <div class="benefit-title">Bank-Grade Security</div>
+                <div class="benefit-text">256-bit encrypted transfers</div>
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="benefit-title">Full Transparency</div>
+                <div class="benefit-text">Live status updates & UTR tracking</div>
+            </div>
+        </div>
+        <div class="charge">
+            <i class="fa-solid fa-percent"></i>
+            &nbsp; 0.00% service charge per withdrawal
+        </div>
+    </section>
+
+    <!-- WITHDRAW CARD -->
+    <section class="withdraw-card">
+        <div class="withdraw-heading">
+            <h1>Withdraw Funds</h1>
+            <p>Complete the form below to transfer money to your account</p>
+        </div>
+
+        <div class="form-area">
+            <div class="settings-status enabled" id="settingsStatus">
+                <i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled
+            </div>
+
+            <div class="form-heading">WITHDRAW DETAILS</div>
+
+            <div class="method-tabs">
+                <button class="method-tab active" id="tabUpi" onclick="switchMethod('upi')">
+                    <i class="fa-solid fa-mobile-screen-button"></i> UPI
+                </button>
+                <button class="method-tab" id="tabBank" onclick="switchMethod('bank')">
+                    <i class="fa-solid fa-building-columns"></i> Bank
+                </button>
+            </div>
+
+            <div id="upiMethod">
+                <div class="input-group">
+                    <label class="field-label"><i class="fa-solid fa-mobile-screen-button"></i> UPI ID *</label>
+                    <input class="text-input" type="text" id="upiId" placeholder="example@upi" autocomplete="off">
+                </div>
+            </div>
+
+            <div id="bankMethod" style="display:none;">
+                <div class="input-group">
+                    <label class="field-label"><i class="fa-solid fa-building"></i> Bank Name *</label>
+                    <input class="text-input" type="text" id="bankName" placeholder="Enter Bank Name">
+                </div>
+                <div class="input-group">
+                    <label class="field-label"><i class="fa-solid fa-user"></i> Account Holder Name *</label>
+                    <input class="text-input" type="text" id="accountHolderName" placeholder="Enter Holder Name">
+                </div>
+                <div class="input-group">
+                    <label class="field-label"><i class="fa-solid fa-credit-card"></i> Account Number *</label>
+                    <input class="text-input" type="text" id="accountNumber" placeholder="Enter Account Number">
+                </div>
+                <div class="input-group">
+                    <label class="field-label"><i class="fa-solid fa-code"></i> IFSC Code *</label>
+                    <input class="text-input" type="text" id="ifscCode" placeholder="Enter IFSC Code">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="field-label"><i class="fa-solid fa-indian-rupee-sign"></i> AMOUNT (₹) *</label>
+                <div class="amount-box">
+                    <span class="rupee">₹</span>
+                    <input type="number" id="amount" placeholder="Enter amount to withdraw" step="1" min="1" inputmode="decimal">
+                </div>
+                <div class="limits">
+                    <span>Min: ₹<span id="minLimit">1</span></span>
+                    <span>Max: ₹<span id="maxLimit">5000</span></span>
+                    <span class="balance">Balance: ₹<span id="balanceLimit">0.00</span></span>
+                </div>
+            </div>
+
+            <div class="fee-display">
+                <span class="label"><i class="fa-solid fa-percent"></i> Withdraw Fee</span>
+                <span class="value" id="feeValue">₹0.00 (No Fee)</span>
+            </div>
+
+            <div class="total-display">
+                <span class="label"><i class="fa-solid fa-hand-holding-dollar"></i> You Will Receive</span>
+                <span class="value" id="totalValue">₹0.00</span>
+            </div>
+
+            <button class="continue-btn" id="withdrawBtn" onclick="requestWithdraw()">
+                <i class="fa-solid fa-arrow-up"></i> Submit Withdraw
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i>Home</a>
+    <a href="/transfer" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Send</a>
+    <a href="/qr" class="nav-item"><i class="fa-solid fa-qrcode"></i>QR</a>
+    <a href="/deposit" class="nav-item"><i class="fa-solid fa-plus-circle"></i>Add</a>
+    <a href="/transactions" class="nav-item"><i class="fa-solid fa-receipt"></i>Logs</a>
+</div>
+
+<script>
+// ============================================================
+//  CONFIG
+// ============================================================
+const AUTH_TOKEN = localStorage.getItem('token');
+const PIN_API_URL = '/api/pin';
+if (!AUTH_TOKEN) { window.location.replace('/'); }
+
+let currentMethod = 'upi';
+let isAccountBlocked = false;
+let _blockedShownAt = 0;
+
+let pendingWithdrawData = null;
+let pinConfirmCode = '';
+let isPinVerifying = false;
+
+let settings = {
+    minAmount: 1,
+    maxAmount: 5000,
+    enabled: true,
+    fee: 0,
+    feeType: 'percentage'
+};
+
+// ============================================================
+//  ✅ THEME SYSTEM — Step 1: Apply on page load
+// ============================================================
+function applyTheme() {
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
+    updateThemeIcon();
+}
+
+// ✅ Step 2: Update icon based on current theme
+function updateThemeIcon() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    var isDark = document.body.classList.contains('dark');
+    themeBtn.innerHTML = isDark
+        ? '<i class="fas fa-sun"></i>'
+        : '<i class="fas fa-moon"></i>';
+}
+
+// ✅ Step 3: Toggle theme — called by inline onclick in HTML
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    localStorage.setItem('uwTheme', isDark ? 'dark' : 'light');
+    updateThemeIcon();
+}
+
+// ✅ Apply theme immediately (before DOMContentLoaded to prevent flash)
+applyTheme();
+
+function goToProfile() {
+    window.location.href = '/profile';
+}
+
+document.getElementById("menuBtn").addEventListener("click", function () {
+    window.location.href = '/dashboard';
+});
+
+// ============================================================
+//  BLOCKED OVERLAY
+// ============================================================
+function showBlockedOverlay(title, message) {
+    const now = Date.now();
+    if (isAccountBlocked && now - _blockedShownAt < 1000) return;
+    _blockedShownAt = now;
+    isAccountBlocked = true;
+
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function logout() {
+    isAccountBlocked = false;
+    _blockedShownAt = 0;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    localStorage.removeItem('pin_verified');
+    sessionStorage.removeItem('pin_verified');
+    document.body.style.overflow = '';
+    window.location.replace('/');
+}
+
+// ============================================================
+//  SAFE FETCH
+// ============================================================
+async function safeFetch(url, options = {}) {
+    let response, data = {};
+    try {
+        response = await fetch(url, options);
+    } catch (netErr) {
+        const err = new Error('Network error: ' + netErr.message);
+        err.network = true;
+        throw err;
+    }
+    try { data = await response.json(); } catch (e) { data = {}; }
+
+    if (response.status === 401) {
+        logout();
+        const err = new Error(data.message || 'Session expired');
+        err.auth = true;
+        throw err;
+    }
+    if (response.status === 403) {
+        showBlockedOverlay('Access Denied', data.message || data.error || 'Your account has been blocked.');
+        const err = new Error('Account blocked'); err.blocked = true; throw err;
+    }
+    if (response.status === 404 && (data.userNotFound || data.isDeleted || data.deleted)) {
+        showBlockedOverlay('Account Not Found', data.message || 'Your account has been deleted.');
+        const err = new Error('Account deleted'); err.deleted = true; throw err;
+    }
+    if (response.status === 423) {
+        showBlockedOverlay('Account Locked', data.message || 'Your account has been temporarily locked.');
+        const err = new Error('Account locked'); err.locked = true; throw err;
+    }
+    return { response, data };
+}
+
+// ============================================================
+//  VERIFY USER STATE
+// ============================================================
+async function verifyUserState() {
+    const t = localStorage.getItem('token');
+    if (!t) { window.location.replace('/'); return false; }
+    try {
+        const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        const user = data.user || data.data?.user || data.data || data.result || data;
+
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) {
+            showBlockedOverlay('Account Blocked', data.message || data.error || user?.blockReason || 'Your account has been blocked.');
+            return false;
+        }
+        if (res.status === 404) {
+            showBlockedOverlay('Account Not Found', data.message || 'Your account has been deleted.');
+            return false;
+        }
+        if (res.status === 423) {
+            showBlockedOverlay('Account Locked', data.message || 'Your account has been temporarily locked.');
+            return false;
+        }
+        if (!res.ok) {
+            showBlockedOverlay('Access Denied', data.message || 'Unable to verify your account.');
+            return false;
+        }
+
+        if (!user || typeof user !== 'object' || (!user.id && !user._id && !user.mobile)) {
+            showBlockedOverlay('Invalid Account', 'Your account data could not be found. Please login again.');
+            return false;
+        }
+
+        const isBlocked = user.isBlocked === true || user.blocked === true || user.status === 'blocked';
+        const isDeleted = user.isDeleted === true || user.deleted === true || !!user.deletedAt || user.status === 'deleted';
+        const isInactive = user.isActive === false || user.status === 'inactive' || user.status === 'deactivated';
+
+        if (isDeleted) { showBlockedOverlay('Account Deleted', 'Your account has been permanently deleted.'); return false; }
+        if (isBlocked) { showBlockedOverlay('Account Blocked', user.blockReason || 'Your account has been blocked.'); return false; }
+        if (isInactive) { showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.'); return false; }
+
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+    } catch (error) {
+        console.error('User state check error:', error);
+        return true;
+    }
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(message, type = '') {
+    if (isAccountBlocked) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    if (type) toast.classList.add(type);
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============================================================
+//  METHOD SWITCH
+// ============================================================
+function switchMethod(method) {
+    if (isAccountBlocked) return;
+    currentMethod = method;
+
+    const tabUpi = document.getElementById('tabUpi');
+    const tabBank = document.getElementById('tabBank');
+    const upiMethod = document.getElementById('upiMethod');
+    const bankMethod = document.getElementById('bankMethod');
+
+    if (method === 'upi') {
+        tabUpi.classList.add('active');
+        tabBank.classList.remove('active');
+        upiMethod.style.display = 'block';
+        bankMethod.style.display = 'none';
+    } else {
+        tabBank.classList.add('active');
+        tabUpi.classList.remove('active');
+        upiMethod.style.display = 'none';
+        bankMethod.style.display = 'block';
+    }
+}
+
+// ============================================================
+//  FEE DISPLAY
+// ============================================================
+function updateFeeDisplay() {
+    if (isAccountBlocked) return;
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const feeRate = settings.fee || 0;
+    const feeType = settings.feeType || 'percentage';
+
+    let feeAmount = 0;
+    let feeText = '';
+
+    if (feeRate > 0) {
+        if (feeType === 'percentage') {
+            feeAmount = (amount * feeRate) / 100;
+            feeText = `${feeRate}% (₹${feeAmount.toFixed(2)})`;
+        } else {
+            feeAmount = feeRate;
+            feeText = `₹${feeRate.toFixed(2)} (Fixed)`;
+        }
+    } else {
+        feeText = '₹0.00 (No Fee)';
+    }
+
+    const userReceives = Math.round((amount - feeAmount) * 100) / 100;
+    document.getElementById('feeValue').textContent = feeText;
+
+    const totalEl = document.getElementById('totalValue');
+    if (amount > 0) {
+        totalEl.textContent = `₹${userReceives.toFixed(2)}`;
+        totalEl.style.color = userReceives > 0 ? '#16a34a' : '#dc2626';
+    } else {
+        totalEl.textContent = '₹0.00';
+        totalEl.style.color = '';
+    }
+}
+
+// ============================================================
+//  LOAD SETTINGS
+// ============================================================
+async function loadSettings() {
+    if (isAccountBlocked) return;
+    try {
+        const { response, data } = await safeFetch('/api/withdraw-settings/', {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (isAccountBlocked) return;
+
+        if (response && response.ok && data.success && data.settings) {
+            settings = {
+                minAmount: data.settings.minAmount || 1,
+                maxAmount: data.settings.maxAmount || 5000,
+                enabled: data.settings.enabled !== undefined ? data.settings.enabled : true,
+                fee: data.settings.fee || 0,
+                feeType: data.settings.feeType || 'percentage'
+            };
+            updateSettingsUI();
+            updateFeeDisplay();
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+    }
+}
+
+function updateSettingsUI() {
+    if (isAccountBlocked) return;
+    const minLimit = document.getElementById('minLimit');
+    const maxLimit = document.getElementById('maxLimit');
+    const statusEl = document.getElementById('settingsStatus');
+    const btn = document.getElementById('withdrawBtn');
+
+    if (minLimit) minLimit.textContent = settings.minAmount;
+    if (maxLimit) maxLimit.textContent = settings.maxAmount;
+
+    if (statusEl && btn) {
+        if (settings.enabled) {
+            statusEl.className = 'settings-status enabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Withdraw Is Enabled';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
+        } else {
+            statusEl.className = 'settings-status disabled';
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Withdraw Is Currently Disabled';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
+        }
+    }
+}
+
+// ============================================================
+//  LOAD USER DATA
+// ============================================================
+async function loadUserData() {
+    if (isAccountBlocked) return;
+    try {
+        const { response, data } = await safeFetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+        });
+        if (isAccountBlocked) return;
+
+        const user = data.user || data.data?.user || data.data || data.result || data;
+        if (response && response.ok && user && typeof user.balance === 'number') {
+            document.getElementById('balance').textContent = user.balance.toFixed(2);
+            document.getElementById('balanceLimit').textContent = user.balance.toFixed(2);
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+    }
+}
+
+// ============================================================
+//  PIN CONFIRM MODAL
+// ============================================================
+function openPinConfirm(amountText) {
+    if (isAccountBlocked) return;
+    pinConfirmCode = '';
+    isPinVerifying = false;
+    updatePinConfirmDots();
+    document.getElementById('pinConfirmAmountValue').textContent = amountText;
+    document.getElementById('pinConfirmOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePinConfirm() {
+    if (isPinVerifying) return;
+    document.getElementById('pinConfirmOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    pinConfirmCode = '';
+    pendingWithdrawData = null;
+    updatePinConfirmDots();
+}
+
+function updatePinConfirmDots(isError) {
+    for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById('pc-dot-' + i);
+        dot.classList.toggle('filled', i < pinConfirmCode.length);
+        if (isError) dot.classList.add('error');
+        else dot.classList.remove('error');
+        dot.textContent = '';
+    }
+}
+
+function pinConfirmPress(n) {
+    if (isPinVerifying) return;
+    if (pinConfirmCode.length < 4) {
+        pinConfirmCode += n;
+        updatePinConfirmDots();
+        if (pinConfirmCode.length === 4) {
+            setTimeout(() => verifyPinAndSubmit(), 150);
+        }
+    }
+}
+
+function pinConfirmDel() {
+    if (isPinVerifying) return;
+    pinConfirmCode = pinConfirmCode.slice(0, -1);
+    updatePinConfirmDots();
+}
+
+function pinConfirmClear() {
+    if (isPinVerifying) return;
+    pinConfirmCode = '';
+    updatePinConfirmDots();
+}
+
+async function verifyPinAndSubmit() {
+    if (isPinVerifying) return;
+    if (pinConfirmCode.length !== 4) {
+        showToast('Please Enter 4-Digit PIN', 'error');
+        return;
+    }
+
+    isPinVerifying = true;
+    document.getElementById('pinConfirmLoading').classList.add('active');
+
+    try {
+        const res = await fetch(PIN_API_URL + '/verify-pin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + AUTH_TOKEN
+            },
+            body: JSON.stringify({ pin: pinConfirmCode })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('pinConfirmLoading').classList.remove('active');
+            document.getElementById('pinConfirmOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+
+            const withdrawData = pendingWithdrawData;
+            pinConfirmCode = '';
+            isPinVerifying = false;
+            pendingWithdrawData = null;
+
+            showToast('PIN Verified Successfully', 'success');
+            await executeWithdraw(withdrawData);
+        } else {
+            document.getElementById('pinConfirmLoading').classList.remove('active');
+            isPinVerifying = false;
+            updatePinConfirmDots(true);
+            showToast(data.message || 'Wrong PIN', 'error');
+            setTimeout(() => {
+                pinConfirmCode = '';
+                updatePinConfirmDots();
+            }, 600);
+        }
+    } catch (error) {
+        document.getElementById('pinConfirmLoading').classList.remove('active');
+        isPinVerifying = false;
+        updatePinConfirmDots(true);
+        showToast('Network Error. Please Try Again.', 'error');
+        setTimeout(() => {
+            pinConfirmCode = '';
+            updatePinConfirmDots();
+        }, 600);
+    }
+}
+
+// ============================================================
+//  REQUEST WITHDRAW
+// ============================================================
+function requestWithdraw() {
+    if (isAccountBlocked) return;
+
+    if (!settings.enabled) {
+        showToast('Withdraw Is Currently Disabled', 'error');
+        return;
+    }
+
+    const amount = parseFloat(document.getElementById('amount').value);
+
+    if (!amount || amount <= 0) {
+        showToast('Please Enter A Valid Amount', 'error');
+        return;
+    }
+
+    const currentBalance = parseFloat(document.getElementById('balance').textContent);
+
+    if (amount < settings.minAmount) {
+        showToast(`Minimum Amount Is ₹${settings.minAmount}`, 'error');
+        return;
+    }
+    if (amount > settings.maxAmount) {
+        showToast(`Maximum Amount Is ₹${settings.maxAmount}`, 'error');
+        return;
+    }
+    if (amount > currentBalance) {
+        showToast(`Insufficient Balance. Available: ₹${currentBalance.toFixed(2)}`, 'error');
+        return;
+    }
+
+    let requestBody = { amount: amount };
+
+    if (currentMethod === 'upi') {
+        const upiId = document.getElementById('upiId').value.trim();
+        if (!upiId) { showToast('Please Enter UPI ID', 'error'); return; }
+        if (!upiId.includes('@')) { showToast('Please Enter A Valid UPI ID', 'error'); return; }
+        requestBody.upiId = upiId;
+        requestBody.note = 'UPI Withdrawal';
+    } else {
+        const bankName = document.getElementById('bankName').value.trim();
+        const accountHolderName = document.getElementById('accountHolderName').value.trim();
+        const accountNumber = document.getElementById('accountNumber').value.trim();
+        const ifscCode = document.getElementById('ifscCode').value.trim().toUpperCase();
+
+        if (!bankName || !accountHolderName || !accountNumber || !ifscCode) {
+            showToast('Please Fill All Bank Details', 'error'); return;
+        }
+        if (ifscCode.length < 7) {
+            showToast('Please Enter A Valid IFSC Code', 'error'); return;
+        }
+
+        requestBody.bankName = bankName;
+        requestBody.accountHolderName = accountHolderName;
+        requestBody.accountNumber = accountNumber;
+        requestBody.ifscCode = ifscCode;
+        requestBody.note = 'Bank Withdrawal';
+    }
+
+    pendingWithdrawData = requestBody;
+    openPinConfirm(amount.toFixed(2));
+}
+
+// ============================================================
+//  EXECUTE WITHDRAW
+// ============================================================
+async function executeWithdraw(requestBody) {
+    if (isAccountBlocked || !requestBody) return;
+
+    const btn = document.getElementById('withdrawBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Processing...';
+
+    try {
+        let endpoint = currentMethod === 'upi' ? '/api/withdraw/upi' : '/api/withdraw/bank';
+
+        const { response, data } = await safeFetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + AUTH_TOKEN
+            },
+            body: JSON.stringify(requestBody)
+        });
+        if (isAccountBlocked) return;
+
+        if (data.success) {
+            const methodText = currentMethod === 'upi' ? 'UPI' : 'Bank';
+            showToast(`${methodText} Withdrawal Submitted!`, 'success');
+
+            if (data.newBalance !== undefined) {
+                document.getElementById('balance').textContent = parseFloat(data.newBalance).toFixed(2);
+                document.getElementById('balanceLimit').textContent = parseFloat(data.newBalance).toFixed(2);
+            } else {
+                loadUserData();
+            }
+
+            document.getElementById('amount').value = '';
+            updateFeeDisplay();
+
+            if (currentMethod === 'upi') {
+                document.getElementById('upiId').value = '';
+            } else {
+                document.getElementById('bankName').value = '';
+                document.getElementById('accountHolderName').value = '';
+                document.getElementById('accountNumber').value = '';
+                document.getElementById('ifscCode').value = '';
+            }
+        } else {
+            showToast(data.message || data.error || 'Withdraw Failed', 'error');
+        }
+    } catch (error) {
+        if (error.blocked || error.deleted || error.locked || error.auth) return;
+        showToast(error.message || 'Network Error', 'error');
+    } finally {
+        if (!isAccountBlocked) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Submit Withdraw';
+            if (!settings.enabled) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-ban"></i> Withdraw Disabled';
+            }
+        }
+    }
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log('Withdraw Page Loaded');
+
+    const isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+
+    loadSettings();
+    loadUserData();
+
+    const amountInput = document.getElementById('amount');
+    amountInput.addEventListener('input', updateFeeDisplay);
+    amountInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') requestWithdraw();
+    });
+
+    document.getElementById('upiId').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') amountInput.focus();
+    });
+
+    ['bankName', 'accountHolderName', 'accountNumber', 'ifscCode'].forEach(id => {
+        document.getElementById(id).addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const fields = ['bankName', 'accountHolderName', 'accountNumber', 'ifscCode'];
+                const currentIndex = fields.indexOf(id);
+                if (currentIndex < fields.length - 1) {
+                    document.getElementById(fields[currentIndex + 1]).focus();
+                } else {
+                    amountInput.focus();
+                }
+            }
+        });
+    });
+});
+
+// ============================================================
+//  SERVICE WORKER REGISTER
+// ============================================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(function(reg) { console.log('✅ SW Registered:', reg.scope); })
+            .catch(function(err) { console.error('❌ SW Failed:', err); });
+    });
+}
+</script>
+
+</body>
+</html>
