@@ -12,15 +12,19 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ============================================
-// Helper: Generate Transaction ID (Always TXN prefix)
+// Helper: Generate Transaction ID (TXN + 10 digits)
 // ============================================
 function generateTxnId(existingTxnId) {
     if (existingTxnId && String(existingTxnId).trim()) {
         return String(existingTxnId).trim();
     }
-    // Crypto-secure random → collision-proof
-    // Format: TXN + 18 hex chars
-    const randomPart = crypto.randomBytes(9).toString('hex').toUpperCase();
+    // TXN + 10 random alphanumeric (uppercase) → total 10 chars
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const bytes = crypto.randomBytes(7);
+    let randomPart = '';
+    for (let i = 0; i < 10; i++) {
+        randomPart += chars[bytes[i] % chars.length];
+    }
     return 'TXN' + randomPart;
 }
 
