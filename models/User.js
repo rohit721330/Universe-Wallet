@@ -1,5 +1,6 @@
 // FILE: models/User.js
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 // ============================================
 // DEFAULT LOGO
@@ -18,12 +19,15 @@ const userSchema = new mongoose.Schema({
     isBlocked: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
-    apiKey: { type: String, unique: true, sparse: true, default: null, uppercase: true, trim: true },
+
+    // ✅ FIX: default: null সরানো হয়েছে — sparse index সঠিকভাবে কাজ করবে
+    apiKey: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
+
     profilePicture: { type: String, default: default_logo },
-    walletId: { type: String, unique: true, required: true, uppercase: true },
+    walletId: { type: String, unique: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -75,30 +79,46 @@ userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_uniq
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
 // ============================================
-// HELPER: Generate Wallet ID
+// HELPER: Generate Wallet ID (crypto-secure)
 // ============================================
 function generateWalletId() {
     const prefix = 'UW';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+
+    // 2 letters — bias-free (26 * 9 = 234)
     let letterPart = '';
-    for (let i = 0; i < 2; i++) {
-        letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
+    while (letterPart.length < 2) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 234) {
+            letterPart += letters[byte % 26];
+        }
     }
+
+    // 6 digits — bias-free (10 * 25 = 250)
     let numberPart = '';
-    for (let i = 0; i < 6; i++) {
-        numberPart += Math.floor(Math.random() * 10).toString();
+    while (numberPart.length < 6) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 250) {
+            numberPart += digits[byte % 10];
+        }
     }
+
     return prefix + letterPart + numberPart;
 }
 
 // ============================================
-// HELPER: Generate API Key
+// HELPER: Generate API Key (crypto-secure)
 // ============================================
 function generateApiKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let key = '';
-    for (let i = 0; i < 10; i++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    // 10 chars — bias-free (36 * 7 = 252)
+    while (key.length < 10) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 252) {
+            key += chars[byte % chars.length];
+        }
     }
     return key;
 }
@@ -112,7 +132,7 @@ userSchema.pre('save', async function(next) {
             this.profilePicture = default_logo;
         }
 
-        // Wallet ID generate
+        // ----- Wallet ID generate -----
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -122,7 +142,10 @@ userSchema.pre('save', async function(next) {
 
             while (exists && attempts < maxAttempts) {
                 newId = generateWalletId();
-                exists = await User.exists({ walletId: newId });
+                exists = await User.exists({
+                    walletId: newId,
+                    _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
+                });
                 attempts++;
             }
 
@@ -132,7 +155,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // API Key generate (শুধু প্রথমবার)
+        // ----- API Key generate (শুধু প্রথমবার) -----
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -142,7 +165,10 @@ userSchema.pre('save', async function(next) {
 
             while (exists && attempts < maxAttempts) {
                 newKey = generateApiKey();
-                exists = await User.exists({ apiKey: newKey });
+                exists = await User.exists({
+                    apiKey: newKey,
+                    _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
+                });
                 attempts++;
             }
 
@@ -150,7 +176,7 @@ userSchema.pre('save', async function(next) {
                 return next(new Error('Failed to generate unique API Key. Please try again.'));
             }
             this.apiKey = newKey;
-            
+
             // apiKeyActive default true
             if (this.apiKeyActive === undefined || this.apiKeyActive === null) {
                 this.apiKeyActive = true;
@@ -228,7 +254,10 @@ userSchema.methods.regenerateApiKey = async function() {
 
     while (exists && attempts < maxAttempts) {
         newKey = generateApiKey();
-        exists = await User.exists({ apiKey: newKey });
+        exists = await User.exists({
+            apiKey: newKey,
+            _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
+        });
         attempts++;
     }
 
@@ -238,6 +267,7 @@ userSchema.methods.regenerateApiKey = async function() {
 
     this.apiKey = newKey;
     this.apiKeyActive = true;
+    this.apiKeyCreatedAt = new Date();
     this.apiKeyUpdatedAt = new Date();
     return await this.save();
 };
