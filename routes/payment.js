@@ -20,7 +20,7 @@ function generateTxnId(existingTxnId) {
     }
     // TXN + 10 random alphanumeric (uppercase) → total 10 chars
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const bytes = crypto.randomBytes(7);
+    const bytes = crypto.randomBytes(10);
     let randomPart = '';
     for (let i = 0; i < 10; i++) {
         randomPart += chars[bytes[i] % chars.length];
