@@ -19,13 +19,12 @@ const userSchema = new mongoose.Schema({
     isBlocked: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
-
-    // ✅ default: null সরানো — sparse index সঠিকভাবে কাজ করবে
     apiKey: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
-
+    totalApiCalls: { type: Number, default: 0, min: 0 },
+    lastApiUsedAt: { type: Date, default: null },
     profilePicture: { type: String, default: default_logo },
     walletId: { type: String, unique: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
@@ -109,7 +108,7 @@ function generateApiKey() {
 }
 
 // ============================================
-// Pre-save
+// Pre-save: Default Logo + Wallet ID + API Key
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
