@@ -12,24 +12,23 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ============================================
-// Helper: Generate Transaction ID (TXN + 10 digits)
+// Helper: Generate Transaction ID (TXN + 10 chars)
 // ============================================
 function generateTxnId(existingTxnId) {
     if (existingTxnId && String(existingTxnId).trim()) {
         return String(existingTxnId).trim();
     }
-    // TXN + 10 random alphanumeric (uppercase) → total 10 chars
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const bytes = crypto.randomBytes(10);
     let randomPart = '';
-    for (let i = 0; i < 10; i++) {
-        randomPart += chars[bytes[i] % chars.length];
+    while (randomPart.length < 10) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 252) randomPart += chars[byte % chars.length];
     }
     return 'TXN' + randomPart;
 }
 
 // ============================================
-// Helper: Escape HTML for Telegram
+// Helper: Escape HTML
 // ============================================
 function escapeHtml(text) {
     if (!text) return '';
@@ -40,7 +39,7 @@ function escapeHtml(text) {
 }
 
 // ============================================
-// Helper: Send Telegram notification (fire-and-forget)
+// Helper: Telegram
 // ============================================
 function sendTelegramMessage(chatId, message) {
     return new Promise((resolve) => {
@@ -79,12 +78,16 @@ function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================
-// Helper: Check if API Key is Active
+// Helper: Check if API Key is Active — ✅ CONSISTENT LOGIC
 // ============================================
 async function isApiKeyActive(apiKey) {
     try {
-        const user = await User.findOne({ apiKey }).select('apiKeyActive');
+        if (!apiKey) return false;
+        const user = await User.findOne({ apiKey: String(apiKey).toUpperCase() })
+            .select('apiKeyActive');
         if (!user) return false;
+
+        // ✅ Only explicit `false` means disabled
         return user.apiKeyActive !== false;
     } catch (error) {
         console.error('Error checking API key status:', error);
@@ -93,14 +96,14 @@ async function isApiKeyActive(apiKey) {
 }
 
 // ============================================
-// Helper: Validate API Key (Sender)
+// Helper: Validate API Key (Sender) — ✅ SAME LOGIC
 // ============================================
 async function validateApiKey(apiKey) {
     if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
         return { status: 'failed', message: 'Invalid API Key format' };
     }
 
-    const user = await User.findOne({ apiKey })
+    const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
         .select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
 
     if (!user) {
@@ -119,7 +122,7 @@ async function validateApiKey(apiKey) {
 }
 
 // ============================================
-// Helper: Find user by mobile number
+// Helper: Find user by mobile
 // ============================================
 async function findUserByMobile(mobile) {
     if (!mobile || !/^[0-9]{10}$/.test(String(mobile))) {
@@ -148,7 +151,7 @@ async function validateReceiverApiKey(apiKey) {
         return { status: 'failed', message: 'Invalid receiver API Key format' };
     }
 
-    const user = await User.findOne({ apiKey })
+    const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
         .select('_id fullName mobile walletId balance isBlocked telegramId');
 
     if (!user) {
@@ -163,26 +166,18 @@ async function validateReceiverApiKey(apiKey) {
 }
 
 // ============================================
-// Auth middleware (always returns 200 with status field)
+// Auth middleware
 // ============================================
 async function auth(req, res, next) {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-
-        if (!token) {
-            return res.json({ status: 'failed', message: 'No token provided' });
-        }
+        if (!token) return res.json({ status: 'failed', message: 'No token provided' });
 
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
 
-        if (!user) {
-            return res.json({ status: 'failed', message: 'User not found' });
-        }
-
-        if (user.isBlocked) {
-            return res.json({ status: 'failed', message: 'Account blocked' });
-        }
+        if (!user) return res.json({ status: 'failed', message: 'User not found' });
+        if (user.isBlocked) return res.json({ status: 'failed', message: 'Account blocked' });
 
         req.user = user;
         next();
@@ -196,7 +191,7 @@ async function auth(req, res, next) {
 }
 
 // ============================================
-// Helper: Standard JSON response (always 200)
+// Response helper
 // ============================================
 function sendResponse(res, status, message, data = null, extra = {}) {
     const body = { status, message };
@@ -206,22 +201,18 @@ function sendResponse(res, status, message, data = null, extra = {}) {
 }
 
 // ============================================
-// Helper: Format timestamp (en-IN)
+// Timestamp
 // ============================================
 function formatTimestamp() {
     return new Date().toLocaleString('en-IN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
         hour12: false
     }).replace(/\//g, '-');
 }
 
 // ============================================
-// Helper: Handle duplicate key error
+// Duplicate error
 // ============================================
 function handleDuplicateError(error) {
     if (error.code === 11000) {
@@ -235,49 +226,27 @@ function handleDuplicateError(error) {
 }
 
 // ============================================
-// CORE: Process API Payment (shared logic)
+// CORE: API Payment
 // ============================================
 async function processApiPayment({ key, number, amount, comment = '', endpoint }) {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        // ----- Validation -----
-        if (!key) {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'API Key is required' };
-        }
-        if (!number) {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'Receiver number is required' };
-        }
-        if (amount === undefined || amount === null || amount === '') {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'Amount is required' };
-        }
+        if (!key) { await session.abortTransaction(); return { status: 'failed', message: 'API Key is required' }; }
+        if (!number) { await session.abortTransaction(); return { status: 'failed', message: 'Receiver number is required' }; }
+        if (amount === undefined || amount === null || amount === '') { await session.abortTransaction(); return { status: 'failed', message: 'Amount is required' }; }
 
         const paymentAmount = parseFloat(amount);
-        if (isNaN(paymentAmount) || paymentAmount < 1) {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'Minimum payment amount is ₹1' };
-        }
-        if (paymentAmount > 5000) {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'Maximum payment amount is ₹5,000' };
-        }
+        if (isNaN(paymentAmount) || paymentAmount < 1) { await session.abortTransaction(); return { status: 'failed', message: 'Minimum payment amount is ₹1' }; }
+        if (paymentAmount > 5000) { await session.abortTransaction(); return { status: 'failed', message: 'Maximum payment amount is ₹5,000' }; }
 
-        if (!key || key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+        if (key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
             await session.abortTransaction();
             return { status: 'failed', message: 'Invalid API Key format' };
         }
 
-        const isActive = await isApiKeyActive(key);
-        if (!isActive) {
-            await session.abortTransaction();
-            return { status: 'failed', message: 'API Key is disabled' };
-        }
-
-        // ----- Sender -----
+        // ✅ Single source of truth — validateApiKey checks everything
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
@@ -285,7 +254,6 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         }
         const sender = senderResult.user;
 
-        // ----- Receiver -----
         const receiverResult = await findUserByMobile(number);
         if (receiverResult.status === 'failed') {
             await session.abortTransaction();
@@ -293,7 +261,6 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         }
         const receiver = receiverResult.user;
 
-        // ----- Business Rules -----
         if (sender._id.toString() === receiver._id.toString()) {
             await session.abortTransaction();
             return { status: 'failed', message: 'You cannot pay yourself' };
@@ -301,11 +268,7 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
 
         if (sender.balance < paymentAmount) {
             await session.abortTransaction();
-            return {
-                status: 'failed',
-                message: 'Insufficient balance',
-                balance: sender.balance
-            };
+            return { status: 'failed', message: 'Insufficient balance', balance: sender.balance };
         }
 
         if (receiver.isBlocked || sender.isBlocked) {
@@ -313,7 +276,6 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
             return { status: 'failed', message: 'Account is blocked' };
         }
 
-        // ----- Balances -----
         const txn_Id = generateTxnId();
         const senderOldBalance = sender.balance;
         const receiverOldBalance = receiver.balance;
@@ -324,7 +286,6 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         await sender.save({ session });
         await receiver.save({ session });
 
-        // ----- Sender Transaction -----
         const senderTransaction = new Transaction({
             user_id: sender._id,
             sender_id: sender._id,
@@ -338,18 +299,14 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
             tx_time: new Date(),
             metadata: {
                 transactionType: 'payment_sent',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                receiverMobile: receiver.mobile,
-                note: comment || '',
+                senderOldBalance, receiverOldBalance,
+                senderName: sender.fullName, receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile, note: comment || '',
                 apiEndpoint: endpoint
             }
         });
         await senderTransaction.save({ session });
 
-        // ----- Receiver Transaction -----
         const receiverTransaction = new Transaction({
             user_id: receiver._id,
             sender_id: sender._id,
@@ -363,12 +320,9 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
             tx_time: new Date(),
             metadata: {
                 transactionType: 'payment_received',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                receiverMobile: receiver.mobile,
-                note: comment || '',
+                senderOldBalance, receiverOldBalance,
+                senderName: sender.fullName, receiverName: receiver.fullName,
+                receiverMobile: receiver.mobile, note: comment || '',
                 apiEndpoint: endpoint
             }
         });
@@ -377,7 +331,6 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         await session.commitTransaction();
         console.log(`✅ API Payment Successful [${endpoint}]:`, txn_Id);
 
-        // ----- Telegram Notifications (fire-and-forget) -----
         if (sender.telegramId) {
             const msg =
 `✅ API Payment Successful
@@ -418,14 +371,8 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
             data: {
                 transaction_id: txn_Id,
                 amount: paymentAmount,
-                sender: {
-                    name: sender.fullName,
-                    number: sender.mobile
-                },
-                receiver: {
-                    name: receiver.fullName,
-                    number: receiver.mobile
-                },
+                sender: { name: sender.fullName, number: sender.mobile },
+                receiver: { name: receiver.fullName, number: receiver.mobile },
                 comment: comment || 'Paid',
                 timestamp: formatTimestamp()
             }
@@ -433,10 +380,8 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
 
     } catch (error) {
         await session.abortTransaction();
-
         const dupMsg = handleDuplicateError(error);
         if (dupMsg) return { status: 'failed', message: dupMsg };
-
         console.error(`Payment Error [${endpoint}]:`, error);
         return { status: 'failed', message: 'Failed to process payment' };
     } finally {
@@ -445,7 +390,7 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
 }
 
 // ============================================
-// GET PAYMENT (API Payment)
+// GET PAYMENT
 // ============================================
 router.get('/', async (req, res) => {
     try {
@@ -464,11 +409,8 @@ router.get('/', async (req, res) => {
         console.log('  Key:', key ? '***' + String(key).slice(-4) : 'MISSING');
         console.log('  Number:', number);
         console.log('  Amount:', amount);
-        console.log('  Comment:', comment);
 
-        const result = await processApiPayment({
-            key, number, amount, comment, endpoint: 'GET'
-        });
+        const result = await processApiPayment({ key, number, amount, comment, endpoint: 'GET' });
 
         return sendResponse(res, result.status, result.message, result.data || null,
             result.balance !== undefined ? { balance: result.balance } : {});
@@ -480,7 +422,7 @@ router.get('/', async (req, res) => {
 });
 
 // ============================================
-// POST PAYMENT (API Payment)
+// POST PAYMENT
 // ============================================
 router.post('/', async (req, res) => {
     try {
@@ -490,11 +432,8 @@ router.post('/', async (req, res) => {
         console.log('  Key:', key ? '***' + String(key).slice(-4) : 'MISSING');
         console.log('  Number:', number);
         console.log('  Amount:', amount);
-        console.log('  Comment:', comment);
 
-        const result = await processApiPayment({
-            key, number, amount, comment, endpoint: 'POST'
-        });
+        const result = await processApiPayment({ key, number, amount, comment, endpoint: 'POST' });
 
         return sendResponse(res, result.status, result.message, result.data || null,
             result.balance !== undefined ? { balance: result.balance } : {});
@@ -506,7 +445,7 @@ router.post('/', async (req, res) => {
 });
 
 // ============================================
-// GET: MAKE PAYMENT (AUTHENTICATED - Regular TXN)
+// MAKE PAYMENT (AUTHENTICATED)
 // ============================================
 router.get('/make', auth, async (req, res) => {
     const session = await mongoose.startSession();
@@ -515,8 +454,6 @@ router.get('/make', auth, async (req, res) => {
     try {
         const { receiverApiKey, amount, note = '' } = req.query;
         const sender = req.user;
-
-        console.log('Make Payment Request From:', sender._id);
 
         if (!receiverApiKey || !amount) {
             await session.abortTransaction();
@@ -539,7 +476,7 @@ router.get('/make', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'You cannot pay yourself');
         }
 
-        if (!receiverApiKey || receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+        if (receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Invalid receiver API Key format');
         }
@@ -571,50 +508,32 @@ router.get('/make', auth, async (req, res) => {
         await sender.save({ session });
         await receiver.save({ session });
 
-        // Sender Transaction
         const senderTransaction = new Transaction({
-            user_id: sender._id,
-            sender_id: sender._id,
-            receiver_id: receiver._id,
-            amount: paymentAmount,
-            type: 'transfer',
-            status: 'success',
+            user_id: sender._id, sender_id: sender._id, receiver_id: receiver._id,
+            amount: paymentAmount, type: 'transfer', status: 'success',
             remark: note || `Payment to ${receiver.fullName}`,
             description: note || `Payment to ${receiver.fullName}`,
-            tx_id: txn_Id,
-            tx_time: new Date(),
+            tx_id: txn_Id, tx_time: new Date(),
             metadata: {
                 transactionType: 'payment_sent',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                note: note || '',
-                apiEndpoint: 'GET'
+                senderOldBalance, receiverOldBalance,
+                senderName: sender.fullName, receiverName: receiver.fullName,
+                note: note || '', apiEndpoint: 'GET'
             }
         });
         await senderTransaction.save({ session });
 
-        // Receiver Transaction
         const receiverTransaction = new Transaction({
-            user_id: receiver._id,
-            sender_id: sender._id,
-            receiver_id: receiver._id,
-            amount: paymentAmount,
-            type: 'transfer',
-            status: 'success',
+            user_id: receiver._id, sender_id: sender._id, receiver_id: receiver._id,
+            amount: paymentAmount, type: 'transfer', status: 'success',
             remark: note || `Payment from ${sender.fullName}`,
             description: note || `Payment from ${sender.fullName}`,
-            tx_id: txn_Id,
-            tx_time: new Date(),
+            tx_id: txn_Id, tx_time: new Date(),
             metadata: {
                 transactionType: 'payment_received',
-                senderOldBalance,
-                receiverOldBalance,
-                senderName: sender.fullName,
-                receiverName: receiver.fullName,
-                note: note || '',
-                apiEndpoint: 'GET'
+                senderOldBalance, receiverOldBalance,
+                senderName: sender.fullName, receiverName: receiver.fullName,
+                note: note || '', apiEndpoint: 'GET'
             }
         });
         await receiverTransaction.save({ session });
@@ -622,7 +541,6 @@ router.get('/make', auth, async (req, res) => {
         await session.commitTransaction();
         console.log('✅ Payment Successful:', txn_Id);
 
-        // Telegram Notifications
         if (sender.telegramId) {
             const senderMessage =
 `✅ API Payment Sent
@@ -660,24 +578,16 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
         return sendResponse(res, 'success', 'Payment sent successfully', {
             transaction_id: txn_Id,
             amount: paymentAmount,
-            sender: {
-                name: sender.fullName,
-                number: sender.mobile
-            },
-            receiver: {
-                name: receiver.fullName,
-                number: receiver.mobile
-            },
+            sender: { name: sender.fullName, number: sender.mobile },
+            receiver: { name: receiver.fullName, number: receiver.mobile },
             comment: note || 'Paid',
             timestamp: formatTimestamp()
         }, { newBalance: sender.balance });
 
     } catch (error) {
         await session.abortTransaction();
-
         const dupMsg = handleDuplicateError(error);
         if (dupMsg) return sendResponse(res, 'failed', dupMsg);
-
         console.error('Payment Error:', error);
         return sendResponse(res, 'failed', 'Failed to process payment');
     } finally {
@@ -686,26 +596,20 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
 });
 
 // ============================================
-// GET USER BY API KEY (For Payment Lookup)
+// LOOKUP USER BY API KEY
 // ============================================
 router.get('/lookup', auth, async (req, res) => {
     try {
         const { apiKey } = req.query;
         const user = req.user;
 
-        if (!apiKey) {
-            return sendResponse(res, 'failed', 'API Key required');
-        }
+        if (!apiKey) return sendResponse(res, 'failed', 'API Key required');
+        if (user.apiKey === apiKey) return sendResponse(res, 'failed', 'You cannot lookup yourself');
 
-        if (user.apiKey === apiKey) {
-            return sendResponse(res, 'failed', 'You cannot lookup yourself');
-        }
+        const receiver = await User.findOne({ apiKey: apiKey.toUpperCase() })
+            .select('fullName mobile walletId');
 
-        const receiver = await User.findOne({ apiKey }).select('fullName mobile walletId');
-
-        if (!receiver) {
-            return sendResponse(res, 'failed', 'User not found');
-        }
+        if (!receiver) return sendResponse(res, 'failed', 'User not found');
 
         return sendResponse(res, 'success', 'User found', {
             name: receiver.fullName,
@@ -720,31 +624,25 @@ router.get('/lookup', auth, async (req, res) => {
 });
 
 // ============================================
-// GET PAYMENT HISTORY
+// PAYMENT HISTORY
 // ============================================
 router.get('/history', auth, async (req, res) => {
     try {
         const user = req.user;
         const { page = 1, limit = 20 } = req.query;
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        const transactions = await Transaction.find({
-            user_id: user._id
-        })
-        .sort({ tx_time: -1 })
-        .skip(skip)
-        .limit(parseInt(limit))
-        .populate('sender_id', 'fullName mobile')
-        .populate('receiver_id', 'fullName mobile');
+        const transactions = await Transaction.find({ user_id: user._id })
+            .sort({ tx_time: -1 })
+            .skip(skip)
+            .limit(parseInt(limit))
+            .populate('sender_id', 'fullName mobile')
+            .populate('receiver_id', 'fullName mobile');
 
-        const total = await Transaction.countDocuments({
-            user_id: user._id
-        });
+        const total = await Transaction.countDocuments({ user_id: user._id });
 
         const transformedTransactions = transactions.map(txn => {
             const txnObj = txn.toObject();
-
             if (!txnObj.metadata || !txnObj.metadata.transactionType) {
                 if (txn.sender_id && txn.sender_id._id.toString() === user._id.toString()) {
                     txnObj.userRole = 'sender';
@@ -754,12 +652,10 @@ router.get('/history', auth, async (req, res) => {
                     txnObj.transactionType = 'payment_received';
                 }
             }
-
             if (txnObj.metadata) {
                 delete txnObj.metadata.senderApiKey;
                 delete txnObj.metadata.receiverApiKey;
             }
-
             return txnObj;
         });
 
@@ -779,21 +675,20 @@ router.get('/history', auth, async (req, res) => {
 });
 
 // ============================================
-// GET MY API KEY
+// MY API KEY
 // ============================================
 router.get('/my-apikey', auth, async (req, res) => {
     try {
-        const user = req.user;
-
-        if (!user.apiKey) {
-            return sendResponse(res, 'failed', 'API Key not found. Please generate one');
-        }
+        const user = await User.findById(req.user._id).select('apiKey walletId fullName mobile apiKeyActive');
+        if (!user) return sendResponse(res, 'failed', 'User not found');
+        if (!user.apiKey) return sendResponse(res, 'failed', 'API Key not found. Please generate one');
 
         return sendResponse(res, 'success', 'API Key found', {
             apiKey: user.apiKey,
             walletId: user.walletId,
             fullName: user.fullName,
-            mobile: user.mobile
+            mobile: user.mobile,
+            apiKeyActive: user.apiKeyActive !== false
         });
     } catch (error) {
         console.error('Get My API Key Error:', error);
@@ -802,7 +697,7 @@ router.get('/my-apikey', auth, async (req, res) => {
 });
 
 // ============================================
-// GET VALIDATE API KEY (Internal)
+// VALIDATE API KEY (Internal)
 // ============================================
 router.get('/validate-key/:apiKey', async (req, res) => {
     try {
@@ -812,16 +707,11 @@ router.get('/validate-key/:apiKey', async (req, res) => {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
 
-        const user = await User.findOne({ apiKey })
+        const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
             .select('fullName walletId mobile balance apiKeyActive');
 
-        if (!user) {
-            return sendResponse(res, 'failed', 'Invalid API Key');
-        }
-
-        if (user.apiKeyActive === false) {
-            return sendResponse(res, 'failed', 'API Key is disabled');
-        }
+        if (!user) return sendResponse(res, 'failed', 'Invalid API Key');
+        if (user.apiKeyActive === false) return sendResponse(res, 'failed', 'API Key is disabled');
 
         return sendResponse(res, 'success', 'API Key validated', {
             name: user.fullName,
@@ -836,14 +726,12 @@ router.get('/validate-key/:apiKey', async (req, res) => {
 });
 
 // ============================================
-// GET REQUEST PAYMENT (User Requests Payment)
+// REQUEST PAYMENT
 // ============================================
 router.get('/request', auth, async (req, res) => {
     try {
         const { receiverApiKey, amount, note = '' } = req.query;
         const requester = req.user;
-
-        console.log('Payment Request From:', requester._id);
 
         if (!receiverApiKey || !amount) {
             return sendResponse(res, 'failed', 'Receiver API Key and amount are required');
@@ -854,7 +742,7 @@ router.get('/request', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'Minimum request amount is ₹1');
         }
 
-        if (!receiverApiKey || receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+        if (receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
             return sendResponse(res, 'failed', 'Invalid receiver API Key format');
         }
 
@@ -872,7 +760,6 @@ router.get('/request', auth, async (req, res) => {
             return sendResponse(res, 'failed', 'Account is blocked');
         }
 
-        // Fire-and-forget Telegram notifications
         if (receiver.telegramId) {
             const requestMessage =
 `🔔 API Payment Request
@@ -921,14 +808,12 @@ Dear ${escapeHtml(requester.fullName)}, Your Payment Request Has Been Sent Succe
 });
 
 // ============================================
-// GET PAYMENT DETAILS BY TRANSACTION ID (must be LAST)
+// GET PAYMENT BY TXN ID (must be LAST)
 // ============================================
 router.get('/:txnId', auth, async (req, res) => {
     try {
         const { txnId } = req.params;
         const user = req.user;
-
-        console.log('Fetching Transaction:', txnId);
 
         const transaction = await Transaction.findOne({
             tx_id: txnId,
@@ -937,9 +822,7 @@ router.get('/:txnId', auth, async (req, res) => {
         .populate('sender_id', 'fullName mobile walletId')
         .populate('receiver_id', 'fullName mobile walletId');
 
-        if (!transaction) {
-            return sendResponse(res, 'failed', 'Transaction not found');
-        }
+        if (!transaction) return sendResponse(res, 'failed', 'Transaction not found');
 
         const txnObj = transaction.toObject();
 
@@ -958,9 +841,7 @@ router.get('/:txnId', auth, async (req, res) => {
             delete txnObj.metadata.receiverApiKey;
         }
 
-        return sendResponse(res, 'success', 'Transaction found', {
-            transaction: txnObj
-        });
+        return sendResponse(res, 'success', 'Transaction found', { transaction: txnObj });
 
     } catch (error) {
         console.error('Get Transaction Error:', error);
