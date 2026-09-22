@@ -2,9 +2,6 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
-// ============================================
-// DEFAULT LOGO
-// ============================================
 const default_logo = 'https://raw.githubusercontent.com/rohit721330/Logo-Picture/main/universe-wallet-logo.png';
 
 const userSchema = new mongoose.Schema({
@@ -23,8 +20,11 @@ const userSchema = new mongoose.Schema({
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
-    totalApiCalls: { type: Number, default: 0, min: 0 },
-    lastApiUsedAt: { type: Date, default: null },
+    totalApiCalls: { type: Number, default: 0, min: 0 },      // success + failed
+    successfulApiCalls: { type: Number, default: 0, min: 0 }, // শুধু success
+    failedApiCalls: { type: Number, default: 0, min: 0 },     // শুধু failed
+    lastApiUsedAt: { type: Date, default: null },             // সর্বশেষ যেকোনো attempt
+    lastApiSuccessAt: { type: Date, default: null },          // সর্বশেষ সফল payment
     profilePicture: { type: String, default: default_logo },
     walletId: { type: String, unique: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
@@ -37,36 +37,20 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // =========================================================
-// ✅ CRITICAL INDEXES
+// INDEXES
 // =========================================================
 userSchema.index(
     { mobile: 1 },
-    {
-        unique: true,
-        partialFilterExpression: { isDeleted: false },
-        name: 'mobile_unique_active'
-    }
+    { unique: true, partialFilterExpression: { isDeleted: false }, name: 'mobile_unique_active' }
 );
-
 userSchema.index(
     { email: 1 },
-    {
-        unique: true,
-        partialFilterExpression: { isDeleted: false },
-        name: 'email_unique_active'
-    }
+    { unique: true, partialFilterExpression: { isDeleted: false }, name: 'email_unique_active' }
 );
-
 userSchema.index(
     { telegramId: 1 },
-    {
-        unique: true,
-        sparse: true,
-        partialFilterExpression: { isDeleted: false },
-        name: 'telegramId_unique_active'
-    }
+    { unique: true, sparse: true, partialFilterExpression: { isDeleted: false }, name: 'telegramId_unique_active' }
 );
-
 userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
 userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
@@ -84,13 +68,11 @@ function generateWalletId() {
         const byte = crypto.randomBytes(1)[0];
         if (byte < 234) letterPart += letters[byte % 26];
     }
-
     let numberPart = '';
     while (numberPart.length < 6) {
         const byte = crypto.randomBytes(1)[0];
         if (byte < 250) numberPart += digits[byte % 10];
     }
-
     return prefix + letterPart + numberPart;
 }
 
@@ -108,19 +90,17 @@ function generateApiKey() {
 }
 
 // ============================================
-// Pre-save: Default Logo + Wallet ID + API Key
+// Pre-save
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
         if (!this.profilePicture) this.profilePicture = default_logo;
 
-        // Wallet ID
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
             let newId;
             let exists = true;
-
             while (exists && attempts < 10) {
                 newId = generateWalletId();
                 exists = await User.exists({ walletId: newId, _id: { $ne: this._id } });
@@ -130,13 +110,11 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // API Key
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
             let newKey;
             let exists = true;
-
             while (exists && attempts < 10) {
                 newKey = generateApiKey();
                 exists = await User.exists({ apiKey: newKey, _id: { $ne: this._id } });
@@ -151,7 +129,6 @@ userSchema.pre('save', async function(next) {
             if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
         }
-
         next();
     } catch (error) {
         next(error);
@@ -159,7 +136,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // ============================================
-// COMPARE METHODS
+// METHODS
 // ============================================
 userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!candidatePassword) return false;
@@ -175,9 +152,6 @@ userSchema.methods.hasPin = function() {
     return this.pin !== null && this.pin_set === true;
 };
 
-// ============================================
-// INSTANCE METHODS — Account Status
-// ============================================
 userSchema.methods.isAccountActive = function() {
     return !this.isBlocked && !this.isDeleted && this.isActive === true;
 };
@@ -189,9 +163,6 @@ userSchema.methods.canLogin = function() {
     return { canLogin: true };
 };
 
-// ============================================
-// INSTANCE METHODS — API Key Management
-// ============================================
 userSchema.methods.isApiKeyActive = function() {
     if (!this.apiKey) return false;
     if (this.apiKeyActive === undefined || this.apiKeyActive === null) return true;
@@ -211,7 +182,6 @@ userSchema.methods.regenerateApiKey = async function() {
     let attempts = 0;
     let newKey;
     let exists = true;
-
     while (exists && attempts < 10) {
         newKey = generateApiKey();
         exists = await User.exists({ apiKey: newKey, _id: { $ne: this._id } });
@@ -226,9 +196,6 @@ userSchema.methods.regenerateApiKey = async function() {
     return await this.save();
 };
 
-// ============================================
-// INSTANCE METHODS — Soft Delete / Restore
-// ============================================
 userSchema.methods.softDelete = async function(adminName = 'Admin') {
     this.isDeleted = true;
     this.deletedAt = new Date();
@@ -262,84 +229,63 @@ userSchema.methods.unblockAccount = async function() {
 };
 
 // ============================================
-// STATIC METHODS
+// STATICS
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
     return this.findOne({ walletId: walletId.toUpperCase() });
 };
-
 userSchema.statics.findByMobile = function(mobile) {
     if (!mobile) return null;
     return this.findOne({ mobile });
 };
-
 userSchema.statics.findByEmail = function(email) {
     if (!email) return null;
     return this.findOne({ email: email.toLowerCase() });
 };
-
 userSchema.statics.findByTelegramId = function(telegramId) {
     if (!telegramId) return null;
     return this.findOne({ telegramId });
 };
-
 userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase() });
 };
-
 userSchema.statics.findActiveByApiKey = function(apiKey) {
     if (!apiKey) return null;
-    return this.findOne({
-        apiKey: apiKey.toUpperCase(),
-        isDeleted: false,
-        isBlocked: false
-    });
+    return this.findOne({ apiKey: apiKey.toUpperCase(), isDeleted: false, isBlocked: false });
 };
-
 userSchema.statics.findActiveByMobile = function(mobile) {
     if (!mobile) return null;
     return this.findOne({ mobile, isDeleted: false });
 };
-
 userSchema.statics.findActiveByEmail = function(email) {
     if (!email) return null;
     return this.findOne({ email: email.toLowerCase(), isDeleted: false });
 };
-
 userSchema.statics.findActiveByTelegramId = function(telegramId) {
     if (!telegramId) return null;
     return this.findOne({ telegramId, isDeleted: false });
 };
-
 userSchema.statics.getUserCount = function() {
     return this.countDocuments({ isDeleted: false });
 };
-
 userSchema.statics.getActiveUserCount = function() {
     return this.countDocuments({ isBlocked: false, isDeleted: false, isActive: true });
 };
-
 userSchema.statics.getBlockedUserCount = function() {
     return this.countDocuments({ isBlocked: true, isDeleted: false });
 };
-
 userSchema.statics.getDeletedUserCount = function() {
     return this.countDocuments({ isDeleted: true });
 };
-
 userSchema.statics.findActiveUsers = function(query = {}) {
     return this.find({ ...query, isBlocked: false, isDeleted: false, isActive: true });
 };
-
 userSchema.statics.findActiveUserById = function(userId) {
     if (!userId) return null;
     return this.findOne({ _id: userId, isBlocked: false, isDeleted: false, isActive: true });
 };
 
-// ============================================
-// EXPORT
-// ============================================
 module.exports = mongoose.model('User', userSchema);
 module.exports.default_logo = default_logo;
