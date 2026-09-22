@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
 
-    // ✅ FIX: default: null সরানো হয়েছে — sparse index সঠিকভাবে কাজ করবে
+    // ✅ default: null সরানো — sparse index সঠিকভাবে কাজ করবে
     apiKey: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
@@ -38,11 +38,8 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // =========================================================
-// ✅ CRITICAL INDEXES (Partial Unique — deleted user মুক্ত)
+// ✅ CRITICAL INDEXES
 // =========================================================
-// শুধু isDeleted: false user-দের মধ্যে mobile/email/telegramId unique
-// Deleted user-এর একই mobile/email/telegramId দিয়ে আবার register করা যাবে
-
 userSchema.index(
     { mobile: 1 },
     {
@@ -71,119 +68,88 @@ userSchema.index(
     }
 );
 
-// walletId এবং apiKey সবসময় unique (deleted user-দের সহ)
 userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
 userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
-
-// Query performance index
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
 // ============================================
-// HELPER: Generate Wallet ID (crypto-secure)
+// HELPER: Generate Wallet ID
 // ============================================
 function generateWalletId() {
     const prefix = 'UW';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
 
-    // 2 letters — bias-free (26 * 9 = 234)
     let letterPart = '';
     while (letterPart.length < 2) {
         const byte = crypto.randomBytes(1)[0];
-        if (byte < 234) {
-            letterPart += letters[byte % 26];
-        }
+        if (byte < 234) letterPart += letters[byte % 26];
     }
 
-    // 6 digits — bias-free (10 * 25 = 250)
     let numberPart = '';
     while (numberPart.length < 6) {
         const byte = crypto.randomBytes(1)[0];
-        if (byte < 250) {
-            numberPart += digits[byte % 10];
-        }
+        if (byte < 250) numberPart += digits[byte % 10];
     }
 
     return prefix + letterPart + numberPart;
 }
 
 // ============================================
-// HELPER: Generate API Key (crypto-secure)
+// HELPER: Generate API Key
 // ============================================
 function generateApiKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let key = '';
-    // 10 chars — bias-free (36 * 7 = 252)
     while (key.length < 10) {
         const byte = crypto.randomBytes(1)[0];
-        if (byte < 252) {
-            key += chars[byte % chars.length];
-        }
+        if (byte < 252) key += chars[byte % chars.length];
     }
     return key;
 }
 
 // ============================================
-// Pre-save: Default Logo + Wallet ID + API Key
+// Pre-save
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
-        if (!this.profilePicture) {
-            this.profilePicture = default_logo;
-        }
+        if (!this.profilePicture) this.profilePicture = default_logo;
 
-        // ----- Wallet ID generate -----
+        // Wallet ID
         if (!this.walletId) {
             const User = this.constructor;
             let attempts = 0;
-            const maxAttempts = 10;
             let newId;
             let exists = true;
 
-            while (exists && attempts < maxAttempts) {
+            while (exists && attempts < 10) {
                 newId = generateWalletId();
-                exists = await User.exists({
-                    walletId: newId,
-                    _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
-                });
+                exists = await User.exists({ walletId: newId, _id: { $ne: this._id } });
                 attempts++;
             }
-
-            if (exists) {
-                return next(new Error('Failed to generate unique Wallet ID. Please try again.'));
-            }
+            if (exists) return next(new Error('Failed to generate unique Wallet ID.'));
             this.walletId = newId;
         }
 
-        // ----- API Key generate (শুধু প্রথমবার) -----
+        // API Key
         if (!this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
-            const maxAttempts = 10;
             let newKey;
             let exists = true;
 
-            while (exists && attempts < maxAttempts) {
+            while (exists && attempts < 10) {
                 newKey = generateApiKey();
-                exists = await User.exists({
-                    apiKey: newKey,
-                    _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
-                });
+                exists = await User.exists({ apiKey: newKey, _id: { $ne: this._id } });
                 attempts++;
             }
-
-            if (exists) {
-                return next(new Error('Failed to generate unique API Key. Please try again.'));
-            }
+            if (exists) return next(new Error('Failed to generate unique API Key.'));
             this.apiKey = newKey;
 
-            // apiKeyActive default true
             if (this.apiKeyActive === undefined || this.apiKeyActive === null) {
                 this.apiKeyActive = true;
             }
-            if (!this.apiKeyCreatedAt) {
-                this.apiKeyCreatedAt = new Date();
-            }
+            if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
         }
 
@@ -234,12 +200,8 @@ userSchema.methods.isApiKeyActive = function() {
 };
 
 userSchema.methods.toggleApiKey = async function(active) {
-    if (typeof active !== 'boolean') {
-        throw new Error('active must be a boolean');
-    }
-    if (!this.apiKey) {
-        throw new Error('No API Key found. Generate one first.');
-    }
+    if (typeof active !== 'boolean') throw new Error('active must be a boolean');
+    if (!this.apiKey) throw new Error('No API Key found. Generate one first.');
     this.apiKeyActive = active;
     this.apiKeyUpdatedAt = new Date();
     return await this.save();
@@ -248,22 +210,15 @@ userSchema.methods.toggleApiKey = async function(active) {
 userSchema.methods.regenerateApiKey = async function() {
     const User = this.constructor;
     let attempts = 0;
-    const maxAttempts = 10;
     let newKey;
     let exists = true;
 
-    while (exists && attempts < maxAttempts) {
+    while (exists && attempts < 10) {
         newKey = generateApiKey();
-        exists = await User.exists({
-            apiKey: newKey,
-            _id: { $ne: this._id }   // ✅ নিজেকে বাদ দিন
-        });
+        exists = await User.exists({ apiKey: newKey, _id: { $ne: this._id } });
         attempts++;
     }
-
-    if (exists) {
-        throw new Error('Failed to generate unique API Key');
-    }
+    if (exists) throw new Error('Failed to generate unique API Key');
 
     this.apiKey = newKey;
     this.apiKeyActive = true;
@@ -275,17 +230,13 @@ userSchema.methods.regenerateApiKey = async function() {
 // ============================================
 // INSTANCE METHODS — Soft Delete / Restore
 // ============================================
-
-// ✅ isBlocked আর touch করা হয় না
 userSchema.methods.softDelete = async function(adminName = 'Admin') {
     this.isDeleted = true;
     this.deletedAt = new Date();
     this.deletedBy = adminName;
-    // ⚠️ isBlocked এবং isActive এই method এ touch করা হয় না
     return await this.save();
 };
 
-// ✅ restore সব reset করে
 userSchema.methods.restore = async function() {
     this.isDeleted = false;
     this.isActive = true;
@@ -312,7 +263,7 @@ userSchema.methods.unblockAccount = async function() {
 };
 
 // ============================================
-// STATIC METHODS — Find by fields
+// STATIC METHODS
 // ============================================
 userSchema.statics.findByWalletId = function(walletId) {
     if (!walletId) return null;
@@ -321,7 +272,7 @@ userSchema.statics.findByWalletId = function(walletId) {
 
 userSchema.statics.findByMobile = function(mobile) {
     if (!mobile) return null;
-    return this.findOne({ mobile: mobile });
+    return this.findOne({ mobile });
 };
 
 userSchema.statics.findByEmail = function(email) {
@@ -331,7 +282,7 @@ userSchema.statics.findByEmail = function(email) {
 
 userSchema.statics.findByTelegramId = function(telegramId) {
     if (!telegramId) return null;
-    return this.findOne({ telegramId: telegramId });
+    return this.findOne({ telegramId });
 };
 
 userSchema.statics.findByApiKey = function(apiKey) {
@@ -348,10 +299,9 @@ userSchema.statics.findActiveByApiKey = function(apiKey) {
     });
 };
 
-// ✅ active (non-deleted) user খোঁজা
 userSchema.statics.findActiveByMobile = function(mobile) {
     if (!mobile) return null;
-    return this.findOne({ mobile: mobile, isDeleted: false });
+    return this.findOne({ mobile, isDeleted: false });
 };
 
 userSchema.statics.findActiveByEmail = function(email) {
@@ -361,22 +311,15 @@ userSchema.statics.findActiveByEmail = function(email) {
 
 userSchema.statics.findActiveByTelegramId = function(telegramId) {
     if (!telegramId) return null;
-    return this.findOne({ telegramId: telegramId, isDeleted: false });
+    return this.findOne({ telegramId, isDeleted: false });
 };
 
-// ============================================
-// STATIC METHODS — Counts
-// ============================================
 userSchema.statics.getUserCount = function() {
     return this.countDocuments({ isDeleted: false });
 };
 
 userSchema.statics.getActiveUserCount = function() {
-    return this.countDocuments({
-        isBlocked: false,
-        isDeleted: false,
-        isActive: true
-    });
+    return this.countDocuments({ isBlocked: false, isDeleted: false, isActive: true });
 };
 
 userSchema.statics.getBlockedUserCount = function() {
@@ -388,22 +331,12 @@ userSchema.statics.getDeletedUserCount = function() {
 };
 
 userSchema.statics.findActiveUsers = function(query = {}) {
-    return this.find({
-        ...query,
-        isBlocked: false,
-        isDeleted: false,
-        isActive: true
-    });
+    return this.find({ ...query, isBlocked: false, isDeleted: false, isActive: true });
 };
 
 userSchema.statics.findActiveUserById = function(userId) {
     if (!userId) return null;
-    return this.findOne({
-        _id: userId,
-        isBlocked: false,
-        isDeleted: false,
-        isActive: true
-    });
+    return this.findOne({ _id: userId, isBlocked: false, isDeleted: false, isActive: true });
 };
 
 // ============================================
