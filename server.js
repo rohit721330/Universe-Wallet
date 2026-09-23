@@ -35,16 +35,14 @@ if (!cached) {
 }
 
 async function connectDB() {
-    // Already connected → reuse
     if (cached.conn) {
         return cached.conn;
     }
 
-    // Connection in progress → wait for it
     if (!cached.promise) {
         const opts = {
-            bufferCommands: false,           // ⭐ CRITICAL — timeout এড়ায়
-            serverSelectionTimeoutMS: 10000, // 10s
+            bufferCommands: false,
+            serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
             connectTimeoutMS: 10000,
             family: 4,
@@ -197,10 +195,31 @@ app.use('/ai', require('./routes/ai'));
 console.log('✅ All API Routes Loaded');
 
 // ==================== STATIC FILES ====================
-app.use(express.static(path.join(__dirname, 'public')));
+// ✅ Static files serve — /public folder থেকে (css, js, images, etc.)
+// Note: HTML files route-এর নিচে override হবে
+app.use(express.static(path.join(__dirname, 'public'), {
+    extensions: ['html'],  // /refer → refer.html (auto)
+    index: false           // index.html auto-serve বন্ধ — আমরা নিচে handle করবো
+}));
 
-// ==================== HTML ROUTES ====================
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// ==================== ROOT & INDEX (Query Param Safe) ====================
+// ✅ Root → index.html (query param সহ/ছাড়া)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ✅ /index → index.html (query param সহ/ছাড়া)
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ✅ /index.html → index.html (query param সহ/ছাড়া)
+app.get('/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ==================== HTML ROUTES (Order Matters!) ====================
+// ⚠️ Specific routes আগে, generic পরে
 app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
@@ -208,7 +227,6 @@ app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', '
 app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
 app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
 app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
-app.get('/index', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/pin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pin.html')));
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
@@ -249,11 +267,18 @@ app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice
 app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
 app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
 
-// ==================== FALLBACK ROUTE ====================
+// ==================== FALLBACK ROUTE (SPA) ====================
+// ⚠️ এই route সবার শেষে — এটা সব unknown path → index.html serve করবে
 app.get('*', (req, res) => {
+    // API endpoints
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
     }
+    // Referral route path
+    if (req.path.startsWith('/referral/')) {
+        return res.status(404).json({ success: false, message: 'Referral Endpoint Not Found' });
+    }
+    // SPA fallback → index.html
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -264,10 +289,9 @@ app.use((err, req, res, next) => {
 });
 
 // ==================== LOCAL DEVELOPMENT ONLY ====================
-// Vercel-এ app.listen() call হবে না। শুধু local-এ চলবে।
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
-    
+
     // Cron jobs — only for local dev
     const Invoice = require('./models/Invoice');
     setInterval(async () => {
