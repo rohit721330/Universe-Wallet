@@ -16,15 +16,18 @@ const userSchema = new mongoose.Schema({
     isBlocked: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
+
     apiKey: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
-    totalApiCalls: { type: Number, default: 0, min: 0 },      // success + failed
-    successfulApiCalls: { type: Number, default: 0, min: 0 }, // শুধু success
-    failedApiCalls: { type: Number, default: 0, min: 0 },     // শুধু failed
-    lastApiUsedAt: { type: Date, default: null },             // সর্বশেষ যেকোনো attempt
-    lastApiSuccessAt: { type: Date, default: null },          // সর্বশেষ সফল payment
+
+    totalApiCalls: { type: Number, default: 0, min: 0 },
+    successfulApiCalls: { type: Number, default: 0, min: 0 },
+    failedApiCalls: { type: Number, default: 0, min: 0 },
+    lastApiUsedAt: { type: Date, default: null },
+    lastApiSuccessAt: { type: Date, default: null },
+
     profilePicture: { type: String, default: default_logo },
     walletId: { type: String, unique: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
@@ -91,12 +94,14 @@ function generateApiKey() {
 
 // ============================================
 // Pre-save
+// ✅ API Key generate শুধু প্রথমবার (নতুন user) — existing user-এ কখনো নয়
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
         if (!this.profilePicture) this.profilePicture = default_logo;
 
-        if (!this.walletId) {
+        // ----- Wallet ID (শুধু নতুন user) -----
+        if (this.isNew && !this.walletId) {
             const User = this.constructor;
             let attempts = 0;
             let newId;
@@ -110,7 +115,9 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        if (!this.apiKey) {
+        // ✅ API Key — শুধু নতুন user-দের জন্য (this.isNew === true)
+        // Existing user-দের save()-এ আর কখনো key generate হবে না
+        if (this.isNew && !this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
             let newKey;
@@ -129,6 +136,7 @@ userSchema.pre('save', async function(next) {
             if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
         }
+
         next();
     } catch (error) {
         next(error);
