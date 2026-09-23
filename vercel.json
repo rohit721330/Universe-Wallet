@@ -95,6 +95,28 @@
       }
     },
     {
+      "src": "/referral/(.*)",
+      "dest": "/server.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
+      "src": "/referral",
+      "dest": "/server.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
       "src": "/ai/(.*)",
       "dest": "/server.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -145,6 +167,13 @@
     },
     {
       "src": "/",
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(.*)",
       "dest": "/server.js",
       "headers": {
         "Access-Control-Allow-Origin": "*"
