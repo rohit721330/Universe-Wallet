@@ -1,4 +1,4 @@
-// FILE: routes/refer.js
+// FILE: routes/referral.js
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -12,6 +12,12 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TG = process.env.ADMIN_TG_ID;
 
+// =========================================================
+// ✅ ENV VALIDATION
+// =========================================================
+if (!JWT_SECRET) console.error('❌ JWT Secret Is Not Set In Environment Variables.');
+if (!BOT_TOKEN) console.error('❌ Bot Token Is Not Set In Environment Variables.');
+
 // ============================================
 // HELPERS
 // ============================================
@@ -21,8 +27,8 @@ function escapeHtml(text) {
 }
 
 async function sendTelegramMessage(chatId, message) {
+    if (!BOT_TOKEN || !chatId) return { success: false };
     return new Promise((resolve) => {
-        if (!BOT_TOKEN || !chatId) return resolve({ success: false });
         const https = require('https');
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
         const data = JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' });
@@ -43,26 +49,56 @@ async function sendTelegramMessage(chatId, message) {
     });
 }
 
-// ============================================
-// AUTH MIDDLEWARE
-// ============================================
-async function verifyToken(req, res, next) {
+// =========================================================
+// ✅ VERIFY TOKEN — auth.js-এর মতো
+// =========================================================
+const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ success: false, message: 'No Token Provided' });
+
+        if (!token) {
+            return res.status(200).json({ success: false, message: 'No Token Provided' });
+        }
+
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
-        if (!user) return res.status(401).json({ success: false, message: 'User Not Found' });
-        if (user.isDeleted) return res.status(401).json({ success: false, message: 'Account Deleted' });
-        if (user.isBlocked) return res.status(403).json({ success: false, message: 'Account Blocked' });
+
+        if (!user) {
+            return res.status(200).json({ success: false, message: 'User Not Found' });
+        }
+
+        if (user.isDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'This account has been deleted. Please contact support.'
+            });
+        }
+
+        if (user.isBlocked) {
+            return res.status(200).json({
+                success: false,
+                message: 'Your account has been blocked. Please contact support.'
+            });
+        }
+
         req.user = user;
         next();
     } catch (error) {
-        if (error.name === 'JsonWebTokenError') return res.status(401).json({ success: false, message: 'Invalid Token' });
-        if (error.name === 'TokenExpiredError') return res.status(401).json({ success: false, message: 'Token Expired' });
-        return res.status(500).json({ success: false, message: 'Auth Error' });
+        console.error('❌ Referral verifyToken error:', {
+            name: error.name,
+            message: error.message,
+            hasJwtSecret: !!JWT_SECRET
+        });
+
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(200).json({ success: false, message: 'Invalid Token' });
+        }
+        if (error.name === 'TokenExpiredError') {
+            return res.status(200).json({ success: false, message: 'Token Expired' });
+        }
+        return res.status(200).json({ success: false, message: 'Auth Error. Please Try Again.' });
     }
-}
+};
 
 // ============================================
 // GENERATE UNIQUE REFERRAL CODE
@@ -104,33 +140,58 @@ function buildReferralLink(code) {
 }
 
 // ============================================
+// ✅ ENSURE USER HAS REFERRAL CODE
+// পুরনো user-দের জন্য auto-generate করে
+// ============================================
+async function ensureUserHasReferralCode(user) {
+    if (user.referralCode && user.referralCode.length >= 6) {
+        return user.referralCode;
+    }
+
+    const newCode = await generateUniqueReferralCode();
+
+    try {
+        const updated = await User.findByIdAndUpdate(
+            user._id,
+            { $set: { referralCode: newCode, referralCodeCustom: false } },
+            { new: true, select: 'referralCode referralCodeCustom' }
+        );
+
+        if (updated && updated.referralCode) {
+            user.referralCode = updated.referralCode;
+            user.referralCodeCustom = false;
+            console.log(`✅ Auto-generated referral code for ${user.mobile}: ${newCode}`);
+            return updated.referralCode;
+        }
+    } catch (err) {
+        console.error('❌ Failed to auto-generate referral code:', err.message);
+    }
+
+    return null;
+}
+
+// ============================================
 // GET / — Main referral info
 // ============================================
 router.get('/', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
             .select('fullName mobile walletId referralCode referralCodeCustom referralCount referralPendingCount referralEarnings referralSettings profilePicture');
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+
+        // ✅ Auto-generate referral code if missing
         if (!user.referralCode) {
-            try {
-                const newCode = await generateUniqueReferralCode();
-                const updated = await User.findByIdAndUpdate(
-                    user._id,
-                    { $set: { referralCode: newCode, referralCodeCustom: false } },
-                    { new: true, select: 'referralCode referralCodeCustom' }
-                );
-                user.referralCode = updated.referralCode;
-                user.referralCodeCustom = false;
-            } catch (err) {
-                return res.status(500).json({ success: false, message: 'Failed to generate referral code. Please retry.' });
+            const generated = await ensureUserHasReferralCode(user);
+            if (!generated) {
+                return res.status(200).json({ success: false, message: 'Failed to generate referral code. Please retry.' });
             }
         }
 
         const stats = await Referral.getStatsForUser(user._id);
         const monthCount = await Referral.getMonthlyCount(user._id);
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             referralCode: user.referralCode,
             referralCodeCustom: user.referralCodeCustom === true,
@@ -158,8 +219,8 @@ router.get('/', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get referral info error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to fetch referral info' });
+        console.error('❌ Get referral info error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to fetch referral info' });
     }
 });
 
@@ -169,10 +230,12 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/stats', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('referralCode');
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+
         const stats = await Referral.getStatsForUser(user._id);
         const monthCount = await Referral.getMonthlyCount(user._id);
-        return res.json({
+
+        return res.status(200).json({
             success: true,
             totalReferrals: stats.totalReferrals,
             completedReferrals: stats.completedReferrals,
@@ -183,7 +246,8 @@ router.get('/stats', verifyToken, async (req, res) => {
             monthReferrals: monthCount
         });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to fetch stats' });
+        console.error('❌ Get referral stats error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to fetch stats' });
     }
 });
 
@@ -225,7 +289,7 @@ router.get('/list', verifyToken, async (req, res) => {
             };
         });
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             referrals: list,
             pagination: {
@@ -236,43 +300,88 @@ router.get('/list', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get referral list error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to fetch referrals' });
+        console.error('❌ Get referral list error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to fetch referrals' });
     }
 });
 
 // ============================================
-// POST /custom-code
+// ✅ POST /custom-code — Fixed for missing referralCode
 // ============================================
 router.post('/custom-code', verifyToken, async (req, res) => {
     try {
         const { code } = req.body;
         const user = await User.findById(req.user._id);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
 
         if (user.referralSettings?.allowCustomCode === false) {
-            return res.status(403).json({ success: false, message: 'Custom referral codes are disabled for your account' });
+            return res.status(200).json({ success: false, message: 'Custom referral codes are disabled for your account' });
         }
 
         const validation = validateCustomCodeFormat(code);
-        if (!validation.valid) return res.status(400).json({ success: false, message: validation.message });
+        if (!validation.valid) return res.status(200).json({ success: false, message: validation.message });
 
         const customCode = validation.code;
 
-        const existing = await User.findOne({ referralCode: customCode, _id: { $ne: user._id } }).select('_id').lean();
-        if (existing) return res.status(409).json({ success: false, message: 'This code is already taken. Please try another one.' });
+        // ✅ Check if code is already taken by someone else
+        const existing = await User.findOne({
+            referralCode: customCode,
+            _id: { $ne: user._id }
+        }).select('_id').lean();
 
-        if (user.referralCode === customCode) return res.status(400).json({ success: false, message: 'This is already your referral code' });
+        if (existing) {
+            return res.status(200).json({ success: false, message: 'This code is already taken. Please try another one.' });
+        }
 
-        const oldCode = user.referralCode;
-        const updated = await User.findByIdAndUpdate(
-            user._id,
-            { $set: { referralCode: customCode, referralCodeCustom: true } },
-            { new: true, select: 'referralCode referralCodeCustom' }
-        );
+        // ✅ Same code already set
+        if (user.referralCode === customCode) {
+            return res.status(200).json({ success: false, message: 'This is already your referral code' });
+        }
 
-        if (updated.referralCode !== customCode) return res.status(500).json({ success: false, message: 'Failed to save custom code' });
+        const oldCode = user.referralCode || null;
 
+        // ✅ Ensure user has a referralCode field (for old users without it)
+        // Even if old was missing, we now set new one
+        user.referralCode = customCode;
+        user.referralCodeCustom = true;
+
+        try {
+            await user.save();
+        } catch (saveErr) {
+            console.error('❌ User save error:', {
+                name: saveErr.name,
+                code: saveErr.code,
+                message: saveErr.message,
+                keyPattern: saveErr.keyPattern,
+                keyValue: saveErr.keyValue
+            });
+
+            if (saveErr.code === 11000) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'This code is already taken. Please try another one.'
+                });
+            }
+            return res.status(200).json({
+                success: false,
+                message: 'Failed to save custom code: ' + saveErr.message
+            });
+        }
+
+        // ✅ Verify save
+        const verified = await User.findById(user._id).select('referralCode referralCodeCustom');
+        if (!verified || verified.referralCode !== customCode) {
+            console.error('❌ Save verification failed:', {
+                expected: customCode,
+                actual: verified ? verified.referralCode : 'USER_NOT_FOUND'
+            });
+            return res.status(200).json({
+                success: false,
+                message: 'Save verification failed. Please retry.'
+            });
+        }
+
+        // Telegram notification
         if (user.telegramId) {
             const msg =
 `🎯 <b>Referral Code Updated</b>
@@ -288,7 +397,7 @@ Share your new code and start earning rewards! 🎁`;
             sendTelegramMessage(user.telegramId, msg).catch(() => {});
         }
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Custom referral code set successfully',
             referralCode: customCode,
@@ -296,8 +405,8 @@ Share your new code and start earning rewards! 🎁`;
             referralLink: buildReferralLink(customCode)
         });
     } catch (error) {
-        console.error('Set custom code error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to set custom code' });
+        console.error('❌ Set custom code error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to set custom code' });
     }
 });
 
@@ -307,18 +416,26 @@ Share your new code and start earning rewards! 🎁`;
 router.post('/regenerate-code', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
 
-        const oldCode = user.referralCode;
+        const oldCode = user.referralCode || null;
         const newCode = await generateUniqueReferralCode();
 
-        const updated = await User.findByIdAndUpdate(
-            user._id,
-            { $set: { referralCode: newCode, referralCodeCustom: false } },
-            { new: true, select: 'referralCode referralCodeCustom' }
-        );
+        user.referralCode = newCode;
+        user.referralCodeCustom = false;
 
-        if (updated.referralCode !== newCode) return res.status(500).json({ success: false, message: 'Failed to save new code' });
+        try {
+            await user.save();
+        } catch (saveErr) {
+            console.error('❌ Save error during regenerate:', saveErr.message);
+            return res.status(200).json({ success: false, message: 'Failed to save new code' });
+        }
+
+        // Verify
+        const verified = await User.findById(user._id).select('referralCode');
+        if (!verified || verified.referralCode !== newCode) {
+            return res.status(200).json({ success: false, message: 'Save verification failed' });
+        }
 
         if (user.telegramId) {
             const msg =
@@ -335,7 +452,7 @@ Dear <b>${escapeHtml(user.fullName)}</b>, Your Referral Code Has Been Regenerate
             sendTelegramMessage(user.telegramId, msg).catch(() => {});
         }
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Referral code regenerated successfully',
             referralCode: newCode,
@@ -343,8 +460,8 @@ Dear <b>${escapeHtml(user.fullName)}</b>, Your Referral Code Has Been Regenerate
             referralLink: buildReferralLink(newCode)
         });
     } catch (error) {
-        console.error('Regenerate code error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to regenerate code' });
+        console.error('❌ Regenerate code error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to regenerate code' });
     }
 });
 
@@ -355,7 +472,7 @@ router.post('/check-code', async (req, res) => {
     try {
         const { code } = req.body;
         if (!code || typeof code !== 'string') {
-            return res.status(400).json({ success: false, valid: false, message: 'Code is required' });
+            return res.status(200).json({ success: false, valid: false, message: 'Code is required' });
         }
 
         const cleaned = code.trim().toUpperCase();
@@ -363,13 +480,13 @@ router.post('/check-code', async (req, res) => {
             .select('fullName mobile profilePicture referralSettings')
             .lean();
 
-        if (!user) return res.json({ success: true, valid: false, message: 'Invalid referral code' });
-        if (user.referralSettings?.enabled === false) return res.json({ success: true, valid: false, message: 'This referral program is currently disabled' });
+        if (!user) return res.status(200).json({ success: true, valid: false, message: 'Invalid referral code' });
+        if (user.referralSettings?.enabled === false) return res.status(200).json({ success: true, valid: false, message: 'This referral program is currently disabled' });
 
         const nameParts = (user.fullName || 'User').split(' ');
         const displayName = nameParts[0] + (nameParts[1] ? ' ' + nameParts[1].charAt(0) + '.' : '');
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             valid: true,
             message: 'Valid referral code',
@@ -380,8 +497,8 @@ router.post('/check-code', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Check code error:', error);
-        return res.status(500).json({ success: false, valid: false, message: 'Server error' });
+        console.error('❌ Check code error:', error);
+        return res.status(200).json({ success: false, valid: false, message: 'Server error' });
     }
 });
 
@@ -391,23 +508,23 @@ router.post('/check-code', async (req, res) => {
 router.post('/apply', async (req, res) => {
     try {
         const { code, newUserId } = req.body;
-        if (!code || !newUserId) return res.status(400).json({ success: false, message: 'Code and newUserId are required' });
+        if (!code || !newUserId) return res.status(200).json({ success: false, message: 'Code and newUserId are required' });
 
         const cleaned = code.trim().toUpperCase();
         const referrer = await User.findOne({ referralCode: cleaned })
             .select('_id fullName referralSettings')
             .lean();
 
-        if (!referrer) return res.status(404).json({ success: false, message: 'Invalid referral code' });
-        if (referrer.referralSettings?.enabled === false) return res.status(400).json({ success: false, message: 'Referral program is disabled' });
+        if (!referrer) return res.status(200).json({ success: false, message: 'Invalid referral code' });
+        if (referrer.referralSettings?.enabled === false) return res.status(200).json({ success: false, message: 'Referral program is disabled' });
 
         const newUser = await User.findById(newUserId);
-        if (!newUser) return res.status(404).json({ success: false, message: 'New user not found' });
-        if (referrer._id.toString() === newUser._id.toString()) return res.status(400).json({ success: false, message: 'You cannot refer yourself' });
-        if (newUser.referredBy) return res.status(400).json({ success: false, message: 'User already referred' });
+        if (!newUser) return res.status(200).json({ success: false, message: 'New user not found' });
+        if (referrer._id.toString() === newUser._id.toString()) return res.status(200).json({ success: false, message: 'You cannot refer yourself' });
+        if (newUser.referredBy) return res.status(200).json({ success: false, message: 'User already referred' });
 
         const existing = await Referral.findOne({ referrerId: referrer._id, referredUserId: newUser._id }).lean();
-        if (existing) return res.status(409).json({ success: false, message: 'Referral already exists' });
+        if (existing) return res.status(200).json({ success: false, message: 'Referral already exists' });
 
         const bonusAmount = referrer.referralSettings?.bonusAmount ?? 10;
         const referral = new Referral({
@@ -426,7 +543,7 @@ router.post('/apply', async (req, res) => {
             { $set: { referredBy: referrer._id, referredByCode: cleaned } }
         );
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Referral code applied successfully',
             referralId: referral._id,
@@ -435,8 +552,8 @@ router.post('/apply', async (req, res) => {
             status: 'pending'
         });
     } catch (error) {
-        console.error('Apply referral error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to apply referral' });
+        console.error('❌ Apply referral error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to apply referral' });
     }
 });
 
@@ -446,11 +563,11 @@ router.post('/apply', async (req, res) => {
 router.post('/complete', async (req, res) => {
     try {
         const { newUserId } = req.body;
-        if (!newUserId) return res.status(400).json({ success: false, message: 'newUserId is required' });
+        if (!newUserId) return res.status(200).json({ success: false, message: 'newUserId is required' });
 
         const newUser = await User.findById(newUserId);
-        if (!newUser) return res.status(404).json({ success: false, message: 'User not found' });
-        if (!newUser.referredBy) return res.json({ success: false, message: 'User was not referred' });
+        if (!newUser) return res.status(200).json({ success: false, message: 'User not found' });
+        if (!newUser.referredBy) return res.status(200).json({ success: false, message: 'User was not referred' });
 
         const referral = await Referral.findOne({
             referrerId: newUser.referredBy,
@@ -458,10 +575,10 @@ router.post('/complete', async (req, res) => {
             status: 'pending'
         });
 
-        if (!referral) return res.json({ success: false, message: 'No pending referral found' });
+        if (!referral) return res.status(200).json({ success: false, message: 'No pending referral found' });
 
         const referrer = await User.findById(referral.referrerId);
-        if (!referrer) return res.status(404).json({ success: false, message: 'Referrer not found' });
+        if (!referrer) return res.status(200).json({ success: false, message: 'Referrer not found' });
 
         const bonusAmount = referral.bonusAmount || 10;
         const now = new Date();
@@ -558,7 +675,7 @@ Thank you for joining Universe Wallet! 🎉`;
             sendTelegramMessage(newUser.telegramId, msg).catch(() => {});
         }
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Referral completed and bonuses paid',
             referralId: referral._id,
@@ -567,8 +684,8 @@ Thank you for joining Universe Wallet! 🎉`;
             referredUser: { fullName: newUser.fullName }
         });
     } catch (error) {
-        console.error('Complete referral error:', error);
-        return res.status(500).json({ success: false, message: 'Failed to complete referral' });
+        console.error('❌ Complete referral error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to complete referral' });
     }
 });
 
@@ -578,8 +695,8 @@ Thank you for joining Universe Wallet! 🎉`;
 router.get('/settings', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('referralSettings referralCode referralCodeCustom');
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-        return res.json({
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+        return res.status(200).json({
             success: true,
             settings: {
                 enabled: user.referralSettings?.enabled !== false,
@@ -591,7 +708,8 @@ router.get('/settings', verifyToken, async (req, res) => {
             referralCodeCustom: user.referralCodeCustom === true
         });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to fetch settings' });
+        console.error('❌ Get settings error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to fetch settings' });
     }
 });
 
@@ -602,7 +720,7 @@ router.post('/settings', verifyToken, async (req, res) => {
     try {
         const { enabled, bonusAmount, requireFirstTransaction, allowCustomCode } = req.body;
         const user = await User.findById(req.user._id);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
 
         const updates = {};
         if (typeof enabled === 'boolean') updates['referralSettings.enabled'] = enabled;
@@ -610,12 +728,13 @@ router.post('/settings', verifyToken, async (req, res) => {
         if (typeof requireFirstTransaction === 'boolean') updates['referralSettings.requireFirstTransaction'] = requireFirstTransaction;
         if (typeof allowCustomCode === 'boolean') updates['referralSettings.allowCustomCode'] = allowCustomCode;
 
-        if (Object.keys(updates).length === 0) return res.status(400).json({ success: false, message: 'No valid settings to update' });
+        if (Object.keys(updates).length === 0) return res.status(200).json({ success: false, message: 'No valid settings to update' });
 
         const updated = await User.findByIdAndUpdate(user._id, { $set: updates }, { new: true, select: 'referralSettings' });
-        return res.json({ success: true, message: 'Settings updated successfully', settings: updated.referralSettings });
+        return res.status(200).json({ success: true, message: 'Settings updated successfully', settings: updated.referralSettings });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to update settings' });
+        console.error('❌ Update settings error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to update settings' });
     }
 });
 
@@ -643,9 +762,10 @@ router.get('/leaderboard', verifyToken, async (req, res) => {
             };
         });
 
-        return res.json({ success: true, leaderboard });
+        return res.status(200).json({ success: true, leaderboard });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to fetch leaderboard' });
+        console.error('❌ Leaderboard error:', error);
+        return res.status(200).json({ success: false, message: 'Failed to fetch leaderboard' });
     }
 });
 
