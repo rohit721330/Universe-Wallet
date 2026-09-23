@@ -167,6 +167,70 @@ app.get('/setup-admin', async (req, res) => {
         });
     }
 });
+
+// ============================================================
+// ⚠️⚠️⚠️ TEMPORARY MIGRATION ROUTE — DELETE AFTER USE ⚠️⚠️⚠️
+// ============================================================
+app.get('/migrate-referral-codes', async (req, res) => {
+    try {
+        await connectDB();
+        const User = require('./models/User');
+        const crypto = require('crypto');
+        
+        function generateCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            while (code.length < 10) {
+                const byte = crypto.randomBytes(1)[0];
+                if (byte < 252) code += chars[byte % chars.length];
+            }
+            return code;
+        }
+        
+        // Find users without referralCode
+        const users = await User.find({
+            $or: [
+                { referralCode: { $exists: false } },
+                { referralCode: null },
+                { referralCode: '' }
+            ]
+        });
+        
+        console.log(`🔵 [migrate] Found ${users.length} users without referralCode`);
+        
+        const results = [];
+        for (const user of users) {
+            let code = generateCode();
+            let attempts = 0;
+            while (await User.findOne({ referralCode: code }) && attempts < 15) {
+                code = generateCode();
+                attempts++;
+            }
+            
+            await User.updateOne(
+                { _id: user._id },
+                { $set: { referralCode: code, referralCodeCustom: false } }
+            );
+            
+            results.push({ 
+                mobile: user.mobile, 
+                fullName: user.fullName,
+                code 
+            });
+            console.log(`✅ [migrate] ${user.mobile} → ${code}`);
+        }
+        
+        res.json({
+            success: true,
+            migrated: results.length,
+            results
+        });
+    } catch (error) {
+        console.error('❌ [migrate] Error:', error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ============================================================
 // ⚠️ END TEMPORARY ROUTE
 // ============================================================
