@@ -170,6 +170,7 @@ app.get('/setup-admin', async (req, res) => {
 
 // ==================== ALL API ROUTES ====================
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/refer', require('./routes/refer'));
 app.use('/api/check-status', require('./routes/check-status'));
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/admin', require('./routes/admin'));
@@ -200,6 +201,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== HTML ROUTES ====================
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
 app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', 'download.html')));
