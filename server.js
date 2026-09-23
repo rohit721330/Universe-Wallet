@@ -35,7 +35,7 @@ if (!cached) {
 }
 
 async function connectDB() {
-    if (cached.conn) {
+    if (cached.conn && mongoose.connection.readyState === 1) {
         return cached.conn;
     }
 
@@ -62,6 +62,7 @@ async function connectDB() {
             .catch((err) => {
                 console.error('❌ MongoDB Connection Error:', err.message);
                 cached.promise = null;
+                cached.conn = null;
                 throw err;
             });
     }
@@ -70,6 +71,7 @@ async function connectDB() {
         cached.conn = await cached.promise;
     } catch (err) {
         cached.promise = null;
+        cached.conn = null;
         throw err;
     }
 
@@ -77,9 +79,9 @@ async function connectDB() {
 }
 
 // =========================================================
-// ✅ DB Connection Middleware — প্রতিটা /api request-এ
+// ✅ DB Connection Middleware — /api এবং /referral উভয়ের জন্য
 // =========================================================
-app.use('/api', async (req, res, next) => {
+const dbConnectMiddleware = async (req, res, next) => {
     try {
         await connectDB();
         next();
@@ -90,7 +92,10 @@ app.use('/api', async (req, res, next) => {
             message: 'Database connection failed. Please try again in a moment.'
         });
     }
-});
+};
+
+app.use('/api', dbConnectMiddleware);
+app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
 // ⚠️⚠️⚠️ TEMPORARY ROUTE — DELETE AFTER CREATING ADMIN ⚠️⚠️⚠️
@@ -195,31 +200,25 @@ app.use('/ai', require('./routes/ai'));
 console.log('✅ All API Routes Loaded');
 
 // ==================== STATIC FILES ====================
-// ✅ Static files serve — /public folder থেকে (css, js, images, etc.)
-// Note: HTML files route-এর নিচে override হবে
 app.use(express.static(path.join(__dirname, 'public'), {
-    extensions: ['html'],  // /refer → refer.html (auto)
-    index: false           // index.html auto-serve বন্ধ — আমরা নিচে handle করবো
+    extensions: ['html'],
+    index: false
 }));
 
 // ==================== ROOT & INDEX (Query Param Safe) ====================
-// ✅ Root → index.html (query param সহ/ছাড়া)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ /index → index.html (query param সহ/ছাড়া)
 app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ /index.html → index.html (query param সহ/ছাড়া)
 app.get('/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ==================== HTML ROUTES (Order Matters!) ====================
-// ⚠️ Specific routes আগে, generic পরে
 app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
@@ -268,17 +267,13 @@ app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss
 app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
 
 // ==================== FALLBACK ROUTE (SPA) ====================
-// ⚠️ এই route সবার শেষে — এটা সব unknown path → index.html serve করবে
 app.get('*', (req, res) => {
-    // API endpoints
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
     }
-    // Referral route path
     if (req.path.startsWith('/referral/')) {
         return res.status(404).json({ success: false, message: 'Referral Endpoint Not Found' });
     }
-    // SPA fallback → index.html
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -292,7 +287,6 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
 
-    // Cron jobs — only for local dev
     const Invoice = require('./models/Invoice');
     setInterval(async () => {
         try {
