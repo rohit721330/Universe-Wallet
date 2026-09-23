@@ -94,7 +94,7 @@ async function verifyToken(req, res, next) {
 }
 
 // ============================================
-// GET API KEY — Atomic
+// GET API KEY — Atomic, কখনো auto-regenerate নয়
 // ============================================
 router.get('/', verifyToken, async (req, res) => {
     try {
@@ -102,6 +102,7 @@ router.get('/', verifyToken, async (req, res) => {
             .select('apiKey apiKeyActive apiKeyCreatedAt apiKeyUpdatedAt');
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+        // ✅ API key আছে — শুধু return করুন, কোনো generate নয়
         if (user.apiKey && user.apiKey.length === 10) {
             return res.json({
                 success: true,
@@ -112,6 +113,7 @@ router.get('/', verifyToken, async (req, res) => {
             });
         }
 
+        // ✅ API key নেই — atomic upsert (শুধু প্রথমবার)
         const newKey = await generateUniqueApiKey();
         const updated = await User.findOneAndUpdate(
             {
@@ -133,8 +135,10 @@ router.get('/', verifyToken, async (req, res) => {
             { new: true, select: 'apiKey apiKeyActive apiKeyCreatedAt apiKeyUpdatedAt' }
         );
 
+        // Race condition — অন্য request আগেই generate করেছে
         if (!updated) {
-            const fresh = await User.findById(user._id).select('apiKey apiKeyActive apiKeyCreatedAt apiKeyUpdatedAt');
+            const fresh = await User.findById(user._id)
+                .select('apiKey apiKeyActive apiKeyCreatedAt apiKeyUpdatedAt');
             return res.json({
                 success: true,
                 apiKey: fresh.apiKey,
@@ -170,17 +174,25 @@ router.post('/regenerate', verifyToken, async (req, res) => {
         const newKey = await generateUniqueApiKey();
         const oldKey = user.apiKey;
 
-        user.apiKey = newKey;
-        user.apiKeyActive = true;
-        user.apiKeyCreatedAt = new Date();
-        user.apiKeyUpdatedAt = new Date();
-        await user.save();
+        // ✅ Atomic update — শুধু apiKey field update করবে
+        const updated = await User.findByIdAndUpdate(
+            user._id,
+            {
+                $set: {
+                    apiKey: newKey,
+                    apiKeyActive: true,
+                    apiKeyCreatedAt: new Date(),
+                    apiKeyUpdatedAt: new Date()
+                }
+            },
+            { new: true, select: 'apiKey apiKeyActive' }
+        );
 
-        const verified = await User.findById(user._id).select('apiKey apiKeyActive');
-        if (verified.apiKey !== newKey) {
+        if (updated.apiKey !== newKey) {
             return res.status(500).json({ success: false, message: 'Failed to save new API key' });
         }
 
+        // Notify user
         if (user.telegramId) {
             const msg =
 `🔄 <b>API Key Regenerated</b>
@@ -196,6 +208,7 @@ Dear <b>${escapeHtml(user.fullName)}</b>, Your API Key Has Been Regenerated Succ
             sendTelegramMessage(user.telegramId, msg).catch(() => {});
         }
 
+        // Notify admin
         notifyAdmin(
 `🔄 <b>API Key Regenerated</b>
 
@@ -219,7 +232,8 @@ Dear <b>${escapeHtml(user.fullName)}</b>, Your API Key Has Been Regenerated Succ
 });
 
 // ============================================
-// TOGGLE API KEY
+// TOGGLE API KEY STATUS (Enable/Disable)
+// ✅ শুধু apiKeyActive field update — apiKey অপরিবর্তিত
 // ============================================
 router.post('/toggle', verifyToken, async (req, res) => {
     try {
@@ -230,13 +244,14 @@ router.post('/toggle', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, message: 'active must be true or false' });
         }
 
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user._id).select('apiKey telegramId fullName walletId mobile');
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         if (!user.apiKey) {
             return res.status(400).json({ success: false, message: 'No API Key found. Generate one first.' });
         }
 
+        // ✅ শুধু apiKeyActive field update — apiKey কখনো touch হবে না
         const updated = await User.findByIdAndUpdate(
             user._id,
             {
@@ -248,11 +263,22 @@ router.post('/toggle', verifyToken, async (req, res) => {
             { new: true, select: 'apiKey apiKeyActive apiKeyUpdatedAt' }
         );
 
+        // Verify — save সত্যিই persist হয়েছে কি না
         if (updated.apiKeyActive !== active) {
             console.error('❌ Toggle failed to persist:', { expected: active, actual: updated.apiKeyActive });
             return res.status(500).json({ success: false, message: 'Failed to update API Key status' });
         }
 
+        // ✅ একই apiKey ensure করুন
+        if (updated.apiKey !== user.apiKey) {
+            console.error('❌ apiKey changed during toggle!', {
+                before: user.apiKey,
+                after: updated.apiKey
+            });
+            return res.status(500).json({ success: false, message: 'API key integrity error' });
+        }
+
+        // Notify user
         if (user.telegramId) {
             const emoji = active ? '🟢' : '🔴';
             const statusText = active ? 'Enabled' : 'Disabled';
@@ -263,6 +289,7 @@ Dear <b>${escapeHtml(user.fullName)}</b>, Your API Key Has Been ${statusText}.
 
 🔑 <b>API Key:</b> <code>${user.apiKey}</code>
 📊 <b>Status:</b> ${statusText}
+💼 <b>Wallet Id:</b> ${user.walletId}
 🕒 <b>Time:</b> ${dateTime}
 
 ${active
@@ -284,7 +311,7 @@ ${active
 });
 
 // ============================================
-// ✅ GET STATUS — with full API usage tracking
+// GET STATUS — with full API usage tracking
 // ============================================
 router.get('/status', verifyToken, async (req, res) => {
     try {
@@ -326,16 +353,28 @@ router.get('/status', verifyToken, async (req, res) => {
 });
 
 // ============================================
-// VALIDATE API KEY
+// VALIDATE API KEY (external)
 // ============================================
 router.get('/validate/:apiKey', async (req, res) => {
     try {
         const { apiKey } = req.params;
-        if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+        if (!apiKey || apiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(apiKey)) {
             return res.status(400).json({ success: false, message: 'Invalid API Key Format' });
         }
-        const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
+
+        // Case-insensitive lookup
+        const trimmedKey = String(apiKey).trim();
+        const normalizedKey = trimmedKey.toUpperCase();
+
+        let user = await User.findOne({ apiKey: normalizedKey })
             .select('fullName walletId mobile balance apiKeyActive isBlocked isDeleted');
+
+        if (!user) {
+            user = await User.findOne({
+                apiKey: { $regex: `^${trimmedKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+            }).select('fullName walletId mobile balance apiKeyActive isBlocked isDeleted');
+        }
+
         if (!user || user.isDeleted) return res.status(404).json({ success: false, message: 'Invalid API Key' });
         if (user.apiKeyActive === false) return res.status(403).json({ success: false, message: 'API Key is disabled' });
         if (user.isBlocked) return res.status(403).json({ success: false, message: 'User account is blocked' });
@@ -350,6 +389,7 @@ router.get('/validate/:apiKey', async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Validate API key error:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 });
