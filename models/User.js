@@ -28,6 +28,21 @@ const userSchema = new mongoose.Schema({
     lastApiUsedAt: { type: Date, default: null },
     lastApiSuccessAt: { type: Date, default: null },
 
+    // ✅ Referral System fields
+    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true, index: true },
+    referralCodeCustom: { type: Boolean, default: false },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    referredByCode: { type: String, uppercase: true, trim: true, default: null },
+    referralCount: { type: Number, default: 0, min: 0 },
+    referralPendingCount: { type: Number, default: 0, min: 0 },
+    referralEarnings: { type: Number, default: 0, min: 0 },
+    referralSettings: {
+        enabled: { type: Boolean, default: true },
+        bonusAmount: { type: Number, default: 10, min: 0 },
+        requireFirstTransaction: { type: Boolean, default: true },
+        allowCustomCode: { type: Boolean, default: true }
+    },
+
     profilePicture: { type: String, default: default_logo },
     walletId: { type: String, unique: true, uppercase: true },
     lastOTPTime: { type: Number, default: 0 },
@@ -42,20 +57,13 @@ const userSchema = new mongoose.Schema({
 // =========================================================
 // INDEXES
 // =========================================================
-userSchema.index(
-    { mobile: 1 },
-    { unique: true, partialFilterExpression: { isDeleted: false }, name: 'mobile_unique_active' }
-);
-userSchema.index(
-    { email: 1 },
-    { unique: true, partialFilterExpression: { isDeleted: false }, name: 'email_unique_active' }
-);
-userSchema.index(
-    { telegramId: 1 },
-    { unique: true, sparse: true, partialFilterExpression: { isDeleted: false }, name: 'telegramId_unique_active' }
-);
+userSchema.index({ mobile: 1 }, { unique: true, partialFilterExpression: { isDeleted: false }, name: 'mobile_unique_active' });
+userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { isDeleted: false }, name: 'email_unique_active' });
+userSchema.index({ telegramId: 1 }, { unique: true, sparse: true, partialFilterExpression: { isDeleted: false }, name: 'telegramId_unique_active' });
 userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
 userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
+userSchema.index({ referralCode: 1 }, { unique: true, sparse: true, name: 'referralCode_unique' });
+userSchema.index({ referredBy: 1, createdAt: -1 }, { name: 'referredBy_index' });
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
 // ============================================
@@ -65,7 +73,6 @@ function generateWalletId() {
     const prefix = 'UW';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
-
     let letterPart = '';
     while (letterPart.length < 2) {
         const byte = crypto.randomBytes(1)[0];
@@ -93,14 +100,26 @@ function generateApiKey() {
 }
 
 // ============================================
+// HELPER: Generate Referral Code (10 alphanumeric)
+// ============================================
+function generateReferralCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    while (code.length < 10) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 252) code += chars[byte % chars.length];
+    }
+    return code;
+}
+
+// ============================================
 // Pre-save
-// ✅ API Key generate শুধু প্রথমবার (নতুন user) — existing user-এ কখনো নয়
 // ============================================
 userSchema.pre('save', async function(next) {
     try {
         if (!this.profilePicture) this.profilePicture = default_logo;
 
-        // ----- Wallet ID (শুধু নতুন user) -----
+        // Wallet ID
         if (this.isNew && !this.walletId) {
             const User = this.constructor;
             let attempts = 0;
@@ -115,8 +134,7 @@ userSchema.pre('save', async function(next) {
             this.walletId = newId;
         }
 
-        // ✅ API Key — শুধু নতুন user-দের জন্য (this.isNew === true)
-        // Existing user-দের save()-এ আর কখনো key generate হবে না
+        // API Key
         if (this.isNew && !this.apiKey) {
             const User = this.constructor;
             let attempts = 0;
@@ -129,12 +147,24 @@ userSchema.pre('save', async function(next) {
             }
             if (exists) return next(new Error('Failed to generate unique API Key.'));
             this.apiKey = newKey;
-
-            if (this.apiKeyActive === undefined || this.apiKeyActive === null) {
-                this.apiKeyActive = true;
-            }
+            if (this.apiKeyActive === undefined || this.apiKeyActive === null) this.apiKeyActive = true;
             if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
+        }
+
+        // ✅ Referral Code
+        if (this.isNew && !this.referralCode) {
+            const User = this.constructor;
+            let attempts = 0;
+            let newCode;
+            let exists = true;
+            while (exists && attempts < 10) {
+                newCode = generateReferralCode();
+                exists = await User.exists({ referralCode: newCode, _id: { $ne: this._id } });
+                attempts++;
+            }
+            if (exists) return next(new Error('Failed to generate unique Referral Code.'));
+            this.referralCode = newCode;
         }
 
         next();
@@ -196,7 +226,6 @@ userSchema.methods.regenerateApiKey = async function() {
         attempts++;
     }
     if (exists) throw new Error('Failed to generate unique API Key');
-
     this.apiKey = newKey;
     this.apiKeyActive = true;
     this.apiKeyCreatedAt = new Date();
@@ -259,6 +288,10 @@ userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase() });
 };
+userSchema.statics.findByReferralCode = function(code) {
+    if (!code) return null;
+    return this.findOne({ referralCode: code.toUpperCase() });
+};
 userSchema.statics.findActiveByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase(), isDeleted: false, isBlocked: false });
@@ -297,3 +330,4 @@ userSchema.statics.findActiveUserById = function(userId) {
 
 module.exports = mongoose.model('User', userSchema);
 module.exports.default_logo = default_logo;
+module.exports.generateReferralCode = generateReferralCode;
