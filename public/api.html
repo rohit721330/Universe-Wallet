@@ -486,14 +486,14 @@ tr:last-child td { border-bottom: 0; }
 
         <div class="input-group">
             <label><i class="fas fa-key"></i> API Key (10 characters)</label>
-            <div class="input-row">
-                <input type="text" id="apiKey" class="input-box" value="" readonly placeholder="Loading...">
-                <button class="copy-btn" onclick="copyText('apiKey', 'API Key')">
-                    <i class="fas fa-copy"></i> Copy
-                </button>
+            <div class="api-url">
+               <div class="api-url-link" id="apiKeyDisplay">Loading...</div>
+               <button class="copy-btn" onclick="copyApiKey()">
+                   <i class="fas fa-copy"></i> Copy
+               </button>
             </div>
         </div>
-
+        
         <div class="security">
             <i class="fas fa-shield-halved"></i>
             <div>
@@ -1237,11 +1237,11 @@ function updateApiUsageStats(data) {
 function updateApiDisplay(key) {
     apiKey = key;
 
-    const apiKeyEl = document.getElementById('apiKey');
+    const apiKeyEl = document.getElementById('apiKeyDisplay');
     const jsKeyEl = document.getElementById('jsKey');
     const pyKeyEl = document.getElementById('pyKey');
 
-    if (apiKeyEl) apiKeyEl.value = key || '';
+    if (apiKeyEl) apiKeyEl.textContent = key || '—';
     if (jsKeyEl) jsKeyEl.textContent = key || 'YOUR_KEY';
     if (pyKeyEl) pyKeyEl.textContent = key || 'YOUR_KEY';
 
@@ -1372,6 +1372,26 @@ function copyText(elementId, label) {
             element.select?.();
             document.execCommand('copy');
             showToast(`${label} copied!`, 'fas fa-check-circle');
+        });
+    } else {
+        showToast('Nothing to copy', 'fas fa-exclamation-triangle');
+    }
+}
+
+/* ✅ Copy API Key — div থেকে textContent নেয় */
+function copyApiKey() {
+    const keyEl = document.getElementById('apiKeyDisplay');
+    if (keyEl && keyEl.textContent.trim() && keyEl.textContent.trim() !== '—') {
+        navigator.clipboard.writeText(keyEl.textContent.trim()).then(() => {
+            showToast('API Key copied!', 'fas fa-check-circle');
+        }).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = keyEl.textContent.trim();
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('API Key copied!', 'fas fa-check-circle');
         });
     } else {
         showToast('Nothing to copy', 'fas fa-exclamation-triangle');
