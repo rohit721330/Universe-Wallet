@@ -59,7 +59,6 @@ function sendTelegramMessage(chatId, message) {
 
 // ============================================
 // ✅ API Usage Tracker
-// সব API attempt track করে — success + failed উভয়ই
 // ============================================
 async function trackApiUsage(userId, success) {
     if (!userId) return;
@@ -69,13 +68,9 @@ async function trackApiUsage(userId, success) {
                 totalApiCalls: 1,
                 ...(success ? { successfulApiCalls: 1 } : { failedApiCalls: 1 })
             },
-            $set: {
-                lastApiUsedAt: new Date()
-            }
+            $set: { lastApiUsedAt: new Date() }
         };
-        if (success) {
-            update.$set.lastApiSuccessAt = new Date();
-        }
+        if (success) update.$set.lastApiSuccessAt = new Date();
         await User.updateOne({ _id: userId }, update);
     } catch (error) {
         console.error('API usage tracking failed:', error.message);
@@ -83,20 +78,77 @@ async function trackApiUsage(userId, success) {
 }
 
 // ============================================
-// API Key Validation
+// ✅ Case-insensitive user lookup by API key
+// Database-এ key যেভাবেই থাকুক (uppercase/lowercase), খুঁজে বের করবে
+// ============================================
+async function findUserByApiKey(apiKey, selectFields = '_id fullName mobile walletId balance isBlocked telegramId apiKeyActive') {
+    if (!apiKey) return null;
+
+    const normalizedKey = String(apiKey).trim().toUpperCase();
+
+    // ✅ Method 1: Normalize + exact match (fast, uses index)
+    let user = await User.findOne({ apiKey: normalizedKey }).select(selectFields);
+    if (user) return user;
+
+    // ✅ Method 2: Original case (fallback — DB-এ lowercase থাকলে)
+    user = await User.findOne({ apiKey: String(apiKey).trim() }).select(selectFields);
+    if (user) return user;
+
+    // ✅ Method 3: Case-insensitive regex (last resort)
+    try {
+        user = await User.findOne({
+            apiKey: { $regex: `^${String(apiKey).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+        }).select(selectFields);
+        if (user) return user;
+    } catch (e) {
+        console.error('Regex lookup failed:', e.message);
+    }
+
+    return null;
+}
+
+// ============================================
+// ✅ Validate API Key (Sender) — With proper order
 // ============================================
 async function validateApiKey(apiKey) {
-    if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+    // 1️⃣ Format check
+    if (!apiKey || apiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(apiKey)) {
         return { status: 'failed', message: 'Invalid API Key format' };
     }
-    const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
-        .select('_id fullName mobile walletId balance isBlocked telegramId apiKeyActive');
-    if (!user) return { status: 'failed', message: 'Invalid API Key' };
-    if (user.apiKeyActive === false) return { status: 'failed', message: 'API Key is disabled' };
-    if (user.isBlocked) return { status: 'failed', message: 'User account is blocked' };
+
+    // 2️⃣ Lookup (case-insensitive)
+    const user = await findUserByApiKey(apiKey);
+
+    if (!user) {
+        console.log('❌ API key lookup failed for:', '***' + String(apiKey).slice(-4));
+        return { status: 'failed', message: 'Invalid API Key' };
+    }
+
+    // ✅ Debug log
+    console.log('✅ API key matched:', {
+        userId: user._id,
+        name: user.fullName,
+        apiKeyActive: user.apiKeyActive,
+        isBlocked: user.isBlocked
+    });
+
+    // 3️⃣ Disable check — MUST come before any other failure
+    if (user.apiKeyActive === false) {
+        console.log('🚫 API key is disabled for:', user.mobile);
+        return { status: 'failed', message: 'API Key is disabled' };
+    }
+
+    // 4️⃣ Blocked check
+    if (user.isBlocked) {
+        return { status: 'failed', message: 'User account is blocked' };
+    }
+
     return { status: 'success', user };
 }
 
+// ============================================
+// Find user by mobile
+// ============================================
 async function findUserByMobile(mobile) {
     if (!mobile || !/^[0-9]{10}$/.test(String(mobile))) {
         return { status: 'failed', message: 'Invalid mobile number format' };
@@ -108,12 +160,14 @@ async function findUserByMobile(mobile) {
     return { status: 'success', user };
 }
 
+// ============================================
+// Validate Receiver API Key (case-insensitive)
+// ============================================
 async function validateReceiverApiKey(apiKey) {
-    if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+    if (!apiKey || apiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(apiKey)) {
         return { status: 'failed', message: 'Invalid receiver API Key format' };
     }
-    const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
-        .select('_id fullName mobile walletId balance isBlocked telegramId');
+    const user = await findUserByApiKey(apiKey, '_id fullName mobile walletId balance isBlocked telegramId');
     if (!user) return { status: 'failed', message: 'Receiver not found' };
     if (user.isBlocked) return { status: 'failed', message: 'Receiver account is blocked' };
     return { status: 'success', user };
@@ -156,22 +210,19 @@ function formatTimestamp() {
 }
 
 function handleDuplicateError(error) {
-    if (error.code === 11000) {
-        return 'Transaction ID conflict. Please retry';
-    }
+    if (error.code === 11000) return 'Transaction ID conflict. Please retry';
     return null;
 }
 
 // ============================================
-// ✅ CORE: API Payment — সব attempt track করবে
+// ✅ CORE: API Payment — সব attempt track
 // ============================================
 async function processApiPayment({ key, number, amount, comment = '', endpoint }) {
-    // ✅ key থেকে sender খুঁজে বের করুন — failed হলেও track করার জন্য
+    // ✅ Sender খুঁজে বের করুন — failed হলেও track করার জন্য
     let senderForTracking = null;
     if (key && typeof key === 'string' && key.length === 10) {
         try {
-            senderForTracking = await User.findOne({ apiKey: key.toUpperCase() })
-                .select('_id').lean();
+            senderForTracking = await findUserByApiKey(key, '_id');
         } catch (e) {}
     }
 
@@ -208,15 +259,16 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
             return { status: 'failed', message: 'Maximum payment amount is ₹5,000' };
         }
 
-        if (key.length !== 10 || !/^[A-Z0-9]+$/.test(key)) {
+        if (key.length !== 10 || !/^[A-Za-z0-9]+$/.test(key)) {
             await session.abortTransaction();
             return { status: 'failed', message: 'Invalid API Key format' };
         }
 
-        // ----- Sender -----
+        // ----- Sender validation -----
         const senderResult = await validateApiKey(key);
         if (senderResult.status === 'failed') {
             await session.abortTransaction();
+            // Disable/blocked case → tracking (কারণ user পাওয়া গেছে)
             if (senderForTracking) await trackApiUsage(senderForTracking._id, false);
             return { status: 'failed', message: senderResult.message };
         }
@@ -241,11 +293,7 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         if (sender.balance < paymentAmount) {
             await session.abortTransaction();
             await trackApiUsage(sender._id, false);
-            return {
-                status: 'failed',
-                message: 'Insufficient balance',
-                balance: sender.balance
-            };
+            return { status: 'failed', message: 'Insufficient balance', balance: sender.balance };
         }
 
         if (receiver.isBlocked || sender.isBlocked) {
@@ -312,7 +360,7 @@ async function processApiPayment({ key, number, amount, comment = '', endpoint }
         await session.commitTransaction();
         console.log(`✅ API Payment Successful [${endpoint}]:`, txn_Id);
 
-        // ✅ Sender-এর API usage track করুন (success)
+        // ✅ Sender usage track (success)
         await trackApiUsage(sender._id, true);
 
         // ----- Telegram -----
@@ -366,7 +414,6 @@ Dear ${escapeHtml(receiver.fullName)}, You Have Received A Payment In Your Walle
     } catch (error) {
         await session.abortTransaction();
 
-        // ✅ Failed attempt track করুন
         if (senderForTracking) {
             await trackApiUsage(senderForTracking._id, false);
         }
@@ -462,7 +509,7 @@ router.get('/make', auth, async (req, res) => {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'You cannot pay yourself');
         }
-        if (receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+        if (receiverApiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(receiverApiKey)) {
             await session.abortTransaction();
             return sendResponse(res, 'failed', 'Invalid receiver API Key format');
         }
@@ -589,8 +636,7 @@ router.get('/lookup', auth, async (req, res) => {
         if (!apiKey) return sendResponse(res, 'failed', 'API Key required');
         if (user.apiKey === apiKey) return sendResponse(res, 'failed', 'You cannot lookup yourself');
 
-        const receiver = await User.findOne({ apiKey: apiKey.toUpperCase() })
-            .select('fullName mobile walletId');
+        const receiver = await findUserByApiKey(apiKey, 'fullName mobile walletId');
         if (!receiver) return sendResponse(res, 'failed', 'User not found');
 
         return sendResponse(res, 'success', 'User found', {
@@ -679,13 +725,14 @@ router.get('/my-apikey', auth, async (req, res) => {
 router.get('/validate-key/:apiKey', async (req, res) => {
     try {
         const { apiKey } = req.params;
-        if (!apiKey || apiKey.length !== 10 || !/^[A-Z0-9]+$/.test(apiKey)) {
+        if (!apiKey || apiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(apiKey)) {
             return sendResponse(res, 'failed', 'Invalid API Key format');
         }
-        const user = await User.findOne({ apiKey: apiKey.toUpperCase() })
-            .select('fullName walletId mobile balance apiKeyActive');
+
+        const user = await findUserByApiKey(apiKey, 'fullName walletId mobile balance apiKeyActive isBlocked');
         if (!user) return sendResponse(res, 'failed', 'Invalid API Key');
         if (user.apiKeyActive === false) return sendResponse(res, 'failed', 'API Key is disabled');
+        if (user.isBlocked) return sendResponse(res, 'failed', 'User account is blocked');
 
         return sendResponse(res, 'success', 'API Key validated', {
             name: user.fullName,
@@ -713,7 +760,7 @@ router.get('/request', auth, async (req, res) => {
         if (isNaN(requestAmount) || requestAmount < 1) {
             return sendResponse(res, 'failed', 'Minimum request amount is ₹1');
         }
-        if (receiverApiKey.length !== 10 || !/^[A-Z0-9]+$/.test(receiverApiKey)) {
+        if (receiverApiKey.length !== 10 || !/^[A-Za-z0-9]+$/.test(receiverApiKey)) {
             return sendResponse(res, 'failed', 'Invalid receiver API Key format');
         }
 
