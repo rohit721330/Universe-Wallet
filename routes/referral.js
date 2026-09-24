@@ -42,12 +42,24 @@ async function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================
-// VERIFY TOKEN
+// VERIFY TOKEN — Multiple Header Case Support
 // ============================================
 const verifyToken = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(200).json({ success: false, message: 'No Token Provided' });
+        // ✅ FIX: Support both lowercase and uppercase header names
+        const authHeader = req.headers.authorization || req.headers.Authorization;
+        console.log('🔵 [verifyToken] authHeader:', authHeader ? 'PRESENT' : 'MISSING');
+
+        if (!authHeader) {
+            return res.status(200).json({ success: false, message: 'No Token Provided' });
+        }
+
+        const parts = authHeader.split(' ');
+        const token = parts.length === 2 ? parts[1] : parts[0];
+
+        if (!token) {
+            return res.status(200).json({ success: false, message: 'No Token Provided' });
+        }
 
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
