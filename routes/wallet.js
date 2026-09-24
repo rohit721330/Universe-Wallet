@@ -46,6 +46,13 @@ function getTransactionMethod(tx) {
     if (tx.type === 'game_win' || tx.type === 'game_loss') return 'Game';
     if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'Lifafa';
     if (tx.type === 'gift') return 'Gift';
+
+    // ✅ Referral bonuses
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return 'Referral';
+
     return 'Transfer';
 }
 
@@ -68,6 +75,13 @@ function getTransactionCategory(tx) {
     if (tx.type === 'lifafa_creation') return 'Lifafa created';
     if (tx.type === 'lifafa_claim') return 'Lifafa claimed';
     if (tx.type === 'gift') return 'Gift';
+
+    // ✅ Referral bonuses
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return 'Referral bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return 'Referral welcome';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return 'Referral bonus (Admin)';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return 'Referral reversed';
+
     return 'transfer';
 }
 
@@ -79,20 +93,13 @@ function getGiftSubCategory(tx, userId) {
     const sid = tx.sender_id?._id?.toString() || tx.sender_id?.toString() || null;
     const rid = tx.receiver_id?._id?.toString() || tx.receiver_id?.toString() || null;
 
-    // Metadata-based (most reliable)
     if (tx.metadata && tx.metadata.category) {
         if (tx.metadata.category === 'gift_created') return 'gift_created';
         if (tx.metadata.category === 'gift_received') return 'gift_received';
     }
 
-    // Fallback based on sender/receiver
-    // Gift Received: user is receiver but not sender
     if (rid === uid && sid !== uid) return 'gift_received';
-
-    // Gift Created: user is sender AND receiver (own transaction)
     if (sid === uid && rid === uid) return 'gift_created';
-
-    // Gift Created: user is sender only
     if (sid === uid && rid !== uid) return 'gift_created';
 
     return 'gift';
@@ -115,7 +122,7 @@ function transformTransaction(txObj, user) {
         if (txObj.type === 'transfer_send') transactionType = 'payment_sent';
         else if (txObj.type === 'transfer_receive') transactionType = 'payment_received';
     }
-    // ===== INVOICE PAYMENT =====
+    // ===== INVOICE =====
     else if (txObj.type === 'invoice_payment' || txObj.type === 'invoice_pay' ||
         txObj.type === 'invoice_pay_send' || txObj.type === 'invoice_pay_receive') {
         if (txObj.type === 'invoice_pay_receive' || isReceiver) transactionType = 'invoice_received';
@@ -136,6 +143,19 @@ function transformTransaction(txObj, user) {
     // ===== WITHDRAW =====
     else if (txObj.type === 'withdraw' || txObj.type === 'withdrawal') {
         transactionType = 'payment_sent';
+    }
+    // ✅ REFERRAL BONUS =====
+    else if (txObj.metadata && txObj.metadata.transactionType === 'referral_bonus_received') {
+        transactionType = 'referral_bonus_received';
+    }
+    else if (txObj.metadata && txObj.metadata.transactionType === 'referral_welcome_bonus') {
+        transactionType = 'referral_welcome_bonus';
+    }
+    else if (txObj.metadata && txObj.metadata.transactionType === 'referral_bonus_force') {
+        transactionType = 'referral_bonus_force';
+    }
+    else if (txObj.metadata && txObj.metadata.transactionType === 'referral_bonus_reversed') {
+        transactionType = 'referral_bonus_reversed';
     }
     else if (isSender && (txObj.type === 'transfer' || txObj.type === 'api')) {
         transactionType = 'payment_sent';
