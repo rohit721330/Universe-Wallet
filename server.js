@@ -78,13 +78,8 @@ async function connectDB() {
     return cached.conn;
 }
 
-// Temporary debug route — Vercel এ deploy করার পর মুছে ফেলবেন
-app.get('/referral-test', (req, res) => {
-    res.json({ success: true, message: 'Referral route is reachable' });
-});
-
 // =========================================================
-// ✅ DB Connection Middleware — /api এবং /referral উভয়ের জন্য
+// ✅ DB Connection Middleware
 // =========================================================
 const dbConnectMiddleware = async (req, res, next) => {
     try {
@@ -99,6 +94,24 @@ const dbConnectMiddleware = async (req, res, next) => {
     }
 };
 
+// =========================================================
+// ✅ REFERRAL-SPECIFIC CORS MIDDLEWARE
+// Vercel এ Authorization হেডার স্ট্রিপ হওয়া রোধ করে
+// =========================================================
+const referralCorsMiddleware = (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Expose-Headers', 'Authorization');
+
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+};
+
+app.use('/referral', referralCorsMiddleware);
 app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
@@ -182,7 +195,6 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
 
         console.log('🔵 [migrate-v2] Starting migration...');
 
-        // ✅ Step 1: Find ALL active users
         const allUsers = await User.find({ isDeleted: false });
         console.log(`🔵 [migrate-v2] Total users found: ${allUsers.length}`);
 
@@ -190,7 +202,6 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
         const skipped = [];
 
         for (const user of allUsers) {
-            // ✅ Check if user has a VALID referral code
             const hasValidCode = user.referralCode &&
                                   typeof user.referralCode === 'string' &&
                                   user.referralCode.length >= 6;
@@ -204,7 +215,6 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
                 continue;
             }
 
-            // ✅ Generate new code
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let newCode = '';
             let attempts = 0;
@@ -229,7 +239,6 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
                 continue;
             }
 
-            // ✅ Update user with new code
             await User.updateOne(
                 { _id: user._id },
                 { $set: { referralCode: newCode } }
@@ -257,6 +266,11 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
         console.error('❌ [migrate-v2] Error:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
+});
+
+// ⚠️ TEMPORARY DEBUG ROUTE — Delete after use
+app.get('/referral-test', (req, res) => {
+    res.json({ success: true, message: 'Referral route is reachable' });
 });
 
 // ============================================================
