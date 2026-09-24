@@ -143,6 +143,8 @@ router.get('/', verifyToken, async (req, res) => {
             if (!generated) {
                 return res.status(200).json({ success: false, message: 'Failed to generate referral code. Please retry.' });
             }
+            // ✅ IMPORTANT: Update local user object so it reflects in response
+            user.referralCode = generated; 
         }
 
         const stats = await Referral.getStatsForUser(user._id);
