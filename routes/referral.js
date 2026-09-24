@@ -91,13 +91,14 @@ function buildReferralLink(code) {
 }
 
 // ============================================
-// ✅ ENSURE USER HAS REFERRAL CODE
+// ENSURE USER HAS REFERRAL CODE
 // ============================================
 async function ensureUserHasReferralCode(user) {
     if (user.referralCode && user.referralCode.length >= 6) {
         return user.referralCode;
     }
 
+    console.log(`⚠️ [ensureUserHasReferralCode] Missing code for ${user.mobile} — generating...`);
     const newCode = await generateUniqueReferralCode();
 
     try {
@@ -109,11 +110,11 @@ async function ensureUserHasReferralCode(user) {
 
         if (updated && updated.referralCode) {
             user.referralCode = updated.referralCode;
-            console.log(`✅ Auto-generated referral code for ${user.mobile}: ${newCode}`);
+            console.log(`✅ [ensureUserHasReferralCode] Generated: ${newCode} for ${user.mobile}`);
             return updated.referralCode;
         }
     } catch (err) {
-        console.error('❌ Failed to auto-generate referral code:', err.message);
+        console.error('❌ [ensureUserHasReferralCode] Failed:', err.message);
     }
 
     return null;
@@ -123,14 +124,21 @@ async function ensureUserHasReferralCode(user) {
 // GET / — Main referral info
 // ============================================
 router.get('/', verifyToken, async (req, res) => {
+    console.log('🔵 [GET /referral/] Handler started for user:', req.user._id);
+
     try {
         const user = await User.findById(req.user._id)
             .select('fullName mobile walletId referralCode referralCount referralPendingCount referralEarnings referralSettings profilePicture');
 
-        if (!user) return res.status(200).json({ success: false, message: 'User not found' });
+        if (!user) {
+            console.log('❌ [GET /referral/] User not found');
+            return res.status(200).json({ success: false, message: 'User not found' });
+        }
+
+        console.log('🔵 [GET /referral/] User.referralCode from DB:', user.referralCode || 'MISSING');
 
         // ✅ Auto-generate if missing
-        if (!user.referralCode) {
+        if (!user.referralCode || user.referralCode.length < 6) {
             const generated = await ensureUserHasReferralCode(user);
             if (!generated) {
                 return res.status(200).json({ success: false, message: 'Failed to generate referral code. Please retry.' });
@@ -140,7 +148,7 @@ router.get('/', verifyToken, async (req, res) => {
         const stats = await Referral.getStatsForUser(user._id);
         const monthCount = await Referral.getMonthlyCount(user._id);
 
-        return res.status(200).json({
+        const responseData = {
             success: true,
             referralCode: user.referralCode,
             referralLink: buildReferralLink(user.referralCode),
@@ -164,9 +172,12 @@ router.get('/', verifyToken, async (req, res) => {
                 bonusAmount: user.referralSettings?.bonusAmount ?? 10,
                 requireFirstTransaction: user.referralSettings?.requireFirstTransaction !== false
             }
-        });
+        };
+
+        console.log('✅ [GET /referral/] Response referralCode:', responseData.referralCode);
+        return res.status(200).json(responseData);
     } catch (error) {
-        console.error('❌ Get referral info error:', error.message);
+        console.error('❌ [GET /referral/] Error:', error.message);
         return res.status(200).json({ success: false, message: 'Failed to fetch referral info' });
     }
 });
@@ -213,7 +224,7 @@ router.get('/list', verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Get referral list error:', error.message);
+        console.error('❌ [GET /list] Error:', error.message);
         return res.status(200).json({ success: false, message: 'Failed to fetch referrals' });
     }
 });
@@ -250,13 +261,13 @@ router.post('/check-code', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Check code error:', error.message);
+        console.error('❌ [check-code] Error:', error.message);
         return res.status(200).json({ success: false, valid: false, message: 'Server error' });
     }
 });
 
 // ============================================
-// POST /complete — Referral complete + bonuses
+// POST /complete
 // ============================================
 router.post('/complete', async (req, res) => {
     try {
@@ -340,7 +351,7 @@ router.post('/complete', async (req, res) => {
             bonusAmount
         });
     } catch (error) {
-        console.error('❌ Complete referral error:', error.message);
+        console.error('❌ [complete] Error:', error.message);
         return res.status(200).json({ success: false, message: 'Failed to complete referral' });
     }
 });
