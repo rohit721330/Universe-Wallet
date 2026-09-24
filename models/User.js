@@ -7,7 +7,7 @@ const default_logo = 'https://raw.githubusercontent.com/rohit721330/Logo-Picture
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: [true, 'Full name is required'], trim: true },
     mobile: { type: String, required: [true, 'Mobile number is required'], trim: true, match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'] },
-    email: { type: String, required: [true, 'Email address is required'], trim: true, lowercase: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'] },
+    email: { type: String, required: [true, 'Email address is required'], trim: true, lowercase: true, match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'] },
     telegramId: { type: String, trim: true },
     password: { type: String, required: [true, 'Password is required'] },
     pin: { type: String, default: null },
@@ -17,20 +17,20 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isNewUser: { type: Boolean, default: true },
 
+    // ✅ API
     apiKey: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     apiKeyActive: { type: Boolean, default: true, index: true },
     apiKeyCreatedAt: { type: Date, default: null },
     apiKeyUpdatedAt: { type: Date, default: null },
 
+    // ✅ API usage tracking
     totalApiCalls: { type: Number, default: 0, min: 0 },
     successfulApiCalls: { type: Number, default: 0, min: 0 },
     failedApiCalls: { type: Number, default: 0, min: 0 },
     lastApiUsedAt: { type: Date, default: null },
     lastApiSuccessAt: { type: Date, default: null },
 
-    // ✅ Referral System fields
-    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true, index: true },
-    referralCodeCustom: { type: Boolean, default: false },
+    // ✅ Referral — code ownership Referral model-এ
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     referredByCode: { type: String, uppercase: true, trim: true, default: null },
     referralCount: { type: Number, default: 0, min: 0 },
@@ -62,7 +62,6 @@ userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { isDele
 userSchema.index({ telegramId: 1 }, { unique: true, sparse: true, partialFilterExpression: { isDeleted: false }, name: 'telegramId_unique_active' });
 userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
 userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
-userSchema.index({ referralCode: 1 }, { unique: true, sparse: true, name: 'referralCode_unique' });
 userSchema.index({ referredBy: 1, createdAt: -1 }, { name: 'referredBy_index' });
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
@@ -73,6 +72,7 @@ function generateWalletId() {
     const prefix = 'UW';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
+
     let letterPart = '';
     while (letterPart.length < 2) {
         const byte = crypto.randomBytes(1)[0];
@@ -97,19 +97,6 @@ function generateApiKey() {
         if (byte < 252) key += chars[byte % chars.length];
     }
     return key;
-}
-
-// ============================================
-// HELPER: Generate Referral Code (10 alphanumeric)
-// ============================================
-function generateReferralCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    while (code.length < 10) {
-        const byte = crypto.randomBytes(1)[0];
-        if (byte < 252) code += chars[byte % chars.length];
-    }
-    return code;
 }
 
 // ============================================
@@ -150,21 +137,6 @@ userSchema.pre('save', async function(next) {
             if (this.apiKeyActive === undefined || this.apiKeyActive === null) this.apiKeyActive = true;
             if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
-        }
-
-        // ✅ Referral Code
-        if (this.isNew && !this.referralCode) {
-            const User = this.constructor;
-            let attempts = 0;
-            let newCode;
-            let exists = true;
-            while (exists && attempts < 10) {
-                newCode = generateReferralCode();
-                exists = await User.exists({ referralCode: newCode, _id: { $ne: this._id } });
-                attempts++;
-            }
-            if (exists) return next(new Error('Failed to generate unique Referral Code.'));
-            this.referralCode = newCode;
         }
 
         next();
@@ -288,10 +260,6 @@ userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase() });
 };
-userSchema.statics.findByReferralCode = function(code) {
-    if (!code) return null;
-    return this.findOne({ referralCode: code.toUpperCase() });
-};
 userSchema.statics.findActiveByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase(), isDeleted: false, isBlocked: false });
@@ -330,4 +298,3 @@ userSchema.statics.findActiveUserById = function(userId) {
 
 module.exports = mongoose.model('User', userSchema);
 module.exports.default_logo = default_logo;
-module.exports.generateReferralCode = generateReferralCode;
