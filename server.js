@@ -144,10 +144,10 @@ app.get('/setup-admin', async (req, res) => {
         }
 
         const superAdmin = new Admin({
-            adminId: 'UWLN427970',
+            adminId: 'UWLE099106',
             password: 'Universe@330',
-            fullName: 'Universe Admin',
-            mobile: '9517532486',
+            fullName: 'Universe',
+            mobile: '9477379243',
             email: 'business.universewallet@gmail.com',
             role: 'super_admin',
             isActive: true,
@@ -161,15 +161,15 @@ app.get('/setup-admin', async (req, res) => {
             success: true,
             message: '✅ Super Admin Created Successfully!',
             credentials: {
-                adminId: 'UWLN427970',
+                adminId: 'UWLE099106',
                 password: 'Universe@330',
-                mobile: '9517532486'
+                mobile: '9477379243'
             },
             nextSteps: [
-                '1. Go to /rohit (admin panel)',
-                '2. Enter your 6-digit pattern',
-                '3. Admin ID: UWLN427970',
-                '4. Password: Universe@330',
+                '1. Go to /xxxxxxx (admin panel)',
+                '2. Enter your X-digit pattern',
+                '3. Admin ID: UWLN****70',
+                '4. Password: *********',
                 '5. ⚠️ Change password immediately after login!',
                 '6. ⚠️ DELETE this /setup-admin route from server.js NOW!'
             ]
