@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema({
     lastApiUsedAt: { type: Date, default: null },
     lastApiSuccessAt: { type: Date, default: null },
 
-    // ✅ Referral — code ownership Referral model-এ
+    // ✅ Referral — fixed code, user cannot change
+    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true, index: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     referredByCode: { type: String, uppercase: true, trim: true, default: null },
     referralCount: { type: Number, default: 0, min: 0 },
@@ -39,8 +40,7 @@ const userSchema = new mongoose.Schema({
     referralSettings: {
         enabled: { type: Boolean, default: true },
         bonusAmount: { type: Number, default: 10, min: 0 },
-        requireFirstTransaction: { type: Boolean, default: true },
-        allowCustomCode: { type: Boolean, default: true }
+        requireFirstTransaction: { type: Boolean, default: true }
     },
 
     profilePicture: { type: String, default: default_logo },
@@ -62,6 +62,7 @@ userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { isDele
 userSchema.index({ telegramId: 1 }, { unique: true, sparse: true, partialFilterExpression: { isDeleted: false }, name: 'telegramId_unique_active' });
 userSchema.index({ walletId: 1 }, { unique: true, name: 'walletId_unique' });
 userSchema.index({ apiKey: 1 }, { unique: true, sparse: true, name: 'apiKey_unique' });
+userSchema.index({ referralCode: 1 }, { unique: true, sparse: true, name: 'referralCode_unique' });
 userSchema.index({ referredBy: 1, createdAt: -1 }, { name: 'referredBy_index' });
 userSchema.index({ isDeleted: 1, isBlocked: 1, isActive: 1 });
 
@@ -72,7 +73,6 @@ function generateWalletId() {
     const prefix = 'UW';
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
-
     let letterPart = '';
     while (letterPart.length < 2) {
         const byte = crypto.randomBytes(1)[0];
@@ -97,6 +97,19 @@ function generateApiKey() {
         if (byte < 252) key += chars[byte % chars.length];
     }
     return key;
+}
+
+// ============================================
+// HELPER: Generate Referral Code
+// ============================================
+function generateReferralCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    while (code.length < 10) {
+        const byte = crypto.randomBytes(1)[0];
+        if (byte < 252) code += chars[byte % chars.length];
+    }
+    return code;
 }
 
 // ============================================
@@ -137,6 +150,21 @@ userSchema.pre('save', async function(next) {
             if (this.apiKeyActive === undefined || this.apiKeyActive === null) this.apiKeyActive = true;
             if (!this.apiKeyCreatedAt) this.apiKeyCreatedAt = new Date();
             this.apiKeyUpdatedAt = new Date();
+        }
+
+        // ✅ Referral Code (fixed, auto-generate)
+        if (this.isNew && !this.referralCode) {
+            const User = this.constructor;
+            let attempts = 0;
+            let newCode;
+            let exists = true;
+            while (exists && attempts < 15) {
+                newCode = generateReferralCode();
+                exists = await User.exists({ referralCode: newCode, _id: { $ne: this._id } });
+                attempts++;
+            }
+            if (exists) return next(new Error('Failed to generate unique Referral Code.'));
+            this.referralCode = newCode;
         }
 
         next();
@@ -260,6 +288,10 @@ userSchema.statics.findByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase() });
 };
+userSchema.statics.findByReferralCode = function(code) {
+    if (!code) return null;
+    return this.findOne({ referralCode: code.toUpperCase() });
+};
 userSchema.statics.findActiveByApiKey = function(apiKey) {
     if (!apiKey) return null;
     return this.findOne({ apiKey: apiKey.toUpperCase(), isDeleted: false, isBlocked: false });
@@ -298,3 +330,4 @@ userSchema.statics.findActiveUserById = function(userId) {
 
 module.exports = mongoose.model('User', userSchema);
 module.exports.default_logo = default_logo;
+module.exports.generateReferralCode = generateReferralCode;
