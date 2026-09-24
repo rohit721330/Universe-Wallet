@@ -1,4 +1,4 @@
-// models/Admin.js
+// FILE: models/Admin.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -15,7 +15,17 @@ const adminSchema = new mongoose.Schema({
     lastLoginAt: Date,
     lastLoginIP: String,
     createdBy: String,
-    updatedBy: String
+    updatedBy: String,
+
+    // ✅ Global Referral Settings
+    referralSettings: {
+        enabled: { type: Boolean, default: true },
+        bonusAmount: { type: Number, default: 10, min: 1 },
+        minDepositAmount: { type: Number, default: 50, min: 1 },
+        maxReferralsPerUser: { type: Number, default: 100, min: 1 },
+        updatedAt: { type: Date, default: null },
+        updatedBy: { type: String, default: null }
+    }
 }, { timestamps: true });
 
 adminSchema.pre('save', async function(next) {
