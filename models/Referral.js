@@ -1,65 +1,206 @@
-// FILE: models/ReferralCode.js
+// FILE: models/Referral.js
 const mongoose = require('mongoose');
 
-const referralCodeSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    code: { type: String, required: true, uppercase: true, trim: true, unique: true, index: true },
+const referralSchema = new mongoose.Schema({
+    // ══════════════════════════════════════════════
+    // ✅ Referral PAIR (referrer → referred)
+    // ══════════════════════════════════════════════
+    referrerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+    referredUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    status: { type: String, enum: ['pending', 'completed', 'failed', 'expired'], default: 'pending', index: true },
+    bonusAmount: { type: Number, default: 10, min: 0 },
+    referrerBonusPaid: { type: Boolean, default: false },
+    referredBonusPaid: { type: Boolean, default: false },
+    referrerBonusPaidAt: { type: Date, default: null },
+    referredBonusPaidAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
+    notes: { type: String, default: '', trim: true },
+
+    // ══════════════════════════════════════════════
+    // ✅ Referral CODE (ownership)
+    // ══════════════════════════════════════════════
+    referralCode: { type: String, uppercase: true, trim: true },
+    codeOwner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+    codeStatus: { type: String, enum: ['active', 'inactive'], default: 'active', index: true },
     isCustom: { type: Boolean, default: false },
-    status: { type: String, enum: ['active', 'inactive', 'expired'], default: 'active', index: true },
+    usedCount: { type: Number, default: 0, min: 0 },
     replacedBy: { type: String, default: null },
     replacedAt: { type: Date, default: null },
-    usedCount: { type: Number, default: 0, min: 0 },
+
     metadata: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 
-// ✅ এক user-এর একটাই active code থাকবে
-referralCodeSchema.index(
-    { userId: 1, status: 1 },
+// ============================================
+// INDEXES
+// ============================================
+
+// ✅ Referral pair unique — শুধু যাদের referrerId ও referredUserId দুটোতেই objectId
+referralSchema.index(
+    { referrerId: 1, referredUserId: 1 },
     {
         unique: true,
-        partialFilterExpression: { status: 'active' },
+        partialFilterExpression: {
+            referrerId: { $type: 'objectId' },
+            referredUserId: { $type: 'objectId' }
+        },
+        name: 'unique_referral_pair'
+    }
+);
+
+// ✅ Code unique — শুধু যাদের referralCode আছে string হিসেবে
+referralSchema.index(
+    { referralCode: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { referralCode: { $type: 'string' } },
+        name: 'code_unique'
+    }
+);
+
+// ✅ Active code per user — এক user-এর একটাই active code
+referralSchema.index(
+    { codeOwner: 1, codeStatus: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { codeStatus: 'active', codeOwner: { $type: 'objectId' } },
         name: 'user_active_code_unique'
     }
 );
 
-// ✅ Code সবসময় unique
-referralCodeSchema.index({ code: 1 }, { unique: true, name: 'code_unique' });
+// ✅ Query performance
+referralSchema.index({ referrerId: 1, status: 1, createdAt: -1 });
+referralSchema.index({ referredUserId: 1 });
+referralSchema.index({ status: 1, createdAt: -1 });
+referralSchema.index({ codeOwner: 1, createdAt: -1 });
 
 // ============================================
-// STATIC METHODS
+// STATIC: Referral Pair Stats
 // ============================================
-referralCodeSchema.statics.getActiveCode = async function(userId) {
-    return await this.findOne({ userId, status: 'active' }).lean();
+referralSchema.statics.getStatsForUser = async function(userId) {
+    const uid = mongoose.Types.ObjectId(userId);
+
+    const stats = await this.aggregate([
+        { $match: { referrerId: uid } },
+        {
+            $group: {
+                _id: null,
+                totalReferrals: { $sum: 1 },
+                completedReferrals: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+                pendingReferrals: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                failedReferrals: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
+                totalEarned: {
+                    $sum: {
+                        $cond: [
+                            { $and: [{ $eq: ['$status', 'completed'] }, { $eq: ['$referrerBonusPaid', true] }] },
+                            '$bonusAmount',
+                            0
+                        ]
+                    }
+                },
+                totalPendingBonus: {
+                    $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$bonusAmount', 0] }
+                }
+            }
+        }
+    ]);
+
+    return stats[0] || {
+        totalReferrals: 0,
+        completedReferrals: 0,
+        pendingReferrals: 0,
+        failedReferrals: 0,
+        totalEarned: 0,
+        totalPendingBonus: 0
+    };
 };
 
-referralCodeSchema.statics.deactivateAllForUser = async function(userId, replacedBy = null) {
-    return await this.updateMany(
-        { userId, status: 'active' },
-        { $set: { status: 'inactive', replacedBy, replacedAt: new Date() } }
-    );
+referralSchema.statics.getMonthlyCount = async function(userId) {
+    const uid = mongoose.Types.ObjectId(userId);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    return await this.countDocuments({ referrerId: uid, createdAt: { $gte: startOfMonth } });
 };
 
-referralCodeSchema.statics.createCode = async function(userId, code, isCustom = false) {
-    await this.deactivateAllForUser(userId, code.toUpperCase().trim());
-    const newCode = new this({
-        userId,
-        code: code.toUpperCase().trim(),
-        isCustom,
-        status: 'active'
-    });
-    return await newCode.save();
+// ============================================
+// ✅ STATIC: CODE MANAGEMENT
+// ============================================
+
+// এক user-এর active code আনা
+referralSchema.statics.getActiveCode = async function(userId) {
+    return await this.findOne({
+        codeOwner: mongoose.Types.ObjectId(userId),
+        codeStatus: 'active'
+    }).lean();
 };
 
-referralCodeSchema.statics.codeExists = async function(code) {
-    const exists = await this.findOne({ code: code.toUpperCase().trim() }).select('_id').lean();
+// Code আছে কি না চেক (any status)
+referralSchema.statics.codeExists = async function(code) {
+    const exists = await this.findOne({
+        referralCode: String(code).toUpperCase().trim()
+    }).select('_id').lean();
     return !!exists;
 };
 
-referralCodeSchema.statics.incrementUsage = async function(code) {
+// নতুন code তৈরি (old গুলো inactive করে)
+referralSchema.statics.createCode = async function(userId, code, isCustom = false) {
+    const cleanedCode = String(code).toUpperCase().trim();
+    const uid = mongoose.Types.ObjectId(userId);
+
+    // ✅ পুরনো active code গুলো inactive করো
+    await this.updateMany(
+        { codeOwner: uid, codeStatus: 'active' },
+        {
+            $set: {
+                codeStatus: 'inactive',
+                replacedBy: cleanedCode,
+                replacedAt: new Date()
+            }
+        }
+    );
+
+    // ✅ নতুন code document তৈরি
+    const newCode = new this({
+        referralCode: cleanedCode,
+        codeOwner: uid,
+        codeStatus: 'active',
+        isCustom
+    });
+
+    return await newCode.save();
+};
+
+// Code usage বাড়ানো
+referralSchema.statics.incrementUsage = async function(code) {
     return await this.updateOne(
-        { code: code.toUpperCase().trim(), status: 'active' },
+        {
+            referralCode: String(code).toUpperCase().trim(),
+            codeStatus: 'active'
+        },
         { $inc: { usedCount: 1 } }
     );
 };
 
-module.exports = mongoose.model('ReferralCode', referralCodeSchema);
+// User-এর সব code history
+referralSchema.statics.getUserCodeHistory = async function(userId, limit = 50) {
+    return await this.find({
+        codeOwner: mongoose.Types.ObjectId(userId)
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .select('referralCode codeStatus isCustom usedCount createdAt replacedBy replacedAt')
+    .lean();
+};
+
+// ============================================
+// ✅ STATIC: Check if code belongs to user
+// ============================================
+referralSchema.statics.isUserCode = async function(userId, code) {
+    const found = await this.findOne({
+        codeOwner: mongoose.Types.ObjectId(userId),
+        referralCode: String(code).toUpperCase().trim()
+    }).select('_id').lean();
+    return !!found;
+};
+
+module.exports = mongoose.model('Referral', referralSchema);
