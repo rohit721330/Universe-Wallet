@@ -17,7 +17,7 @@ const adminSchema = new mongoose.Schema({
     createdBy: String,
     updatedBy: String,
 
-    // ✅ Global Referral Settings
+    // ✅ Global Referral Settings (Admin configurable)
     referralSettings: {
         enabled: { type: Boolean, default: true },
         bonusAmount: { type: Number, default: 10, min: 1 },
