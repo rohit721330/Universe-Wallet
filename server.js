@@ -358,9 +358,6 @@ app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
     }
-    if (req.path.startsWith('/referral/')) {
-        return res.status(404).json({ success: false, message: 'Referral Endpoint Not Found' });
-    }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
