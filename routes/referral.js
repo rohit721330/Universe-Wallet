@@ -1,5 +1,5 @@
 // FILE: routes/referral.js
-const router = require('express').Router();
+const router = require('express').Router({ mergeParams: true });  // ✅ mergeParams যোগ করা হয়েছে
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -122,20 +122,21 @@ async function ensureUserHasReferralCode(user) {
 
 // ============================================
 // GET / — Main referral info
+// ✅ FIX: ['/', ''] ব্যবহার করা হয়েছে যাতে /referral এবং /referral/ দুটোই কাজ করে
 // ============================================
-router.get('/', verifyToken, async (req, res) => {
-    console.log('🔵 [GET /referral/] Handler started for user:', req.user._id);
+router.get(['/', ''], verifyToken, async (req, res) => {
+    console.log('🔵 [GET /referral] Handler started for user:', req.user._id);
 
     try {
         const user = await User.findById(req.user._id)
             .select('fullName mobile walletId referralCode referralCount referralPendingCount referralEarnings referralSettings profilePicture');
 
         if (!user) {
-            console.log('❌ [GET /referral/] User not found');
+            console.log('❌ [GET /referral] User not found');
             return res.status(200).json({ success: false, message: 'User not found' });
         }
 
-        console.log('🔵 [GET /referral/] User.referralCode from DB:', user.referralCode || 'MISSING');
+        console.log('🔵 [GET /referral] User.referralCode from DB:', user.referralCode || 'MISSING');
 
         // ✅ Auto-generate if missing
         if (!user.referralCode || user.referralCode.length < 6) {
@@ -143,8 +144,7 @@ router.get('/', verifyToken, async (req, res) => {
             if (!generated) {
                 return res.status(200).json({ success: false, message: 'Failed to generate referral code. Please retry.' });
             }
-            // ✅ IMPORTANT: Update local user object so it reflects in response
-            user.referralCode = generated; 
+            user.referralCode = generated;
         }
 
         const stats = await Referral.getStatsForUser(user._id);
@@ -176,10 +176,10 @@ router.get('/', verifyToken, async (req, res) => {
             }
         };
 
-        console.log('✅ [GET /referral/] Response referralCode:', responseData.referralCode);
+        console.log('✅ [GET /referral] Response referralCode:', responseData.referralCode);
         return res.status(200).json(responseData);
     } catch (error) {
-        console.error('❌ [GET /referral/] Error:', error.message);
+        console.error('❌ [GET /referral] Error:', error.message);
         return res.status(200).json({ success: false, message: 'Failed to fetch referral info' });
     }
 });
