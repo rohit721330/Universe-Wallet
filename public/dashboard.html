@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dashboard • Universe Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/universe-wallet-logo-512.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Universe">
+<meta name="mobile-web-app-capable" content="yes">
+
+<style>
+:root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --user-avatar-border: #dce6ef; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --modal-bg: #ffffff; --modal-detail-color: #172033; --modal-label-color: #8a9ab0; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #ffffff; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; --stat-bg: #ffffff; --stat-shadow: 0 5px 15px rgba(30,60,100,.08); --quick-bg: #ffffff; --quick-shadow: 0 5px 14px rgba(30,60,100,.08); --txn-bg: #ffffff; --txn-shadow: 0 5px 16px rgba(30,60,100,.08); --view-all-bg: #eaf3ff; --view-all-color: #2778df; --balance-card-shadow: 0 12px 25px rgba(38,103,220,.25); }
+body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --user-avatar-border: #334155; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --modal-bg: #1a2639; --modal-detail-color: #edf3ff; --modal-label-color: #8491a6; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #1a2639; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; --stat-bg: #1a2639; --stat-shadow: 0 5px 15px rgba(0,0,0,.25); --quick-bg: #1a2639; --quick-shadow: 0 5px 14px rgba(0,0,0,.25); --txn-bg: #1a2639; --txn-shadow: 0 5px 16px rgba(0,0,0,.25); --view-all-bg: #172b55; --view-all-color: #60a5fa; --balance-card-shadow: 0 12px 25px rgba(0,0,0,.4); }
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
+
+* { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select, [contenteditable="true"] { -webkit-user-select: text !important; user-select: text !important; -webkit-touch-callout: default !important; }
+.copy-btn, .modal-btn-copy, .copy-text, [data-copy] { -webkit-user-select: text !important; user-select: text !important; -webkit-touch-callout: default !important; }
+img { -webkit-user-drag: none; user-drag: none; }
+
+.app { width: 100%; max-width: 430px; min-height: 100vh; margin: auto; padding-bottom: 130px; background: linear-gradient(var(--bg-pattern-1), var(--bg-pattern-2)), repeating-linear-gradient(0deg, transparent 0px, transparent 38px, var(--grid-color) 39px), repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--grid-color) 39px); transition: background .3s ease; }
+
+.header { height: 64px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; background: var(--header-bg); border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.header-left { display: flex; align-items: center; gap: 11px; }
+.menu-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--menu-btn-bg); border: 1px solid var(--menu-btn-border); border-radius: 11px; font-size: 15px; color: var(--menu-btn-color); cursor: pointer; }
+.title { font-size: 15px; font-weight: 700; color: var(--text-title); }
+.header-right { display: flex; align-items: center; gap: 7px; }
+.theme-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: var(--theme-btn-bg); border: 1px solid var(--theme-btn-border); border-radius: 50%; color: var(--theme-btn-color); font-size: 15px; cursor: pointer; transition: all 0.25s ease; }
+.theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--bottom-nav-active); color: var(--bottom-nav-active); }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid var(--user-avatar-border); overflow: hidden; }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+.sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: var(--sidebar-bg); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background .3s ease; display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
+.sidebar.open { transform: translateX(0); }
+.sidebar-header { padding: 22px 18px 18px; background: var(--sidebar-header); color: #fff; position: relative; overflow: hidden; }
+.sidebar-header::before { content: ''; position: absolute; width: 180px; height: 180px; right: -70px; top: -70px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+.sidebar-header::after { content: ''; position: absolute; width: 120px; height: 120px; right: -30px; bottom: -60px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+.sidebar-user { display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+.sidebar-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+.sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-info h3 { font-size: 14px; font-weight: 800; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-info p { font-size: 10px; opacity: 0.85; font-weight: 600; letter-spacing: 0.3px; }
+.sidebar-balance-box { margin-top: 14px; padding: 10px 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
+.sidebar-balance-label { font-size: 9px; font-weight: 700; opacity: 0.85; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-balance-value { font-size: 16px; font-weight: 900; }
+.sidebar-menu { flex: 1; overflow-y: auto; padding: 14px 10px; }
+.sidebar-menu::-webkit-scrollbar { width: 4px; }
+.sidebar-menu::-webkit-scrollbar-thumb { background: #c5d9f0; border-radius: 4px; }
+.sidebar-section-label { font-size: 9px; font-weight: 800; color: var(--muted-3); letter-spacing: 1.2px; text-transform: uppercase; padding: 12px 12px 6px; }
+.sidebar-item { display: flex; align-items: center; gap: 13px; padding: 12px 14px; margin-bottom: 3px; border-radius: 12px; color: var(--sidebar-item-color); text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.sidebar-item:hover { background: var(--sidebar-item-hover-bg); color: var(--bottom-nav-active); transform: translateX(3px); }
+.sidebar-item.active { background: var(--sidebar-item-active-bg); color: var(--bottom-nav-active); }
+.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3.5px; border-radius: 4px; background: var(--bottom-nav-active); }
+.sidebar-item-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: var(--sidebar-item-icon-bg); color: var(--sidebar-item-icon-color); font-size: 14px; flex-shrink: 0; }
+.sidebar-item.active .sidebar-item-icon { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; }
+.sidebar-item-text { flex: 1; }
+.sidebar-item-badge { font-size: 8px; font-weight: 800; padding: 3px 7px; border-radius: 20px; background: #ff4444; color: #fff; }
+.sidebar-divider { height: 1px; margin: 10px 14px; background: var(--sidebar-divider); }
+.sidebar-footer { padding: 14px 16px 20px; border-top: 1px solid var(--sidebar-footer-border); background: var(--sidebar-footer-bg); }
+.sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.sidebar-version { text-align: center; font-size: 9px; color: var(--muted-3); font-weight: 600; margin-top: 10px; }
+
+.main { padding: 16px 12px; }
+
+.overview { margin-bottom: 16px; }
+.overview small { color: #2678df; font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer; user-select: none; display: inline-block; }
+.overview h1 { margin-top: 6px; font-size: 20px; color: var(--text-title); }
+.overview h1 span { color: #2678df; }
+
+.balance-card { position: relative; min-height: 240px; padding: 24px 22px; overflow: hidden; border-radius: 18px; color: #fff; background: radial-gradient(circle at 90% 20%, rgba(100,170,255,.45), transparent 35%), linear-gradient(135deg, #1269e9, #3c82ed); box-shadow: var(--balance-card-shadow); }
+.balance-card::after { content: ""; position: absolute; width: 240px; height: 140px; right: -50px; bottom: -70px; border-radius: 50%; background: rgba(255,255,255,.10); }
+.balance-content { position: relative; z-index: 2; }
+.balance-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.balance-label { font-size: 9px; letter-spacing: 1px; opacity: .85; }
+.premium { padding: 5px 11px; border-radius: 20px; background: rgba(255,255,255,.18); font-size: 9px; font-weight: 700; }
+.balance { font-size: 30px; font-weight: 700; letter-spacing: 0.5px; }
+.balance-line { height: 1px; margin: 16px 0; background: rgba(255,255,255,.2); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.info-box { padding: 10px 12px; border-radius: 11px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.13); }
+.info-box small { display: block; font-size: 8px; letter-spacing: 1px; opacity: .65; margin-bottom: 5px; }
+.info-box span { font-size: 11.5px; word-break: break-all; font-weight: 600; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.stat { position: relative; min-height: 118px; background: var(--stat-bg); border-radius: 14px; padding: 15px; box-shadow: var(--stat-shadow); overflow: hidden; border: 1px solid var(--card-border); }
+.stat::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #2f72ee; }
+.stat:nth-child(2)::before { background: #20b889; }
+.stat:nth-child(3)::before { background: #e7a91e; }
+.stat:nth-child(4)::before { background: #28a9dc; }
+.stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #eaf3ff; color: #2477e8; font-size: 18px; margin-bottom: 9px; }
+body.dark .stat-icon { background: #172b55; color: #60a5fa; }
+.stat:nth-child(2) .stat-icon { background: #dff8ed; color: #18a779; }
+body.dark .stat:nth-child(2) .stat-icon { background: #12352f; color: #10c993; }
+.stat:nth-child(3) .stat-icon { background: #fff3c9; color: #d89b00; }
+body.dark .stat:nth-child(3) .stat-icon { background: #39331d; color: #fbbf24; }
+.stat:nth-child(4) .stat-icon { background: #e2f4fc; color: #209aca; }
+body.dark .stat:nth-child(4) .stat-icon { background: #172b55; color: #60a5fa; }
+.stat strong { display: block; font-size: 19px; margin-bottom: 4px; color: var(--text-title); }
+.stat small { color: var(--muted); font-size: 10px; }
+
+.section-title { display: flex; align-items: center; gap: 7px; margin: 20px 0 12px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.section-title::before { content: ""; width: 4px; height: 13px; border-radius: 5px; background: #2779e8; }
+
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.quick { background: var(--quick-bg); min-height: 145px; border-radius: 14px; padding: 14px 5px; text-align: center; box-shadow: var(--quick-shadow); cursor: pointer; transition: transform 0.2s; border: 1px solid var(--card-border); }
+.quick:hover { transform: translateY(-3px); }
+.quick-icon { width: 46px; height: 46px; margin: 0 auto 9px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 19px; }
+.quick:nth-child(1) .quick-icon { background: #1675ed; }
+.quick:nth-child(2) .quick-icon { background: #079c75; }
+.quick:nth-child(3) .quick-icon { background: #8b39ed; }
+.quick:nth-child(4) .quick-icon { background: #229ED9; }
+.quick strong { display: block; font-size: 11px; line-height: 15px; color: var(--text-title); }
+.quick small { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; line-height: 11px; }
+
+.transactions { margin-top: 18px; background: var(--txn-bg); border-radius: 16px; box-shadow: var(--txn-shadow); overflow: hidden; border: 1px solid var(--card-border); }
+.transaction-header { padding: 14px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
+.transaction-title { display: flex; align-items: center; gap: 7px; font-size: 9px; font-weight: 700; letter-spacing: .8px; color: var(--muted-2); }
+.transaction-title::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: #8c42df; }
+.view-all { padding: 6px 11px; border-radius: 20px; background: var(--view-all-bg); color: var(--view-all-color); font-size: 8.5px; font-weight: 700; cursor: pointer; }
+.transaction { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid var(--card-border); gap: 10px; }
+.transaction:last-child { border-bottom: none; }
+
+.tx-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; }
+.tx-icon.green { background: #dcf9ea; color: #14a978; border: 1px solid #a7f3d0; }
+body.dark .tx-icon.green { background: #12352f; color: #10c993; border-color: #065f46; }
+.tx-icon.red { background: #ffe4e5; color: #e7444b; border: 1px solid #fecaca; }
+body.dark .tx-icon.red { background: #3a2025; color: #f87171; border-color: #7f1d1d; }
+
+.tx-info { flex: 1; min-width: 0; }
+.tx-info strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; margin-bottom: 3px; color: var(--text-title); font-weight: 700; }
+.tx-info span { display: block; color: var(--muted); font-size: 8.5px; margin-bottom: 3px; }
+.tx-info small { color: var(--muted-3); font-size: 7.5px; }
+
+.tx-amount { text-align: right; font-size: 12px; font-weight: 800; letter-spacing: 0.2px; }
+.tx-amount.green { color: #0b9b6d; }
+body.dark .tx-amount.green { color: #10c993; }
+.tx-amount.red { color: #e44147; }
+body.dark .tx-amount.red { color: #f87171; }
+
+.tx-amount .success { display: block; margin-top: 4px; color: #10a276; font-size: 8px; font-weight: 700; }
+body.dark .tx-amount .success { color: #10c993; }
+.tx-amount .success.pending { color: #d89b00; }
+body.dark .tx-amount .success.pending { color: #fbbf24; }
+
+.toast-notify { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 0.8rem 1.2rem; border-radius: 14px; font-size: 0.75rem; font-weight: 700; text-align: center; z-index: 10000; opacity: 0; transition: all 0.3s ease; pointer-events: none; max-width: 90%; width: max-content; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
+.toast-notify.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-notify.error { background: var(--toast-bg-error); color: var(--toast-color-error); border-left: 4px solid var(--toast-color-error); }
+.toast-notify.success { background: var(--toast-bg-success); color: var(--toast-color-success); border-left: 4px solid var(--toast-color-success); }
+.toast-notify.info { background: var(--toast-bg-info); color: var(--toast-color-info); border-left: 4px solid var(--toast-color-info); }
+.toast-notify.warning { background: var(--toast-bg-warning); color: var(--toast-color-warning); border-left: 4px solid var(--toast-color-warning); }
+
+.bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30, 100, 220, 0.15); z-index: 1000; }
+.bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; }
+.bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
+.bottom-nav .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.bottom-nav .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+.bottom-nav .scan-item { justify-content: center; padding: 0; gap: 1px; color: var(--bottom-nav-active); z-index: 10; }
+.bottom-nav .scan-circle { width: 54px; height: 54px; margin-top: -32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--scan-circle-bg); border: 5px solid var(--modal-bg); box-shadow: 0 0 0 2px var(--bottom-nav-border), 0 10px 25px rgba(18, 100, 255, 0.25); }
+.bottom-nav .qr-icon { width: 30px; height: 30px; fill: var(--bottom-nav-active); stroke: none; }
+.bottom-nav .scan-item span { color: var(--bottom-nav-active); font-size: 9px; font-weight: 800; margin-top: 2px; }
+.bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); }
+.bottom-nav .scan-item::after { display: none; }
+
+.blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
+.blocked-overlay.active { display: flex; }
+.blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); box-shadow: 0 20px 60px rgba(0, 50, 100, 0.2); }
+.blocked-icon { width: 90px; height: 90px; border-radius: 24px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 42px; color: #dc2626; border: 2px solid #fca5a5; }
+body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
+.blocked-title { font-size: 24px; font-weight: 900; color: var(--text-title); margin-bottom: 12px; text-transform: uppercase; }
+.blocked-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+.blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; font-family: inherit; background: #1a56db; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+@media (max-width: 480px) {
+    .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; }
+    .bottom-nav .nav-item { font-size: 8px; }
+    .bottom-nav .nav-icon { width: 22px; height: 22px; }
+    .bottom-nav .nav-icon svg { width: 20px; height: 20px; }
+    .bottom-nav .scan-circle { width: 48px; height: 48px; margin-top: -28px; border-width: 4px; }
+    .bottom-nav .qr-icon { width: 26px; height: 26px; }
+    .bottom-nav .scan-item span { font-size: 8px; }
+    .bottom-nav .nav-item.active::after { width: 16px; height: 2.5px; bottom: 2px; }
+}
+@media (max-width: 380px) {
+    .bottom-nav { height: 66px; }
+    .bottom-nav .nav-item { font-size: 7px; }
+    .bottom-nav .scan-circle { width: 44px; height: 44px; margin-top: -25px; }
+    .bottom-nav .qr-icon { width: 22px; height: 22px; }
+    .sidebar { width: 270px; }
+}
+@media (max-width: 360px) {
+    .main { padding: 13px 10px; }
+    .balance-card { min-height: 230px; padding: 20px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebarAvatar"><i class="fas fa-user"></i></div>
+            <div class="sidebar-user-info">
+                <h3 id="sidebarUserName">User</h3>
+                <p id="sidebarUserMobile">+91 XXXXXXXXXX</p>
+            </div>
+        </div>
+        <div class="sidebar-balance-box">
+            <span class="sidebar-balance-label"><i class="fas fa-wallet"></i> Balance</span>
+            <span class="sidebar-balance-value">₹<span id="sidebarBalance">0.00</span></span>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <div class="sidebar-section-label">MAIN</div>
+        <a href="/dashboard" class="sidebar-item active" data-sidebar="dashboard"><div class="sidebar-item-icon"><i class="fas fa-house"></i></div><span class="sidebar-item-text">Dashboard</span></a>
+        <a href="/transfer" class="sidebar-item" data-sidebar="transfer"><div class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></div><span class="sidebar-item-text">Transfer</span></a>
+        <a href="/qr" class="sidebar-item" data-sidebar="qr"><div class="sidebar-item-icon"><i class="fas fa-qrcode"></i></div><span class="sidebar-item-text">Scan QR</span></a>
+        <a href="/deposit" class="sidebar-item" data-sidebar="deposit"><div class="sidebar-item-icon"><i class="fas fa-circle-plus"></i></div><span class="sidebar-item-text">Add Funds</span></a>
+        <a href="/withdraw" class="sidebar-item" data-sidebar="withdraw"><div class="sidebar-item-icon"><i class="fas fa-circle-minus"></i></div><span class="sidebar-item-text">Withdraw</span></a>
+        <a href="/transactions" class="sidebar-item" data-sidebar="transactions"><div class="sidebar-item-icon"><i class="fas fa-clock-rotate-left"></i></div><span class="sidebar-item-text">Transactions</span></a>
+        <a href="/gift" class="sidebar-item" data-sidebar="gift"><div class="sidebar-item-icon"><i class="fas fa-gift"></i></div><span class="sidebar-item-text">Gift Code</span></a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">ACCOUNT</div>
+        <a href="/profile" class="sidebar-item" data-sidebar="profile"><div class="sidebar-item-icon"><i class="fas fa-user"></i></div><span class="sidebar-item-text">My Profile</span></a>
+        <a href="/api" class="sidebar-item" data-sidebar="api"><div class="sidebar-item-icon"><i class="fas fa-code"></i></div><span class="sidebar-item-text">API Settings</span></a>
+        <a href="/tg" class="sidebar-item" data-sidebar="tg"><div class="sidebar-item-icon"><i class="fab fa-telegram"></i></div><span class="sidebar-item-text">Join Telegram</span></a>
+        <a href="https://t.me/UNIVERSAL_OFC_SUPPORT" target="_blank" class="sidebar-item" data-sidebar="support"><div class="sidebar-item-icon"><i class="fas fa-headset"></i></div><span class="sidebar-item-text">Support</span></a>
+        <a href="/refer" class="sidebar-item" data-sidebar="refer"><div class="sidebar-item-icon"><i class="fas fa-gift"></i></div><span class="sidebar-item-text">Refer & Earn</span><span class="sidebar-item-badge">NEW</span></a>
+    </div>
+
+    <div class="sidebar-footer">
+        <button class="sidebar-logout" onclick="showLogoutModal()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        <div class="sidebar-version">v2.0.1 • Universe Wallet</div>
+    </div>
+</aside>
+
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Account Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support for more information.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<div class="app">
+    <header class="header">
+        <div class="header-left">
+            <div class="menu-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></div>
+            <div class="title">Dashboard</div>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+            <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="overview">
+            <small id="overviewTapArea"><i class="fas fa-gauge-high"></i> OVERVIEW</small>
+            <h1>Your <span>Dashboard</span></h1>
+        </section>
+
+        <section class="balance-card">
+            <div class="balance-content">
+                <div class="balance-top">
+                    <div class="balance-label">AVAILABLE BALANCE</div>
+                    <div class="premium"><i class="fas fa-crown"></i> Premium</div>
+                </div>
+                <div class="balance">₹<span id="balance">0.00</span></div>
+                <div class="balance-line"></div>
+                <div class="info-grid">
+                    <div class="info-box"><small>PHONE</small><span id="infoMobile"><i class="fas fa-phone"></i> ---</span></div>
+                    <div class="info-box"><small>EMAIL</small><span id="infoEmail"><i class="fas fa-envelope"></i> ---</span></div>
+                    <div class="info-box"><small>WALLET ID</small><span id="infoWallet"><i class="fas fa-wallet"></i> ---</span></div>
+                    <div class="info-box"><small>MEMBER SINCE</small><span id="infoJoined"><i class="fas fa-calendar"></i> ---</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat"><div class="stat-icon"><i class="fas fa-arrow-down"></i></div><strong>₹<span id="totalCredit">0.00</span></strong><small>Total Credit</small></div>
+            <div class="stat"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><strong id="totalSuccess">0</strong><small>Successful</small></div>
+            <div class="stat"><div class="stat-icon"><i class="fas fa-list-alt"></i></div><strong id="totalTxns">0</strong><small>Total Txns</small></div>
+            <div class="stat"><div class="stat-icon"><i class="fas fa-percent"></i></div><strong id="successRate">100%</strong><small>Success Rate</small></div>
+        </section>
+
+        <div class="section-title">QUICK ACTIONS</div>
+        <section class="quick-actions">
+            <div class="quick" onclick="location.href='/deposit'"><div class="quick-icon"><i class="fa-solid fa-plus"></i></div><strong>Add<br>Fund</strong><small>Instant Top-up</small></div>
+            <div class="quick" onclick="location.href='/withdraw'"><div class="quick-icon"><i class="fa-solid fa-arrow-up"></i></div><strong>Withdraw</strong><small>To Bank</small></div>
+            <div class="quick" onclick="location.href='/transfer'"><div class="quick-icon"><i class="fa-solid fa-paper-plane"></i></div><strong>Pay User</strong><small>Wallet<br>Transfer</small></div>
+            <div class="quick" onclick="location.href='/gift'"><div class="quick-icon"><i class="fa-solid fa-gift"></i></div><strong>Gift<br>Code</strong><small>Create &amp; Claim</small></div>
+        </section>
+
+        <section class="transactions">
+            <div class="transaction-header">
+                <div class="transaction-title">RECENT TRANSACTIONS</div>
+                <div class="view-all" onclick="location.href='/transactions'">View All <i class="fas fa-arrow-right"></i></div>
+            </div>
+            <div id="txnList">
+                <div class="transaction" style="justify-content:center;color:var(--muted-2);font-size:11px;padding:20px;">Loading...</div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item" data-nav="dashboard"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><span>Home</span></a>
+    <a href="/transfer" class="nav-item" data-nav="transfer"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div><span>Send</span></a>
+    <a href="/qr" class="nav-item scan-item" data-nav="qr"><div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div><span>Scan</span></a>
+    <a href="/deposit" class="nav-item" data-nav="deposit"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><span>Add</span></a>
+    <a href="/transactions" class="nav-item" data-nav="transactions"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><span>History</span></a>
+</div>
+
+<div class="modal-overlay" id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(15,30,60,0.5);backdrop-filter:blur(6px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--modal-bg);border-radius:24px;padding:30px 24px;max-width:380px;width:100%;text-align:center;border:1px solid var(--card-border);box-shadow:0 20px 50px rgba(0,50,100,0.2);">
+        <i class="fas fa-sign-out-alt" style="font-size:46px;color:#dc2626;margin-bottom:12px;display:block;"></i>
+        <div style="font-size:20px;font-weight:900;color:var(--text-title);margin-bottom:8px;text-transform:uppercase;">Logout Confirmation</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Are you sure you want to logout?</div>
+        <div style="display:flex;gap:12px;">
+            <button onclick="closeLogoutModal()" style="padding:13px 24px;border-radius:14px;font-size:13px;font-weight:800;border:1px solid var(--card-border);cursor:pointer;flex:1;text-transform:uppercase;background:var(--bg);color:var(--text-title);font-family:inherit;">No</button>
+            <button onclick="confirmLogout()" style="padding:13px 24px;border-radius:14px;font-size:13px;font-weight:800;border:none;cursor:pointer;flex:1;text-transform:uppercase;background:#dc2626;color:#fff;font-family:inherit;">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var API_BASE = '/api';
+var DEFAULT_PROFILE_PICTURE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+        '<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1a56db"/><stop offset="100%" stop-color="#0088ff"/></linearGradient></defs>' +
+        '<rect width="100" height="100" fill="url(#g)"/>' +
+        '<circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.95"/>' +
+        '<path d="M 50 62 C 30 62 18 75 18 92 L 82 92 C 82 75 70 62 50 62 Z" fill="#ffffff" opacity="0.95"/>' +
+    '</svg>'
+);
+window.handleAvatarError = function(imgEl) { if (imgEl.src !== DEFAULT_PROFILE_PICTURE) imgEl.src = DEFAULT_PROFILE_PICTURE; };
+
+function initAdminAccess() {
+    var tapArea = document.getElementById('overviewTapArea');
+    if (!tapArea) return;
+    var tapCount = 0, tapTimer = null;
+    tapArea.addEventListener('click', function() {
+        tapCount++;
+        clearTimeout(tapTimer);
+        if (tapCount >= 5) { tapCount = 0; window.location.href = '/rohit'; return; }
+        tapTimer = setTimeout(function() { tapCount = 0; }, 3000);
+    });
+}
+
+(function initTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; }
+    else { document.body.classList.remove('dark'); themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; }
+})();
+
+function toggleTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    if (isDark) { themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('uwTheme', 'dark'); }
+    else { themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('uwTheme', 'light'); }
+}
+
+function openSidebar() { if (isAccountBlocked) return; document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); document.body.style.overflow = ''; }
+
+(function initSidebarSwipe(){
+    var sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    var startX = 0, currentX = 0, isDragging = false;
+    sidebar.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; isDragging = true; }, { passive: true });
+    sidebar.addEventListener('touchmove', function(e){
+        if (!isDragging) return;
+        currentX = e.touches[0].clientX;
+        var diff = currentX - startX;
+        if (diff < 0) sidebar.style.transform = 'translateX(' + diff + 'px)';
+    }, { passive: true });
+    sidebar.addEventListener('touchend', function(){
+        if (!isDragging) return;
+        isDragging = false;
+        var diff = currentX - startX;
+        sidebar.style.transform = '';
+        if (diff < -60) closeSidebar();
+        startX = 0; currentX = 0;
+    });
+})();
+(function initEdgeSwipe(){
+    var startX = 0, startY = 0, tracking = false;
+    document.addEventListener('touchstart', function(e){
+        if (isAccountBlocked) return;
+        var x = e.touches[0].clientX, y = e.touches[0].clientY;
+        if (x < 30) { startX = x; startY = y; tracking = true; }
+    }, { passive: true });
+    document.addEventListener('touchend', function(e){
+        if (!tracking) return;
+        tracking = false;
+        var endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+        var dx = endX - startX, dy = Math.abs(endY - startY);
+        if (dx > 70 && dy < 60) openSidebar();
+    }, { passive: true });
+})();
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSidebar(); });
+
+function updateSidebarUser(user) {
+    if (!user) return;
+    var name = user.fullName || user.username || 'User';
+    var mobile = user.mobile ? ('+91 ' + user.mobile) : '';
+    var nameEl = document.getElementById('sidebarUserName');
+    var mobileEl = document.getElementById('sidebarUserMobile');
+    var avatarEl = document.getElementById('sidebarAvatar');
+    if (nameEl) nameEl.textContent = name;
+    if (mobileEl) mobileEl.textContent = mobile;
+    if (avatarEl) {
+        var imgSrc = '';
+        if (user.profilePicture && typeof user.profilePicture === 'string') {
+            var pp = user.profilePicture.trim();
+            if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
+        }
+        if (imgSrc) avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
+        else avatarEl.innerHTML = '<i class="fas fa-user"></i>';
+    }
+}
+function updateSidebarBalance(balance) { var el = document.getElementById('sidebarBalance'); if (el) el.textContent = parseFloat(balance || 0).toFixed(2); }
+
+var isAccountBlocked = false;
+var blockCheckDone = false;
+
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) cleanMobile = cleanMobile.slice(2);
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        return await res.json();
+    } catch (err) { return { allowed: true, reason: 'network_error' }; }
+}
+
+function handleBlockReason(reason) {
+    if (reason === 'blocked') showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator. Please contact support.');
+    else if (reason === 'deleted') showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
+    else if (reason === 'inactive') showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
+    else if (reason === 'notfound') showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    else showBlockedOverlay('Access Denied', 'Your account is not accessible.');
+}
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; closeSidebar(); }
+function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
+function confirmLogout() { closeLogoutModal(); setTimeout(logout, 200); }
+document.getElementById('logoutModal').addEventListener('click', function(e){ if(e.target === this) closeLogoutModal(); });
+
+function goToProfile(){ window.location.href = '/profile'; }
+
+function setAvatar(user) {
+    var avatarEl = document.getElementById('userAvatar');
+    if (!avatarEl) return;
+    var imgSrc = DEFAULT_PROFILE_PICTURE;
+    if (user && user.profilePicture && typeof user.profilePicture === 'string') {
+        var pp = user.profilePicture.trim();
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
+    }
+    avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+}
+
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload, safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+
+async function apiRequest(endpoint, options) {
+    options = options || {};
+    var token = localStorage.getItem('token');
+    if (!token) { logout(); throw new Error('No Token'); }
+    var response = await fetch(API_BASE + endpoint, {
+        method: options.method || 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, ...(options.headers || {}) },
+        body: options.body || null
+    });
+    var data = {};
+    try { data = await response.json(); } catch(e) { data = {}; }
+    if (response.status === 401) { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/'; throw new Error('Session Expired'); }
+    if (response.status === 403) { showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.'); throw new Error('Account Blocked'); }
+    if (response.status === 404 && data.userNotFound) { showBlockedOverlay('Account Not Found', 'Your account has been deleted.'); throw new Error('User Not Found'); }
+    return data;
+}
+
+function showToast(message, type) {
+    if (isAccountBlocked) return;
+    type = type || 'info';
+    var toast = document.getElementById('globalToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'globalToast';
+        toast.className = 'toast-notify';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = 'toast-notify ' + type + ' show';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function(){ toast.classList.remove('show'); }, 3000);
+}
+
+function getUserId(f){ if(!f) return null; if(typeof f==='string') return f; if(f._id) return f._id.toString(); if(f.toString) return f.toString(); return null; }
+function getUserName(o){ if(!o) return ''; if(typeof o === 'string') return o; return o.fullName || o.name || o.username || ''; }
+function fmtMobile(m){ if(!m) return ''; var s = m.toString(); if(s.length === 10) return s.slice(0,3)+'••'+s.slice(5,7)+'••'+s.slice(9); return s; }
+
+// ============================================
+// ✅ IS CREDIT — DIRECTION-SPECIFIC TYPES FIRST
+// ============================================
+function isCredit(tx, uid) {
+    if (!tx) return false;
+
+    // ✅ Direction-specific transaction types (highest priority)
+    if (tx.type === 'api_send') return false;        // API Payment Sent → Debit
+    if (tx.type === 'api_receive') return true;      // API Payment Received → Credit
+    if (tx.type === 'transfer_send') return false;   // Transfer Sent → Debit
+    if (tx.type === 'transfer_receive') return true; // Transfer Received → Credit
+
+    // ✅ Fixed-direction types
+    if (tx.type === 'deposit') return true;
+    if (tx.type === 'admin_add') return true;
+    if (tx.type === 'admin_deduct') return false;
+    if (tx.type === 'game_win') return true;
+    if (tx.type === 'game_loss') return false;
+    if (tx.type === 'lifafa_claim') return true;
+    if (tx.type === 'lifafa_referral') return true;
+    if (tx.type === 'lifafa_creation') return false;
+    if (tx.type === 'invoice_pay_send') return false;
+    if (tx.type === 'invoice_pay_receive') return true;
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return false;
+
+    // ✅ Referral bonus — always credit
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return false;
+
+    // ✅ Invoice pay — check sender/receiver
+    if (tx.type === 'invoice_pay') {
+        var ridX = getUserId(tx.receiver_id || tx.receiver);
+        var sidX = getUserId(tx.sender_id || tx.sender);
+        if (ridX === uid && sidX !== uid) return true;
+        if (sidX === uid && ridX !== uid) return false;
+    }
+
+    // ✅ Gift — check category or sender/receiver
+    if (tx.type === 'gift') {
+        if (tx.metadata && tx.metadata.category) {
+            if (tx.metadata.category === 'gift_received') return true;
+            if (tx.metadata.category === 'gift_created') return false;
+        }
+        var gRid = getUserId(tx.receiver_id || tx.receiver);
+        var gSid = getUserId(tx.sender_id || tx.sender);
+        if (gRid === uid && gSid !== uid) return true;
+        if (gSid === uid && gRid !== uid) return false;
+        return false;
+    }
+
+    // ✅ Fallback — sender/receiver check
+    var rid = getUserId(tx.receiver_id || tx.receiver);
+    var sid = getUserId(tx.sender_id || tx.sender);
+    var tuid = getUserId(tx.user_id);
+
+    // User is sender only → debit
+    if (sid === uid && rid !== uid) return false;
+    // User is receiver only → credit
+    if (rid === uid && sid !== uid) return true;
+    // Self-transfer → debit (money left)
+    if (sid === uid && rid === uid) return false;
+    // Fallback user_id
+    if (tuid === uid && rid === uid && sid !== uid) return true;
+    if (tuid === uid && sid === uid && rid !== uid) return false;
+    // No sender but receiver is user → credit
+    if (!sid && rid === uid) return true;
+    // Unknown → debit
+    return false;
+}
+
+// ============================================
+// ✅ DISPLAY NAME — credit ↓ green, debit ↑ red
+// ============================================
+function getDisplayName(tx, uid){
+    var rid = getUserId(tx.receiver_id || tx.receiver);
+    var sid = getUserId(tx.sender_id || tx.sender);
+    var tuid = getUserId(tx.user_id);
+    var isS = sid === uid, isR = rid === uid, isU = tuid === uid;
+    var sn = '', rn = '', sm = '', rm = '';
+    if (tx.sender_id && typeof tx.sender_id === 'object') { sn = getUserName(tx.sender_id); sm = tx.sender_id.mobile || ''; }
+    else if (tx.sender && typeof tx.sender === 'object') { sn = getUserName(tx.sender); sm = tx.sender.mobile || ''; }
+    if (tx.receiver_id && typeof tx.receiver_id === 'object') { rn = getUserName(tx.receiver_id); rm = tx.receiver_id.mobile || ''; }
+    else if (tx.receiver && typeof tx.receiver === 'object') { rn = getUserName(tx.receiver); rm = tx.receiver.mobile || ''; }
+    if (tx.metadata) {
+        if (!sn && tx.metadata.senderName) sn = tx.metadata.senderName;
+        if (!rn && tx.metadata.receiverName) rn = tx.metadata.receiverName;
+        if (!sm && tx.metadata.senderMobile) sm = tx.metadata.senderMobile;
+        if (!rm && tx.metadata.receiverMobile) rm = tx.metadata.receiverMobile;
+    }
+    var fSM = fmtMobile(sm), fRM = fmtMobile(rm);
+
+    var DOWN = '<i class="fas fa-arrow-down" style="color:#16a34a;margin-right:6px;font-size:11px;"></i>';
+    var UP   = '<i class="fas fa-arrow-up" style="color:#dc2626;margin-right:6px;font-size:11px;"></i>';
+
+    // Referral bonuses
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return DOWN + 'Referral Bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return DOWN + 'Welcome Bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return DOWN + 'Referral Bonus (Admin)';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return UP + 'Referral Bonus Reversed';
+
+    // Fixed types
+    if (tx.type === 'deposit') return DOWN + 'Deposit Approved';
+    if (tx.type === 'admin_add') return DOWN + 'Balance Added';
+    if (tx.type === 'admin_deduct') return UP + 'Balance Deducted';
+    if (tx.type === 'withdraw') return UP + 'Withdrawal Request';
+    if (tx.type === 'game_win') return DOWN + 'Game Win';
+    if (tx.type === 'game_loss') return UP + 'Game Loss';
+    if (tx.type === 'lifafa_creation') return UP + 'Lifafa Created';
+    if (tx.type === 'lifafa_claim') return DOWN + 'Lifafa Claimed';
+    if (tx.type === 'lifafa_referral') return DOWN + 'Lifafa Referral';
+
+    // ✅ API Payment — direction specific
+    if (tx.type === 'api_send') return UP + 'API Payment Sent' + (rn ? ' To ' + rn : '');
+    if (tx.type === 'api_receive') return DOWN + 'API Payment Received' + (sn ? ' From ' + sn : '');
+    if (tx.type === 'api') {
+        if (isS && !isR) return UP + 'API Transaction';
+        if (isR && !isS) return DOWN + 'API Transaction';
+        return DOWN + 'API Transaction';
+    }
+
+    // ✅ Transfer — direction specific
+    if (tx.type === 'transfer_send' || (tx.type === 'transfer' && isS)) return UP + 'Money Sent' + (rn ? ' To ' + rn : '') + (fRM ? ' (' + fRM + ')' : '');
+    if (tx.type === 'transfer_receive' || (tx.type === 'transfer' && isR)) return DOWN + 'Money Received' + (sn ? ' From ' + sn : '') + (fSM ? ' (' + fSM + ')' : '');
+    if (tx.type === 'transfer') return DOWN + 'Transfer';
+
+    // Invoice
+    if (tx.type === 'invoice_pay_send' || (tx.type === 'invoice_pay' && isS)) return UP + 'Invoice Paid' + (rn ? ' To ' + rn : '');
+    if (tx.type === 'invoice_pay_receive' || (tx.type === 'invoice_pay' && isR)) return DOWN + 'Invoice Received' + (sn ? ' From ' + sn : '');
+    if (tx.type === 'invoice_pay') return DOWN + 'Invoice Payment';
+
+    // Gift
+    if (tx.type === 'gift') {
+        var category = (tx.metadata && tx.metadata.category) ? tx.metadata.category : '';
+        if (category === 'gift_received' || (isR && !isS)) return DOWN + 'Gift Code Claimed';
+        if (category === 'gift_created' || isU || (isS && isR)) return UP + 'Gift Code Created';
+        if (isS) return UP + 'Gift Code Redeemed';
+        return DOWN + 'Gift Code';
+    }
+
+    if (isS) return UP + 'Payment Sent';
+    if (isR) return DOWN + 'Payment Received';
+    return DOWN + 'Transaction';
+}
+
+function dedup(txns, uid) {
+    var seen = {};
+    var result = [];
+    txns.forEach(function(x){
+        var key = (x.tx_id || x._id) + '|' + x.type;
+        if (!seen[key]) { seen[key] = true; result.push(x); }
+    });
+    return result;
+}
+
+function filterUserTransactions(txns, uid) {
+    return txns.filter(function(tx) {
+        if (tx.type === 'transfer_send' || tx.type === 'api_send') {
+            var sid = getUserId(tx.sender_id || tx.sender);
+            return sid === uid;
+        }
+        if (tx.type === 'transfer_receive' || tx.type === 'api_receive') {
+            var rid = getUserId(tx.receiver_id || tx.receiver);
+            return rid === uid;
+        }
+        var tuid = getUserId(tx.user_id);
+        if (tuid === uid) return true;
+        var sid2 = getUserId(tx.sender_id || tx.sender);
+        var rid2 = getUserId(tx.receiver_id || tx.receiver);
+        return sid2 === uid || rid2 === uid;
+    });
+}
+
+async function loadDashboard(){
+    try {
+        var ures;
+        try { ures = await apiRequest('/auth/me'); } catch(e) { return; }
+        if (isAccountBlocked) return;
+        var user = extractUser(ures);
+        if (!user || (!user.id && !user._id)) { showBlockedOverlay('Account Not Found', 'Your account data could not be found.'); return; }
+        if (user.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(user.mobile);
+            if (status && status.allowed === false) { handleBlockReason(status.reason); return; }
+        }
+        setAvatar(user);
+        updateSidebarUser(user);
+        var uid = (user.id || user._id).toString();
+
+        var txns = [];
+        try {
+            var tres = await apiRequest('/wallet/transactions?limit=100');
+            if (isAccountBlocked) return;
+            txns = tres.transactions || (tres.data && tres.data.transactions) || tres.data || [];
+            if (!Array.isArray(txns)) txns = [];
+            txns = filterUserTransactions(txns, uid);
+            var uq = dedup(txns, uid);
+            if (uq.length !== txns.length) txns = uq;
+        } catch(e) { txns = []; }
+
+        var calcBal = 0, tCr = 0, tDb = 0, tSuccess = 0, tCount = 0;
+        txns.forEach(function(tx){
+            tCount++;
+            if ((tx.status || 'success') === 'success') tSuccess++;
+            var ic = isCredit(tx, uid);
+            if (ic) { tCr += (tx.amount || 0); calcBal += (tx.amount || 0); }
+            else { tDb += (tx.amount || 0); calcBal -= (tx.amount || 0); }
+        });
+
+        var sb = 0;
+        try {
+            var bres = await apiRequest('/wallet/balance');
+            if (isAccountBlocked) return;
+            if (bres && bres.status === 'success') {
+                if (bres.data && bres.data.balance !== undefined) sb = bres.data.balance;
+                else if (bres.balance !== undefined) sb = bres.balance;
+                if (sb !== calcBal) calcBal = sb;
+            }
+        } catch(e) {}
+
+        var rate = tCount > 0 ? Math.round((tSuccess / tCount) * 100) : 100;
+        updateUI(user, calcBal, tCr, tSuccess, tCount, rate, txns, uid);
+
+    } catch(err) {
+        if (!isAccountBlocked) {
+            showToast('Failed To Load Dashboard', 'error');
+            document.getElementById('txnList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:11px;">Failed To Load Data</div>';
+        }
+    }
+}
+
+function updateUI(user, bal, tCr, tSuccess, tCount, rate, txns, uid){
+    var mob = user.mobile || '---';
+    document.getElementById('sidebarBalance').textContent = bal.toFixed(2);
+    document.getElementById('balance').textContent = bal.toFixed(2);
+    document.getElementById('infoMobile').innerHTML = '<i class="fas fa-phone"></i> ' + (mob.length >= 4 ? '****' + mob.slice(-4) : mob);
+    document.getElementById('infoEmail').innerHTML = '<i class="fas fa-envelope"></i> ' + (user.email ? user.email.substring(0,3) + '***@' + user.email.split('@')[1] : '---');
+    document.getElementById('infoWallet').innerHTML = '<i class="fas fa-wallet"></i> ' + (user.walletId || '---');
+    var joined = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '---';
+    document.getElementById('infoJoined').innerHTML = '<i class="fas fa-calendar"></i> ' + joined;
+    document.getElementById('totalCredit').textContent = tCr.toFixed(2);
+    document.getElementById('totalSuccess').textContent = tSuccess;
+    document.getElementById('totalTxns').textContent = tCount;
+    document.getElementById('successRate').textContent = rate + '%';
+    renderTxns(txns, uid);
+}
+
+// ============================================
+// ✅ RENDER TRANSACTIONS
+// ============================================
+function renderTxns(txns, uid){
+    var el = document.getElementById('txnList');
+    if (!txns || txns.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:11px;">No Transactions Yet</div>';
+        return;
+    }
+    el.innerHTML = '';
+    var lim = Math.min(10, txns.length);
+    for (var i = 0; i < lim; i++) {
+        var tx = txns[i];
+        var ic = isCredit(tx, uid);
+        var dn = getDisplayName(tx, uid);
+        var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var ts = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        var iconClass = ic ? 'green' : 'red';
+
+        var iconHtml = '<i class="fa-solid fa-circle-dot"></i>';
+        var refType = (tx.metadata && tx.metadata.transactionType) ? tx.metadata.transactionType : '';
+
+        // Referral bonus — user-group
+        if (refType === 'referral_bonus_received' || refType === 'referral_welcome_bonus' || refType === 'referral_bonus_force') {
+            iconHtml = '<i class="fa-solid fa-user-group"></i>';
+        }
+        else if (refType === 'referral_bonus_reversed') {
+            iconHtml = '<i class="fa-solid fa-rotate-left"></i>';
+        }
+        // Admin
+        else if (tx.type === 'admin_add') iconHtml = '<i class="fa-solid fa-arrow-down"></i>';
+        else if (tx.type === 'admin_deduct') iconHtml = '<i class="fa-solid fa-arrow-up"></i>';
+        // Deposit — plus
+        else if (tx.type === 'deposit') iconHtml = '<i class="fa-solid fa-plus"></i>';
+        // Withdraw — arrow-up
+        else if (tx.type === 'withdraw') iconHtml = '<i class="fa-solid fa-arrow-up"></i>';
+        // API — code
+        else if (tx.type === 'api' || tx.type === 'api_send' || tx.type === 'api_receive') iconHtml = '<i class="fa-solid fa-code"></i>';
+        // Transfer — right-left
+        else if (tx.type.indexOf('transfer') === 0) iconHtml = '<i class="fa-solid fa-right-left"></i>';
+        // Invoice — file-invoice
+        else if (tx.type.indexOf('invoice') === 0) iconHtml = '<i class="fa-solid fa-file-invoice"></i>';
+        // Game — gamepad
+        else if (tx.type.indexOf('game') === 0) iconHtml = '<i class="fa-solid fa-gamepad"></i>';
+        // Lifafa — envelope
+        else if (tx.type.indexOf('lifafa') === 0) iconHtml = '<i class="fa-solid fa-envelope-open-text"></i>';
+        // Gift — gift
+        else if (tx.type === 'gift') iconHtml = '<i class="fa-solid fa-gift"></i>';
+
+        var statusClass = 'success';
+        var statusText = 'SUCCESS';
+        if ((tx.status || 'success') !== 'success') {
+            statusClass = 'success pending';
+            statusText = (tx.status || 'pending').toUpperCase();
+        }
+
+        var d = document.createElement('div');
+        d.className = 'transaction';
+        d.innerHTML =
+            '<div class="tx-icon ' + iconClass + '">' + iconHtml + '</div>' +
+            '<div class="tx-info">' +
+                '<strong>' + dn + '</strong>' +
+                '<span>' + (tx.remark || tx.description || 'Transaction') + '</span>' +
+                '<small>' + ts + '</small>' +
+            '</div>' +
+            '<div class="tx-amount ' + iconClass + '">' +
+                (ic ? '+' : '-') + '₹' + (tx.amount || 0).toFixed(2) +
+                '<span class="' + statusClass + '">● ' + statusText + '</span>' +
+            '</div>';
+        el.appendChild(d);
+    }
+}
+
+(function setActiveNav(){
+    var path = window.location.pathname;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
+    var active = null;
+    if (path.indexOf('/dashboard') === 0 || path === '/' || path === '') active = document.querySelector('.bottom-nav .nav-item[data-nav="dashboard"]');
+    else if (path.indexOf('/transfer') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transfer"]');
+    else if (path.indexOf('/qr') === 0 || path.indexOf('/scan') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="qr"]');
+    else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="deposit"]');
+    else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transactions"]');
+    if (active) active.classList.add('active');
+})();
+
+document.addEventListener('DOMContentLoaded', function(){
+    var token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/'; return; }
+    initAdminAccess();
+    try {
+        var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setAvatar(cachedUser);
+        updateSidebarUser(cachedUser);
+    } catch(e) { setAvatar({}); updateSidebarUser({}); }
+    loadDashboard();
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').catch(function(){});
+    });
+}
+</script>
+
+</body>
+</html>
