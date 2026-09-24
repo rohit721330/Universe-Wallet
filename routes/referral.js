@@ -1,5 +1,5 @@
 // FILE: routes/referral.js
-const router = require('express').Router({ mergeParams: true });  // ✅ mergeParams যোগ করা হয়েছে
+const router = require('express').Router({ mergeParams: true });
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -121,11 +121,11 @@ async function ensureUserHasReferralCode(user) {
 }
 
 // ============================================
-// GET / — Main referral info
-// ✅ FIX: ['/', ''] ব্যবহার করা হয়েছে যাতে /referral এবং /referral/ দুটোই কাজ করে
+// GET /referral AND /referral/
 // ============================================
 router.get(['/', ''], verifyToken, async (req, res) => {
     console.log('🔵 [GET /referral] Handler started for user:', req.user._id);
+    console.log('🔵 [GET /referral] Original URL:', req.originalUrl);
 
     try {
         const user = await User.findById(req.user._id)
@@ -138,7 +138,6 @@ router.get(['/', ''], verifyToken, async (req, res) => {
 
         console.log('🔵 [GET /referral] User.referralCode from DB:', user.referralCode || 'MISSING');
 
-        // ✅ Auto-generate if missing
         if (!user.referralCode || user.referralCode.length < 6) {
             const generated = await ensureUserHasReferralCode(user);
             if (!generated) {
