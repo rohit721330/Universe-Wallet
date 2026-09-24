@@ -96,14 +96,13 @@ const dbConnectMiddleware = async (req, res, next) => {
 
 // =========================================================
 // ✅ REFERRAL-SPECIFIC CORS MIDDLEWARE
-// Vercel এ Authorization হেডার স্ট্রিপ হওয়া রোধ করে
 // =========================================================
 const referralCorsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, X-HTTP-Method-Override');
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Expose-Headers', 'Authorization');
+    res.header('Access-Control-Expose-Headers', 'Authorization, X-Auth-Token');
 
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
