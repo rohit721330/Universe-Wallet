@@ -42,22 +42,38 @@ async function sendTelegramMessage(chatId, message) {
 }
 
 // ============================================
-// VERIFY TOKEN — Multiple Header Case Support
+// ✅ VERIFY TOKEN — 3 Sources: Header, Custom Header, Query
+// Vercel Authorization হেডার স্ট্রিপ করলেও query parameter কাজ করবে
 // ============================================
 const verifyToken = async (req, res, next) => {
     try {
-        // ✅ FIX: Support both lowercase and uppercase header names
-        const authHeader = req.headers.authorization || req.headers.Authorization;
-        console.log('🔵 [verifyToken] authHeader:', authHeader ? 'PRESENT' : 'MISSING');
+        let token = null;
+        let source = 'NONE';
 
-        if (!authHeader) {
-            return res.status(200).json({ success: false, message: 'No Token Provided' });
+        // ১. Authorization header (Bearer token)
+        const authHeader = req.headers.authorization || req.headers.Authorization;
+        if (authHeader) {
+            const parts = authHeader.split(' ');
+            token = parts.length === 2 ? parts[1] : parts[0];
+            if (token) source = 'header';
         }
 
-        const parts = authHeader.split(' ');
-        const token = parts.length === 2 ? parts[1] : parts[0];
+        // ২. Custom header X-Auth-Token
+        if (!token && req.headers['x-auth-token']) {
+            token = req.headers['x-auth-token'];
+            source = 'x-auth-token';
+        }
+
+        // ৩. Query parameter ?token=
+        if (!token && req.query && req.query.token) {
+            token = req.query.token;
+            source = 'query';
+        }
+
+        console.log(`🔵 [verifyToken] Token source: ${source}`);
 
         if (!token) {
+            console.log('❌ [verifyToken] No token found in any source');
             return res.status(200).json({ success: false, message: 'No Token Provided' });
         }
 
