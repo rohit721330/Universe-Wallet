@@ -8,7 +8,9 @@ const Admin = require('../models/Admin');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// ✅ Get settings directly from Admin model
+// ============================================
+// GET GLOBAL REFERRAL SETTINGS
+// ============================================
 async function getGlobalReferralSettings() {
     try {
         const admin = await Admin.findOne({
@@ -32,7 +34,9 @@ async function getGlobalReferralSettings() {
     return { enabled: true, bonusAmount: 10, minDepositAmount: 50, maxReferralsPerUser: 100 };
 }
 
+// ============================================
 // VERIFY TOKEN
+// ============================================
 const verifyToken = async (req, res, next) => {
     try {
         let token = null;
@@ -62,6 +66,9 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
+// ============================================
+// HELPERS
+// ============================================
 async function generateUniqueReferralCode(maxAttempts = 20) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -100,7 +107,9 @@ async function ensureUserHasReferralCode(user) {
     return null;
 }
 
-// GET /
+// ============================================
+// GET / — Main referral info
+// ============================================
 router.get(['/', ''], verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
@@ -147,11 +156,14 @@ router.get(['/', ''], verifyToken, async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('GET /referral error:', error.message);
         return res.status(200).json({ success: false, message: 'Failed to fetch referral info' });
     }
 });
 
-// GET /list
+// ============================================
+// GET /list — FIXED: use global bonus amount
+// ============================================
 router.get('/list', verifyToken, async (req, res) => {
     try {
         const user = req.user;
@@ -160,11 +172,16 @@ router.get('/list', verifyToken, async (req, res) => {
         const skip = (page - 1) * limit;
 
         const referrals = await Referral.find({ referrerId: user._id })
-            .sort({ createdAt: -1 }).skip(skip).limit(limit)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate('referredUserId', 'fullName mobile profilePicture createdAt')
             .lean();
 
         const total = await Referral.countDocuments({ referrerId: user._id });
+
+        // ✅ Get current global settings
+        const settings = await getGlobalReferralSettings();
 
         const list = referrals.map(r => {
             const u = r.referredUserId || {};
@@ -175,28 +192,41 @@ router.get('/list', verifyToken, async (req, res) => {
                 profilePicture: u.profilePicture || null,
                 joinedAt: u.createdAt || r.createdAt,
                 status: r.status,
-                bonusAmount: r.bonusAmount,
-                minDepositRequired: r.minDepositRequired,
+                // ✅ Use current global bonus amount (not the old saved value)
+                bonusAmount: settings.bonusAmount,
+                minDepositRequired: settings.minDepositAmount || r.minDepositRequired || 50,
                 depositCompleted: r.depositCompleted,
                 depositAmount: r.depositAmount
             };
         });
 
         return res.status(200).json({
-            success: true, referrals,
-            pagination: { currentPage: page, totalPages: Math.ceil(total / limit), totalReferrals: total }
+            success: true,
+            referrals: list,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalReferrals: total
+            }
         });
     } catch (error) {
-        return res.status(200).json({ success: false, message: 'Failed' });
+        console.error('GET /list error:', error.message);
+        return res.status(200).json({ success: false, message: 'Failed to fetch referrals' });
     }
 });
 
-// POST /check-code
+// ============================================
+// POST /check-code — Public
+// ============================================
 router.post('/check-code', async (req, res) => {
     try {
         const settings = await getGlobalReferralSettings();
         if (!settings.enabled) {
-            return res.status(200).json({ success: true, valid: false, message: 'Referral program is currently disabled' });
+            return res.status(200).json({
+                success: true,
+                valid: false,
+                message: 'Referral program is currently disabled'
+            });
         }
 
         const { code } = req.body;
@@ -206,7 +236,8 @@ router.post('/check-code', async (req, res) => {
 
         const cleaned = code.trim().toUpperCase();
         const user = await User.findOne({ referralCode: cleaned, isDeleted: false })
-            .select('fullName mobile profilePicture').lean();
+            .select('fullName mobile profilePicture')
+            .lean();
 
         if (!user) return res.status(200).json({ success: true, valid: false, message: 'Invalid referral code' });
 
@@ -226,6 +257,7 @@ router.post('/check-code', async (req, res) => {
             bonusAmount: settings.bonusAmount
         });
     } catch (error) {
+        console.error('check-code error:', error.message);
         return res.status(200).json({ success: false, valid: false, message: 'Server error' });
     }
 });
