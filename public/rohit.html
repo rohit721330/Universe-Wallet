@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Admin Panel • Universal Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root { --bg: #f5f7fb; --bg-card: #ffffff; --bg-soft: #f9fafc; --text: #202938; --text-sec: #687587; --text-muted: #9aa5b2; --border: #e2e6ed; --border-soft: #eef2f7; --accent: #5046df; --accent-light: #f0f4ff; --accent-grad: linear-gradient(135deg, #5046df, #0088ff); --success: #16a34a; --danger: #dc2626; --warning: #d97706; --purple: #8b5cf6; --shadow: 0 4px 15px rgba(30, 50, 80, 0.06); --shadow-lg: 0 20px 60px rgba(30, 50, 80, 0.12); }
+html, body { font-family: 'Inter', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+body { padding-bottom: 100px; }
+
+.security-gate { position: fixed; inset: 0; background: linear-gradient(135deg, #f5f7fb 0%, #e8edf4 100%); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.security-gate.hidden { display: none; }
+.security-gate-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); animation: gateIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1); }
+@keyframes gateIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.gate-spinner { display: inline-block; width: 34px; height: 34px; border: 3px solid #e0e8ff; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.login-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, #f5f7fb 0%, #e8edf4 100%); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.login-overlay.show { display: flex; }
+.login-modal { background: #fff; border: 1px solid var(--border); border-radius: 24px; padding: 32px 24px; max-width: 400px; width: 100%; box-shadow: var(--shadow-lg); animation: gateIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1); margin: auto; }
+.login-modal .modal-logo { text-align: center; margin-bottom: 24px; }
+.login-modal .modal-logo i { font-size: 48px; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; display: block; margin-bottom: 8px; }
+.login-modal .modal-logo h2 { font-size: 22px; font-weight: 800; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.5px; }
+.login-modal .modal-logo p { font-size: 11px; color: var(--text-sec); margin-top: 4px; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
+.login-step-title { text-align: center; font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; padding: 10px; border: 1.5px solid #d0d8ff; border-radius: 10px; background: var(--accent-light); }
+.login-step-title i { margin-right: 6px; }
+.login-field { margin-bottom: 14px; text-align: left; }
+.login-field label { display: block; font-size: 11px; font-weight: 800; color: var(--text-sec); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+.login-field label i { margin-right: 4px; color: var(--accent); }
+.login-field input { width: 100%; padding: 13px 16px; background: var(--bg-soft); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); outline: none; transition: all 0.2s; font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; }
+.login-field input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(80, 70, 223, 0.08); }
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 3rem; }
+.toggle-pw { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); font-size: 15px; cursor: pointer; padding: 8px; }
+.pattern-container { display: flex; flex-direction: column; align-items: center; gap: 20px; margin: 20px 0; }
+.pattern-status { font-size: 13px; font-weight: 700; color: var(--text-sec); min-height: 20px; text-align: center; }
+.pattern-status.error { color: var(--danger); }
+.pattern-status.success { color: var(--success); }
+.pattern-wrapper { position: relative; width: 260px; height: 260px; margin: 0 auto; touch-action: none; }
+.pattern-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+.pattern-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; height: 100%; position: relative; z-index: 10; }
+.pattern-dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #fff; border: 2px solid var(--border); cursor: pointer; position: relative; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(30, 50, 80, 0.05); }
+.pattern-dot .dot-inner { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); opacity: 0; transition: all 0.2s ease; transform: scale(0); }
+.pattern-dot.selected .dot-inner { opacity: 1; transform: scale(1.2); box-shadow: 0 0 20px rgba(80, 70, 223, 0.5); }
+.pattern-dot.wrong { border-color: var(--danger); animation: shake 0.4s ease; }
+.pattern-dot.wrong .dot-inner { background: var(--danger); opacity: 1; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+.pattern-dot .dot-number { position: absolute; top: -6px; right: -6px; font-size: 9px; font-weight: 800; color: var(--text-muted); background: #fff; padding: 2px 5px; border-radius: 50%; border: 1px solid var(--border); }
+.pattern-actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.btn-pattern { padding: 12px 22px; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+.btn-pattern:active { transform: scale(0.97); }
+.btn-pattern:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-clear { background: var(--bg-soft); color: var(--text-sec); border: 1.5px solid var(--border); }
+.btn-login { background: var(--accent-grad); color: #fff; box-shadow: 0 4px 14px rgba(80, 70, 223, 0.3); }
+.btn-pattern.full-width { width: 100%; margin-top: 8px; padding: 14px 20px; }
+.login-error { color: var(--danger); font-size: 12px; text-align: center; min-height: 18px; margin-top: 8px; font-weight: 700; }
+.hidden { display: none !important; }
+
+.header { height: 66px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.96); border-bottom: 1px solid var(--border-soft); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.menu-btn { width: 40px; height: 40px; border-radius: 12px; background: #fff; border: 1px solid var(--border); color: var(--accent); font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.menu-btn:active { transform: scale(0.94); }
+.header-logo { font-size: 16px; font-weight: 800; color: var(--text); }
+.header-logo span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.admin-badge { background: var(--accent-grad); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; box-shadow: 0 3px 10px rgba(80, 70, 223, 0.3); }
+.admin-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; border: 2px solid #fff; }
+
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(15, 30, 60, 0.4); backdrop-filter: blur(4px); z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+.sidebar { position: fixed; top: 0; left: -300px; width: 290px; height: 100%; background: #fff; z-index: 999; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 0; overflow-y: auto; border-right: 1px solid var(--border-soft); box-shadow: 4px 0 20px rgba(0, 50, 100, 0.08); }
+.sidebar.open { left: 0; }
+.sidebar-header { padding: 20px 18px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-soft); }
+.sidebar-header .sidebar-logo { font-size: 18px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.sidebar-header .sidebar-logo i { color: var(--accent); font-size: 20px; }
+.sidebar-close { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-sec); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sidebar-user { padding: 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-soft); background: linear-gradient(135deg, #f0f4ff, #eef7ff); }
+.user-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(80, 70, 223, 0.25); }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.sidebar-menu { padding: 8px 0; }
+.menu-label { padding: 12px 18px 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; color: var(--text-sec); text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; }
+.menu-item i { width: 20px; font-size: 15px; color: #8a9ab0; }
+.menu-item:hover { background: var(--bg-soft); color: var(--text); }
+.menu-item.active { background: var(--accent-light); color: var(--accent); border-left: 3px solid var(--accent); }
+.menu-item.active i { color: var(--accent); }
+.menu-item.logout { margin-top: 8px; border-top: 1px solid var(--border-soft); padding-top: 14px; color: var(--danger); }
+.menu-item.logout i { color: var(--danger); }
+.menu-item.logout:hover { background: #fee2e2; }
+.menu-item.super-only { display: none; }
+.menu-item.super-only.visible { display: flex; }
+
+.container { max-width: 500px; margin: 0 auto; padding: 16px; }
+
+.section { display: none; animation: fadeIn 0.3s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 4px; letter-spacing: -0.3px; }
+.page-subtitle { font-size: 12px; color: var(--text-sec); margin-bottom: 16px; font-weight: 600; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.stats-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.stats-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; text-align: center; box-shadow: var(--shadow); }
+.stat-number { font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+.stat-number.total { color: var(--accent); }
+.stat-number.pending { color: var(--warning); }
+.stat-number.completed { color: var(--success); }
+.stat-number.danger { color: var(--danger); }
+.stat-number.purple { color: var(--purple); }
+.stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-sec); font-weight: 800; }
+
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.card-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+.card-title i { color: var(--accent); font-size: 15px; }
+
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 11px; font-weight: 800; color: var(--text-sec); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+.form-group label i { margin-right: 4px; color: var(--accent); }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; background: var(--bg-soft); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); outline: none; font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(80, 70, 223, 0.08); }
+.form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-muted); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn { padding: 13px 20px; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; justify-content: center; width: 100%; font-family: 'Inter', sans-serif; letter-spacing: 0.3px; text-transform: uppercase; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--accent-grad); color: #fff; box-shadow: 0 4px 14px rgba(80, 70, 223, 0.3); }
+.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); }
+.btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3); }
+.btn-secondary { background: var(--bg-soft); color: var(--text-sec); border: 1.5px solid var(--border); }
+.btn-sm { padding: 8px 14px; font-size: 11px; }
+.btn-block { width: 100%; }
+.btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-soft); }
+.info-row:last-child { border-bottom: none; }
+.info-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 700; }
+.info-value { font-size: 13px; font-weight: 800; color: var(--text); text-align: right; word-break: break-word; }
+.info-value.balance { color: var(--accent); font-size: 16px; }
+
+.list-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.list-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.list-user { font-weight: 800; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.list-details { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
+.list-details span { font-size: 10.5px; color: var(--text-sec); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.list-details i { color: var(--accent); font-size: 10px; }
+.list-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.list-amount { font-weight: 800; font-size: 17px; color: var(--accent); letter-spacing: -0.3px; }
+.list-badge { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; }
+.badge-auto { color: var(--accent); background: var(--accent-light); border: 1px solid #d0d8ff; }
+.badge-manual { color: var(--purple); background: #f5f0ff; border: 1px solid #e0d4ff; }
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; display: inline-flex; align-items: center; gap: 4px; }
+.status-badge.pending { background: #fef3c7; color: var(--warning); }
+.status-badge.pending_approval { background: #ede9fe; color: #7c3aed; }
+.status-badge.approved, .status-badge.completed, .status-badge.paid { background: #dcfce7; color: var(--success); }
+.status-badge.rejected, .status-badge.failed { background: #fee2e2; color: var(--danger); }
+.status-badge.cancelled, .status-badge.expired { background: #f1f5f9; color: #64748b; }
+.list-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-soft); }
+.list-actions button { flex: 1; min-width: 80px; padding: 9px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; border: none; cursor: pointer; font-family: inherit; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.list-actions button:active { transform: scale(0.96); }
+.btn-approve { background: var(--success); color: #fff; }
+.btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+.btn-view { background: var(--accent-light); color: var(--accent); border: 1px solid #d0d8ff; }
+.btn-delete { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+
+.filter-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 12px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-tabs button { background: var(--bg-soft); border: 1.5px solid var(--border); color: var(--text-sec); padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit; text-transform: uppercase; }
+.filter-tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.wallet-card { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 10px; display: flex; align-items: center; gap: 12px; animation: cardIn 0.3s ease; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.wallet-card.wallet-verifying { border-color: #c7d2fe; background: linear-gradient(135deg, #f0f4ff, #eef7ff); }
+.wallet-card.wallet-found { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+.wallet-card.wallet-not-found { border-color: #fecaca; background: linear-gradient(135deg, #fef2f2, #fee2e2); }
+.spinner { width: 36px; height: 36px; border: 3px solid rgba(80, 70, 223, 0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+.wallet-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(80, 70, 223, 0.25); }
+.wallet-details { flex: 1; min-width: 0; }
+.verify-title, .wallet-success-title, .not-found-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.verify-title { color: var(--accent); }
+.wallet-success-title { color: var(--success); display: flex; align-items: center; gap: 4px; }
+.not-found-title { color: var(--danger); }
+.check-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--success); color: #fff; border-radius: 50%; font-size: 9px; font-weight: 900; }
+.wallet-name { font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wallet-id { font-size: 11px; color: var(--text-sec); font-weight: 600; margin-top: 2px; font-family: monospace; }
+.wallet-check { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
+.not-found-icon { width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; }
+.not-found-text { font-size: 11px; color: var(--text-sec); font-weight: 500; }
+.not-found-number { font-size: 12px; color: var(--danger); font-weight: 800; font-family: monospace; margin-top: 2px; }
+.user-info { background: linear-gradient(135deg, #f0f4ff, #eef7ff); border: 1.5px solid #d0d8ff; border-radius: 12px; padding: 14px 16px; margin-top: 12px; margin-bottom: 12px; }
+.user-info .info-row { border-bottom: 1px solid rgba(80, 70, 223, 0.1); }
+.user-info .info-row:last-child { border-bottom: none; }
+.user-info .info-value.balance { color: var(--accent); font-size: 16px; }
+
+.loading-state, .empty-state { text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; color: var(--text-sec); box-shadow: var(--shadow); }
+.loading-state i { font-size: 30px; margin-bottom: 10px; display: block; color: var(--accent); animation: spin 1s linear infinite; }
+.empty-state i { font-size: 34px; display: block; margin-bottom: 10px; opacity: 0.3; color: var(--accent); }
+.loading-state p, .empty-state p { font-size: 12px; font-weight: 700; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(15, 30, 60, 0.5); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 16px; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 20px; padding: 22px; max-width: 440px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: gateIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+.modal-header h3 { font-size: 15px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.modal-header h3 i { color: var(--accent); }
+.modal-close { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-sec); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-footer { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); flex-wrap: wrap; }
+.modal-footer button { flex: 1; min-width: 90px; padding: 12px 16px; border-radius: 10px; border: none; font-weight: 800; font-size: 11px; cursor: pointer; font-family: inherit; text-transform: uppercase; }
+.modal-footer .btn-cancel { background: var(--bg-soft); color: var(--text-sec); border: 1px solid var(--border); }
+.modal-footer .btn-confirm { background: var(--accent-grad); color: #fff; }
+.modal-footer .btn-danger { background: var(--danger); color: #fff; }
+
+.admin-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-soft); border: 1px solid var(--border-soft); border-radius: 12px; margin-bottom: 8px; }
+.admin-item.blocked { opacity: 0.6; border-color: #fecaca; }
+.admin-item .admin-avatar-sm { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.admin-item .admin-info { flex: 1; min-width: 0; }
+.admin-item .admin-name { font-size: 14px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-item .admin-meta { font-size: 10.5px; color: var(--text-muted); display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; font-weight: 600; }
+.admin-item .admin-role { padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.admin-item .admin-role.super_admin { background: var(--accent-light); color: var(--accent); }
+.admin-item .admin-role.admin { background: #dcfce7; color: var(--success); }
+.admin-item .admin-role.moderator { background: #fef3c7; color: var(--warning); }
+.admin-item .admin-actions { display: flex; gap: 4px; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--text-sec); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+.leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow); }
+.leaderboard-rank { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; flex-shrink: 0; }
+.leaderboard-rank.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
+.leaderboard-rank.rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+.leaderboard-rank.rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+.leaderboard-rank.rank-other { background: var(--bg-soft); border: 1.5px solid var(--border); color: var(--text-sec); font-size: 12px; }
+.leaderboard-info { flex: 1; min-width: 0; }
+.leaderboard-name { font-size: 13px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leaderboard-meta { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 2px; font-family: monospace; }
+.leaderboard-stats { text-align: right; flex-shrink: 0; }
+.leaderboard-count { font-size: 15px; font-weight: 900; color: var(--accent); }
+.leaderboard-earned { font-size: 10px; color: var(--success); font-weight: 700; }
+
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-10px); padding: 12px 22px; border-radius: 30px; font-size: 12px; font-weight: 800; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 92%; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--success); color: #fff; }
+.toast.error { background: var(--danger); color: #fff; }
+.toast.warning { background: var(--warning); color: #fff; }
+.toast.info { background: var(--accent); color: #fff; }
+
+.note-box { margin-top: 14px; padding: 12px; background: var(--bg-soft); border-radius: 10px; font-size: 11px; color: var(--text-sec); line-height: 1.7; font-weight: 600; border: 1px solid var(--border-soft); }
+.note-box i.dot { font-size: 6px; color: var(--accent); margin-right: 4px; }
+
+@media (max-width: 480px) {
+    .pattern-wrapper { width: 220px; height: 220px; }
+    .pattern-grid { gap: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+    .list-header { flex-direction: column; }
+    .list-right { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="security-gate hidden" id="securityGate">
+    <div class="security-gate-card" id="securityGateContent">
+        <div class="gate-spinner"></div>
+        <p style="color:#788394;font-weight:700;">Checking access...</p>
+    </div>
+</div>
+
+<div class="login-overlay show" id="loginOverlay">
+    <div class="login-modal">
+        <div class="modal-logo">
+            <i class="fas fa-bolt"></i>
+            <h2>ADMIN PANEL</h2>
+            <p>Universal Wallet • Secure Access</p>
+        </div>
+        <div id="loginStep1">
+            <div class="login-step-title"><i class="fas fa-shield-alt"></i> Step 1 of 2 - Security Pattern</div>
+            <div class="pattern-container">
+                <div class="pattern-status" id="patternStatus">Draw your pattern</div>
+                <div class="pattern-wrapper" id="patternWrapper">
+                    <canvas class="pattern-canvas" id="patternCanvas"></canvas>
+                    <div class="pattern-grid" id="patternGrid"></div>
+                </div>
+                <div class="pattern-actions">
+                    <button class="btn-pattern btn-clear" onclick="clearPattern()"><i class="fas fa-undo"></i> Clear</button>
+                    <button class="btn-pattern btn-login" id="patternLoginBtn" onclick="verifyPattern()" disabled><i class="fas fa-arrow-right"></i> Continue</button>
+                </div>
+                <div class="login-error" id="loginError"></div>
+            </div>
+        </div>
+        <div id="loginStep2" class="hidden">
+            <div class="login-step-title"><i class="fas fa-user-shield"></i> Step 2 of 2 - Admin Credentials</div>
+            <div class="login-field">
+                <label for="adminIdInput"><i class="fas fa-id-badge"></i> Admin ID</label>
+                <input type="text" id="adminIdInput" placeholder="Enter admin ID" autocomplete="username">
+            </div>
+            <div class="login-field">
+                <label for="adminPasswordInput"><i class="fas fa-lock"></i> Password</label>
+                <div class="password-wrap">
+                    <input type="password" id="adminPasswordInput" placeholder="Enter password" autocomplete="current-password">
+                    <button type="button" class="toggle-pw" onclick="togglePassword()"><i class="fas fa-eye" id="pwEye"></i></button>
+                </div>
+            </div>
+            <button class="btn-pattern btn-login full-width" id="step2Btn" onclick="submitStep2()"><i class="fas fa-bolt"></i> Login</button>
+            <button class="btn-pattern btn-clear full-width" style="margin-top:8px;" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back</button>
+            <div class="login-error" id="step2Error"></div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <span class="sidebar-logo"><i class="fas fa-shield-halved"></i> Admin</span>
+        <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-info">
+            <div class="user-name" id="sidebarName">Admin</div>
+            <div class="user-role" id="sidebarRole"><i class="fas fa-crown"></i> Super Admin</div>
+        </div>
+    </div>
+    <div class="sidebar-menu">
+        <div class="menu-label">Main Menu</div>
+        <button class="menu-item active" data-section="dashboard" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
+        <button class="menu-item" data-section="deposits" onclick="showSection('deposits')"><i class="fas fa-coins"></i><span>Deposits</span></button>
+        <button class="menu-item" data-section="withdrawals" onclick="showSection('withdrawals')"><i class="fas fa-arrow-up"></i><span>Withdrawals</span></button>
+        <button class="menu-item" data-section="users" onclick="showSection('users')"><i class="fas fa-users"></i><span>Users</span></button>
+        <button class="menu-item" data-section="adjust" onclick="showSection('adjust')"><i class="fas fa-sliders-h"></i><span>Adjust Balance</span></button>
+        <button class="menu-item" data-section="gift" onclick="showSection('gift')"><i class="fas fa-gift"></i><span>Gift Codes</span></button>
+        <button class="menu-item" data-section="lifafa" onclick="showSection('lifafa')"><i class="fas fa-envelope"></i><span>Lifafa</span></button>
+        <button class="menu-item" data-section="invoices" onclick="showSection('invoices')"><i class="fas fa-file-invoice"></i><span>Invoices</span></button>
+        <button class="menu-item" data-section="transactions" onclick="showSection('transactions')"><i class="fas fa-exchange-alt"></i><span>Transactions</span></button>
+
+        <div class="menu-label">Referral System</div>
+        <button class="menu-item" data-section="referrals" onclick="showSection('referrals')"><i class="fas fa-user-plus"></i><span>All Referrals</span></button>
+        <button class="menu-item" data-section="top-referrers" onclick="showSection('top-referrers')"><i class="fas fa-trophy"></i><span>Top Referrers</span></button>
+        <button class="menu-item super-only" data-section="referral-settings" onclick="showSection('referral-settings')"><i class="fas fa-cog"></i><span>Referral Settings</span></button>
+
+        <div class="menu-label">Admin Account</div>
+        <button class="menu-item" data-section="profile" onclick="showSection('profile')"><i class="fas fa-user-circle"></i><span>My Profile</span></button>
+        <button class="menu-item" data-section="password" onclick="showSection('password')"><i class="fas fa-key"></i><span>Change Password</span></button>
+        <button class="menu-item super-only" data-section="admins" id="menuAdmins" onclick="showSection('admins')"><i class="fas fa-user-shield"></i><span>Admin List</span></button>
+        <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>
+    </div>
+</div>
+
+<header class="header">
+    <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars-staggered"></i></button>
+        <span class="header-logo">Admin <span id="headerSection">Panel</span></span>
+    </div>
+    <div class="header-right">
+        <span class="admin-badge" id="headerBadge"><i class="fas fa-bolt"></i> Admin</span>
+        <div class="admin-avatar" onclick="toggleSidebar()" id="headerAvatar">A</div>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="section active" id="section-dashboard">
+        <div class="page-title">Welcome, <span id="dashAdminName">Admin</span></div>
+        <div class="page-subtitle">Overview of your wallet system</div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number total" id="dTotalUsers">0</div><div class="stat-label">Total Users</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="dVolume">₹0</div><div class="stat-label">Total Volume</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="dPendingDeposits">0</div><div class="stat-label">Pending Deposits</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="dApprovedDeposits">0</div><div class="stat-label">Approved Deposits</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="dPendingWithdrawals">0</div><div class="stat-label">Pending Withdrawals</div></div>
+            <div class="stat-card"><div class="stat-number total" id="dTotalWithdrawn">₹0</div><div class="stat-label">Total Withdrawn</div></div>
+            <div class="stat-card"><div class="stat-number purple" id="dTotalLifafas">0</div><div class="stat-label">Total Lifafas</div></div>
+            <div class="stat-card"><div class="stat-number danger" id="dTotalGifts">0</div><div class="stat-label">Total Gifts</div></div>
+        </div>
+
+        <div class="page-subtitle" style="margin-top:16px;margin-bottom:8px;"><i class="fas fa-gift" style="color:var(--accent);"></i> Referral Overview</div>
+        <div class="stats-grid cols-4">
+            <div class="stat-card"><div class="stat-number total" id="dTotalRefs">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="dCompletedRefs">0</div><div class="stat-label">Completed</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="dPendingRefs">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number purple" id="dPaidRefs">₹0</div><div class="stat-label">Bonus Paid</div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-bolt"></i> Recent Transactions</div>
+            <div id="dashRecentTx"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+        </div>
+    </div>
+
+    <div class="section" id="section-deposits">
+        <div class="page-title">Deposits</div>
+        <div class="page-subtitle">Approve or reject deposit requests</div>
+        <div class="stats-grid cols-3">
+            <div class="stat-card"><div class="stat-number total" id="depTotal">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="depPending">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="depApproved">0</div><div class="stat-label">Approved</div></div>
+        </div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-dep-filter="all" onclick="filterDeposits('all')">All</button>
+                <button data-dep-filter="pending_approval" onclick="filterDeposits('pending_approval')">Approval</button>
+                <button data-dep-filter="pending" onclick="filterDeposits('pending')">Pending</button>
+                <button data-dep-filter="approved" onclick="filterDeposits('approved')">Approved</button>
+                <button data-dep-filter="rejected" onclick="filterDeposits('rejected')">Rejected</button>
+            </div>
+        </div>
+        <div id="depositList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-withdrawals">
+        <div class="page-title">Withdrawals</div>
+        <div class="page-subtitle">Manage withdrawal requests</div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-wd-filter="all" onclick="filterWithdrawals('all')">All</button>
+                <button data-wd-filter="pending" onclick="filterWithdrawals('pending')">Pending</button>
+                <button data-wd-filter="completed" onclick="filterWithdrawals('completed')">Completed</button>
+                <button data-wd-filter="failed" onclick="filterWithdrawals('failed')">Failed</button>
+            </div>
+        </div>
+        <div id="withdrawList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-users">
+        <div class="page-title">Users</div>
+        <div class="page-subtitle">Search, block, or manage users</div>
+        <div class="card">
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Search Users</label>
+                <input type="text" id="userSearchInput" placeholder="Name, mobile, or wallet ID..." onkeyup="searchUsersList(event)">
+            </div>
+        </div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-user-filter="active" onclick="filterUsers('active')">Active</button>
+                <button data-user-filter="blocked" onclick="filterUsers('blocked')">Blocked</button>
+                <button data-user-filter="deleted" onclick="filterUsers('deleted')">Deleted</button>
+                <button data-user-filter="all" onclick="filterUsers('all')">All</button>
+            </div>
+        </div>
+        <div id="usersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-adjust">
+        <div class="page-title">Adjust Balance</div>
+        <div class="page-subtitle">Add or deduct user balance</div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-sliders-h"></i> Adjust User Balance</div>
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Search User</label>
+                <input type="text" id="walletInput" placeholder="Mobile / Wallet ID" autocomplete="off">
+            </div>
+            <div id="walletResult"></div>
+            <div class="user-info" id="adjUserInfo" style="display:none;">
+                <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="adjUserName">-</span></div>
+                <div class="info-row"><span class="info-label">Mobile</span><span class="info-value" id="adjUserMobile">-</span></div>
+                <div class="info-row"><span class="info-label">Wallet</span><span class="info-value" id="adjUserWallet">-</span></div>
+                <div class="info-row"><span class="info-label">Balance</span><span class="info-value balance" id="adjUserBalance">₹0.00</span></div>
+            </div>
+            <div class="form-group" style="margin-top:14px;">
+                <label><i class="fas fa-rupee-sign"></i> Amount (₹)</label>
+                <input type="number" id="adjAmount" placeholder="Enter amount" min="1">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-sticky-note"></i> Reason</label>
+                <input type="text" id="adjReason" placeholder="Reason (optional)">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="adjustBalance('add')"><i class="fas fa-plus-circle"></i> Add</button>
+                <button class="btn btn-danger" onclick="adjustBalance('deduct')"><i class="fas fa-minus-circle"></i> Deduct</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="section-gift">
+        <div class="page-title">Gift Codes</div>
+        <div class="page-subtitle">Create and manage gift codes</div>
+        <div class="stats-grid cols-3">
+            <div class="stat-card"><div class="stat-number total" id="giftTotal">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="giftActive">0</div><div class="stat-label">Active</div></div>
+            <div class="stat-card"><div class="stat-number danger" id="giftUsed">0</div><div class="stat-label">Used</div></div>
+        </div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-plus-circle"></i> Create Gift</div>
+            <div class="form-group"><label><i class="fas fa-rupee-sign"></i> Amount (₹)</label><input type="number" id="giftAmount" placeholder="Amount" min="1"></div>
+            <div class="form-group"><label><i class="fas fa-align-left"></i> Note</label><input type="text" id="giftNote" placeholder="Optional note"></div>
+            <div class="form-group"><label><i class="fas fa-hashtag"></i> Quantity</label><input type="number" id="giftQty" placeholder="Number of gifts" min="1" value="1"></div>
+            <button class="btn btn-primary btn-block" onclick="createGift()"><i class="fas fa-gift"></i> Create</button>
+        </div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-list"></i> All Gifts</div>
+            <div id="giftList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+        </div>
+    </div>
+
+    <div class="section" id="section-lifafa">
+        <div class="page-title">Lifafa</div>
+        <div class="page-subtitle">Manage lifafa campaigns</div>
+        <div id="lifafaList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-invoices">
+        <div class="page-title">Invoices</div>
+        <div class="page-subtitle">Manage all invoices</div>
+        <div class="stats-grid cols-4">
+            <div class="stat-card"><div class="stat-number total" id="invTotal">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="invPending">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="invPaid">0</div><div class="stat-label">Paid</div></div>
+            <div class="stat-card"><div class="stat-number danger" id="invExpired">0</div><div class="stat-label">Expired</div></div>
+        </div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-inv-filter="all" onclick="filterInvoices('all')">All</button>
+                <button data-inv-filter="pending" onclick="filterInvoices('pending')">Pending</button>
+                <button data-inv-filter="paid" onclick="filterInvoices('paid')">Paid</button>
+                <button data-inv-filter="expired" onclick="filterInvoices('expired')">Expired</button>
+                <button data-inv-filter="cancelled" onclick="filterInvoices('cancelled')">Cancelled</button>
+            </div>
+        </div>
+        <div id="invoiceList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-transactions">
+        <div class="page-title">Transactions</div>
+        <div class="page-subtitle">All system transactions</div>
+        <div class="card">
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Search</label>
+                <input type="text" id="txSearchInput" placeholder="Transaction ID, remark..." onkeyup="searchTransactions(event)">
+            </div>
+        </div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-tx-type="all" onclick="filterTxType('all')">All</button>
+                <button data-tx-type="deposit" onclick="filterTxType('deposit')">Deposit</button>
+                <button data-tx-type="withdraw" onclick="filterTxType('withdraw')">Withdraw</button>
+                <button data-tx-type="transfer" onclick="filterTxType('transfer')">Transfer</button>
+                <button data-tx-type="admin_add" onclick="filterTxType('admin_add')">Admin Add</button>
+                <button data-tx-type="admin_deduct" onclick="filterTxType('admin_deduct')">Admin Deduct</button>
+            </div>
+        </div>
+        <div id="transactionsList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-referrals">
+        <div class="page-title">All Referrals</div>
+        <div class="page-subtitle">Manage all user referrals</div>
+        <div class="stats-grid cols-4">
+            <div class="stat-card"><div class="stat-number total" id="refTotal">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number completed" id="refCompleted">0</div><div class="stat-label">Completed</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="refPending">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number purple" id="refPaidBonus">₹0</div><div class="stat-label">Bonus Paid</div></div>
+        </div>
+        <div class="card">
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Search</label>
+                <input type="text" id="refSearchInput" placeholder="Name, mobile, or code..." onkeyup="searchReferrals(event)">
+            </div>
+        </div>
+        <div class="filter-card">
+            <div class="filter-tabs">
+                <button class="active" data-ref-filter="all" onclick="filterReferrals('all')">All</button>
+                <button data-ref-filter="completed" onclick="filterReferrals('completed')">Completed</button>
+                <button data-ref-filter="pending" onclick="filterReferrals('pending')">Pending</button>
+                <button data-ref-filter="failed" onclick="filterReferrals('failed')">Failed</button>
+            </div>
+        </div>
+        <div id="referralsList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-top-referrers">
+        <div class="page-title">Top Referrers</div>
+        <div class="page-subtitle">Leaderboard of best referrers</div>
+        <div id="topReferrersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+    <div class="section" id="section-referral-settings">
+        <div class="page-title">Referral Settings</div>
+        <div class="page-subtitle">Configure global referral program</div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-cog"></i> Global Settings</div>
+
+            <div class="form-group">
+                <label><i class="fas fa-toggle-on"></i> Program Status</label>
+                <select id="refEnabled">
+                    <option value="true">Enabled - Users can refer</option>
+                    <option value="false">Disabled - Program paused</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-rupee-sign"></i> Referral Bonus (₹)</label>
+                <input type="number" id="refBonusAmount" placeholder="e.g. 10" min="1" value="10">
+                <small style="display:block;font-size:10px;color:var(--text-muted);margin-top:4px;font-weight:600;">Referrer will receive this amount when bonus triggers</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-hand-holding-usd"></i> Minimum Total Deposit (₹)</label>
+                <input type="number" id="refMinDeposit" placeholder="e.g. 50" min="1" value="50">
+                <small style="display:block;font-size:10px;color:var(--text-muted);margin-top:4px;font-weight:600;">Referred user must deposit this much in total (multiple small deposits allowed)</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-hashtag"></i> Max Referrals Per User</label>
+                <input type="number" id="refMaxReferrals" placeholder="e.g. 100" min="1" value="100">
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="saveReferralSettings()">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+
+            <div class="note-box">
+                <strong>How it works:</strong><br>
+                <i class="fas fa-circle dot"></i> Referred user can deposit <strong>any amount</strong> (₹1+)<br>
+                <i class="fas fa-circle dot"></i> When their <strong>total deposit</strong> reaches ₹<span id="settingsMinDepText">50</span>, referrer gets ₹<span id="settingsBonusText">10</span><br>
+                <i class="fas fa-circle dot"></i> Referred user gets <strong>NO</strong> bonus<br>
+                <i class="fas fa-circle dot"></i> Only referrer earns the reward
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="section-profile">
+        <div class="page-title">My Profile</div>
+        <div class="page-subtitle">Manage your admin account</div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-user-circle"></i> Account Info</div>
+            <div class="info-row"><span class="info-label">Admin ID</span><span class="info-value" id="profAdminId">-</span></div>
+            <div class="info-row"><span class="info-label">Role</span><span class="info-value" id="profRole">-</span></div>
+            <div class="info-row"><span class="info-label">Last Login</span><span class="info-value" id="profLastLogin">-</span></div>
+        </div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-edit"></i> Edit Profile</div>
+            <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="profFullName"></div>
+            <div class="form-group"><label><i class="fas fa-phone"></i> Mobile</label><input type="text" id="profMobile" maxlength="10"></div>
+            <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="profEmail"></div>
+            <div class="form-group"><label><i class="fab fa-telegram"></i> Telegram ID</label><input type="text" id="profTelegram"></div>
+            <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save"></i> Save</button>
+        </div>
+    </div>
+
+    <div class="section" id="section-password">
+        <div class="page-title">Change Password</div>
+        <div class="page-subtitle">Update your account password</div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-key"></i> Password Update</div>
+            <div class="form-group"><label><i class="fas fa-lock"></i> Current Password</label><input type="password" id="cpCurrent"></div>
+            <div class="form-group"><label><i class="fas fa-lock"></i> New Password</label><input type="password" id="cpNew" placeholder="Min 6 characters"></div>
+            <div class="form-group"><label><i class="fas fa-lock"></i> Confirm Password</label><input type="password" id="cpConfirm"></div>
+            <button class="btn btn-primary btn-block" onclick="changePassword()"><i class="fas fa-shield-alt"></i> Update</button>
+        </div>
+    </div>
+
+    <div class="section" id="section-admins">
+        <div class="page-title">Admin List</div>
+        <div class="page-subtitle">Manage admin accounts</div>
+        <button class="btn btn-primary btn-block" onclick="openCreateAdminModal()" style="margin-bottom:14px;"><i class="fas fa-plus"></i> Create New Admin</button>
+        <div id="adminsListContainer"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="detailsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> <span id="modalTitle">Details</span></h3>
+            <button class="modal-close" onclick="closeModal('detailsModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="modalBody"></div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('detailsModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="createAdminModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus"></i> Create Admin</h3>
+            <button class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-group"><label><i class="fas fa-id-badge"></i> Admin ID *</label><input type="text" id="newAdminId" placeholder="john123"></div>
+        <div class="form-group"><label><i class="fas fa-lock"></i> Password *</label><input type="text" id="newAdminPassword" placeholder="Min 6 chars"></div>
+        <div class="form-group"><label><i class="fas fa-user"></i> Full Name *</label><input type="text" id="newAdminFullName"></div>
+        <div class="form-group"><label><i class="fas fa-phone"></i> Mobile *</label><input type="text" id="newAdminMobile" maxlength="10"></div>
+        <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="newAdminEmail"></div>
+        <div class="form-group"><label><i class="fab fa-telegram"></i> Telegram ID</label><input type="text" id="newAdminTelegram"></div>
+        <div class="form-group"><label><i class="fas fa-user-tag"></i> Role</label>
+            <select id="newAdminRole">
+                <option value="admin">Admin</option>
+                <option value="moderator">Moderator</option>
+                <option value="super_admin">Super Admin</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('createAdminModal')">Cancel</button>
+            <button class="btn-confirm" onclick="createAdmin()"><i class="fas fa-plus"></i> Create</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editAdminModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-edit"></i> Edit Admin</h3>
+            <button class="modal-close" onclick="closeModal('editAdminModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="editAdminId">
+        <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="editAdminFullName"></div>
+        <div class="form-group"><label><i class="fas fa-phone"></i> Mobile</label><input type="text" id="editAdminMobile" maxlength="10"></div>
+        <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="editAdminEmail"></div>
+        <div class="form-group"><label><i class="fab fa-telegram"></i> Telegram</label><input type="text" id="editAdminTelegram"></div>
+        <div class="form-row">
+            <div class="form-group"><label><i class="fas fa-user-tag"></i> Role</label>
+                <select id="editAdminRole">
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="super_admin">Super Admin</option>
+                </select>
+            </div>
+            <div class="form-group"><label><i class="fas fa-lock"></i> New Password</label><input type="text" id="editAdminPassword" placeholder="Blank = keep"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label><i class="fas fa-toggle-on"></i> Active</label>
+                <select id="editAdminActive"><option value="true">Yes</option><option value="false">No</option></select>
+            </div>
+            <div class="form-group"><label><i class="fas fa-ban"></i> Blocked</label>
+                <select id="editAdminBlocked"><option value="false">No</option><option value="true">Yes</option></select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('editAdminModal')">Cancel</button>
+            <button class="btn-confirm" onclick="saveAdminEdit()"><i class="fas fa-save"></i> Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editReferralModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Edit Referral</h3>
+            <button class="modal-close" onclick="closeModal('editReferralModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="editRefId">
+        <div class="form-group">
+            <label><i class="fas fa-info-circle"></i> Status</label>
+            <select id="editRefStatus">
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="expired">Expired</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-sticky-note"></i> Notes</label>
+            <textarea id="editRefNotes" placeholder="Admin notes..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('editReferralModal')">Cancel</button>
+            <button class="btn-confirm" onclick="saveReferralEdit()"><i class="fas fa-save"></i> Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var currentAdmin = null;
+var adminToken = null;
+var patternTempToken = null;
+var currentSection = 'dashboard';
+var MIN_PATTERN_LENGTH = 4;
+var selectedPattern = [];
+var isDrawing = false;
+var dotPositions = [];
+var canvas, ctx;
+var currentMousePos = null;
+
+var state = {
+    deposits: [], users: [], gifts: [], lifafas: [], invoices: [], transactions: [], referrals: [],
+    depFilter: 'all', wdFilter: 'all', userFilter: 'active', invFilter: 'all', txType: 'all', refFilter: 'all',
+    adjSelectedUserId: null
+};
+
+function showToast(msg, type) {
+    type = type || 'info';
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type + ' show';
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(function(){ t.className = 'toast'; }, 3000);
+}
+
+async function apiCall(endpoint, options) {
+    options = options || {};
+    var headers = { 'Content-Type': 'application/json' };
+    if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+    var r = await fetch('/api/admin' + endpoint, {
+        method: options.method || 'GET',
+        headers: headers,
+        body: options.body || null
+    });
+    if (r.status === 401 || r.status === 403) { handleSessionExpired(); throw new Error('Session expired'); }
+    var data = await r.json();
+    if (!r.ok) throw new Error(data.message || 'API error');
+    return data;
+}
+
+function initCanvas() { canvas = document.getElementById('patternCanvas'); if (!canvas) return; ctx = canvas.getContext('2d'); resizeCanvas(); }
+function resizeCanvas() {
+    if (!canvas) return;
+    var wrapper = document.getElementById('patternWrapper');
+    if (!wrapper) return;
+    var rect = wrapper.getBoundingClientRect();
+    if (rect.width === 0) return;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    computeDotPositions(); redrawPattern();
+}
+function computeDotPositions() {
+    dotPositions = [];
+    var dots = document.querySelectorAll('.pattern-dot');
+    var wrapper = document.getElementById('patternWrapper');
+    if (!wrapper) return;
+    var wRect = wrapper.getBoundingClientRect();
+    dots.forEach(function(dot) {
+        var r = dot.getBoundingClientRect();
+        dotPositions.push({ x: r.left - wRect.left + r.width / 2, y: r.top - wRect.top + r.height / 2 });
+    });
+}
+function createPatternGrid() {
+    var grid = document.getElementById('patternGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    for (var i = 0; i < 9; i++) {
+        var dot = document.createElement('div');
+        dot.className = 'pattern-dot';
+        dot.innerHTML = '<span class="dot-number">' + (i+1) + '</span><div class="dot-inner"></div>';
+        grid.appendChild(dot);
+    }
+    var wrapper = document.getElementById('patternWrapper');
+    if (!wrapper) return;
+    var newWrapper = wrapper.cloneNode(true);
+    wrapper.parentNode.replaceChild(newWrapper, wrapper);
+    newWrapper.addEventListener('mousedown', handleStart);
+    newWrapper.addEventListener('mousemove', handleMove);
+    newWrapper.addEventListener('mouseup', handleEnd);
+    newWrapper.addEventListener('mouseleave', handleEnd);
+    newWrapper.addEventListener('touchstart', handleStart, { passive: false });
+    newWrapper.addEventListener('touchmove', handleMove, { passive: false });
+    newWrapper.addEventListener('touchend', handleEnd);
+    newWrapper.addEventListener('touchcancel', handleEnd);
+    canvas = document.getElementById('patternCanvas');
+    if (canvas) ctx = canvas.getContext('2d');
+    setTimeout(function() { computeDotPositions(); resizeCanvas(); }, 80);
+}
+function getPointerPos(e) {
+    var wrapper = document.getElementById('patternWrapper');
+    var rect = wrapper.getBoundingClientRect();
+    var cx, cy;
+    if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else if (e.changedTouches && e.changedTouches.length > 0) { cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY; }
+    else { cx = e.clientX; cy = e.clientY; }
+    return { x: cx - rect.left, y: cy - rect.top };
+}
+function getDotAtPosition(pos) {
+    for (var i = 0; i < dotPositions.length; i++) {
+        var d = dotPositions[i];
+        if (Math.hypot(pos.x - d.x, pos.y - d.y) < 30) return i;
+    }
+    return -1;
+}
+function handleStart(e) {
+    e.preventDefault();
+    var pos = getPointerPos(e); var idx = getDotAtPosition(pos);
+    if (idx >= 0) { isDrawing = true; selectedPattern = []; document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('selected', 'wrong'); }); addDotToPattern(idx); }
+}
+function handleMove(e) {
+    e.preventDefault(); if (!isDrawing) return;
+    var pos = getPointerPos(e); currentMousePos = pos;
+    var idx = getDotAtPosition(pos);
+    if (idx >= 0 && selectedPattern.indexOf(idx) === -1) addDotToPattern(idx);
+    redrawPattern();
+}
+function handleEnd() {
+    if (!isDrawing) return;
+    isDrawing = false; currentMousePos = null;
+    var btn = document.getElementById('patternLoginBtn');
+    if (btn) btn.disabled = selectedPattern.length < MIN_PATTERN_LENGTH;
+    redrawPattern();
+}
+function addDotToPattern(idx) {
+    selectedPattern.push(idx);
+    var dots = document.querySelectorAll('.pattern-dot');
+    if (dots[idx]) dots[idx].classList.add('selected');
+    var status = document.getElementById('patternStatus');
+    var count = selectedPattern.length;
+    if (count >= MIN_PATTERN_LENGTH) {
+        status.textContent = count + ' dots - tap Continue';
+        status.className = 'pattern-status success';
+        document.getElementById('patternLoginBtn').disabled = false;
+    } else {
+        status.textContent = count + ' dots (' + (MIN_PATTERN_LENGTH - count) + ' more)';
+        status.className = 'pattern-status';
+    }
+    document.getElementById('loginError').innerHTML = '';
+    document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('wrong'); });
+    if (navigator.vibrate) navigator.vibrate(15);
+    redrawPattern();
+}
+function redrawPattern() {
+    if (!ctx || !canvas) return;
+    var wrapper = document.getElementById('patternWrapper'); if (!wrapper) return;
+    var rect = wrapper.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    if (selectedPattern.length === 0) return;
+    var wrong = document.querySelector('.pattern-dot.wrong');
+    var color = wrong ? '#dc2626' : '#5046df';
+    var glow = wrong ? 'rgba(220,38,38,0.5)' : 'rgba(80,70,223,0.5)';
+    ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = color; ctx.shadowColor = glow; ctx.shadowBlur = 12;
+    ctx.beginPath();
+    for (var i = 0; i < selectedPattern.length; i++) {
+        var p = dotPositions[selectedPattern[i]]; if (!p) continue;
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    if (isDrawing && currentMousePos && selectedPattern.length > 0) {
+        var lastDot = dotPositions[selectedPattern[selectedPattern.length - 1]];
+        if (lastDot) { ctx.beginPath(); ctx.moveTo(lastDot.x, lastDot.y); ctx.lineTo(currentMousePos.x, currentMousePos.y); ctx.stroke(); }
+    }
+}
+function clearPattern() {
+    selectedPattern = []; isDrawing = false; currentMousePos = null;
+    document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('selected', 'wrong'); });
+    var status = document.getElementById('patternStatus');
+    if (status) { status.textContent = 'Draw your pattern'; status.className = 'pattern-status'; }
+    document.getElementById('patternLoginBtn').disabled = true;
+    document.getElementById('loginError').innerHTML = '';
+    if (ctx && canvas) {
+        var wrapper = document.getElementById('patternWrapper');
+        if (wrapper) { var rect = wrapper.getBoundingClientRect(); ctx.clearRect(0, 0, rect.width, rect.height); }
+    }
+}
+async function verifyPattern() {
+    var status = document.getElementById('patternStatus');
+    var error = document.getElementById('loginError');
+    if (selectedPattern.length < MIN_PATTERN_LENGTH) {
+        status.textContent = MIN_PATTERN_LENGTH + ' dots required';
+        status.className = 'pattern-status error'; return;
+    }
+    var patternString = selectedPattern.map(function(i){ return i + 1; }).join('');
+    status.textContent = 'Verifying...'; status.className = 'pattern-status';
+    try {
+        var r = await fetch('/api/admin/login-step1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pattern: patternString }) });
+        var data = await r.json();
+        if (data.success) {
+            status.textContent = 'Pattern verified';
+            status.className = 'pattern-status success';
+            patternTempToken = data.tempToken;
+            setTimeout(function() {
+                document.getElementById('loginStep1').classList.add('hidden');
+                document.getElementById('loginStep2').classList.remove('hidden');
+                setTimeout(function(){ document.getElementById('adminIdInput').focus(); }, 200);
+            }, 400);
+        } else {
+            status.textContent = data.message; status.className = 'pattern-status error';
+            error.innerHTML = data.message;
+            document.querySelectorAll('.pattern-dot.selected').forEach(function(d){ d.classList.add('wrong'); });
+            redrawPattern();
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            setTimeout(clearPattern, 1200);
+        }
+    } catch (e) { status.textContent = 'Network error'; status.className = 'pattern-status error'; setTimeout(clearPattern, 1200); }
+}
+function backToStep1() {
+    patternTempToken = null;
+    document.getElementById('loginStep1').classList.remove('hidden');
+    document.getElementById('loginStep2').classList.add('hidden');
+    document.getElementById('adminIdInput').value = '';
+    document.getElementById('adminPasswordInput').value = '';
+    document.getElementById('step2Error').innerHTML = '';
+    clearPattern();
+    setTimeout(function() { createPatternGrid(); initCanvas(); resizeCanvas(); }, 100);
+}
+function togglePassword() {
+    var input = document.getElementById('adminPasswordInput');
+    var eye = document.getElementById('pwEye');
+    if (input.type === 'password') { input.type = 'text'; eye.className = 'fas fa-eye-slash'; }
+    else { input.type = 'password'; eye.className = 'fas fa-eye'; }
+}
+async function submitStep2() {
+    var adminId = document.getElementById('adminIdInput').value.trim();
+    var password = document.getElementById('adminPasswordInput').value;
+    var btn = document.getElementById('step2Btn');
+    var errEl = document.getElementById('step2Error');
+    errEl.innerHTML = '';
+    if (!adminId || !password) { errEl.textContent = 'Both fields required.'; return; }
+    if (!patternTempToken) { errEl.textContent = 'Session lost.'; setTimeout(backToStep1, 1500); return; }
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+    try {
+        var r = await fetch('/api/admin/login-step2', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tempToken: patternTempToken, adminId: adminId, password: password }) });
+        var data = await r.json();
+        if (data.success) {
+            adminToken = data.token; currentAdmin = data.admin;
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminData', JSON.stringify(data.admin));
+            updateAdminUI(data.admin); applyRoleVisibility();
+            document.getElementById('loginOverlay').classList.remove('show');
+            patternTempToken = null;
+            document.getElementById('adminIdInput').value = '';
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('loginStep2').classList.add('hidden');
+            document.getElementById('loginStep1').classList.remove('hidden');
+            showToast(data.message, 'success');
+            setTimeout(function(){ showSection('dashboard'); }, 300);
+        } else {
+            errEl.textContent = data.message;
+            if (data.message.indexOf('expired') > -1) setTimeout(backToStep1, 2000);
+        }
+    } catch (e) { errEl.textContent = 'Network error'; }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Login';
+}
+function updateAdminUI(admin) {
+    if (!admin) return;
+    var name = admin.fullName || admin.adminId || 'Admin';
+    var initial = name.charAt(0).toUpperCase();
+    var role = (admin.role || 'admin').replace('_', ' ').toUpperCase();
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarAvatar').textContent = initial;
+    document.getElementById('headerAvatar').textContent = initial;
+    document.getElementById('dashAdminName').textContent = name.split(' ')[0];
+    var icon = admin.role === 'super_admin' ? 'fa-crown' : 'fa-user-shield';
+    document.getElementById('sidebarRole').innerHTML = '<i class="fas ' + icon + '"></i> ' + role;
+    document.getElementById('headerBadge').innerHTML = '<i class="fas fa-bolt"></i> ' + (admin.role === 'super_admin' ? 'Super Admin' : 'Admin');
+}
+function applyRoleVisibility() {
+    if (!currentAdmin) return;
+    document.querySelectorAll('.menu-item.super-only').forEach(function(item){
+        if (currentAdmin.role === 'super_admin') item.classList.add('visible');
+        else item.classList.remove('visible');
+    });
+}
+function handleSessionExpired() {
+    localStorage.removeItem('adminToken'); localStorage.removeItem('adminData');
+    adminToken = null; currentAdmin = null; patternTempToken = null;
+    showLogin(); showToast('Session expired', 'error');
+}
+async function checkSession() {
+    adminToken = localStorage.getItem('adminToken');
+    var adminData = localStorage.getItem('adminData');
+    if (!adminToken) { showLogin(); return; }
+    try {
+        if (adminData) { try { currentAdmin = JSON.parse(adminData); } catch (e) {} }
+        var r = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+        if (r.status === 401 || r.status === 403) { handleSessionExpired(); return; }
+        var data = await r.json();
+        if (data && data.success) {
+            document.getElementById('loginOverlay').classList.remove('show');
+            if (currentAdmin) { updateAdminUI(currentAdmin); applyRoleVisibility(); }
+            showSection('dashboard');
+        } else { showLogin(); }
+    } catch (e) { showLogin(); }
+}
+function showLogin() {
+    document.getElementById('loginOverlay').classList.add('show');
+    document.getElementById('loginStep1').classList.remove('hidden');
+    document.getElementById('loginStep2').classList.add('hidden');
+    document.getElementById('adminIdInput').value = '';
+    document.getElementById('adminPasswordInput').value = '';
+    document.getElementById('step2Error').innerHTML = '';
+    patternTempToken = null;
+    clearPattern();
+    setTimeout(function() { createPatternGrid(); initCanvas(); resizeCanvas(); }, 100);
+}
+function handleLogout() {
+    if (!confirm('Logout from admin panel?')) return;
+    localStorage.removeItem('adminToken'); localStorage.removeItem('adminData');
+    adminToken = null; currentAdmin = null; patternTempToken = null;
+    closeSidebar(); showLogin(); showToast('Logged out', 'info');
+}
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+function showSection(name) {
+    currentSection = name;
+    document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+    var target = document.getElementById('section-' + name);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(m){ m.classList.remove('active'); });
+    var menuItem = document.querySelector('.menu-item[data-section="' + name + '"]');
+    if (menuItem) menuItem.classList.add('active');
+    var titles = {
+        dashboard: 'Panel', deposits: 'Deposits', withdrawals: 'Withdrawals',
+        users: 'Users', adjust: 'Adjust', gift: 'Gifts', lifafa: 'Lifafa',
+        invoices: 'Invoices', transactions: 'Transactions', profile: 'Profile',
+        password: 'Password', admins: 'Admins',
+        referrals: 'Referrals', 'top-referrers': 'Top Referrers', 'referral-settings': 'Settings'
+    };
+    document.getElementById('headerSection').textContent = titles[name] || 'Panel';
+    closeSidebar();
+    if (name === 'dashboard') loadDashboard();
+    else if (name === 'deposits') loadDeposits();
+    else if (name === 'withdrawals') loadWithdrawals();
+    else if (name === 'users') loadUsers();
+    else if (name === 'gift') loadGifts();
+    else if (name === 'lifafa') loadLifafas();
+    else if (name === 'invoices') loadInvoices();
+    else if (name === 'transactions') loadTransactions();
+    else if (name === 'profile') loadProfile();
+    else if (name === 'admins') loadAdmins();
+    else if (name === 'referrals') loadReferrals();
+    else if (name === 'top-referrers') loadTopReferrers();
+    else if (name === 'referral-settings') loadReferralSettings();
+}
+
+async function loadDashboard() {
+    try {
+        var data = await apiCall('/stats');
+        if (!data.success) return;
+        var s = data.stats;
+        document.getElementById('dTotalUsers').textContent = s.totalUsers || 0;
+        document.getElementById('dVolume').textContent = '₹' + (s.totalVolume || 0).toFixed(0);
+        document.getElementById('dPendingDeposits').textContent = s.pendingDeposits || 0;
+        document.getElementById('dApprovedDeposits').textContent = s.approvedDeposits || 0;
+        document.getElementById('dPendingWithdrawals').textContent = s.pendingWithdrawals || 0;
+        document.getElementById('dTotalWithdrawn').textContent = '₹' + (s.totalWithdrawn || 0).toFixed(0);
+        document.getElementById('dTotalLifafas').textContent = s.totalLifafas || 0;
+        document.getElementById('dTotalGifts').textContent = s.totalGifts || 0;
+        renderRecentTx(data.recentTransactions || []);
+        loadReferralQuickStats();
+    } catch (e) { console.error('Dashboard error:', e); }
+}
+async function loadReferralQuickStats() {
+    try {
+        var data = await apiCall('/referrals?limit=1');
+        if (data.success && data.stats) {
+            document.getElementById('dTotalRefs').textContent = data.stats.total || 0;
+            document.getElementById('dCompletedRefs').textContent = data.stats.completed || 0;
+            document.getElementById('dPendingRefs').textContent = data.stats.pending || 0;
+            document.getElementById('dPaidRefs').textContent = '₹' + (data.stats.totalBonusPaid || 0);
+        }
+    } catch (e) {}
+}
+function renderRecentTx(txs) {
+    var container = document.getElementById('dashRecentTx');
+    if (!txs || txs.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No recent transactions</p></div>'; return; }
+    var html = '';
+    txs.forEach(function(tx) {
+        var isNeg = ['withdrawal', 'admin_deduct', 'transfer'].indexOf(tx.type) > -1;
+        var time = new Date(tx.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (tx.tx_id || tx._id).toString().substring(0, 20) + '</div><div class="list-details"><span><i class="fas fa-clock"></i> ' + time + '</span><span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div><span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div></div></div>';
+    });
+    container.innerHTML = html;
+}
+
+async function loadDeposits() {
+    var container = document.getElementById('depositList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var url = '/deposits?limit=30';
+        if (state.depFilter !== 'all') url += '&status=' + state.depFilter;
+        var data = await apiCall(url);
+        state.deposits = data.deposits || [];
+        renderDeposits();
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>'; }
+}
+function filterDeposits(f) {
+    state.depFilter = f;
+    document.querySelectorAll('[data-dep-filter]').forEach(function(b){ b.classList.remove('active'); });
+    var t = document.querySelector('[data-dep-filter="' + f + '"]');
+    if (t) t.classList.add('active');
+    loadDeposits();
+}
+function renderDeposits() {
+    var container = document.getElementById('depositList');
+    if (!state.deposits || state.deposits.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>No deposits found</p></div>'; return; }
+    var html = '';
+    state.deposits.forEach(function(d) {
+        var u = d.userId || {};
+        var isAuto = d.depositId && d.depositId.startsWith('PAY_');
+        var typeLabel = isAuto ? 'Auto' : 'Manual';
+        var typeClass = isAuto ? 'badge-auto' : 'badge-manual';
+        var typeIcon = isAuto ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-pen"></i>';
+        var status = d.status || 'pending';
+        var canAct = status === 'pending' || status === 'pending_approval';
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge ' + typeClass + '">' + typeIcon + ' ' + typeLabel + '</span></div><div class="list-details"><span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span><span><i class="fas fa-hashtag"></i> ' + (d.depositId || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount">₹' + (d.amount || 0).toFixed(2) + '</div><span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span></div></div>';
+        if (canAct) { html += '<div class="list-actions"><button class="btn-approve" onclick="verifyDeposit(\'' + d._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button><button class="btn-reject" onclick="verifyDeposit(\'' + d._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button></div>'; }
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+async function verifyDeposit(id, action) {
+    if (!confirm('Confirm ' + action + '?')) return;
+    var notes = prompt('Notes (optional):') || '';
+    try {
+        var data = await apiCall('/verify-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, action: action, adminNotes: notes }) });
+        showToast(data.message, 'success');
+        loadDeposits();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadWithdrawals() {
+    var container = document.getElementById('withdrawList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var data = await apiCall('/transactions?type=withdraw&limit=30');
+        var txs = data.transactions || [];
+        if (txs.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-arrow-up"></i><p>No withdrawals</p></div>'; return; }
+        var html = '';
+        txs.forEach(function(tx) {
+            var u = tx.user_id || {};
+            html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'Unknown') + '</div><div class="list-details"><span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span><span><i class="fas fa-hashtag"></i> ' + (tx.tx_id || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount" style="color:var(--danger);">-₹' + (tx.amount || 0).toFixed(2) + '</div><span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div></div></div>';
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+function filterWithdrawals(f) {
+    state.wdFilter = f;
+    document.querySelectorAll('[data-wd-filter]').forEach(function(b){ b.classList.remove('active'); });
+    var t = document.querySelector('[data-wd-filter="' + f + '"]');
+    if (t) t.classList.add('active');
+    loadWithdrawals();
+}
+
+async function loadUsers() {
+    var container = document.getElementById('usersList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var url = '/users?status=' + state.userFilter + '&limit=30';
+        var search = document.getElementById('userSearchInput').value.trim();
+        if (search) url += '&search=' + encodeURIComponent(search);
+        var data = await apiCall(url);
+        state.users = data.users || [];
+        renderUsers();
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+function filterUsers(f) {
+    state.userFilter = f;
+    document.querySelectorAll('[data-user-filter]').forEach(function(b){ b.classList.remove('active'); });
+    var t = document.querySelector('[data-user-filter="' + f + '"]');
+    if (t) t.classList.add('active');
+    loadUsers();
+}
+var userSearchTimeout;
+function searchUsersList() {
+    clearTimeout(userSearchTimeout);
+    userSearchTimeout = setTimeout(loadUsers, 500);
+}
+function renderUsers() {
+    var container = document.getElementById('usersList');
+    if (!state.users || state.users.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No users</p></div>'; return; }
+    var html = '';
+    state.users.forEach(function(u) {
+        var isBlocked = u.isBlocked, isDeleted = u.isDeleted;
+        var status = isDeleted ? 'Deleted' : (isBlocked ? 'Blocked' : 'Active');
+        var statusColor = isDeleted ? 'var(--text-muted)' : (isBlocked ? 'var(--danger)' : 'var(--success)');
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto" style="background:' + statusColor + '20;color:' + statusColor + ';border-color:' + statusColor + '40;">' + status + '</span></div><div class="list-details"><span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span><span><i class="fas fa-wallet"></i> ' + (u.walletId || 'N/A') + '</span>' + (u.referralCode ? '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>' : '') + '</div></div><div class="list-right"><div class="list-amount">₹' + (u.balance || 0).toFixed(2) + '</div></div></div>';
+        html += '<div class="list-actions"><button class="btn-view" onclick="viewUserDetails(\'' + u._id + '\')"><i class="fas fa-eye"></i> View</button>';
+        if (!isDeleted) {
+            html += '<button class="' + (isBlocked ? 'btn-approve' : 'btn-reject') + '" onclick="toggleBlockUser(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\')"><i class="fas fa-' + (isBlocked ? 'unlock' : 'ban') + '"></i> ' + (isBlocked ? 'Unblock' : 'Block') + '</button>';
+            html += '<button class="btn-delete" onclick="deleteUser(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\')"><i class="fas fa-trash"></i> Delete</button>';
+        } else {
+            html += '<button class="btn-approve" onclick="restoreUser(\'' + u._id + '\')"><i class="fas fa-undo"></i> Restore</button>';
+        }
+        html += '</div></div>';
+    });
+    container.innerHTML = html;
+}
+async function toggleBlockUser(id, name) {
+    if (!confirm('Toggle block for ' + name + '?')) return;
+    try { var data = await apiCall('/toggle-block', { method: 'POST', body: JSON.stringify({ userId: id }) }); showToast(data.message, 'success'); loadUsers(); }
+    catch (e) { showToast(e.message, 'error'); }
+}
+async function deleteUser(id, name) {
+    if (!confirm('Delete user "' + name + '"?')) return;
+    try { var data = await apiCall('/delete-user/' + id, { method: 'DELETE' }); showToast(data.message, 'success'); loadUsers(); }
+    catch (e) { showToast(e.message, 'error'); }
+}
+async function restoreUser(id) {
+    if (!confirm('Restore this user?')) return;
+    try { var data = await apiCall('/restore-user/' + id, { method: 'POST' }); showToast(data.message, 'success'); loadUsers(); }
+    catch (e) { showToast(e.message, 'error'); }
+}
+async function viewUserDetails(id) {
+    try {
+        var data = await apiCall('/user/' + id);
+        if (!data.success) return;
+        var u = data.user;
+        var html = '';
+        html += '<div class="info-row"><span class="info-label">Name</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + (u.mobile || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Wallet ID</span><span class="info-value">' + (u.walletId || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Email</span><span class="info-value">' + (u.email || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Telegram</span><span class="info-value">' + (u.telegramId || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Balance</span><span class="info-value balance">₹' + (u.balance || 0).toFixed(2) + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Referral Code</span><span class="info-value" style="color:var(--accent);font-family:monospace;">' + (u.referralCode || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (u.isDeleted ? 'Deleted' : (u.isBlocked ? 'Blocked' : 'Active')) + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Joined</span><span class="info-value">' + new Date(u.createdAt).toLocaleDateString('en-IN') + '</span></div>';
+        try {
+            var refData = await apiCall('/user-referrals/' + id);
+            if (refData.success) {
+                html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-user-plus"></i> Referral Info</div>';
+                html += '<div class="info-row"><span class="info-label">Total Refs</span><span class="info-value">' + (refData.asReferrer?.length || 0) + '</span></div>';
+                if (refData.asReferred) {
+                    var rU = refData.asReferred.referrerId || {};
+                    html += '<div class="info-row"><span class="info-label">Referred By</span><span class="info-value">' + (rU.fullName || 'Unknown') + ' (' + (rU.referralCode || '-') + ')</span></div>';
+                } else {
+                    html += '<div class="info-row"><span class="info-label">Referred By</span><span class="info-value">Direct Signup</span></div>';
+                }
+            }
+        } catch (e) {}
+        document.getElementById('modalTitle').textContent = 'User Details';
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('detailsModal').classList.add('active');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+var walletInput = document.getElementById('walletInput');
+var walletResult = document.getElementById('walletResult');
+var searchTimer;
+if (walletInput) {
+    walletInput.addEventListener('input', function() {
+        var value = this.value.trim();
+        clearTimeout(searchTimer);
+        walletResult.innerHTML = '';
+        document.getElementById('adjUserInfo').style.display = 'none';
+        state.adjSelectedUserId = null;
+        if (value.length < 6) return;
+        searchTimer = setTimeout(function() { findWallet(value); }, 500);
+    });
+}
+function findWallet(identifier) {
+    walletResult.innerHTML = '<div class="wallet-card wallet-verifying"><div class="spinner"></div><div class="wallet-details"><div class="verify-title">VERIFYING...</div><div class="wallet-id">' + identifier + '</div></div></div>';
+    var token = adminToken || localStorage.getItem('adminToken');
+    if (!token) return;
+    fetch('/api/admin/users?search=' + encodeURIComponent(identifier) + '&limit=10', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var users = data.users || [];
+        if (users.length === 0) { showNotFound(identifier); return; }
+        var best = null;
+        for (var i = 0; i < users.length; i++) { if (users[i].mobile === identifier) { best = users[i]; break; } }
+        if (!best) best = users[0];
+        showUser(best);
+    })
+    .catch(function(err) { walletResult.innerHTML = '<div class="wallet-card wallet-not-found"><div class="not-found-icon"><i class="fas fa-exclamation"></i></div><div class="wallet-details"><div class="not-found-title">ERROR</div><div class="not-found-text">' + err.message + '</div></div></div>'; });
+}
+function showUser(user) {
+    var name = user.fullName || 'Unknown';
+    var initials = name.split(' ').map(function(w){ return w[0]; }).slice(0, 2).join('').toUpperCase();
+    state.adjSelectedUserId = user._id;
+    walletResult.innerHTML = '<div class="wallet-card wallet-found"><div class="wallet-avatar">' + initials + '</div><div class="wallet-details"><div class="wallet-success-title"><span class="check-icon"><i class="fas fa-check"></i></span> ADJUSTING</div><div class="wallet-name">' + name + '</div><div class="wallet-id">' + (user.mobile || user.walletId) + '</div></div><div class="wallet-check"><i class="fas fa-check"></i></div></div>';
+    document.getElementById('adjUserName').textContent = name;
+    document.getElementById('adjUserMobile').textContent = user.mobile || '-';
+    document.getElementById('adjUserWallet').textContent = user.walletId || '-';
+    document.getElementById('adjUserBalance').textContent = '₹' + (user.balance || 0).toFixed(2);
+    document.getElementById('adjUserInfo').style.display = 'block';
+}
+function showNotFound(identifier) {
+    walletResult.innerHTML = '<div class="wallet-card wallet-not-found"><div class="not-found-icon"><i class="fas fa-times"></i></div><div class="wallet-details"><div class="not-found-title">NOT FOUND</div><div class="not-found-text">No account linked to</div><div class="not-found-number">' + identifier + '</div></div></div>';
+    document.getElementById('adjUserInfo').style.display = 'none';
+    state.adjSelectedUserId = null;
+}
+async function adjustBalance(type) {
+    if (!state.adjSelectedUserId) { showToast('Select user first', 'error'); return; }
+    var amount = parseFloat(document.getElementById('adjAmount').value);
+    var reason = document.getElementById('adjReason').value.trim() || 'Admin action';
+    if (!amount || amount <= 0) { showToast('Enter valid amount', 'error'); return; }
+    var currentBalance = parseFloat(document.getElementById('adjUserBalance').textContent.replace('₹', '').replace(/,/g, ''));
+    if (type === 'deduct' && amount > currentBalance) { showToast('Insufficient balance', 'error'); return; }
+    if (!confirm(type.toUpperCase() + ' ₹' + amount + '?')) return;
+    try {
+        var data = await apiCall('/adjust-balance', { method: 'POST', body: JSON.stringify({ userId: state.adjSelectedUserId, amount: amount, type: type, reason: reason }) });
+        showToast(data.message, 'success');
+        document.getElementById('adjUserBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
+        document.getElementById('adjAmount').value = '';
+        document.getElementById('adjReason').value = '';
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadGifts() {
+    var container = document.getElementById('giftList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var data = await apiCall('/gifts?limit=50');
+        state.gifts = data.gifts || [];
+        renderGifts();
+        var total = state.gifts.length;
+        var active = state.gifts.filter(function(g){ return !g.isUsed; }).length;
+        var used = state.gifts.filter(function(g){ return g.isUsed; }).length;
+        document.getElementById('giftTotal').textContent = total;
+        document.getElementById('giftActive').textContent = active;
+        document.getElementById('giftUsed').textContent = used;
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>Failed</p></div>'; }
+}
+function renderGifts() {
+    var container = document.getElementById('giftList');
+    if (!state.gifts || state.gifts.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>No gifts</p></div>'; return; }
+    var html = '';
+    state.gifts.forEach(function(g) {
+        var status = g.isUsed ? 'Used' : 'Active';
+        var statusCls = g.isUsed ? 'rejected' : 'approved';
+        var time = new Date(g.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short' });
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user" style="font-family:monospace;color:var(--accent);font-size:16px;">' + (g.code || 'N/A') + '</div><div class="list-details"><span><i class="fas fa-clock"></i> ' + time + '</span>' + (g.note ? '<span><i class="fas fa-sticky-note"></i> ' + g.note + '</span>' : '') + '</div></div><div class="list-right"><div class="list-amount">₹' + (g.amount || 0).toFixed(2) + '</div><span class="status-badge ' + statusCls + '">' + status + '</span></div></div>';
+        if (!g.isUsed) { html += '<div class="list-actions"><button class="btn-view" onclick="copyGiftCode(\'' + g.code + '\')"><i class="fas fa-copy"></i> Copy</button><button class="btn-delete" onclick="deleteGift(\'' + g._id + '\')"><i class="fas fa-trash"></i> Delete</button></div>'; }
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+async function createGift() {
+    var amount = parseFloat(document.getElementById('giftAmount').value);
+    var note = document.getElementById('giftNote').value.trim();
+    var quantity = parseInt(document.getElementById('giftQty').value) || 1;
+    if (!amount || amount <= 0) { showToast('Enter valid amount', 'error'); return; }
+    if (quantity < 1 || quantity > 100) { showToast('Quantity 1-100', 'error'); return; }
+    try {
+        var r = await fetch('/api/gift-mgmt/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ amount: amount, note: note, quantity: quantity }) });
+        var data = await r.json();
+        if (data.success) { showToast(data.giftsCreated + ' gift(s) created', 'success'); document.getElementById('giftAmount').value = ''; document.getElementById('giftNote').value = ''; document.getElementById('giftQty').value = '1'; loadGifts(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast('Failed', 'error'); }
+}
+async function deleteGift(id) {
+    if (!confirm('Delete this gift?')) return;
+    try {
+        var r = await fetch('/api/gift-mgmt/delete/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
+        var data = await r.json();
+        if (data.success) { showToast('Deleted', 'success'); loadGifts(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast('Failed', 'error'); }
+}
+function copyGiftCode(code) {
+    navigator.clipboard.writeText(code).then(function() { showToast('Copied', 'success'); }).catch(function() { showToast('Copy failed', 'error'); });
+}
+
+async function loadLifafas() {
+    var container = document.getElementById('lifafaList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var data = await apiCall('/lifafas?limit=30');
+        state.lifafas = data.lifafas || [];
+        if (state.lifafas.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-envelope"></i><p>No lifafas</p></div>'; return; }
+        var html = '';
+        state.lifafas.forEach(function(lf) {
+            var u = lf.userId || {};
+            html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (lf.title || 'Lifafa') + '</div><div class="list-details"><span><i class="fas fa-user"></i> ' + (u.fullName || 'Unknown') + '</span><span><i class="fas fa-rupee-sign"></i> ₹' + (lf.amount || 0).toFixed(2) + '</span></div></div><div class="list-right"><span class="status-badge ' + (lf.status || 'pending') + '">' + (lf.status || 'active') + '</span></div></div><div class="list-actions"><button class="btn-delete" onclick="deleteLifafa(\'' + lf._id + '\')"><i class="fas fa-trash"></i> Delete</button></div></div>';
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+async function deleteLifafa(id) {
+    if (!confirm('Delete this lifafa?')) return;
+    try { var data = await apiCall('/delete-lifafa/' + id, { method: 'DELETE' }); showToast(data.message, 'success'); loadLifafas(); }
+    catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadInvoices() {
+    var container = document.getElementById('invoiceList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var r = await fetch('/api/admin-invoice/invoices?limit=30' + (state.invFilter !== 'all' ? '&status=' + state.invFilter : ''), { headers: { 'Authorization': 'Bearer ' + adminToken } });
+        var data = await r.json();
+        state.invoices = data.invoices || [];
+        if (data.stats) {
+            document.getElementById('invTotal').textContent = data.stats.total || 0;
+            document.getElementById('invPending').textContent = data.stats.pending || 0;
+            document.getElementById('invPaid').textContent = data.stats.paid || 0;
+            document.getElementById('invExpired').textContent = data.stats.expired || 0;
+        }
+        renderInvoices();
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices</p></div>'; }
+}
+function filterInvoices(f) {
+    state.invFilter = f;
+    document.querySelectorAll('[data-inv-filter]').forEach(function(b){ b.classList.remove('active'); });
+    var t = document.querySelector('[data-inv-filter="' + f + '"]');
+    if (t) t.classList.add('active');
+    loadInvoices();
+}
+function renderInvoices() {
+    var container = document.getElementById('invoiceList');
+    if (!state.invoices || state.invoices.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices</p></div>'; return; }
+    var html = '';
+    state.invoices.forEach(function(inv) {
+        var sender = inv.senderId || {};
+        var receiver = inv.userId || {};
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user" style="font-size:12px;">' + (sender.fullName || 'Sender') + ' <i class="fas fa-arrow-right" style="font-size:10px;"></i> ' + (receiver.fullName || 'Receiver') + '</div><div class="list-details"><span><i class="fas fa-hashtag"></i> ' + (inv.invoiceId || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount">₹' + (inv.amount || 0).toFixed(2) + '</div><span class="status-badge ' + (inv.status || 'pending') + '">' + (inv.status || 'pending') + '</span></div></div></div>';
+    });
+    container.innerHTML = html;
+}
+
+async function loadTransactions() {
+    var container = document.getElementById('transactionsList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var url = '/transactions?limit=30';
+        if (state.txType !== 'all') url += '&type=' + state.txType;
+        var search = document.getElementById('txSearchInput').value.trim();
+        if (search) url += '&search=' + encodeURIComponent(search);
+        var data = await apiCall(url);
+        state.transactions = data.transactions || [];
+        renderTransactions();
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Failed</p></div>'; }
+}
+function filterTxType(t) {
+    state.txType = t;
+    document.querySelectorAll('[data-tx-type]').forEach(function(b){ b.classList.remove('active'); });
+    var btn = document.querySelector('[data-tx-type="' + t + '"]');
+    if (btn) btn.classList.add('active');
+    loadTransactions();
+}
+var txSearchTimeout;
+function searchTransactions() {
+    clearTimeout(txSearchTimeout);
+    txSearchTimeout = setTimeout(loadTransactions, 500);
+}
+function renderTransactions() {
+    var container = document.getElementById('transactionsList');
+    if (!state.transactions || state.transactions.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>No transactions</p></div>'; return; }
+    var html = '';
+    state.transactions.forEach(function(tx) {
+        var u = tx.user_id || tx.sender_id || tx.receiver_id || {};
+        var isNeg = ['withdrawal', 'admin_deduct', 'transfer'].indexOf(tx.type) > -1;
+        var time = new Date(tx.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'N/A') + '</div><div class="list-details"><span><i class="fas fa-hashtag"></i> ' + (tx.tx_id || 'N/A') + '</span><span><i class="fas fa-clock"></i> ' + time + '</span><span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div><span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div></div></div>';
+    });
+    container.innerHTML = html;
+}
+
+async function loadReferrals() {
+    var container = document.getElementById('referralsList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var url = '/referrals?limit=50';
+        if (state.refFilter !== 'all') url += '&status=' + state.refFilter;
+        var search = document.getElementById('refSearchInput').value.trim();
+        if (search) url += '&search=' + encodeURIComponent(search);
+        var data = await apiCall(url);
+        state.referrals = data.referrals || [];
+        if (data.stats) {
+            document.getElementById('refTotal').textContent = data.stats.total || 0;
+            document.getElementById('refCompleted').textContent = data.stats.completed || 0;
+            document.getElementById('refPending').textContent = data.stats.pending || 0;
+            document.getElementById('refPaidBonus').textContent = '₹' + (data.stats.totalBonusPaid || 0);
+        }
+        renderReferrals();
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+function filterReferrals(f) {
+    state.refFilter = f;
+    document.querySelectorAll('[data-ref-filter]').forEach(function(b){ b.classList.remove('active'); });
+    var t = document.querySelector('[data-ref-filter="' + f + '"]');
+    if (t) t.classList.add('active');
+    loadReferrals();
+}
+var refSearchTimeout;
+function searchReferrals() {
+    clearTimeout(refSearchTimeout);
+    refSearchTimeout = setTimeout(loadReferrals, 500);
+}
+function renderReferrals() {
+    var container = document.getElementById('referralsList');
+    if (!state.referrals || state.referrals.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i><p>No referrals found</p></div>'; return; }
+    var html = '';
+    state.referrals.forEach(function(r) {
+        var referrer = r.referrerId || {};
+        var referred = r.referredUserId || {};
+        var status = r.status || 'pending';
+        var time = new Date(r.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var progressHtml = '';
+        if (status === 'pending' && r.minDepositRequired) {
+            var paid = r.depositAmount || 0;
+            var req = r.minDepositRequired || 50;
+            var percent = Math.min(100, Math.round((paid / req) * 100));
+            progressHtml = '<div style="margin-top:8px;padding:8px;background:var(--bg-soft);border-radius:6px;font-size:10px;font-weight:700;color:var(--text-sec);"><i class="fas fa-chart-line"></i> Progress: ₹' + paid + ' / ₹' + req + ' (' + percent + '%)</div>';
+        }
+        html += '<div class="list-item">' +
+            '<div class="list-header">' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div class="list-user"><i class="fas fa-user"></i> ' + (referrer.fullName || 'Referrer') + ' <span style="color:var(--accent);font-family:monospace;font-size:11px;">(' + (referrer.referralCode || 'N/A') + ')</span></div>' +
+                    '<div class="list-details" style="margin-top:6px;">' +
+                        '<span><i class="fas fa-arrow-right"></i> Invited: ' + (referred.fullName || 'User') + '</span>' +
+                        '<span><i class="fas fa-phone"></i> ' + (referred.mobile || 'N/A') + '</span>' +
+                    '</div>' +
+                    progressHtml +
+                '</div>' +
+                '<div class="list-right">' +
+                    '<div class="list-amount">₹' + (r.bonusAmount || 0) + '</div>' +
+                    '<span class="status-badge ' + status + '">' + status + '</span>' +
+                    '<div style="font-size:9px;color:var(--text-muted);margin-top:4px;">' + time + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="list-actions">' +
+                '<button class="btn-view" onclick="openEditReferralModal(\'' + r._id + '\', \'' + status + '\', \'' + (r.notes || '').replace(/'/g, '') + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn-delete" onclick="deleteReferral(\'' + r._id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+            '</div>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+}
+function openEditReferralModal(id, status, notes) {
+    document.getElementById('editRefId').value = id;
+    document.getElementById('editRefStatus').value = status;
+    document.getElementById('editRefNotes').value = notes || '';
+    document.getElementById('editReferralModal').classList.add('active');
+}
+async function saveReferralEdit() {
+    var id = document.getElementById('editRefId').value;
+    var status = document.getElementById('editRefStatus').value;
+    var notes = document.getElementById('editRefNotes').value.trim();
+    try {
+        var data = await apiCall('/update-referral/' + id, { method: 'PUT', body: JSON.stringify({ status: status, notes: notes }) });
+        if (data.success) { showToast('Referral updated', 'success'); closeModal('editReferralModal'); loadReferrals(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+async function deleteReferral(id) {
+    if (!confirm('Delete this referral record?')) return;
+    try {
+        var data = await apiCall('/delete-referral/' + id, { method: 'DELETE' });
+        if (data.success) { showToast('Deleted', 'success'); loadReferrals(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadTopReferrers() {
+    var container = document.getElementById('topReferrersList');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var data = await apiCall('/top-referrers');
+        if (!data.success || !data.leaderboard || data.leaderboard.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i><p>No referrers yet</p></div>';
+            return;
+        }
+        var html = '';
+        data.leaderboard.forEach(function(u, idx) {
+            var rank = idx + 1;
+            var rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : 'rank-other'));
+            var rankIcon = '';
+            if (rank === 1) rankIcon = '<i class="fas fa-crown"></i>';
+            else if (rank === 2) rankIcon = '<i class="fas fa-medal"></i>';
+            else if (rank === 3) rankIcon = '<i class="fas fa-award"></i>';
+            else rankIcon = '#' + rank;
+            html += '<div class="leaderboard-item">' +
+                '<div class="leaderboard-rank ' + rankClass + '">' + rankIcon + '</div>' +
+                '<div class="leaderboard-info">' +
+                    '<div class="leaderboard-name">' + (u.name || 'Unknown') + '</div>' +
+                    '<div class="leaderboard-meta">' + (u.mobile ? '••••' + u.mobile.slice(-4) : '') + ' • ' + (u.referralCode || '-') + '</div>' +
+                '</div>' +
+                '<div class="leaderboard-stats">' +
+                    '<div class="leaderboard-count">' + u.count + ' refs</div>' +
+                    '<div class="leaderboard-earned">₹' + (u.totalEarned || 0) + '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+
+async function loadReferralSettings() {
+    try {
+        var data = await apiCall('/referral-settings');
+        if (!data.success) return;
+        var s = data.settings;
+        document.getElementById('refEnabled').value = s.enabled ? 'true' : 'false';
+        document.getElementById('refBonusAmount').value = s.bonusAmount || 10;
+        document.getElementById('refMinDeposit').value = s.minDepositAmount || 50;
+        document.getElementById('refMaxReferrals').value = s.maxReferralsPerUser || 100;
+        var minDepText = document.getElementById('settingsMinDepText');
+        var bonusText = document.getElementById('settingsBonusText');
+        if (minDepText) minDepText.textContent = s.minDepositAmount || 50;
+        if (bonusText) bonusText.textContent = s.bonusAmount || 10;
+    } catch (e) { console.error('Load referral settings error:', e.message); showToast(e.message, 'error'); }
+}
+async function saveReferralSettings() {
+    var enabled = document.getElementById('refEnabled').value === 'true';
+    var bonusAmount = parseFloat(document.getElementById('refBonusAmount').value);
+    var minDepositAmount = parseFloat(document.getElementById('refMinDeposit').value);
+    var maxReferralsPerUser = parseInt(document.getElementById('refMaxReferrals').value);
+    if (!bonusAmount || bonusAmount < 1) { showToast('Bonus must be at least Rs 1', 'error'); return; }
+    if (!minDepositAmount || minDepositAmount < 1) { showToast('Min deposit must be at least Rs 1', 'error'); return; }
+    if (!maxReferralsPerUser || maxReferralsPerUser < 1) { showToast('Max referrals must be at least 1', 'error'); return; }
+    var msg = 'Save these settings?\n\n' +
+        'Program: ' + (enabled ? 'ENABLED' : 'DISABLED') + '\n' +
+        'Bonus: Rs ' + bonusAmount + '\n' +
+        'Min Deposit: Rs ' + minDepositAmount + '\n' +
+        'Max Refs: ' + maxReferralsPerUser;
+    if (!confirm(msg)) return;
+    try {
+        var data = await apiCall('/referral-settings', { method: 'PUT', body: JSON.stringify({ enabled: enabled, bonusAmount: bonusAmount, minDepositAmount: minDepositAmount, maxReferralsPerUser: maxReferralsPerUser }) });
+        if (data.success) { showToast('Settings saved', 'success'); loadReferralSettings(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadProfile() {
+    try {
+        var data = await apiCall('/my-profile');
+        if (!data.success) return;
+        var a = data.admin;
+        currentAdmin = a;
+        document.getElementById('profAdminId').textContent = a.adminId || '-';
+        document.getElementById('profRole').textContent = (a.role || 'admin').replace('_', ' ').toUpperCase();
+        document.getElementById('profLastLogin').textContent = a.lastLoginAt ? new Date(a.lastLoginAt).toLocaleString('en-IN') : 'First login';
+        document.getElementById('profFullName').value = a.fullName || '';
+        document.getElementById('profMobile').value = a.mobile || '';
+        document.getElementById('profEmail').value = a.email || '';
+        document.getElementById('profTelegram').value = a.telegramId || '';
+    } catch (e) { showToast(e.message, 'error'); }
+}
+async function saveProfile() {
+    var payload = {
+        fullName: document.getElementById('profFullName').value.trim(),
+        mobile: document.getElementById('profMobile').value.trim(),
+        email: document.getElementById('profEmail').value.trim(),
+        telegramId: document.getElementById('profTelegram').value.trim()
+    };
+    if (!payload.fullName || !payload.mobile) { showToast('Name and Mobile required', 'error'); return; }
+    try {
+        var data = await apiCall('/update-my-profile', { method: 'PUT', body: JSON.stringify(payload) });
+        if (data.success) { showToast('Profile updated', 'success'); currentAdmin = Object.assign({}, currentAdmin, payload); localStorage.setItem('adminData', JSON.stringify(currentAdmin)); updateAdminUI(currentAdmin); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+async function changePassword() {
+    var current = document.getElementById('cpCurrent').value;
+    var newPw = document.getElementById('cpNew').value;
+    var confirm = document.getElementById('cpConfirm').value;
+    if (!current || !newPw || !confirm) { showToast('All fields required', 'error'); return; }
+    if (newPw.length < 6) { showToast('Min 6 chars', 'error'); return; }
+    if (newPw !== confirm) { showToast('Passwords do not match', 'error'); return; }
+    try {
+        var data = await apiCall('/change-my-password', { method: 'PUT', body: JSON.stringify({ currentPassword: current, newPassword: newPw }) });
+        if (data.success) { showToast('Password changed', 'success'); document.getElementById('cpCurrent').value = ''; document.getElementById('cpNew').value = ''; document.getElementById('cpConfirm').value = ''; }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadAdmins() {
+    var container = document.getElementById('adminsListContainer');
+    container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+    try {
+        var data = await apiCall('/admins-list');
+        if (!data.success) { container.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>' + data.message + '</p></div>'; return; }
+        renderAdmins(data.admins || []);
+    } catch (e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; }
+}
+function renderAdmins(admins) {
+    var container = document.getElementById('adminsListContainer');
+    if (!admins || admins.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-user-shield"></i><p>No admins</p></div>'; return; }
+    var html = '';
+    admins.forEach(function(a) {
+        var initial = (a.fullName || 'A').charAt(0).toUpperCase();
+        var isMe = currentAdmin && (a._id === currentAdmin._id || a.adminId === currentAdmin.adminId);
+        html += '<div class="admin-item ' + (a.isBlocked ? 'blocked' : '') + '"><div class="admin-avatar-sm">' + initial + '</div><div class="admin-info"><div class="admin-name">' + (a.fullName || 'Unknown') + (isMe ? ' <span style="color:var(--accent);font-size:11px;">(YOU)</span>' : '') + '</div><div class="admin-meta"><span>@' + (a.adminId || '-') + '</span><span>' + (a.mobile || '-') + '</span><span class="admin-role ' + a.role + '">' + (a.role || 'admin').replace('_', ' ') + '</span></div></div><div class="admin-actions"><button class="icon-btn" onclick=\'openEditAdminModal(' + JSON.stringify(a).replace(/'/g, "&apos;") + ')\'><i class="fas fa-edit"></i></button>' + (!isMe ? '<button class="icon-btn danger" onclick="deleteAdmin(\'' + a._id + '\', \'' + (a.fullName || a.adminId).replace(/'/g, '') + '\')"><i class="fas fa-trash"></i></button>' : '') + '</div></div>';
+    });
+    container.innerHTML = html;
+}
+function openCreateAdminModal() {
+    ['newAdminId','newAdminPassword','newAdminFullName','newAdminMobile','newAdminEmail','newAdminTelegram'].forEach(function(id) { document.getElementById(id).value = ''; });
+    document.getElementById('newAdminRole').value = 'admin';
+    document.getElementById('createAdminModal').classList.add('active');
+}
+async function createAdmin() {
+    var payload = {
+        adminId: document.getElementById('newAdminId').value.trim(),
+        password: document.getElementById('newAdminPassword').value,
+        fullName: document.getElementById('newAdminFullName').value.trim(),
+        mobile: document.getElementById('newAdminMobile').value.trim(),
+        email: document.getElementById('newAdminEmail').value.trim(),
+        telegramId: document.getElementById('newAdminTelegram').value.trim(),
+        role: document.getElementById('newAdminRole').value
+    };
+    if (!payload.adminId || !payload.password || !payload.fullName || !payload.mobile) { showToast('Required fields missing', 'error'); return; }
+    if (payload.password.length < 6) { showToast('Password min 6 chars', 'error'); return; }
+    if (!/^[0-9]{10}$/.test(payload.mobile)) { showToast('Mobile must be 10 digits', 'error'); return; }
+    try {
+        var data = await apiCall('/create-admin-account', { method: 'POST', body: JSON.stringify(payload) });
+        if (data.success) { showToast('Admin created', 'success'); closeModal('createAdminModal'); loadAdmins(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+function openEditAdminModal(a) {
+    document.getElementById('editAdminId').value = a._id;
+    document.getElementById('editAdminFullName').value = a.fullName || '';
+    document.getElementById('editAdminMobile').value = a.mobile || '';
+    document.getElementById('editAdminEmail').value = a.email || '';
+    document.getElementById('editAdminTelegram').value = a.telegramId || '';
+    document.getElementById('editAdminRole').value = a.role || 'admin';
+    document.getElementById('editAdminActive').value = a.isActive ? 'true' : 'false';
+    document.getElementById('editAdminBlocked').value = a.isBlocked ? 'true' : 'false';
+    document.getElementById('editAdminPassword').value = '';
+    document.getElementById('editAdminModal').classList.add('active');
+}
+async function saveAdminEdit() {
+    var id = document.getElementById('editAdminId').value;
+    var payload = {
+        fullName: document.getElementById('editAdminFullName').value.trim(),
+        mobile: document.getElementById('editAdminMobile').value.trim(),
+        email: document.getElementById('editAdminEmail').value.trim(),
+        telegramId: document.getElementById('editAdminTelegram').value.trim(),
+        role: document.getElementById('editAdminRole').value,
+        isActive: document.getElementById('editAdminActive').value === 'true',
+        isBlocked: document.getElementById('editAdminBlocked').value === 'true'
+    };
+    var pw = document.getElementById('editAdminPassword').value;
+    if (pw) { if (pw.length < 6) { showToast('Password min 6 chars', 'error'); return; } payload.newPassword = pw; }
+    try {
+        var data = await apiCall('/update-admin/' + id, { method: 'PUT', body: JSON.stringify(payload) });
+        if (data.success) { showToast('Admin updated', 'success'); closeModal('editAdminModal'); loadAdmins(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+async function deleteAdmin(id, name) {
+    if (!confirm('Delete admin "' + name + '"?')) return;
+    try {
+        var data = await apiCall('/delete-admin/' + id, { method: 'DELETE' });
+        if (data.success) { showToast('Admin deleted', 'success'); loadAdmins(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    var overlay = document.getElementById('loginOverlay');
+    if (!overlay.classList.contains('show')) return;
+    var step1 = document.getElementById('loginStep1');
+    var step2 = document.getElementById('loginStep2');
+    if (!step1.classList.contains('hidden')) { if (!document.getElementById('patternLoginBtn').disabled) verifyPattern(); }
+    else if (!step2.classList.contains('hidden')) { submitStep2(); }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    var saved = localStorage.getItem('adminData');
+    if (saved) { try { currentAdmin = JSON.parse(saved); } catch (e) {} }
+    checkSession();
+});
+window.addEventListener('resize', function() { if (canvas) setTimeout(resizeCanvas, 100); });
+setInterval(function() { if (adminToken && currentSection === 'dashboard') loadDashboard(); }, 30000);
+</script>
+</body>
+</html>
