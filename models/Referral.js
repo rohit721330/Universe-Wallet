@@ -5,8 +5,20 @@ const referralSchema = new mongoose.Schema({
     referrerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     referredUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     referralCode: { type: String, required: true, uppercase: true, trim: true, index: true },
-    status: { type: String, required: true, enum: ['pending', 'completed', 'failed', 'expired'], default: 'pending', index: true },
+    status: {
+        type: String,
+        required: true,
+        enum: ['pending', 'completed', 'failed', 'expired'],
+        default: 'pending',
+        index: true
+    },
     bonusAmount: { type: Number, default: 10, min: 0 },
+
+    minDepositRequired: { type: Number, default: 50 },
+    depositCompleted: { type: Boolean, default: false },
+    depositAmount: { type: Number, default: 0 },
+    depositCompletedAt: { type: Date, default: null },
+
     referrerBonusPaid: { type: Boolean, default: false },
     referredBonusPaid: { type: Boolean, default: false },
     referrerBonusPaidAt: { type: Date, default: null },
@@ -16,26 +28,13 @@ const referralSchema = new mongoose.Schema({
     metadata: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 
-// ============================================
-// INDEXES
-// ============================================
-// একই user একবারই refer করতে পারবে
-referralSchema.index(
-    { referrerId: 1, referredUserId: 1 },
-    { unique: true, name: 'unique_referral_pair' }
-);
-
-// Query performance
+referralSchema.index({ referrerId: 1, referredUserId: 1 }, { unique: true, name: 'unique_referral_pair' });
 referralSchema.index({ referrerId: 1, status: 1, createdAt: -1 });
 referralSchema.index({ referredUserId: 1 });
 referralSchema.index({ status: 1, createdAt: -1 });
 
-// ============================================
-// STATIC: Referral Pair Stats
-// ============================================
 referralSchema.statics.getStatsForUser = async function(userId) {
     const uid = new mongoose.Types.ObjectId(userId);
-
     const stats = await this.aggregate([
         { $match: { referrerId: uid } },
         {
@@ -60,20 +59,12 @@ referralSchema.statics.getStatsForUser = async function(userId) {
             }
         }
     ]);
-
     return stats[0] || {
-        totalReferrals: 0,
-        completedReferrals: 0,
-        pendingReferrals: 0,
-        failedReferrals: 0,
-        totalEarned: 0,
-        totalPendingBonus: 0
+        totalReferrals: 0, completedReferrals: 0, pendingReferrals: 0,
+        failedReferrals: 0, totalEarned: 0, totalPendingBonus: 0
     };
 };
 
-// ============================================
-// STATIC: Monthly Count
-// ============================================
 referralSchema.statics.getMonthlyCount = async function(userId) {
     const uid = new mongoose.Types.ObjectId(userId);
     const startOfMonth = new Date();
