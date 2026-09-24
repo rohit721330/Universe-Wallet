@@ -21,9 +21,7 @@
 <script>eruda.init();</script>
 
 <style>
-/* ===== THEME VARIABLES (LIGHT) ===== */
 :root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --input-bg: #f0f2f5; --input-focus-bg: #fff; --input-shadow: #cfe1ff; --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --user-avatar-border: #dce6ef; --success-bg: #e7f8ef; --success-color: #18a473; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --modal-bg: #ffffff; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; }
-
 body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --input-bg: #101a2c; --input-focus-bg: #0d1526; --input-shadow: #1e3a5f; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --user-avatar-border: #334155; --success-bg: #12352f; --success-color: #10c993; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --modal-bg: #1a2639; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -80,7 +78,6 @@ img { -webkit-user-drag: none; user-drag: none; }
 .sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .sidebar-version { text-align: center; font-size: 9px; color: var(--muted-3); font-weight: 600; margin-top: 10px; }
 
-/* MAIN */
 .main { padding: 16px 12px; }
 
 /* REFER HERO */
@@ -93,6 +90,13 @@ img { -webkit-user-drag: none; user-drag: none; }
 .refer-hero-sub { font-size: 12px; font-weight: 600; opacity: 0.92; line-height: 1.5; max-width: 280px; }
 .refer-hero-earn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 8px 14px; background: rgba(255,255,255,0.20); border: 1px solid rgba(255,255,255,0.30); border-radius: 30px; font-size: 11px; font-weight: 800; }
 .refer-hero-earn i { font-size: 12px; }
+
+/* DISABLED BANNER */
+.disabled-banner { display: none; padding: 18px; background: var(--toast-bg-warning); border: 2px solid var(--toast-color-warning); border-radius: 14px; margin-top: 16px; text-align: center; }
+.disabled-banner i { font-size: 32px; color: var(--toast-color-warning); margin-bottom: 10px; display: block; }
+.disabled-banner h3 { font-size: 15px; font-weight: 800; color: var(--toast-color-warning); margin-bottom: 6px; }
+.disabled-banner p { font-size: 12px; color: var(--text); font-weight: 600; line-height: 1.5; }
+.disabled-banner.show { display: block; }
 
 /* STATS */
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
@@ -184,7 +188,6 @@ body.dark .share-btn.more { background: #30205b; color: #a78bfa; }
 .toast-notify.info { background: var(--toast-bg-info); color: var(--toast-color-info); border-left: 4px solid var(--toast-color-info); }
 .toast-notify.warning { background: var(--toast-bg-warning); color: var(--toast-color-warning); border-left: 4px solid var(--toast-color-warning); }
 
-/* BLOCKED */
 .blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
 .blocked-overlay.active { display: flex; }
 .blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); }
@@ -308,42 +311,51 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
                 </div>
             </section>
 
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-box-icon blue"><i class="fas fa-users"></i></div><div class="stat-box-label">Total Referrals</div><div class="stat-box-value" id="totalReferrals">0</div></div>
-                <div class="stat-box"><div class="stat-box-icon green"><i class="fas fa-coins"></i></div><div class="stat-box-label">Total Earned</div><div class="stat-box-value" id="totalEarned">₹0</div></div>
-                <div class="stat-box"><div class="stat-box-icon purple"><i class="fas fa-hourglass-half"></i></div><div class="stat-box-label">Pending</div><div class="stat-box-value" id="pendingReferrals">0</div></div>
-                <div class="stat-box"><div class="stat-box-icon yellow"><i class="fas fa-calendar-day"></i></div><div class="stat-box-label">This Month</div><div class="stat-box-value" id="monthReferrals">0</div></div>
+            <!-- ✅ DISABLED BANNER -->
+            <div class="disabled-banner" id="disabledBanner">
+                <i class="fas fa-pause-circle"></i>
+                <h3>Referral Program Paused</h3>
+                <p>The referral program is temporarily disabled by the admin. Please check back later.</p>
             </div>
 
-            <section class="code-card">
-                <div class="code-card-title">YOUR REFERRAL CODE</div>
-                <div class="code-box">
-                    <div class="code-label">Share this code with friends</div>
-                    <div class="code-value" id="referralCode">------</div>
+            <div id="referralActiveContent">
+                <div class="stats-grid">
+                    <div class="stat-box"><div class="stat-box-icon blue"><i class="fas fa-users"></i></div><div class="stat-box-label">Total Referrals</div><div class="stat-box-value" id="totalReferrals">0</div></div>
+                    <div class="stat-box"><div class="stat-box-icon green"><i class="fas fa-coins"></i></div><div class="stat-box-label">Total Earned</div><div class="stat-box-value" id="totalEarned">₹0</div></div>
+                    <div class="stat-box"><div class="stat-box-icon purple"><i class="fas fa-hourglass-half"></i></div><div class="stat-box-label">Pending</div><div class="stat-box-value" id="pendingReferrals">0</div></div>
+                    <div class="stat-box"><div class="stat-box-icon yellow"><i class="fas fa-calendar-day"></i></div><div class="stat-box-label">This Month</div><div class="stat-box-value" id="monthReferrals">0</div></div>
                 </div>
-                <div class="code-actions">
-                    <button class="code-btn copy" onclick="copyReferralCode()"><i class="fas fa-copy"></i> Copy Code</button>
-                    <button class="code-btn share" onclick="shareReferral()"><i class="fas fa-share-nodes"></i> Share</button>
-                </div>
-            </section>
 
-            <section class="link-card">
-                <div class="link-card-title">YOUR REFERRAL LINK</div>
-                <div class="link-box">
-                    <div class="link-url" id="referralLink">Loading...</div>
-                    <button class="link-copy-btn" onclick="copyReferralLink()"><i class="fas fa-copy"></i> Copy</button>
-                </div>
-            </section>
+                <section class="code-card">
+                    <div class="code-card-title">YOUR REFERRAL CODE</div>
+                    <div class="code-box">
+                        <div class="code-label">Share this code with friends</div>
+                        <div class="code-value" id="referralCode">------</div>
+                    </div>
+                    <div class="code-actions">
+                        <button class="code-btn copy" onclick="copyReferralCode()"><i class="fas fa-copy"></i> Copy Code</button>
+                        <button class="code-btn share" onclick="shareReferral()"><i class="fas fa-share-nodes"></i> Share</button>
+                    </div>
+                </section>
 
-            <section class="share-card">
-                <div class="share-title">SHARE VIA</div>
-                <div class="share-grid">
-                    <button class="share-btn whatsapp" onclick="shareVia('whatsapp')"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></button>
-                    <button class="share-btn telegram" onclick="shareVia('telegram')"><i class="fab fa-telegram"></i><span>Telegram</span></button>
-                    <button class="share-btn sms" onclick="shareVia('sms')"><i class="fas fa-comment-sms"></i><span>SMS</span></button>
-                    <button class="share-btn more" onclick="shareVia('native')"><i class="fas fa-ellipsis"></i><span>More</span></button>
-                </div>
-            </section>
+                <section class="link-card">
+                    <div class="link-card-title">YOUR REFERRAL LINK</div>
+                    <div class="link-box">
+                        <div class="link-url" id="referralLink">Loading...</div>
+                        <button class="link-copy-btn" onclick="copyReferralLink()"><i class="fas fa-copy"></i> Copy</button>
+                    </div>
+                </section>
+
+                <section class="share-card">
+                    <div class="share-title">SHARE VIA</div>
+                    <div class="share-grid">
+                        <button class="share-btn whatsapp" onclick="shareVia('whatsapp')"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></button>
+                        <button class="share-btn telegram" onclick="shareVia('telegram')"><i class="fab fa-telegram"></i><span>Telegram</span></button>
+                        <button class="share-btn sms" onclick="shareVia('sms')"><i class="fas fa-comment-sms"></i><span>SMS</span></button>
+                        <button class="share-btn more" onclick="shareVia('native')"><i class="fas fa-ellipsis"></i><span>More</span></button>
+                    </div>
+                </section>
+            </div>
 
             <section class="list-card">
                 <div class="list-header">
@@ -359,7 +371,8 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
                 <div class="how-title">HOW IT WORKS</div>
                 <div class="how-step"><div class="how-num">1</div><div class="how-info"><strong>Share Your Code</strong><small>Send your referral code or link to your friends via WhatsApp, Telegram, or any messaging app.</small></div></div>
                 <div class="how-step"><div class="how-num">2</div><div class="how-info"><strong>Friend Signs Up</strong><small>Your friend registers on Universe Wallet using your referral code.</small></div></div>
-                <div class="how-step"><div class="how-num">3</div><div class="how-info"><strong>Both Get Rewarded</strong><small>Once your friend completes their first transaction, you earn ₹<span id="bonusAmountText">10</span> and they get ₹<span id="bonusAmountText2">10</span> as a welcome bonus.</small></div></div>
+                <div class="how-step"><div class="how-num">3</div><div class="how-info"><strong>Friend Deposits ₹<span id="minDepositText">50</span>+</strong><small>Your friend must deposit a total of ₹<span id="minDepositText2">50</span> (can be in multiple small deposits) to activate your bonus.</small></div></div>
+                <div class="how-step"><div class="how-num">4</div><div class="how-info"><strong>You Get Rewarded</strong><small>Once their total deposit reaches ₹<span id="minDepositText3">50</span>, you earn ₹<span id="bonusAmountText">10</span> as a referral bonus.</small></div></div>
             </section>
         </main>
     </div>
@@ -381,8 +394,10 @@ var blockCheckDone = false;
 var referralCode = '';
 var referralLink = '';
 var bonusAmount = 10;
+var minDepositAmount = 50;
+var programEnabled = true;
 
-console.log('🔵 [refer.html] Loaded. Token:', AUTH_TOKEN ? 'YES (' + AUTH_TOKEN.length + ' chars)' : 'NO');
+console.log('🔵 [refer.html] Loaded. Token:', AUTH_TOKEN ? 'YES' : 'NO');
 
 if (!AUTH_TOKEN) { window.location.href = '/'; }
 
@@ -403,13 +418,9 @@ function toggleTheme() {
     applyTheme(nt);
     localStorage.setItem('uwTheme', nt);
 }
-window.addEventListener('storage', function(e) { if (e.key === 'uwTheme' && e.newValue) applyTheme(e.newValue); });
 
 function openSidebar() { if (isAccountBlocked) return; document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); document.body.style.overflow = ''; }
-(function(){ var s = document.getElementById('sidebar'); if (!s) return; var sx=0, cx=0, d=false; s.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; d=true; }, {passive:true}); s.addEventListener('touchmove', function(e){ if(!d)return; cx=e.touches[0].clientX; var diff=cx-sx; if(diff<0) s.style.transform='translateX('+diff+'px)'; }, {passive:true}); s.addEventListener('touchend', function(){ if(!d)return; d=false; var diff=cx-sx; s.style.transform=''; if(diff<-60) closeSidebar(); sx=0; cx=0; }); })();
-(function(){ var sx=0, sy=0, t=false; document.addEventListener('touchstart', function(e){ if(isAccountBlocked)return; var x=e.touches[0].clientX; var y=e.touches[0].clientY; if(x<30){ sx=x; sy=y; t=true; } }, {passive:true}); document.addEventListener('touchend', function(e){ if(!t)return; t=false; var ex=e.changedTouches[0].clientX; var ey=e.changedTouches[0].clientY; if((ex-sx)>70 && Math.abs(ey-sy)<60) openSidebar(); }, {passive:true}); })();
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSidebar(); });
 
 function updateSidebarUser(user) {
     if (!user) return;
@@ -442,7 +453,6 @@ function setAvatar(user) {
 function showToast(message, type) {
     if (isAccountBlocked) return;
     type = type || 'info';
-    console.log('🔵 Toast:', type, '→', message);
     var t = document.getElementById('globalToast');
     if (!t) { t = document.createElement('div'); t.id = 'globalToast'; t.className = 'toast-notify'; document.body.appendChild(t); }
     t.textContent = message;
@@ -478,7 +488,7 @@ function handleBlockReason(reason) {
     else if (reason === 'deleted') showBlockedOverlay('Account Deleted', 'Your account has been deleted. Please contact support.');
     else if (reason === 'inactive') showBlockedOverlay('Account Deactivated', 'Your account has been deactivated. Please contact support.');
     else if (reason === 'notfound') showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
-    else showBlockedOverlay('Access Denied', 'Your account is not accessible. Please contact support.');
+    else showBlockedOverlay('Access Denied', 'Your account is not accessible.');
 }
 function showBlockedOverlay(title, message) {
     if (isAccountBlocked) return;
@@ -490,17 +500,14 @@ function showBlockedOverlay(title, message) {
 }
 
 async function verifyUserState() {
-    console.log('🔵 [verifyUserState] Started');
     var t = localStorage.getItem('token');
     if (!t) { window.location.href = '/'; return false; }
     try {
         var res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } });
-        console.log('🔵 [/api/auth/me] Status:', res.status);
         var data = {};
-        try { data = await res.json(); } catch (e) { console.log('❌ JSON parse error'); }
-        console.log('🔵 [/api/auth/me] Response:', JSON.stringify(data));
+        try { data = await res.json(); } catch (e) {}
 
-        if (res.status === 401) { console.log('❌ 401 - logging out'); logout(); return false; }
+        if (res.status === 401) { logout(); return false; }
         if (res.status === 403) { showBlockedOverlay('Account Blocked', data.message || 'Blocked'); return false; }
         if (res.status === 404) { showBlockedOverlay('Account Not Found', 'Deleted'); return false; }
 
@@ -517,10 +524,8 @@ async function verifyUserState() {
         setAvatar(user);
         updateSidebarUser(user);
         if (user.balance !== undefined && user.balance !== null) updateSidebarBalance(user.balance);
-        console.log('✅ [verifyUserState] User:', user.fullName, '| referralCode:', user.referralCode);
         return true;
     } catch (error) {
-        console.log('❌ [verifyUserState] Error:', error.message);
         return true;
     }
 }
@@ -534,35 +539,26 @@ function logout() {
 }
 
 async function refreshWalletBalance() {
-    console.log('🔵 [refreshWalletBalance] Started');
     if (isAccountBlocked) return;
     try {
         var token = localStorage.getItem('token');
         if (!token) return;
-        var balance = null;
-        try {
-            var res = await fetch('/api/wallet/balance', { headers: { 'Authorization': 'Bearer ' + token } });
-            console.log('🔵 [/api/wallet/balance] Status:', res.status);
-            if (res.ok) {
-                var data = await res.json();
-                if (data.status === 'success' && data.data && data.data.balance !== undefined) balance = parseFloat(data.data.balance);
-                else if (data.status === 'success' && data.balance !== undefined) balance = parseFloat(data.balance);
-            }
-        } catch (e) {}
-        if (balance !== null && !isNaN(balance)) { updateSidebarBalance(balance); }
-    } catch (error) {}
+        var res = await fetch('/api/wallet/balance', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.ok) {
+            var data = await res.json();
+            var balance = null;
+            if (data.status === 'success' && data.data && data.data.balance !== undefined) balance = parseFloat(data.data.balance);
+            else if (data.status === 'success' && data.balance !== undefined) balance = parseFloat(data.balance);
+            if (balance !== null && !isNaN(balance)) updateSidebarBalance(balance);
+        }
+    } catch (e) {}
 }
 
 async function loadReferralData() {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔵 [loadReferralData] Started');
-    console.log('🔵 [loadReferralData] URL:', REFER_BASE + '/');
-
     try {
         var token = localStorage.getItem('token');
-        if (!token) { console.log('❌ No token'); return; }
+        if (!token) return;
 
-        // ✅ টোকেন কে ৩টি উপায়ে পাঠানো হচ্ছে: query, Authorization header, custom header
         var url = REFER_BASE + '/?token=' + encodeURIComponent(token) + '&t=' + Date.now();
 
         var res = await fetch(url, {
@@ -576,62 +572,59 @@ async function loadReferralData() {
             cache: 'no-store'
         });
 
-        console.log('🔵 [loadReferralData] HTTP Status:', res.status);
-        console.log('🔵 [loadReferralData] HTTP OK:', res.ok);
-
-        if (!res.ok) {
-            console.log('❌ Response not OK:', res.status);
-            showToast('Failed to load referral data', 'error');
-            return;
-        }
+        if (!res.ok) { showToast('Failed to load', 'error'); return; }
 
         var data = await res.json();
-        console.log('🔵 [loadReferralData] Response:', JSON.stringify(data, null, 2));
+        console.log('🔵 [loadReferralData] Response:', data);
 
-        if (!data.success) {
-            console.log('❌ success=false:', data.message);
-            showToast(data.message || 'Failed to load', 'error');
+        if (!data.success) { showToast(data.message || 'Failed', 'error'); return; }
+
+        // ✅ Handle settings
+        if (data.settings) {
+            programEnabled = data.settings.enabled !== false;
+            bonusAmount = data.settings.bonusAmount || 10;
+            minDepositAmount = data.settings.minDepositAmount || 50;
+
+            document.getElementById('bonusAmount').textContent = bonusAmount;
+            document.getElementById('bonusAmountText').textContent = bonusAmount;
+            document.getElementById('minDepositText').textContent = minDepositAmount;
+            document.getElementById('minDepositText2').textContent = minDepositAmount;
+            document.getElementById('minDepositText3').textContent = minDepositAmount;
+        }
+
+        // ✅ Handle disabled program
+        if (!programEnabled) {
+            document.getElementById('disabledBanner').classList.add('show');
+            document.getElementById('referralActiveContent').style.display = 'none';
+            // Still show referral list
+            await loadReferralList();
             return;
         }
+
+        // Show active content
+        document.getElementById('disabledBanner').classList.remove('show');
+        document.getElementById('referralActiveContent').style.display = 'block';
 
         if (data.referralCode) {
             referralCode = data.referralCode;
-            var ce = document.getElementById('referralCode');
-            if (ce) { ce.textContent = data.referralCode; console.log('✅ Set referralCode:', data.referralCode); }
-        } else { console.log('⚠️ No referralCode in response'); }
+            document.getElementById('referralCode').textContent = data.referralCode;
+        }
 
         if (data.referralLink) {
             referralLink = data.referralLink;
-            var le = document.getElementById('referralLink');
-            if (le) { le.textContent = data.referralLink; console.log('✅ Set referralLink:', data.referralLink); }
-        } else { console.log('⚠️ No referralLink in response'); }
-
-        if (data.settings && data.settings.bonusAmount) {
-            bonusAmount = data.settings.bonusAmount;
-            var b1 = document.getElementById('bonusAmount');
-            var b2 = document.getElementById('bonusAmountText');
-            var b3 = document.getElementById('bonusAmountText2');
-            if (b1) b1.textContent = bonusAmount;
-            if (b2) b2.textContent = bonusAmount;
-            if (b3) b3.textContent = bonusAmount;
+            document.getElementById('referralLink').textContent = data.referralLink;
         }
 
         if (data.stats) {
-            var s1 = document.getElementById('totalReferrals');
-            var s2 = document.getElementById('totalEarned');
-            var s3 = document.getElementById('pendingReferrals');
-            var s4 = document.getElementById('monthReferrals');
-            if (s1) s1.textContent = data.stats.totalReferrals || 0;
-            if (s2) s2.textContent = '₹' + (data.stats.totalEarned || 0);
-            if (s3) s3.textContent = data.stats.pendingReferrals || 0;
-            if (s4) s4.textContent = data.stats.monthReferrals || 0;
+            document.getElementById('totalReferrals').textContent = data.stats.totalReferrals || 0;
+            document.getElementById('totalEarned').textContent = '₹' + (data.stats.totalEarned || 0);
+            document.getElementById('pendingReferrals').textContent = data.stats.pendingReferrals || 0;
+            document.getElementById('monthReferrals').textContent = data.stats.monthReferrals || 0;
         }
 
         await loadReferralList();
-        console.log('✅ [loadReferralData] COMPLETED');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     } catch (error) {
-        console.log('❌ [loadReferralData] Error:', error.message);
+        console.error('❌ [loadReferralData] Error:', error.message);
         showToast('Network error', 'error');
     }
 }
@@ -674,7 +667,19 @@ function renderReferrals(referrals) {
         var dt = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '';
         var amt = r.bonusAmount || bonusAmount;
         var ac = r.status === 'completed' ? 'var(--success-color)' : 'var(--muted-3)';
-        return '<div class="referral-item"><div class="referral-avatar">' + av + '</div><div class="referral-info"><div class="referral-name">' + (r.name || 'User') + '</div><div class="referral-meta">' + (r.mobile || '') + (dt ? (r.mobile ? ' • ' : '') + dt : '') + '</div></div><div class="referral-reward"><div class="referral-amount" style="color:' + ac + ';">+₹' + amt + '</div><div class="referral-status ' + sc + '">' + st + '</div></div></div>';
+
+        // Show progress for pending referrals
+        var progressHtml = '';
+        if (r.status === 'pending' && r.minDepositRequired) {
+            var paid = r.depositAmount || 0;
+            var req = r.minDepositRequired || 50;
+            var percent = Math.min(100, Math.round((paid / req) * 100));
+            progressHtml = '<div style="margin-top:6px;font-size:9px;color:var(--muted);font-weight:600;">' +
+                '₹' + paid + ' / ₹' + req + ' (' + percent + '%)' +
+            '</div>';
+        }
+
+        return '<div class="referral-item"><div class="referral-avatar">' + av + '</div><div class="referral-info"><div class="referral-name">' + (r.name || 'User') + '</div><div class="referral-meta">' + (r.mobile || '') + (dt ? (r.mobile ? ' • ' : '') + dt : '') + '</div>' + progressHtml + '</div><div class="referral-reward"><div class="referral-amount" style="color:' + ac + ';">+₹' + amt + '</div><div class="referral-status ' + sc + '">' + st + '</div></div></div>';
     }).join('');
 }
 
@@ -682,7 +687,7 @@ function copyReferralCode() {
     if (!referralCode || referralCode === '------') { showToast('No referral code', 'warning'); return; }
     navigator.clipboard.writeText(referralCode).then(function() { showToast('Referral code copied!', 'success'); }).catch(function() {
         var ta = document.createElement('textarea'); ta.value = referralCode; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        showToast('Referral code copied!', 'success');
+        showToast('Copied!', 'success');
     });
 }
 
@@ -690,18 +695,18 @@ function copyReferralLink() {
     if (!referralLink) { showToast('No referral link', 'warning'); return; }
     navigator.clipboard.writeText(referralLink).then(function() { showToast('Referral link copied!', 'success'); }).catch(function() {
         var ta = document.createElement('textarea'); ta.value = referralLink; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        showToast('Referral link copied!', 'success');
+        showToast('Copied!', 'success');
     });
 }
 
 function shareReferral() {
-    var msg = 'Join Universe Wallet and get ₹' + bonusAmount + ' welcome bonus! Use my referral code: ' + referralCode + '\n\n' + referralLink;
+    var msg = 'Join Universe Wallet and get a welcome bonus! Use my referral code: ' + referralCode + '\n\n' + referralLink;
     if (navigator.share) navigator.share({ title: 'Join Universe Wallet', text: msg }).catch(function(){});
     else copyReferralLink();
 }
 
 function shareVia(platform) {
-    var msg = 'Join Universe Wallet and get ₹' + bonusAmount + ' welcome bonus! Use my referral code: ' + referralCode;
+    var msg = 'Join Universe Wallet! Use my referral code: ' + referralCode;
     var em = encodeURIComponent(msg);
     var el = encodeURIComponent(referralLink);
     var url = '';
@@ -713,19 +718,17 @@ function shareVia(platform) {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🔵 [refer.html] DOMContentLoaded');
     initTheme();
     if (!AUTH_TOKEN) return;
     var v = await verifyUserState();
     if (!v) return;
     await refreshWalletBalance();
     await loadReferralData();
-    console.log('✅ [refer.html] INIT complete');
 });
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js').then(function(reg) { console.log('✅ SW:', reg.scope); }).catch(function(err) { console.log('❌ SW:', err); });
+        navigator.serviceWorker.register('/service-worker.js').catch(function(){});
     });
 }
 </script>
