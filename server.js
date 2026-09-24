@@ -78,6 +78,11 @@ async function connectDB() {
     return cached.conn;
 }
 
+// Temporary debug route — Vercel এ deploy করার পর মুছে ফেলবেন
+app.get('/referral-test', (req, res) => {
+    res.json({ success: true, message: 'Referral route is reachable' });
+});
+
 // =========================================================
 // ✅ DB Connection Middleware — /api এবং /referral উভয়ের জন্য
 // =========================================================
