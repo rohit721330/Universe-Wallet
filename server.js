@@ -168,65 +168,88 @@ app.get('/setup-admin', async (req, res) => {
     }
 });
 
-// ============================================================
-// ⚠️⚠️⚠️ TEMPORARY MIGRATION ROUTE — DELETE AFTER USE ⚠️⚠️⚠️
-// ============================================================
-app.get('/migrate-referral-codes', async (req, res) => {
+// ⚠️ TEMPORARY — Delete after use
+app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
         await connectDB();
         const User = require('./models/User');
         const crypto = require('crypto');
-        
-        function generateCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            while (code.length < 10) {
-                const byte = crypto.randomBytes(1)[0];
-                if (byte < 252) code += chars[byte % chars.length];
-            }
-            return code;
-        }
-        
-        // Find users without referralCode
-        const users = await User.find({
-            $or: [
-                { referralCode: { $exists: false } },
-                { referralCode: null },
-                { referralCode: '' }
-            ]
-        });
-        
-        console.log(`🔵 [migrate] Found ${users.length} users without referralCode`);
-        
+
+        console.log('🔵 [migrate-v2] Starting migration...');
+
+        // ✅ Step 1: Find ALL active users
+        const allUsers = await User.find({ isDeleted: false });
+        console.log(`🔵 [migrate-v2] Total users found: ${allUsers.length}`);
+
         const results = [];
-        for (const user of users) {
-            let code = generateCode();
+        const skipped = [];
+
+        for (const user of allUsers) {
+            // ✅ Check if user has a VALID referral code
+            const hasValidCode = user.referralCode &&
+                                  typeof user.referralCode === 'string' &&
+                                  user.referralCode.length >= 6;
+
+            if (hasValidCode) {
+                skipped.push({
+                    mobile: user.mobile,
+                    existingCode: user.referralCode,
+                    reason: 'Already has code'
+                });
+                continue;
+            }
+
+            // ✅ Generate new code
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let newCode = '';
             let attempts = 0;
-            while (await User.findOne({ referralCode: code }) && attempts < 15) {
-                code = generateCode();
+            let isUnique = false;
+
+            while (!isUnique && attempts < 20) {
+                newCode = '';
+                while (newCode.length < 10) {
+                    const byte = crypto.randomBytes(1)[0];
+                    if (byte < 252) newCode += chars[byte % chars.length];
+                }
+                const exists = await User.findOne({ referralCode: newCode });
+                isUnique = !exists;
                 attempts++;
             }
-            
+
+            if (!isUnique) {
+                results.push({
+                    mobile: user.mobile,
+                    error: 'Failed to generate unique code'
+                });
+                continue;
+            }
+
+            // ✅ Update user with new code
             await User.updateOne(
                 { _id: user._id },
-                { $set: { referralCode: code, referralCodeCustom: false } }
+                { $set: { referralCode: newCode } }
             );
-            
-            results.push({ 
-                mobile: user.mobile, 
+
+            results.push({
+                mobile: user.mobile,
                 fullName: user.fullName,
-                code 
+                newCode: newCode,
+                status: 'updated'
             });
-            console.log(`✅ [migrate] ${user.mobile} → ${code}`);
+
+            console.log(`✅ [migrate-v2] ${user.mobile} → ${newCode}`);
         }
-        
+
         res.json({
             success: true,
-            migrated: results.length,
-            results
+            totalUsers: allUsers.length,
+            updated: results.length,
+            skipped: skipped.length,
+            results,
+            skippedUsers: skipped
         });
     } catch (error) {
-        console.error('❌ [migrate] Error:', error.message);
+        console.error('❌ [migrate-v2] Error:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 });
