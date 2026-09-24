@@ -153,41 +153,21 @@ router.post('/set-pin', verifyToken, async (req, res) => {
         user.isNewUser = false;
         await user.save();
 
-        // Welcome message
-        if (isNewUser && user.telegramId && BOT_TOKEN) {
-            const welcomeMessage = 
-`🔐 Welcome to Universal Wallet
+        // ✅ PIN Set success message
+        if (user.telegramId && BOT_TOKEN) {
+            const pinSetMessage = 
+`🎉 <b>PIN Set Successfully</b> 🎉
 
-Dear ${user.fullName},
+👋 Dear <b>${user.fullName}</b>, Your account PIN has been set successfully.
 
-Your account has been created successfully!
+📱 Mobile: <b>${user.mobile}</b>
+💼 Wallet ID: <b>${user.walletId}</b>
+✅ PIN Status: <b>Set</b>
+🕒 Time: <b>${dateTime}</b>
 
-Mobile: ${user.mobile}
-Wallet ID: ${user.walletId}
-Balance: ₹${user.balance || 0}
-PIN: Set successfully
-Time: ${dateTime}
+🔒 Keep your PIN safe and secure. Never share it with anyone.`;
 
-Keep your credentials safe and secure.`;
-            
-            await sendTelegramMessage(user.telegramId, welcomeMessage);
-        }
-
-        // Admin notification
-        if (isNewUser && ADMIN_TELEGRAM_ID && BOT_TOKEN) {
-            const adminMessage = 
-`🆕 New User Registered
-
-Name: ${user.fullName}
-Mobile: ${user.mobile}
-Wallet ID: ${user.walletId}
-API Key: ${user.apiKey}
-PIN: Set successfully
-Time: ${dateTime}
-
-Total Users: ${await User.countDocuments()}`;
-
-            await sendTelegramMessage(ADMIN_TELEGRAM_ID, adminMessage);
+            await sendTelegramMessage(user.telegramId, pinSetMessage);
         }
 
         res.status(200).json({
@@ -214,8 +194,6 @@ router.post('/verify-pin', verifyToken, async (req, res) => {
             return res.status(200).json({ success: false, message: 'User Not Authenticated' });
         }
 
-        const dateTime = getCurrentDateTime();
-
         if (!pin) {
             return res.status(200).json({ success: false, message: 'PIN Is Required' });
         }
@@ -232,26 +210,6 @@ router.post('/verify-pin', verifyToken, async (req, res) => {
         // ✅ Plain text comparison
         if (pin !== user.pin) {
             return res.status(200).json({ success: false, message: 'Incorrect PIN' });
-        }
-
-        // Login notification
-        if (user.telegramId && BOT_TOKEN) {
-            const loginMessage = 
-`🔐 New Login Detected
-
-Dear ${user.fullName},
-
-A new login was detected on your account.
-
-Mobile: ${user.mobile}
-Purpose: PIN Verification
-Time: ${dateTime}
-
-If this wasn't you, change your PIN immediately or contact support!`;
-            
-            sendTelegramMessage(user.telegramId, loginMessage).catch(err => {
-                console.error('Failed to send PIN verification alert:', err);
-            });
         }
 
         res.status(200).json({ success: true, message: 'PIN Verified Successfully' });
@@ -305,18 +263,17 @@ router.post('/change-pin', verifyToken, async (req, res) => {
         user.pin_set = true;
         await user.save();
 
+        // ✅ PIN change notification
         if (user.telegramId) {
             const message = 
-`🔄 PIN Changed Successfully
+`🔄 <b>PIN Changed Successfully</b> 🔄
 
-Dear ${user.fullName},
+👋 Dear <b>${user.fullName}</b>, Your PIN has been changed successfully.
 
-Your PIN has been changed successfully.
+🔐 PIN Status: <b>Changed</b>
+🕒 Time: <b>${dateTime}</b>
 
-PIN Status: Changed
-Time: ${dateTime}
-
-If this wasn't you, please contact support immediately.`;
+⚠️ If this wasn't you, please contact support immediately.`;
             
             await sendTelegramMessage(user.telegramId, message);
         }
@@ -440,18 +397,16 @@ router.post('/forgot-pin-send-otp', verifyToken, async (req, res) => {
         }, 5 * 60 * 1000);
 
         const otpMessage = 
-`🔐 PIN Recovery OTP
+`🔐 <b>PIN Recovery OTP</b> 🔐
 
-Dear ${user.fullName},
+👋 Dear <b>${user.fullName}</b>, Your PIN recovery OTP has been generated.
 
-Your PIN recovery OTP has been generated.
+🔢 Your OTP: <b>${otp}</b>
+⏳ Validity: <b>5 minutes</b>
+🎯 Purpose: <b>PIN Recovery</b>
+🕒 Time: <b>${dateTime}</b>
 
-Your OTP: ${otp}
-Validity: 5 minutes
-Purpose: PIN Recovery
-Time: ${dateTime}
-
-Do not share this OTP with anyone.`;
+⚠️ Do not share this OTP with anyone.`;
 
         const result = await sendTelegramMessage(user.telegramId, otpMessage);
 
@@ -539,18 +494,17 @@ router.post('/forgot-pin-reset', verifyToken, async (req, res) => {
         user.pin_set = true;
         await user.save();
 
+        // ✅ PIN reset notification
         if (user.telegramId) {
             const message = 
-`✅ PIN Reset Successfully
+`✅ <b>PIN Reset Successfully</b> ✅
 
-Dear ${user.fullName},
+👋 Dear <b>${user.fullName}</b>, Your PIN has been reset successfully.
 
-Your PIN has been reset successfully.
+🔑 PIN Status: <b>Reset</b>
+🕒 Time: <b>${dateTime}</b>
 
-PIN Status: Reset
-Time: ${dateTime}
-
-If this wasn't you, please contact support immediately.`;
+⚠️ If this wasn't you, please contact support immediately.`;
             
             await sendTelegramMessage(user.telegramId, message);
         }
