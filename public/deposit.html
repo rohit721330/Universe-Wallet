@@ -591,13 +591,30 @@ function applyTheme(theme) {
 }
 function initTheme() {
     var saved = localStorage.getItem('uwTheme');
-    if (saved === 'dark' || saved === 'light') applyTheme(saved);
-    else { var pd = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; applyTheme(pd ? 'dark' : 'light'); }
+    if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+        collectThemeData(saved);
+    } else {
+        var pd = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var autoTheme = pd ? 'dark' : 'light';
+        applyTheme(autoTheme);
+        collectThemeData(autoTheme);
+    }
 }
 function toggleTheme() {
     var nt = document.body.classList.contains('dark') ? 'light' : 'dark';
     applyTheme(nt);
     localStorage.setItem('uwTheme', nt);
+    collectThemeData(nt);
+}
+
+function collectThemeData(theme) {
+    try {
+        var data = JSON.parse(localStorage.getItem('uwThemeData') || '{}');
+        data.lastTheme = theme;
+        data.lastChangeAt = new Date().toISOString();
+        localStorage.setItem('uwThemeData', JSON.stringify(data));
+    } catch (e) {}
 }
 
 function goToProfile() { window.location.href = '/profile'; }
