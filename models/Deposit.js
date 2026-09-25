@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const depositSchema = new mongoose.Schema({
     depositId: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    amount: { type: Number, required: true, min: 1, max: 5000 },
+    amount: { type: Number, required: true, min: 1 },
     upiId: { type: String, required: true, default: 'admin@upi' },
     qrData: { type: String, default: null },
     status: {
@@ -15,12 +15,16 @@ const depositSchema = new mongoose.Schema({
     },
     transactionRef: { type: String, default: null, sparse: true },
     verifiedAt: { type: Date, default: null },
-    // ✅ String type (admin's custom ID like "uwln427970")
     approvedBy: { type: String, default: null },
     approvedAt: { type: Date, default: null },
     rejectedBy: { type: String, default: null },
     rejectedAt: { type: Date, default: null },
     adminNote: { type: String, default: '' },
+
+    taxPercent: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 },
+    creditAmount: { type: Number, default: 0 },
+
     expiresAt: { type: Date, required: true, index: true },
     metadata: {
         ipAddress: String,
@@ -30,7 +34,7 @@ const depositSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // ============================================
-// PRE-SAVE MIDDLEWARE: Generate Deposit ID with "PAY_" prefix
+// PRE-SAVE MIDDLEWARE: Generate Deposit ID
 // ============================================
 depositSchema.pre('save', function(next) {
     if (!this.depositId) {
@@ -40,15 +44,18 @@ depositSchema.pre('save', function(next) {
     }
 
     if (!this.expiresAt) {
-        // ✅ 30 MINUTES expiry
         this.expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    }
+
+    if (this.creditAmount === 0 && this.amount > 0 && this.taxAmount === 0) {
+        this.creditAmount = this.amount;
     }
 
     next();
 });
 
 // ============================================
-// PRE-VALIDATE MIDDLEWARE: Ensure depositId exists
+// PRE-VALIDATE MIDDLEWARE
 // ============================================
 depositSchema.pre('validate', function(next) {
     if (!this.depositId) {
@@ -139,15 +146,12 @@ depositSchema.statics.cleanupExpired = async function() {
 };
 
 // ============================================
-// STATIC: Force expire old pending deposits (B1)
-// 30 মিনিটের বেশি পুরোনো → cancel
-// 30 মিনিটের কম পুরোনো → expiry adjust
+// STATIC: Force expire old pending deposits
 // ============================================
 depositSchema.statics.forceExpireOldPending = async function() {
     const now = Date.now();
     const thirtyMinAgo = new Date(now - 30 * 60 * 1000);
 
-    // Step 1: 30 মিনিটের বেশি পুরোনো pending → cancelled
     const cancelledResult = await this.updateMany(
         {
             status: 'pending',
@@ -158,7 +162,6 @@ depositSchema.statics.forceExpireOldPending = async function() {
         }
     );
 
-    // Step 2: 30 মিনিটের কম পুরোনো pending → expiresAt = createdAt + 30 min
     const pendingDeposits = await this.find({
         status: 'pending',
         createdAt: { $gte: thirtyMinAgo }
