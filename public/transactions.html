@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transactions • Universe Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/universe-wallet-logo-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/universe-wallet-logo-512.png">
+<link rel="apple-touch-icon" href="/universe-wallet-logo-192.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Universe">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease}
+:root{--bg:#f3f6fc;--bg-pattern-1:rgba(244,247,252,.90);--bg-pattern-2:rgba(244,247,252,.90);--grid-color:rgba(87,120,170,.075);--text:#182133;--text-title:#202a3a;--muted:#7a8594;--muted-2:#9aa5b2;--header-bg:rgba(255,255,255,.96);--header-border:#e5eaf1;--card-bg:#ffffff;--card-border:#e6ebf1;--card-shadow:0 4px 15px rgba(35,60,95,.06);--menu-btn-bg:#fff;--menu-btn-border:#e3e8ee;--menu-btn-color:#687587;--icon-btn-bg:#fff;--icon-btn-border:#e3e8ee;--icon-btn-color:#229ED9;--theme-btn-bg:#fff;--theme-btn-border:#e3e8ee;--theme-btn-color:#718096;--avatar-border:#dce6ef;--filter-bg:#fff;--filter-border:#e7ecf2;--filter-input-bg:#f8f9fb;--filter-input-border:#e5e9ef;--bottom-nav-bg:rgba(255,255,255,0.98);--bottom-nav-border:#dce9ff;--bottom-nav-color:#8a9bb8;--bottom-nav-active:#1264ff;--scan-circle-bg:linear-gradient(145deg,#ffffff,#eaf3ff);--scan-circle-border:#ffffff;--scan-circle-shadow:#d9e7ff;--modal-bg:#ffffff;--modal-border:#c5d9f0;--modal-close-bg:#f0f7ff;--modal-close-border:#c5d9f0;--modal-close-color:#5a7a9a;--modal-label-color:#5a7a9a;--modal-value-color:#172033;--modal-divider:#e8f0fe;--blocked-bg-1:#ffffff;--blocked-bg-2:#e8f0fe;--blocked-bg-3:#d4e4f7;--blocked-card-bg:#ffffff;--blocked-card-border:#c5d9f0;--blocked-title:#1a3a6b;--blocked-sub:#5a7a9a}
+body.dark{--bg:#0d1526;--bg-pattern-1:rgba(13,21,38,0.92);--bg-pattern-2:rgba(13,21,38,0.92);--grid-color:rgba(90,120,170,0.05);--text:#edf3ff;--text-title:#edf3ff;--muted:#8491a6;--muted-2:#8491a6;--header-bg:rgba(26,38,57,0.96);--header-border:#2b3a50;--card-bg:#1a2639;--card-border:#2b3a50;--card-shadow:0 4px 15px rgba(0,0,0,.25);--menu-btn-bg:#202d42;--menu-btn-border:#2b3a50;--menu-btn-color:#b8c5d6;--icon-btn-bg:#202d42;--icon-btn-border:#2b3a50;--icon-btn-color:#60a5fa;--theme-btn-bg:#202d42;--theme-btn-border:#2b3a50;--theme-btn-color:#cbd5e1;--avatar-border:#334155;--filter-bg:#1a2639;--filter-border:#2b3a50;--filter-input-bg:#101a2c;--filter-input-border:#2b3a50;--bottom-nav-bg:rgba(26,38,57,0.98);--bottom-nav-border:#2b3a50;--bottom-nav-color:#8491a6;--bottom-nav-active:#60a5fa;--scan-circle-bg:linear-gradient(145deg,#1a2639,#202d42);--scan-circle-border:#1a2639;--scan-circle-shadow:#2b3a50;--modal-bg:#1a2639;--modal-border:#2b3a50;--modal-close-bg:#202d42;--modal-close-border:#2b3a50;--modal-close-color:#8491a6;--modal-label-color:#8491a6;--modal-value-color:#edf3ff;--modal-divider:#2b3a50;--blocked-bg-1:#0d1526;--blocked-bg-2:#1a2639;--blocked-bg-3:#202d42;--blocked-card-bg:#1a2639;--blocked-card-border:#2b3a50;--blocked-title:#edf3ff;--blocked-sub:#8491a6}
+*{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+.modal-btn-copy,.copy-text{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+img{-webkit-user-drag:none;user-drag:none}
+.app{width:100%;max-width:430px;min-height:100vh;margin:auto;padding-bottom:130px;background:linear-gradient(var(--bg-pattern-1),var(--bg-pattern-2)),repeating-linear-gradient(0deg,transparent 0px,transparent 38px,var(--grid-color) 39px),repeating-linear-gradient(90deg,transparent 0px,transparent 38px,var(--grid-color) 39px);transition:background .3s ease}
+.header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--header-bg);border-bottom:1px solid var(--header-border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .3s ease,border .3s ease}
+.header-left{display:flex;align-items:center;gap:10px}
+.menu-btn{width:35px;height:35px;display:flex;align-items:center;justify-content:center;border:1px solid var(--menu-btn-border);border-radius:10px;background:var(--menu-btn-bg);color:var(--menu-btn-color);font-size:15px;cursor:pointer;transition:0.2s;flex-shrink:0}
+.menu-btn:hover{background:var(--card-bg);color:var(--bottom-nav-active)}
+.header-title{font-size:14px;font-weight:700;color:var(--text-title)}
+.header-right{display:flex;align-items:center;gap:8px}
+.theme-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--theme-btn-border);border-radius:50%;background:var(--theme-btn-bg);color:var(--theme-btn-color);font-size:15px;cursor:pointer;transition:all 0.25s ease;flex-shrink:0}
+.theme-btn:hover{transform:rotate(20deg) scale(1.08);border-color:var(--bottom-nav-active);color:var(--bottom-nav-active)}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0088ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--avatar-border);overflow:hidden;box-shadow:0 3px 10px rgba(26,86,219,0.25);transition:transform 0.2s;flex-shrink:0}
+.user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.main{width:100%;padding:16px 12px 30px}
+.page-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;gap:10px}
+.page-heading small{display:block;margin-bottom:5px;color:#3985d7;font-size:9px;font-weight:700;letter-spacing:1px}
+.page-heading h1{font-size:21px;color:var(--text-title)}
+.page-heading h1 span{color:#2878dc}
+.export-buttons{display:flex;gap:6px}
+.export-btn{height:32px;padding:0 12px;border:none;border-radius:8px;font-size:9px;font-weight:800;cursor:pointer;font-family:inherit;transition:0.2s;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:0.3px}
+.export-btn:active{transform:scale(0.95)}
+.csv-btn{background:#dff8ec;color:#159a6a}
+.pdf-btn{background:#ffe2e4;color:#e6535a}
+.export-btn:disabled{opacity:0.5;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{min-height:90px;position:relative;padding:14px;background:var(--card-bg);border-radius:13px;border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden}
+.stat-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:#2779e8}
+.stat-card.success-card::before{background:#27bd88}
+.stat-card.transaction-card::before{background:#eab62b}
+.stat-card.debit-card::before{background:#e45a60}
+.stat-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;border-radius:8px;background:#eaf3ff;color:#287ce2;font-size:12px}
+body.dark .stat-icon{background:#172b55;color:#60a5fa}
+.success-card .stat-icon{background:#ddf8ec;color:#16a874}
+body.dark .success-card .stat-icon{background:#12352f;color:#10c993}
+.transaction-card .stat-icon{background:#fff2cf;color:#d99b12}
+body.dark .transaction-card .stat-icon{background:#39331d;color:#fbbf24}
+.debit-card .stat-icon{background:#ffe3e5;color:#dc4f57}
+body.dark .debit-card .stat-icon{background:#3a2025;color:#f87171}
+.stat-value{font-size:16px;font-weight:800;color:var(--text-title)}
+.stat-label{margin-top:3px;color:var(--muted-2);font-size:8px;font-weight:600}
+.filter-panel{padding:14px;background:var(--filter-bg);border:1px solid var(--filter-border);border-radius:15px;box-shadow:var(--card-shadow);margin-bottom:14px}
+.filter-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.filter-btn{height:27px;padding:0 12px;border:1px solid var(--filter-input-border);border-radius:15px;background:var(--filter-bg);color:var(--muted);font-size:8px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;text-transform:uppercase;letter-spacing:0.3px}
+.filter-btn.active{background:#2378e7;border-color:#2378e7;color:#fff;box-shadow:0 4px 10px rgba(35,120,231,.18)}
+.filter-row{display:flex;flex-direction:column;gap:8px}
+.search-box{position:relative}
+.search-box span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted-2);font-size:12px}
+.filter-input{width:100%;height:38px;padding:0 10px 0 30px;border:1px solid var(--filter-input-border);border-radius:8px;outline:none;background:var(--filter-input-bg);color:var(--text);font-size:11px;font-family:inherit;font-weight:600}
+.filter-input:focus{border-color:#9ec4f4;background:var(--card-bg);box-shadow:0 0 0 2px rgba(50,125,224,.08)}
+.filter-input::placeholder{color:var(--muted-2);font-weight:500}
+.filter-summary{display:grid;grid-template-columns:repeat(4,1fr);margin-top:13px;padding-top:12px;border-top:1px solid var(--card-border);gap:6px}
+.summary-item{text-align:center}
+.summary-label{display:block;margin-bottom:4px;color:var(--muted-2);font-size:7px;letter-spacing:.5px;font-weight:700}
+.summary-value{color:#16a779;font-size:10px;font-weight:800}
+.summary-item:nth-child(2) .summary-value{color:#dc565b}
+.summary-item:nth-child(3) .summary-value{color:var(--text-title)}
+.summary-item:nth-child(4) .summary-value{color:#159f72}
+.transactions-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:15px;box-shadow:var(--card-shadow);overflow:hidden}
+.transactions-header{height:49px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--card-border)}
+.transactions-title{display:flex;align-items:center;gap:7px;color:var(--text-title);font-size:10px;font-weight:700}
+.transactions-title-icon{color:#2878dd;font-size:12px}
+.showing{padding:4px 8px;border-radius:10px;background:#eef6ff;color:#4283cf;font-size:7px;font-weight:700}
+body.dark .showing{background:#172b55;color:#60a5fa}
+.txn-list{padding:8px}
+.txn-item{display:flex;align-items:center;gap:10px;padding:11px 10px;border-bottom:1px solid var(--card-border);cursor:pointer;transition:0.15s;border-radius:8px}
+.txn-item:last-child{border-bottom:none}
+.txn-item:hover{background:var(--bg)}
+.txn-icon{flex-shrink:0;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.txn-icon.credit{background:#dcf8eb;color:#15a473}
+body.dark .txn-icon.credit{background:#12352f;color:#10c993}
+.txn-icon.debit{background:#ffe1e4;color:#dc5058}
+body.dark .txn-icon.debit{background:#3a2025;color:#f87171}
+.txn-info{flex:1;min-width:0}
+.txn-title{display:block;margin-bottom:3px;color:var(--text-title);font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-sub{display:block;margin-bottom:3px;color:var(--muted);font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-id{display:block;font-family:'Courier New',monospace;color:var(--muted-2);font-size:8px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-right{text-align:right;flex-shrink:0;margin-left:6px}
+.txn-amount{display:block;margin-bottom:4px;font-size:12px;font-weight:800}
+.txn-amount.credit{color:#159f70}
+body.dark .txn-amount.credit{color:#10c993}
+.txn-amount.debit{color:#df4f57}
+body.dark .txn-amount.debit{color:#f87171}
+.txn-status{display:inline-block;padding:3px 8px;border-radius:10px;font-size:7px;font-weight:800;letter-spacing:0.3px;text-transform:uppercase}
+.txn-status.success{background:#dff8eb;color:#159b6b}
+body.dark .txn-status.success{background:#12352f;color:#10c993}
+.txn-status.pending{background:#fff2cf;color:#c58600}
+body.dark .txn-status.pending{background:#39331d;color:#fbbf24}
+.txn-status.failed{background:#ffe1e4;color:#dc5058}
+body.dark .txn-status.failed{background:#3a2025;color:#f87171}
+.txn-status.cancelled{background:#f1f5f9;color:#8a9ab0}
+body.dark .txn-status.cancelled{background:#202d42;color:#8491a6}
+.loading-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.loading-state i{font-size:28px;display:block;margin-bottom:10px;color:#1a56db;animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state i{font-size:32px;display:block;margin-bottom:10px;opacity:0.3;color:#1a56db}
+.empty-state p{font-size:11px;font-weight:600}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(10,25,50,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9998;opacity:0;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease}
+.sidebar-overlay.active{opacity:1;visibility:visible}
+.sidebar{position:fixed;top:0;left:0;width:290px;max-width:85vw;height:100vh;background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);z-index:9999;transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;box-shadow:6px 0 40px rgba(10,40,100,0.15);overflow:hidden}
+body.dark .sidebar{background:linear-gradient(180deg,#1a2639 0%,#172131 100%)}
+.sidebar.open{transform:translateX(0)}
+.sidebar-header{padding:22px 18px 18px;background:linear-gradient(135deg,#1a56db 0%,#0088ff 100%);color:#fff;position:relative;overflow:hidden}
+.sidebar-header::before{content:'';position:absolute;width:180px;height:180px;right:-70px;top:-70px;border-radius:50%;background:rgba(255,255,255,0.08)}
+.sidebar-header::after{content:'';position:absolute;width:120px;height:120px;right:-30px;bottom:-60px;border-radius:50%;background:rgba(255,255,255,0.06)}
+.sidebar-user{display:flex;align-items:center;gap:12px;position:relative;z-index:2}
+.sidebar-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0}
+.sidebar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.sidebar-user-info{flex:1;min-width:0}
+.sidebar-user-info h3{font-size:14px;font-weight:800;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-info p{font-size:10px;opacity:0.85;font-weight:600;letter-spacing:0.3px}
+.sidebar-balance-box{margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+.sidebar-balance-label{font-size:9px;font-weight:700;opacity:0.85;letter-spacing:0.5px;text-transform:uppercase}
+.sidebar-balance-value{font-size:16px;font-weight:900}
+.sidebar-menu{flex:1;overflow-y:auto;padding:14px 10px}
+.sidebar-section-label{font-size:9px;font-weight:800;color:var(--muted-2);letter-spacing:1.2px;text-transform:uppercase;padding:12px 12px 6px}
+.sidebar-item{display:flex;align-items:center;gap:13px;padding:12px 14px;margin-bottom:3px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s ease;position:relative}
+.sidebar-item:hover{background:#eef4ff;color:var(--bottom-nav-active);transform:translateX(3px)}
+body.dark .sidebar-item:hover{background:#202d42}
+.sidebar-item.active{background:linear-gradient(135deg,#e8f1ff,#dbe9ff);color:var(--bottom-nav-active)}
+body.dark .sidebar-item.active{background:linear-gradient(135deg,#172b55,#1e3a5f)}
+.sidebar-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3.5px;border-radius:4px;background:var(--bottom-nav-active)}
+.sidebar-item-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#f0f5fb;color:#5a7a9a;font-size:14px;flex-shrink:0}
+body.dark .sidebar-item-icon{background:#202d42;color:#8491a6}
+.sidebar-item.active .sidebar-item-icon{background:linear-gradient(135deg,#1a56db,#0088ff);color:#fff}
+.sidebar-item-text{flex:1}
+.sidebar-item-badge{font-size:8px;font-weight:800;padding:3px 7px;border-radius:20px;background:#ff4444;color:#fff}
+.sidebar-divider{height:1px;margin:10px 14px;background:linear-gradient(90deg,transparent,#e0e8f2,transparent)}
+body.dark .sidebar-divider{background:linear-gradient(90deg,transparent,#2b3a50,transparent)}
+.sidebar-footer{padding:14px 16px 20px;border-top:1px solid #eef2f8;background:#fff}
+body.dark .sidebar-footer{border-top:1px solid #2b3a50;background:#1a2639}
+.sidebar-logout{width:100%;padding:12px;border:none;border-radius:12px;background:#fee2e2;color:#dc2626;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.sidebar-version{text-align:center;font-size:9px;color:var(--muted-2);font-weight:600;margin-top:10px}
+.bottom-nav{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:calc(100% - 24px);max-width:430px;height:78px;display:flex;align-items:center;justify-content:space-around;padding:6px 8px;background:var(--bottom-nav-bg);backdrop-filter:blur(16px);border:2px solid var(--bottom-nav-border);border-radius:46px;box-shadow:0 15px 45px rgba(30,100,220,0.15);z-index:1000;transition:background .3s ease,border .3s ease}
+.bottom-nav .nav-item{position:relative;flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--bottom-nav-color);text-decoration:none;font-size:9px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase}
+.bottom-nav .nav-item.active{color:var(--bottom-nav-active)}
+.bottom-nav .nav-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.bottom-nav .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:2;fill:none}
+.bottom-nav .scan-item{justify-content:center;padding:0;gap:1px;color:var(--bottom-nav-active);z-index:10}
+.bottom-nav .scan-circle{width:54px;height:54px;margin-top:-32px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--scan-circle-bg);border:5px solid var(--scan-circle-border);box-shadow:0 0 0 2px var(--scan-circle-shadow),0 10px 25px rgba(18,100,255,0.25)}
+.bottom-nav .qr-icon{width:30px;height:30px;fill:var(--bottom-nav-active);stroke:none}
+.bottom-nav .scan-item span{color:var(--bottom-nav-active);font-size:9px;font-weight:800;margin-top:2px}
+.bottom-nav .nav-item.active::after{content:"";position:absolute;bottom:3px;width:20px;height:3px;border-radius:10px;background:var(--bottom-nav-active)}
+.bottom-nav .scan-item::after{display:none}
+.transaction-overlay{position:fixed;inset:0;background:rgba(18,25,38,.55);display:flex;align-items:center;justify-content:center;padding:14px;z-index:2000}
+.transaction-modal{width:100%;max-width:420px;max-height:94vh;overflow-y:auto;background:#fff;border-radius:29px;box-shadow:0 25px 70px rgba(0,0,0,.22);scrollbar-width:none;animation:slideUp .3s ease}
+.transaction-modal::-webkit-scrollbar{display:none}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.transaction-header{height:87px;padding:0 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e7eaf0}
+.transaction-title{font-size:18px;font-weight:750;letter-spacing:-.4px;color:#182234}
+.transaction-close{width:42px;height:42px;border:0;border-radius:14px;background:#f4f6fa;color:#718096;font-size:23px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+.transaction-content{padding:28px 30px 30px}
+.transaction-main-title{font-size:21px;font-weight:650;line-height:1.3;color:#182234;margin-bottom:8px}
+.transaction-date{font-size:13px;color:#a5afbd;margin-bottom:19px}
+.transaction-amount{font-size:39px;font-weight:800;line-height:1;color:#079b72;letter-spacing:-1.1px;margin-bottom:14px}
+.transaction-amount.debit{color:#e53935}
+.transaction-status{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:23px;background:#d8f8e9;color:#087653;font-size:11px;font-weight:700;margin-bottom:26px}
+.transaction-status::before{content:"\2713";width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#087653;color:#fff;font-size:8px;font-weight:900}
+.transaction-status.pending{background:#fff4d6;color:#b45309}
+.transaction-status.pending::before{content:"\23F1";background:#b45309}
+.transaction-status.failed{background:#fee2e2;color:#b91c1c}
+.transaction-status.failed::before{content:"\2715";background:#b91c1c}
+.transaction-status.cancelled{background:#f1f5f9;color:#64748b}
+.transaction-status.cancelled::before{content:"\25CB";background:#64748b}
+.transaction-info{display:flex;flex-direction:column;gap:14px}
+.transaction-card{width:100%;padding:17px 19px;border-radius:17px;background:#f4f6fb}
+.transaction-card.notes{background:#eaf3ff}
+.transaction-card.comment{background:#cdf8df}
+.transaction-label{display:block;font-size:11px;line-height:1.2;color:#98a5b6;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:9px}
+.transaction-value{font-size:15px;line-height:1.45;font-weight:500;color:#182234;word-break:break-word}
+.transaction-value.bold{font-weight:700}
+.transaction-value.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-weight:700;color:#68768b;font-size:14px}
+.transaction-method{display:flex;align-items:center;gap:7px}
+.transaction-method-icon{font-size:17px;color:#5965d8;font-weight:800}
+.transaction-copy{display:inline-flex;align-items:center;margin-left:6px;color:#8b9aad;font-size:16px;cursor:pointer;vertical-align:middle}
+.transaction-actions{margin-top:26px;display:flex;flex-direction:column;gap:14px}
+.download-receipt{height:51px;width:100%;border:0;border-radius:15px;background:#2379e9;color:#fff;font-size:15px;font-weight:750;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 8px 20px rgba(35,121,233,.18);transition:.2s}
+.close-button{height:51px;width:100%;border:0;border-radius:15px;background:#f3f5fa;color:#718096;font-size:15px;font-weight:650;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.2s}
+.close-icon{font-size:19px;line-height:1}
+body.dark .transaction-modal{background:#1a2639;color:#edf3ff}
+body.dark .transaction-header{border-bottom:1px solid #2b3a50}
+body.dark .transaction-title{color:#edf3ff}
+body.dark .transaction-close{background:#202d42;color:#8491a6}
+body.dark .transaction-main-title{color:#edf3ff}
+body.dark .transaction-date{color:#8491a6}
+body.dark .transaction-card{background:#202d42}
+body.dark .transaction-card.notes{background:#172b55}
+body.dark .transaction-card.comment{background:#12352f}
+body.dark .transaction-label{color:#8491a6}
+body.dark .transaction-value{color:#edf3ff}
+body.dark .transaction-value.mono{color:#94a3b8}
+body.dark .transaction-method-icon{color:#60a5fa}
+body.dark .transaction-copy{color:#94a3b8}
+body.dark .close-button{background:#202d42;color:#8491a6}
+
+/* =========================================================
+   ✅ UNIVERSAL ALERT SYSTEM
+   ========================================================= */
+.otp-alert { display: none; width: calc(100% - 30px); max-width: 472px; min-height: 54px; margin: 19px auto; padding: 9px 14px 9px 21px; align-items: center; gap: 12px; background: #ffffff; border: 2px solid #ffd9d9; border-radius: 17px; box-shadow: 0 9px 22px rgba(40,60,110,.12), 0 3px 9px rgba(255,80,80,.06); font-family: 'Poppins','Inter',Arial,sans-serif; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .3s ease, transform .3s ease; }
+.otp-alert.show { display: flex; opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.otp-alert .alert-icon { flex-shrink: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #ee4d56; color: #ffffff; font-size: 16px; font-weight: 700; line-height: 1; }
+.otp-alert.success .alert-icon { background: #17b989; }
+.otp-alert.info .alert-icon { background: #3972f5; }
+.otp-alert.warning .alert-icon { background: #e6a82e; }
+.otp-alert .alert-message { flex: 1; color: #97373d; font-size: 13px; font-weight: 500; line-height: 1.4; }
+.otp-alert.success .alert-message { color: #0e6f4c; }
+.otp-alert.info .alert-message { color: #1a3a8f; }
+.otp-alert.warning .alert-message { color: #8a5b00; }
+.otp-alert.success { border-color: #c7f0dc; box-shadow: 0 9px 22px rgba(40, 60, 110, 0.12), 0 3px 9px rgba(23, 185, 137, 0.08); }
+.otp-alert.info { border-color: #c7d6ff; box-shadow: 0 9px 22px rgba(40, 60, 110, 0.12), 0 3px 9px rgba(57, 114, 245, 0.08); }
+.otp-alert.warning { border-color: #ffe8c2; box-shadow: 0 9px 22px rgba(40, 60, 110, 0.12), 0 3px 9px rgba(230, 168, 46, 0.08); }
+.otp-alert .alert-close { flex-shrink: 0; border: none; background: transparent; color: #a9a0a2; font-size: 19px; font-weight: 400; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; padding: 0; }
+.otp-alert .alert-close:hover { color: #7f7275; }
+body.dark .otp-alert { background: var(--card-bg); border-color: #3a2025; box-shadow: 0 9px 22px rgba(0, 0, 0, 0.35); }
+body.dark .otp-alert .alert-message { color: #f87171; }
+body.dark .otp-alert.success { border-color: #12352f; }
+body.dark .otp-alert.success .alert-message { color: #10c993; }
+body.dark .otp-alert.info { border-color: #172b55; }
+body.dark .otp-alert.info .alert-message { color: #60a5fa; }
+body.dark .otp-alert.warning { border-color: #39331d; }
+body.dark .otp-alert.warning .alert-message { color: #fbbf24; }
+body.dark .otp-alert .alert-close { color: #8491a6; }
+body.dark .otp-alert .alert-close:hover { color: #cbd5e1; }
+
+/* =========================================================
+   ✅ FIELD VALIDATION TOOLTIP
+   ========================================================= */
+.field-tooltip { position: absolute; top: -12px; left: 20px; transform: translateY(-100%) scale(0.9); background: #ffffff; border: 2px solid #ff9800; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(255, 152, 0, 0.25); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.34, 1.2, 0.64, 1); pointer-events: none; max-width: 260px; }
+.field-tooltip.show { opacity: 1; visibility: visible; transform: translateY(-100%) scale(1); }
+.field-tooltip::before { content: ''; position: absolute; bottom: -10px; left: 20px; width: 16px; height: 16px; background: #ffffff; border-right: 2px solid #ff9800; border-bottom: 2px solid #ff9800; transform: rotate(45deg); }
+.field-tooltip .tip-icon { width: 32px; height: 32px; background: #ff9800; border-radius: 8px; color: #ffffff; font-size: 20px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.field-tooltip .tip-message { font-size: 12px; font-weight: 700; color: #172033; line-height: 1.35; }
+body.dark .field-tooltip { background: #1a2639; border-color: #ff9800; }
+body.dark .field-tooltip::before { background: #1a2639; border-color: #ff9800; }
+body.dark .field-tooltip .tip-message { color: #edf3ff; }
+.input-error { border-color: #ef5350 !important; box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important; animation: shakeError 0.4s ease; }
+@keyframes shakeError { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+.blocked-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,var(--blocked-bg-1) 0%,var(--blocked-bg-2) 50%,var(--blocked-bg-3) 100%);display:none;align-items:center;justify-content:center;padding:20px}
+.blocked-overlay.active{display:flex}
+.blocked-card{background:var(--blocked-card-bg);border-radius:24px;padding:40px 30px;max-width:420px;width:100%;text-align:center;border:1px solid var(--blocked-card-border)}
+.blocked-icon{width:90px;height:90px;border-radius:24px;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:42px;color:#dc2626;border:2px solid #fca5a5}
+.blocked-title{font-size:24px;font-weight:900;color:var(--text-title);margin-bottom:12px;text-transform:uppercase}
+.blocked-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.blocked-btn{width:100%;padding:15px;border-radius:16px;font-size:14px;font-weight:800;border:none;cursor:pointer;text-transform:uppercase;font-family:inherit;background:#1a56db;color:#ffffff;display:flex;align-items:center;justify-content:center;gap:8px}
+
+@media(max-width:480px){.transaction-overlay{padding:14px 12px}.transaction-modal{max-width:100%;border-radius:29px;max-height:95vh}.transaction-header{height:87px;padding:0 30px}.transaction-title{font-size:17px}.transaction-content{padding:28px 30px 30px}.transaction-main-title{font-size:20px}.transaction-amount{font-size:38px}.bottom-nav{width:calc(100% - 16px);height:72px;bottom:10px;padding:6px 6px;border-radius:40px}.bottom-nav .nav-item{font-size:8px}.bottom-nav .nav-icon{width:22px;height:22px}.bottom-nav .nav-icon svg{width:20px;height:20px}.bottom-nav .scan-circle{width:48px;height:48px;margin-top:-28px;border-width:4px}.bottom-nav .qr-icon{width:26px;height:26px}.filter-summary{grid-template-columns:repeat(2,1fr);row-gap:10px}.export-btn{height:28px;padding:0 8px;font-size:8px}.otp-alert { width: calc(100% - 24px); min-height: 52px; padding: 8px 11px 8px 15px; gap: 10px; border-radius: 15px; margin: 15px auto; } .otp-alert .alert-icon { width: 23px; height: 23px; font-size: 15px; } .otp-alert .alert-message { font-size: 12px; } .otp-alert .alert-close { font-size: 17px; } .field-tooltip { max-width: 220px; padding: 10px 12px; gap: 8px; } .field-tooltip .tip-icon { width: 28px; height: 28px; font-size: 18px; } .field-tooltip .tip-message { font-size: 11px; }}
+@media(max-width:430px){.transaction-overlay{padding:8px}.transaction-modal{border-radius:26px}.transaction-header{height:79px;padding:0 21px}.transaction-title{font-size:16px}.transaction-close{width:40px;height:40px;border-radius:13px;font-size:21px}.transaction-content{padding:24px 21px 23px}.transaction-main-title{font-size:18px}.transaction-date{font-size:11px;margin-bottom:17px}.transaction-amount{font-size:33px}.transaction-status{font-size:10px;padding:6px 11px;margin-bottom:21px}.transaction-info{gap:11px}.transaction-card{padding:14px 16px;border-radius:16px}.transaction-label{font-size:10px;margin-bottom:7px}.transaction-value{font-size:13px}.transaction-value.mono{font-size:12px}.transaction-actions{margin-top:21px;gap:11px}.download-receipt,.close-button{height:47px;border-radius:14px;font-size:14px}}
+@media(max-width:380px){.bottom-nav{height:66px}.bottom-nav .nav-item{font-size:7px}.bottom-nav .scan-circle{width:44px;height:44px;margin-top:-25px}.bottom-nav .qr-icon{width:22px;height:22px}.page-heading h1{font-size:17px}.filter-btn{padding:0 8px;font-size:7px}.theme-btn,.user-avatar{width:32px;height:32px}.menu-btn{width:32px;height:32px;font-size:14px}.sidebar{width:270px}}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebarAvatar"><i class="fas fa-user"></i></div>
+            <div class="sidebar-user-info">
+                <h3 id="sidebarUserName">User</h3>
+                <p id="sidebarUserMobile">+91 XXXXXXXXXX</p>
+            </div>
+        </div>
+        <div class="sidebar-balance-box">
+            <span class="sidebar-balance-label"><i class="fas fa-wallet"></i> Balance</span>
+            <span class="sidebar-balance-value">₹<span id="sidebarBalance">0.00</span></span>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <div class="sidebar-section-label">MAIN</div>
+        <a href="/dashboard" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-house"></i></div><span class="sidebar-item-text">Dashboard</span></a>
+        <a href="/transfer" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></div><span class="sidebar-item-text">Transfer</span></a>
+        <a href="/qr" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-qrcode"></i></div><span class="sidebar-item-text">Scan QR</span></a>
+        <a href="/deposit" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-circle-plus"></i></div><span class="sidebar-item-text">Add Funds</span></a>
+        <a href="/withdraw" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-circle-minus"></i></div><span class="sidebar-item-text">Withdraw</span></a>
+        <a href="/transactions" class="sidebar-item active"><div class="sidebar-item-icon"><i class="fas fa-clock-rotate-left"></i></div><span class="sidebar-item-text">Transactions</span></a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">API</div>
+        <a href="/api" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-code"></i></div><span class="sidebar-item-text">API Integration</span></a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">ACCOUNT</div>
+        <a href="/profile" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-user"></i></div><span class="sidebar-item-text">My Profile</span></a>
+        <a href="/settings" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-gear"></i></div><span class="sidebar-item-text">Settings</span></a>
+        <a href="/support" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-headset"></i></div><span class="sidebar-item-text">Support</span></a>
+        <a href="/refer" class="sidebar-item"><div class="sidebar-item-icon"><i class="fas fa-gift"></i></div><span class="sidebar-item-text">Refer & Earn</span><span class="sidebar-item-badge">NEW</span></a>
+    </div>
+
+    <div class="sidebar-footer">
+        <button class="sidebar-logout" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        <div class="sidebar-version">v2.0.1 • Universal Wallet</div>
+    </div>
+</aside>
+
+<div class="blocked-overlay" id="blockedOverlay">
+    <div class="blocked-card">
+        <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="blocked-title" id="blockedTitle">Access Denied</div>
+        <div class="blocked-sub" id="blockedSub">Your account has been blocked or deleted. Please contact support.</div>
+        <button class="blocked-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Back To Login</button>
+    </div>
+</div>
+
+<div class="app">
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="header-title">Transactions</div>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="page-top">
+            <div class="page-heading">
+                <small><i class="fas fa-rotate"></i> HISTORY</small>
+                <h1>Transaction <span>Ledger</span></h1>
+            </div>
+            <div class="export-buttons">
+                <button class="export-btn csv-btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="export-btn pdf-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+        </div>
+
+        <section class="stats">
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-arrow-down"></i></div><div class="stat-value" id="totalCredit">₹0.00</div><div class="stat-label">Total Credit</div></div>
+            <div class="stat-card success-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-value" id="totalSuccess">0</div><div class="stat-label">Successful Txns</div></div>
+            <div class="stat-card transaction-card"><div class="stat-icon"><i class="fas fa-list-ul"></i></div><div class="stat-value" id="totalTxns">0</div><div class="stat-label">Total Transactions</div></div>
+            <div class="stat-card debit-card"><div class="stat-icon"><i class="fas fa-arrow-up"></i></div><div class="stat-value" id="totalDebit">₹0.00</div><div class="stat-label">Total Debit</div></div>
+        </section>
+
+        <section class="filter-panel">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" onclick="filterTransactions('all')"><i class="fas fa-border-all"></i> All</button>
+                <button class="filter-btn" data-filter="credit" onclick="filterTransactions('credit')"><i class="fas fa-arrow-down"></i> Credit</button>
+                <button class="filter-btn" data-filter="debit" onclick="filterTransactions('debit')"><i class="fas fa-arrow-up"></i> Debit</button>
+                <button class="filter-btn" data-filter="success" onclick="filterTransactions('success')"><i class="fas fa-circle" style="font-size:6px;"></i> Success</button>
+                <button class="filter-btn" data-filter="pending" onclick="filterTransactions('pending')"><i class="fas fa-circle" style="font-size:6px;"></i> Pending</button>
+                <button class="filter-btn" data-filter="failed" onclick="filterTransactions('failed')"><i class="fas fa-circle" style="font-size:6px;"></i> Failed</button>
+            </div>
+            <div class="filter-row">
+                <div class="search-box">
+                    <span><i class="fas fa-search"></i></span>
+                    <input type="text" class="filter-input" id="searchInput" placeholder="Search ID, title, notes..." oninput="handleSearch()">
+                </div>
+            </div>
+            <div class="filter-summary">
+                <div class="summary-item"><span class="summary-label">CREDIT</span><span class="summary-value" id="summaryCredit">₹0.00</span></div>
+                <div class="summary-item"><span class="summary-label">DEBIT</span><span class="summary-value" id="summaryDebit">₹0.00</span></div>
+                <div class="summary-item"><span class="summary-label">TOTAL</span><span class="summary-value" id="summaryTotal">0</span></div>
+                <div class="summary-item"><span class="summary-label">SUCCESS</span><span class="summary-value" id="summarySuccess">0</span></div>
+            </div>
+        </section>
+
+        <section class="transactions-card">
+            <div class="transactions-header">
+                <div class="transactions-title"><span class="transactions-title-icon"><i class="fas fa-list-ul"></i></span> All Transactions</div>
+                <div class="showing">Showing <strong id="showingCount">0</strong> of <strong id="totalCount">0</strong></div>
+            </div>
+            <div id="txnList" class="txn-list">
+                <div class="loading-state"><i class="fas fa-bolt"></i><p>Loading Transactions...</p></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="transaction-overlay" id="transactionOverlay" style="display:none;" onclick="closeTransactionModal(event)">
+    <div class="transaction-modal" id="transactionModal" onclick="event.stopPropagation()">
+        <div class="transaction-header">
+            <h2 class="transaction-title">Transaction Details</h2>
+            <button class="transaction-close" onclick="closeTransactionModal()" aria-label="Close">&times;</button>
+        </div>
+        <div class="transaction-content" id="transactionModalContent"></div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="/dashboard" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><span>Home</span></a>
+    <a href="/transfer" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div><span>Send</span></a>
+    <a href="/qr" class="nav-item scan-item"><div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div><span>Scan</span></a>
+    <a href="/deposit" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><span>Add</span></a>
+    <a href="/transactions" class="nav-item active"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><span>History</span></a>
+</div>
+
+<!-- ✅ Universal Alert -->
+<div class="otp-alert" id="otpAlert">
+    <div class="alert-icon" id="alertIcon">×</div>
+    <div class="alert-message" id="alertMessage">Message</div>
+    <button class="alert-close" onclick="closeOtpAlert()">×</button>
+</div>
+
+<script>
+var API_BASE = '/api';
+var AUTH_TOKEN = localStorage.getItem('token');
+var isAccountBlocked = false;
+var blockCheckDone = false;
+if (!AUTH_TOKEN) { window.location.href = '/'; }
+var state = { allTransactions: [], filteredTransactions: [], filter: 'all', searchQuery: '', userId: null, user: {} };
+
+/* =========================================================
+   ✅ UNIVERSAL ALERT SYSTEM
+   ========================================================= */
+var _alertHideTimer = null;
+function showAlert(message, type) {
+    type = type || 'error';
+    var alert = document.getElementById('otpAlert');
+    var icon = document.getElementById('alertIcon');
+    var msg = document.getElementById('alertMessage');
+    if (!alert) return;
+    alert.classList.remove('success', 'info', 'warning', 'show');
+    var symbol = '×';
+    if (type === 'success') symbol = '✓';
+    else if (type === 'info') symbol = 'i';
+    else if (type === 'warning') symbol = '!';
+    icon.textContent = symbol;
+    if (type === 'success') alert.classList.add('success');
+    else if (type === 'info') alert.classList.add('info');
+    else if (type === 'warning') alert.classList.add('warning');
+    msg.textContent = message;
+    alert.classList.add('show');
+    clearTimeout(_alertHideTimer);
+    _alertHideTimer = setTimeout(closeOtpAlert, 5000);
+}
+function closeOtpAlert() {
+    var alert = document.getElementById('otpAlert');
+    if (alert) alert.classList.remove('show');
+    clearTimeout(_alertHideTimer);
+}
+function showToast(message, type) { showAlert(message, type); }
+
+function openSidebar() { if (isAccountBlocked) return; document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); document.body.style.overflow = ''; }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeSidebar(); closeTransactionModal(); } });
+
+function updateSidebarUser(user) {
+    if (!user) return;
+    var name = user.fullName || user.username || 'User';
+    var mobile = user.mobile ? ('+91 ' + user.mobile) : '';
+    var nameEl = document.getElementById('sidebarUserName');
+    var mobileEl = document.getElementById('sidebarUserMobile');
+    var avatarEl = document.getElementById('sidebarAvatar');
+    if (nameEl) nameEl.textContent = name;
+    if (mobileEl) mobileEl.textContent = mobile;
+    if (avatarEl) {
+        var imgSrc = '';
+        if (user.profilePicture && typeof user.profilePicture === 'string') {
+            var pp = user.profilePicture.trim();
+            if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
+        }
+        if (imgSrc) avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" />';
+        else avatarEl.innerHTML = '<i class="fas fa-user"></i>';
+    }
+}
+function updateSidebarBalance(balance) { var el = document.getElementById('sidebarBalance'); if (el) el.textContent = parseFloat(balance || 0).toFixed(2); }
+
+(function initTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; }
+    else { document.body.classList.remove('dark'); themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; }
+})();
+function toggleTheme() {
+    var themeBtn = document.getElementById('themeBtn');
+    if (!themeBtn) return;
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    if (isDark) { themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('uwTheme', 'dark'); }
+    else { themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('uwTheme', 'light'); }
+}
+
+var DEFAULT_PROFILE_PICTURE = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1a56db"/><stop offset="100%" stop-color="#0088ff"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.95"/><path d="M 50 62 C 30 62 18 75 18 92 L 82 92 C 82 75 70 62 50 62 Z" fill="#ffffff" opacity="0.95"/></svg>');
+window.handleAvatarError = function(imgEl) { if (imgEl.src !== DEFAULT_PROFILE_PICTURE) imgEl.src = DEFAULT_PROFILE_PICTURE; };
+function extractUser(payload) {
+    if (!payload) return null;
+    var u = payload, safety = 0;
+    while (u && safety < 6) {
+        if (u.id || u._id) return u;
+        if (u.user && typeof u.user === 'object') { u = u.user; safety++; continue; }
+        if (u.data && typeof u.data === 'object') { u = u.data; safety++; continue; }
+        break;
+    }
+    return u;
+}
+function setAvatar(user) {
+    var avatarEl = document.getElementById('userAvatar');
+    if (!avatarEl) return;
+    var imgSrc = DEFAULT_PROFILE_PICTURE;
+    if (user && user.profilePicture && typeof user.profilePicture === 'string') {
+        var pp = user.profilePicture.trim();
+        if (pp.startsWith('data:image/') || pp.startsWith('http://') || pp.startsWith('https://') || pp.startsWith('/')) imgSrc = pp;
+    }
+    avatarEl.innerHTML = '<img src="' + imgSrc + '" alt="Profile" onerror="handleAvatarError(this)" />';
+}
+async function checkStatusByMobile(mobile) {
+    if (!mobile) return { allowed: true, reason: null };
+    try {
+        var cleanMobile = String(mobile).replace(/\D/g, '');
+        if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) cleanMobile = cleanMobile.slice(2);
+        var res = await fetch(API_BASE + '/check-status/' + cleanMobile);
+        return await res.json();
+    } catch (err) { return { allowed: true, reason: 'network_error' }; }
+}
+function handleBlockReason(reason) {
+    if (reason === 'blocked') showBlockedOverlay('Account Blocked', 'Your account has been blocked by administrator.');
+    else if (reason === 'deleted') showBlockedOverlay('Account Deleted', 'Your account has been deleted.');
+    else if (reason === 'inactive') showBlockedOverlay('Account Deactivated', 'Your account has been deactivated.');
+    else if (reason === 'notfound') showBlockedOverlay('Account Not Found', 'Your account data could not be found.');
+    else showBlockedOverlay('Access Denied', 'Your account is not accessible.');
+}
+function goToProfile() { window.location.href = '/profile'; }
+function showBlockedOverlay(title, message) {
+    if (isAccountBlocked) return;
+    isAccountBlocked = true;
+    if (title) document.getElementById('blockedTitle').textContent = title;
+    if (message) document.getElementById('blockedSub').textContent = message;
+    document.getElementById('blockedOverlay').classList.add('active');
+    closeSidebar();
+    closeTransactionModal();
+}
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pin_set');
+    sessionStorage.removeItem('pin_verified');
+    window.location.href = '/';
+}
+async function safeFetch(url, options) {
+    options = options || {};
+    try {
+        var response = await fetch(url, options);
+        var data = {};
+        try { data = await response.json(); } catch (e) { data = {}; }
+        if (response.status === 401) { logout(); throw new Error('Session expired'); }
+        if (response.status === 403) { showBlockedOverlay('Access Denied', data.message || 'Your account has been blocked.'); throw new Error('Account blocked'); }
+        if (response.status === 404 && data.userNotFound) { showBlockedOverlay('Account Not Found', 'Your account has been deleted.'); throw new Error('Account deleted'); }
+        return { response: response, data: data };
+    } catch (error) {
+        if (!isAccountBlocked) throw error;
+        return { response: null, data: {} };
+    }
+}
+async function verifyUserState() {
+    var t = localStorage.getItem('token');
+    if (!t) { window.location.href = '/'; return false; }
+    try {
+        var res = await fetch(API_BASE + '/auth/me', { headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } });
+        var data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+        if (res.status === 401) { logout(); return false; }
+        if (res.status === 403) { showBlockedOverlay('Account Blocked', data.message || 'Your account has been blocked.'); return false; }
+        if (res.status === 404) { showBlockedOverlay('Account Not Found', 'Your account has been deleted.'); return false; }
+        var user = extractUser(data);
+        if (!user || (!user.id && !user._id)) { showBlockedOverlay('Invalid Account', 'Your account data could not be found.'); return false; }
+        if (user.mobile && !blockCheckDone) {
+            blockCheckDone = true;
+            var status = await checkStatusByMobile(user.mobile);
+            if (status && status.allowed === false) { handleBlockReason(status.reason); return false; }
+        }
+        state.userId = (user.id || user._id).toString();
+        state.user = user;
+        localStorage.setItem('user', JSON.stringify(user));
+        setAvatar(user);
+        updateSidebarUser(user);
+        if (user.balance !== undefined && user.balance !== null) updateSidebarBalance(user.balance);
+        return true;
+    } catch (error) { console.error('User state check error:', error); return true; }
+}
+
+function getUserId(f){ if(!f) return null; if(typeof f==='string') return f; if(f._id) return f._id.toString(); if(f.toString) return f.toString(); return null; }
+function getUserName(o){ if(!o) return ''; if(typeof o === 'string') return o; return o.fullName || o.name || o.username || ''; }
+function fmtMobile(m){ if(!m) return ''; var s = m.toString(); if(s.length === 10) return s.slice(0,3)+'••••'+s.slice(7); return s; }
+
+function isCredit(tx, uid) {
+    if (!tx) return false;
+    if (tx.type === 'api_send') return false;
+    if (tx.type === 'api_receive') return true;
+    if (tx.type === 'transfer_send') return false;
+    if (tx.type === 'transfer_receive') return true;
+    if (tx.type === 'deposit') return true;
+    if (tx.type === 'manual-deposit') return true;
+    if (tx.type === 'auto-deposit') return true;
+    if (tx.type === 'web-deposit') return true;
+    if (tx.type === 'admin_add') return true;
+    if (tx.type === 'admin_deduct') return false;
+    if (tx.type === 'game_win') return true;
+    if (tx.type === 'game_loss') return false;
+    if (tx.type === 'lifafa_claim' || tx.type === 'lifafa_referral') return true;
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_edit') return false;
+    if (tx.type === 'invoice_pay_send') return false;
+    if (tx.type === 'invoice_pay_receive') return true;
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') return false;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return true;
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return false;
+    if (tx.type === 'invoice_pay') { var ridX = getUserId(tx.receiver_id || tx.receiver); var sidX = getUserId(tx.sender_id || tx.sender); if (ridX === uid && sidX !== uid) return true; if (sidX === uid && ridX !== uid) return false; }
+    if (tx.type === 'gift') {
+        if (tx.metadata && tx.metadata.category) { if (tx.metadata.category === 'gift_received') return true; if (tx.metadata.category === 'gift_created') return false; }
+        var gRid = getUserId(tx.receiver_id || tx.receiver); var gSid = getUserId(tx.sender_id || tx.sender);
+        if (gRid === uid && gSid !== uid) return true; if (gSid === uid && gRid !== uid) return false; return false;
+    }
+    var rid = getUserId(tx.receiver || tx.receiver_id); var sid = getUserId(tx.sender || tx.sender_id); var tuid = getUserId(tx.user_id);
+    if (sid === uid && rid !== uid) return false;
+    if (rid === uid && sid !== uid) return true;
+    if (sid === uid && rid === uid) { if (['deposit', 'admin_add'].includes(tx.type)) return true; return false; }
+    if (tuid === uid && rid === uid && sid !== uid) return true;
+    if (tuid === uid && sid === uid && rid !== uid) return false;
+    if (!sid && rid === uid) return true;
+    if (!sid && !rid && tuid === uid) return false;
+    if (!sid) return false;
+    return false;
+}
+
+function getDisplayName(tx, uid) {
+    var rid = getUserId(tx.receiver || tx.receiver_id);
+    var sid = getUserId(tx.sender || tx.sender_id);
+    var tuid = getUserId(tx.user_id);
+    var isS = sid === uid, isR = rid === uid, isU = tuid === uid;
+    var sn = '', rn = '';
+    if (tx.sender_id && typeof tx.sender_id === 'object') sn = getUserName(tx.sender_id);
+    else if (tx.sender && typeof tx.sender === 'object') sn = getUserName(tx.sender);
+    if (tx.receiver_id && typeof tx.receiver_id === 'object') rn = getUserName(tx.receiver_id);
+    else if (tx.receiver && typeof tx.receiver === 'object') rn = getUserName(tx.receiver);
+    if (tx.metadata) { if (!sn && tx.metadata.senderName) sn = tx.metadata.senderName; if (!rn && tx.metadata.receiverName) rn = tx.metadata.receiverName; }
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return 'Referral Bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return 'Welcome Bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return 'Referral Bonus (Admin)';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return 'Referral Bonus Reversed';
+    if (tx.type === 'api_send') return 'API Payment Sent' + (rn ? ' To ' + rn : '');
+    if (tx.type === 'api_receive') return 'API Payment Received' + (sn ? ' From ' + sn : '');
+    if (tx.type === 'api') { if (isS && !isR) return 'API Payment Sent'; if (isR && !isS) return 'API Payment Received'; return 'API Transaction'; }
+    if (tx.type === 'transfer_send') return 'Money Sent' + (rn ? ' To ' + rn : '');
+    if (tx.type === 'transfer_receive') return 'Money Received' + (sn ? ' From ' + sn : '');
+    if (tx.type === 'transfer') { if (isS && !isR) return 'Money Sent' + (rn ? ' To ' + rn : ''); if (isR && !isS) return 'Money Received' + (sn ? ' From ' + sn : ''); return 'Transfer'; }
+    if (tx.type === 'invoice_pay_send') return 'Invoice Paid' + (rn ? ' To ' + rn : '');
+    if (tx.type === 'invoice_pay_receive') return 'Invoice Received' + (sn ? ' From ' + sn : '');
+    if (tx.type === 'invoice_pay') { if (isS && !isR) return 'Invoice Paid' + (rn ? ' To ' + rn : ''); if (isR && !isS) return 'Invoice Received' + (sn ? ' From ' + sn : ''); return 'Invoice Payment'; }
+    if (tx.type === 'invoice_payment') return 'Invoice Payment';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Balance Added';
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') return 'Withdrawal Request';
+    if (tx.type === 'lifafa_creation') return 'Lifafa Created';
+    if (tx.type === 'lifafa_claim') return 'Lifafa Claimed';
+    if (tx.type === 'lifafa_referral') return 'Lifafa Referral';
+    if (tx.type === 'gift') { var cat = (tx.metadata && tx.metadata.category) ? tx.metadata.category : ''; if (cat === 'gift_received' || (isR && !isS)) return 'Gift Code Claimed'; if (cat === 'gift_created' || (isS && isR)) return 'Gift Code Created'; if (isS) return 'Gift Code Redeemed'; return 'Gift Code'; }
+    if (tx.type === 'game_win') return 'Game Win';
+    if (tx.type === 'game_loss') return 'Game Loss';
+    if (tx.type === 'admin_add') return 'Balance Added';
+    if (tx.type === 'admin_deduct') return 'Balance Deducted';
+    if (isS) return 'Payment Sent';
+    if (isR) return 'Payment Received';
+    return 'Transaction';
+}
+
+function getCounterparty(tx, uid) {
+    var isC = isCredit(tx, uid);
+    if (isC) {
+        if (tx.sender_id && typeof tx.sender_id === 'object') { var n1 = getUserName(tx.sender_id); if (n1) return n1 + (tx.sender_id.mobile ? ' (' + fmtMobile(tx.sender_id.mobile) + ')' : ''); }
+        if (tx.sender && typeof tx.sender === 'object') { var n2 = getUserName(tx.sender); if (n2) return n2 + (tx.sender.mobile ? ' (' + fmtMobile(tx.sender.mobile) + ')' : ''); }
+        if (tx.metadata && tx.metadata.senderName) return tx.metadata.senderName + (tx.metadata.senderMobile ? ' (' + fmtMobile(tx.metadata.senderMobile) + ')' : '');
+        return 'System';
+    } else {
+        if (tx.receiver_id && typeof tx.receiver_id === 'object') { var n3 = getUserName(tx.receiver_id); if (n3) return n3 + (tx.receiver_id.mobile ? ' (' + fmtMobile(tx.receiver_id.mobile) + ')' : ''); }
+        if (tx.receiver && typeof tx.receiver === 'object') { var n4 = getUserName(tx.receiver); if (n4) return n4 + (tx.receiver.mobile ? ' (' + fmtMobile(tx.receiver.mobile) + ')' : ''); }
+        if (tx.metadata && tx.metadata.receiverName) return tx.metadata.receiverName + (tx.metadata.receiverMobile ? ' (' + fmtMobile(tx.metadata.receiverMobile) + ')' : '');
+        return 'System';
+    }
+}
+function getMethod(tx) {
+    if (tx.method) return tx.method;
+    if (tx.metadata && tx.metadata.method) return tx.metadata.method;
+    if (tx.type === 'api' || tx.type === 'api_send' || tx.type === 'api_receive') return 'API Transfer';
+    if (tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive' || tx.type === 'invoice_payment' || tx.type === 'invoice_pay') return 'Invoice';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add' || tx.type === 'admin_deduct') return 'Admin';
+    if (tx.type === 'game_win' || tx.type === 'game_loss') return 'Game';
+    if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'Lifafa';
+    if (tx.type === 'gift') return 'Gift';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return 'Referral';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return 'Referral';
+    return 'Transfer';
+}
+function getCategory(tx) {
+    if (tx.category) return tx.category;
+    if (tx.metadata && tx.metadata.category) return tx.metadata.category;
+    if (tx.type === 'transfer_send') return 'P2P sent';
+    if (tx.type === 'transfer_receive') return 'P2P received';
+    if (tx.type === 'api_send') return 'API sent';
+    if (tx.type === 'api_receive') return 'API received';
+    if (tx.type === 'api') return 'P2P';
+    if (tx.type === 'invoice_pay_send') return 'Invoice sent';
+    if (tx.type === 'invoice_pay_receive') return 'Invoice received';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'Deposit';
+    if (tx.type === 'withdraw' || tx.type === 'withdrawal') return 'Withdrawal';
+    if (tx.type === 'admin_add') return 'Admin credit';
+    if (tx.type === 'admin_deduct') return 'Admin debit';
+    if (tx.type === 'game_win') return 'Game win';
+    if (tx.type === 'game_loss') return 'Game loss';
+    if (tx.type === 'lifafa_creation') return 'Lifafa created';
+    if (tx.type === 'lifafa_claim') return 'Lifafa claimed';
+    if (tx.type === 'gift') return 'Gift';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_received') return 'Referral bonus';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_welcome_bonus') return 'Referral welcome';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_force') return 'Referral bonus (Admin)';
+    if (tx.metadata && tx.metadata.transactionType === 'referral_bonus_reversed') return 'Referral reversed';
+    return 'transfer';
+}
+function getBalanceAfter(tx) {
+    if (tx.balanceAfter !== undefined && tx.balanceAfter !== null) return tx.balanceAfter;
+    if (tx.metadata && tx.metadata.balanceAfter !== undefined && tx.metadata.balanceAfter !== null) return tx.metadata.balanceAfter;
+    return null;
+}
+function getIconClass(tx, uid) {
+    if (tx.type === 'api' || tx.type === 'api_send' || tx.type === 'api_receive') return 'fa-code';
+    if (tx.type === 'invoice_payment' || tx.type === 'invoice_pay' || tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive') return 'fa-file-invoice';
+    if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive') return 'fa-right-left';
+    if (tx.type === 'deposit' || tx.type === 'manual-deposit' || tx.type === 'auto-deposit' || tx.type === 'web-deposit') return 'fa-plus';
+    if (tx.type === 'admin_add') return 'fa-arrow-down';
+    if (tx.type === 'admin_deduct') return 'fa-arrow-up';
+    if (tx.type === 'withdrawal' || tx.type === 'withdraw') return 'fa-arrow-up';
+    if (tx.type === 'game_win') return 'fa-trophy';
+    if (tx.type === 'game_loss') return 'fa-times-circle';
+    if (tx.type === 'lifafa' || tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') return 'fa-envelope-open-text';
+    if (tx.type === 'gift') return 'fa-gift';
+    if (tx.metadata && tx.metadata.transactionType) {
+        var refType = tx.metadata.transactionType;
+        if (refType === 'referral_bonus_received' || refType === 'referral_welcome_bonus' || refType === 'referral_bonus_force') return 'fa-user-group';
+        if (refType === 'referral_bonus_reversed') return 'fa-rotate-left';
+    }
+    return isCredit(tx, uid) ? 'fa-arrow-down' : 'fa-arrow-up';
+}
+
+async function fetchTransactions() {
+    if (isAccountBlocked) return;
+    var listEl = document.getElementById('txnList');
+    listEl.innerHTML = '<div class="loading-state"><i class="fas fa-bolt"></i><p>Loading Transactions...</p></div>';
+    try {
+        var result = await safeFetch(API_BASE + '/wallet/transactions?limit=500', { headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN } });
+        if (isAccountBlocked) return;
+        if (!result.response || !result.response.ok) throw new Error('Failed to fetch');
+        var txns = result.data.transactions || (result.data.data && result.data.data.transactions) || result.data.data || [];
+        if (!Array.isArray(txns)) txns = [];
+        var uid = state.userId;
+        txns = txns.filter(function(tx) {
+            if (tx.type === 'transfer_send' || tx.type === 'api_send') { var sid = getUserId(tx.sender_id || tx.sender); return sid === uid; }
+            if (tx.type === 'transfer_receive' || tx.type === 'api_receive') { var rid = getUserId(tx.receiver_id || tx.receiver); return rid === uid; }
+            var tuid = getUserId(tx.user_id);
+            if (tuid === uid) return true;
+            var sid2 = getUserId(tx.sender_id || tx.sender);
+            var rid2 = getUserId(tx.receiver_id || tx.receiver);
+            return sid2 === uid || rid2 === uid;
+        });
+        state.allTransactions = txns;
+        applyFilters();
+        updateStats();
+    } catch (error) {
+        if (!isAccountBlocked) { showAlert('Failed To Load Transactions', 'error'); listEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed To Load Transactions</p></div>'; }
+    }
+}
+
+function applyFilters() {
+    if (isAccountBlocked) return;
+    var filtered = state.allTransactions.slice();
+    var uid = state.userId;
+    if (state.filter !== 'all') {
+        filtered = filtered.filter(function(tx){
+            var status = (tx.status || 'success').toLowerCase();
+            if (state.filter === 'credit') return isCredit(tx, uid);
+            if (state.filter === 'debit') return !isCredit(tx, uid);
+            if (state.filter === 'success') return status === 'success';
+            if (state.filter === 'pending') return status === 'pending';
+            if (state.filter === 'failed') return status === 'failed' || status === 'cancelled';
+            return true;
+        });
+    }
+    if (state.searchQuery.trim()) {
+        var q = state.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(function(tx){
+            var id = (tx.tx_id || tx._id || '').toLowerCase();
+            var remark = (tx.remark || tx.description || '').toLowerCase();
+            var name = getDisplayName(tx, uid).toLowerCase();
+            var cp = getCounterparty(tx, uid).toLowerCase();
+            return id.includes(q) || remark.includes(q) || name.includes(q) || cp.includes(q);
+        });
+    }
+    state.filteredTransactions = filtered;
+    renderTransactions();
+    renderSummary();
+}
+function filterTransactions(filter) {
+    if (isAccountBlocked) return;
+    state.filter = filter;
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btn = document.querySelector('.filter-btn[data-filter="' + filter + '"]');
+    if (btn) btn.classList.add('active');
+    applyFilters();
+}
+function handleSearch() { if (isAccountBlocked) return; state.searchQuery = document.getElementById('searchInput').value; applyFilters(); }
+
+function renderTransactions() {
+    if (isAccountBlocked) return;
+    var listEl = document.getElementById('txnList');
+    var txns = state.filteredTransactions;
+    var uid = state.userId;
+    document.getElementById('showingCount').textContent = txns.length;
+    document.getElementById('totalCount').textContent = state.allTransactions.length;
+    if (!txns || txns.length === 0) { listEl.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>' + (state.searchQuery ? 'No Transactions Match Your Search.' : 'No Transactions Found.') + '</p></div>'; return; }
+    var html = '';
+    txns.forEach(function(tx){
+        var isC = isCredit(tx, uid);
+        var displayName = getDisplayName(tx, uid);
+        var status = (tx.status || 'success').toLowerCase();
+        var amount = tx.amount || 0;
+        var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var time = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        var sign = isC ? '+' : '-';
+        var amountClass = isC ? 'credit' : 'debit';
+        var iconClass = isC ? 'credit' : 'debit';
+        var icon = getIconClass(tx, uid);
+        var statusClass = 'success';
+        var statusText = 'Success';
+        if (status === 'pending') { statusClass = 'pending'; statusText = 'Pending'; }
+        else if (status === 'failed') { statusClass = 'failed'; statusText = 'Failed'; }
+        else if (status === 'cancelled') { statusClass = 'cancelled'; statusText = 'Cancelled'; }
+        var subText = '';
+        if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive' || tx.type === 'api' || tx.type === 'api_send' || tx.type === 'api_receive' || tx.type === 'invoice_payment' || tx.type === 'invoice_pay_send' || tx.type === 'invoice_pay_receive') { var cp = getCounterparty(tx, uid); subText = (isC ? 'From: ' : 'To: ') + cp; }
+        else if (tx.remark || tx.description) { subText = (tx.remark || tx.description).substring(0, 45); }
+        var txnId = tx.tx_id || tx._id || 'N/A';
+        html += '<div class="txn-item" onclick="openTransactionDetails(\'' + txnId + '\')"><div class="txn-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div><div class="txn-info"><span class="txn-title">' + displayName + '</span>' + (subText ? '<span class="txn-sub">' + subText + '</span>' : '') + '<span class="txn-id">' + txnId + '</span></div><div class="txn-right"><span class="txn-amount ' + amountClass + '">' + sign + '₹' + amount.toFixed(2) + '</span><span class="txn-status ' + statusClass + '">' + statusText + '</span></div></div>';
+    });
+    listEl.innerHTML = html;
+}
+
+function updateStats() {
+    if (isAccountBlocked) return;
+    var uid = state.userId;
+    var tCr = 0, tDb = 0, tSuccess = 0, tCount = 0;
+    state.allTransactions.forEach(function(tx){
+        tCount++;
+        if ((tx.status || 'success').toLowerCase() === 'success') tSuccess++;
+        if (isCredit(tx, uid)) tCr += tx.amount || 0;
+        else tDb += tx.amount || 0;
+    });
+    document.getElementById('totalCredit').textContent = '₹' + tCr.toFixed(2);
+    document.getElementById('totalDebit').textContent = '₹' + tDb.toFixed(2);
+    document.getElementById('totalSuccess').textContent = tSuccess;
+    document.getElementById('totalTxns').textContent = tCount;
+}
+function renderSummary() {
+    if (isAccountBlocked) return;
+    var uid = state.userId;
+    var txns = state.filteredTransactions;
+    var tCr = 0, tDb = 0, tSuccess = 0;
+    txns.forEach(function(tx){
+        if ((tx.status || 'success').toLowerCase() === 'success') tSuccess++;
+        if (isCredit(tx, uid)) tCr += tx.amount || 0;
+        else tDb += tx.amount || 0;
+    });
+    document.getElementById('summaryCredit').textContent = '₹' + tCr.toFixed(2);
+    document.getElementById('summaryDebit').textContent = '₹' + tDb.toFixed(2);
+    document.getElementById('summaryTotal').textContent = txns.length;
+    document.getElementById('summarySuccess').textContent = tSuccess;
+}
+
+function openTransactionDetails(txnId) {
+    if (isAccountBlocked) return;
+    var tx = state.allTransactions.find(function(t){ return (t.tx_id || t._id) === txnId; });
+    if (!tx) { showAlert('Transaction not found', 'error'); return; }
+    renderTransactionModal(tx);
+    document.getElementById('transactionOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTransactionModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('transactionOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function renderTransactionModal(tx) {
+    var uid = state.userId;
+    var isC = isCredit(tx, uid);
+    var displayName = getDisplayName(tx, uid);
+    var status = (tx.status || 'success').toLowerCase();
+    var amount = tx.amount || 0;
+    var sign = isC ? '+' : '-';
+    var amountClass = isC ? '' : 'debit';
+    var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+    var time = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    var txnId = tx.tx_id || tx._id || 'N/A';
+    var method = getMethod(tx);
+    var category = getCategory(tx);
+    var balanceAfter = getBalanceAfter(tx);
+    var cp = getCounterparty(tx, uid);
+    var cpType = isC ? 'From' : 'To';
+    var note = tx.remark || tx.description || '';
+    if (!note) { if (cp && cp !== 'System') note = (isC ? 'Received from ' : 'Sent to ') + cp; else note = displayName; }
+    var comment = (tx.metadata && tx.metadata.comment) ? tx.metadata.comment : (tx.comment || '');
+    var statusClass = '';
+    var statusText = 'Success';
+    if (status === 'pending') { statusClass = 'pending'; statusText = 'Pending'; }
+    else if (status === 'failed') { statusClass = 'failed'; statusText = 'Failed'; }
+    else if (status === 'cancelled') { statusClass = 'cancelled'; statusText = 'Cancelled'; }
+    var methodIcon = '<i class="fas fa-code"></i>';
+    if (method === 'Deposit') methodIcon = '<i class="fas fa-plus"></i>';
+    else if (method === 'Withdrawal') methodIcon = '<i class="fas fa-arrow-up"></i>';
+    else if (method === 'Admin') methodIcon = '<i class="fas fa-star"></i>';
+    else if (method === 'Game') methodIcon = '<i class="fas fa-gamepad"></i>';
+    else if (method === 'Lifafa') methodIcon = '<i class="fas fa-envelope-open-text"></i>';
+    else if (method === 'Gift') methodIcon = '<i class="fas fa-gift"></i>';
+    else if (method === 'Invoice') methodIcon = '<i class="fas fa-file-invoice"></i>';
+    else if (method === 'Referral') methodIcon = '<i class="fas fa-user-group"></i>';
+    var html = '<h1 class="transaction-main-title">' + displayName + '</h1><div class="transaction-date">' + time + '</div><div class="transaction-amount ' + amountClass + '">' + sign + '₹' + amount.toFixed(2) + '</div><div class="transaction-status ' + statusClass + '">' + statusText + '</div><div class="transaction-info"><div class="transaction-card"><span class="transaction-label">Transaction ID</span><div class="transaction-value mono">' + txnId + '<span class="transaction-copy" onclick="copyToClipboard(\'' + txnId + '\')" title="Copy"><i class="fas fa-copy"></i></span></div></div><div class="transaction-card"><span class="transaction-label">Payment Method</span><div class="transaction-value transaction-method"><span class="transaction-method-icon">' + methodIcon + '</span>' + method + '</div></div><div class="transaction-card"><span class="transaction-label">' + cpType + '</span><div class="transaction-value">' + cp + '</div></div><div class="transaction-card"><span class="transaction-label">Category</span><div class="transaction-value">' + category + '</div></div>' + (balanceAfter !== null ? '<div class="transaction-card"><span class="transaction-label">Net Balance After</span><div class="transaction-value bold">₹' + Number(balanceAfter).toFixed(2) + '</div></div>' : '') + '<div class="transaction-card notes"><span class="transaction-label">Notes</span><div class="transaction-value">' + note + '</div></div>' + (comment ? '<div class="transaction-card comment"><span class="transaction-label">Comment</span><div class="transaction-value">' + comment + '</div></div>' : '') + '</div><div class="transaction-actions"><button class="download-receipt" onclick="downloadReceipt(\'' + txnId + '\')"><i class="fas fa-file-pdf"></i> Download Receipt</button><button class="close-button" onclick="closeTransactionModal()"><span class="close-icon">&times;</span> Close</button></div>';
+    document.getElementById('transactionModalContent').innerHTML = html;
+}
+
+function downloadReceipt(txnId) {
+    var tx = state.allTransactions.find(function(t){ return (t.tx_id || t._id) === txnId; });
+    if (!tx) { showAlert('Transaction not found', 'error'); return; }
+    if (typeof window.jspdf === 'undefined') { showAlert('PDF library loading...', 'warning'); return; }
+    var uid = state.userId;
+    var isC = isCredit(tx, uid);
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    doc.setFillColor(26, 86, 219);
+    doc.rect(0, 0, pageWidth, 22, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('Transaction Receipt', 10, 14);
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(9);
+    var y = 32;
+    var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+    var timeStr = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    function addRow(label, value) { doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120); doc.text(label, 10, y); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30); var lines = doc.splitTextToSize(String(value), 80); doc.text(lines, pageWidth - 10, y, { align: 'right' }); y += 6 * lines.length + 2; }
+    addRow('Transaction ID', tx.tx_id || tx._id || 'N/A');
+    addRow('Title', getDisplayName(tx, uid));
+    addRow('Type', isC ? 'Credit' : 'Debit');
+    addRow('Amount', 'Rs. ' + (tx.amount || 0).toFixed(2));
+    addRow('Method', getMethod(tx));
+    addRow('Category', getCategory(tx));
+    addRow('Status', (tx.status || 'success').toUpperCase());
+    addRow('Date & Time', timeStr);
+    addRow(isC ? 'From' : 'To', getCounterparty(tx, uid));
+    var bal = getBalanceAfter(tx);
+    if (bal !== null) addRow('Net Balance After', 'Rs. ' + Number(bal).toFixed(2));
+    var note = tx.remark || tx.description;
+    if (note) addRow('Note', note);
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Universe Wallet • Secure • Fast', 10, doc.internal.pageSize.getHeight() - 6);
+    doc.save('receipt_' + (tx.tx_id || tx._id) + '.pdf');
+    showAlert('Receipt Downloaded', 'success');
+}
+
+function copyToClipboard(text) {
+    if (isAccountBlocked || !text) return;
+    if (navigator.clipboard) { navigator.clipboard.writeText(text).then(function(){ showAlert('Copied To Clipboard', 'success'); }).catch(function(){ fallbackCopy(text); }); }
+    else { fallbackCopy(text); }
+}
+function fallbackCopy(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); showAlert('Copied To Clipboard', 'success'); } catch (e) { showAlert('Copy failed', 'error'); }
+    document.body.removeChild(textarea);
+}
+
+function exportCSV() {
+    if (isAccountBlocked) return;
+    var txns = state.filteredTransactions;
+    if (!txns || txns.length === 0) { showAlert('No transactions to export', 'warning'); return; }
+    var uid = state.userId;
+    var allTxns = state.allTransactions;
+    var balanceMap = {};
+    var sortedAsc = allTxns.slice().sort(function(a, b) { return new Date(a.tx_time || a.createdAt) - new Date(b.tx_time || b.createdAt); });
+    var runningBalance = 0;
+    sortedAsc.forEach(function(tx) { var isC = isCredit(tx, uid); var amt = tx.amount || 0; if (isC) runningBalance += amt; else runningBalance -= amt; var key = tx.tx_id || tx._id; var storedBalance = getBalanceAfter(tx); balanceMap[key] = (storedBalance !== null) ? storedBalance : runningBalance; });
+    var csvRows = [];
+    csvRows.push(['TXN ID', 'Title', 'Type', 'Amount', 'Method', 'Status', 'Category', 'Net Balance', 'Date', 'Notes'].join(','));
+    txns.forEach(function(tx){
+        var key = tx.tx_id || tx._id;
+        var isC = isCredit(tx, uid);
+        var amount = tx.amount || 0;
+        var dt = new Date(tx.tx_time || tx.createdAt || Date.now());
+        var dtStr = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+        var title = getDisplayName(tx, uid);
+        var type = isC ? 'credit' : 'debit';
+        var method = getMethod(tx);
+        var status = (tx.status || 'success').toLowerCase();
+        var category = getCategory(tx);
+        var netBalance = balanceMap[key] !== undefined ? balanceMap[key] : '';
+        var notes = tx.remark || tx.description || '';
+        if (!notes) { var cp = getCounterparty(tx, uid); if (cp && cp !== 'System') notes = (isC ? 'Received from ' : 'Sent to ') + cp; else notes = title; }
+        csvRows.push([csvEscape(tx.tx_id || tx._id || 'N/A'), csvEscape(title), csvEscape(type), csvEscape(amount.toFixed(2).replace(/\.00$/, '')), csvEscape(method), csvEscape(status), csvEscape(category), csvEscape(typeof netBalance === 'number' ? netBalance.toFixed(2).replace(/\.00$/, '') : netBalance), csvEscape(dtStr), csvEscape(notes)].join(','));
+    });
+    var csv = csvRows.join('\n');
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = 'transactions_' + dateStr + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showAlert('CSV Downloaded', 'success');
+}
+function csvEscape(str) { if (str === null || str === undefined) return '""'; var s = String(str); return '"' + s.replace(/"/g, '""') + '"'; }
+
+function exportPDF() {
+    if (isAccountBlocked) return;
+    if (typeof window.jspdf === 'undefined') { showAlert('PDF library loading, please wait...', 'warning'); return; }
+    var txns = state.filteredTransactions;
+    if (!txns || txns.length === 0) { showAlert('No transactions to export', 'warning'); return; }
+    var uid = state.userId;
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    var totalCredit = 0, totalDebit = 0, totalSuccess = 0, totalCount = txns.length;
+    txns.forEach(function(tx){ if ((tx.status || 'success').toLowerCase() === 'success') totalSuccess++; if (isCredit(tx, uid)) totalCredit += tx.amount || 0; else totalDebit += tx.amount || 0; });
+    var successRate = totalCount > 0 ? Math.round((totalSuccess / totalCount) * 100) : 100;
+    doc.setFillColor(26, 86, 219);
+    doc.rect(0, 0, pageWidth, 26, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('Transaction Statement', 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    var now = new Date();
+    var dateStr = now.toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    doc.text('Generated: ' + dateStr, pageWidth - 14, 16, { align: 'right' });
+    var y = 38;
+    var boxWidth = (pageWidth - 28) / 4;
+    var boxGap = 2;
+    var statY = y;
+    var statHeight = 22;
+    doc.setFillColor(230, 248, 238);
+    doc.roundedRect(14, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Total Credit', 14 + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 160, 110);
+    doc.text('Rs.' + totalCredit.toFixed(2), 14 + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+    var b2X = 14 + boxWidth;
+    doc.setFillColor(255, 232, 234);
+    doc.roundedRect(b2X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Total Debit', b2X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(220, 60, 60);
+    doc.text('Rs.' + totalDebit.toFixed(2), b2X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+    var b3X = 14 + boxWidth * 2;
+    doc.setFillColor(238, 246, 255);
+    doc.roundedRect(b3X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Successful', b3X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(40, 120, 220);
+    doc.text(String(totalSuccess), b3X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+    var b4X = 14 + boxWidth * 3;
+    doc.setFillColor(245, 240, 255);
+    doc.roundedRect(b4X, statY, boxWidth - boxGap, statHeight, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+    doc.text('Success Rate', b4X + (boxWidth - boxGap) / 2, statY + 6, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(120, 60, 200);
+    doc.text(successRate + '%', b4X + (boxWidth - boxGap) / 2, statY + 16, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    y = statY + statHeight + 8;
+    var tableRows = [];
+    txns.forEach(function(tx){ var isC = isCredit(tx, uid); var amount = tx.amount || 0; var title = getDisplayName(tx, uid); if (title.length > 30) title = title.substring(0, 27) + '...'; var txnId = tx.tx_id || tx._id || ''; if (txnId.length > 18) txnId = txnId.substring(0, 18) + '...'; tableRows.push([title, txnId, getMethod(tx), isC ? 'Credit' : 'Debit', (tx.status || 'success').charAt(0).toUpperCase() + (tx.status || 'success').slice(1), (isC ? '+ Rs.' : '- Rs.') + amount.toFixed(2)]); });
+    doc.autoTable({ startY: y, head: [['Title', 'TXN ID', 'Method', 'Type', 'Status', 'Amount']], body: tableRows, theme: 'grid', styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2, overflow: 'linebreak', textColor: [40, 40, 40], lineColor: [220, 225, 232], lineWidth: 0.1 }, headStyles: { fillColor: [240, 245, 250], textColor: [60, 70, 90], fontStyle: 'bold', fontSize: 7.5, halign: 'left' }, alternateRowStyles: { fillColor: [250, 252, 255] }, columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 40, font: 'courier' }, 2: { cellWidth: 26 }, 3: { cellWidth: 18, halign: 'center' }, 4: { cellWidth: 20, halign: 'center' }, 5: { cellWidth: 28, halign: 'right', fontStyle: 'bold' } }, didParseCell: function(data) { if (data.section === 'body') { if (data.column.index === 5) { var val = String(data.cell.raw || ''); if (val.indexOf('+') === 0) data.cell.styles.textColor = [20, 160, 110]; else if (val.indexOf('-') === 0) data.cell.styles.textColor = [220, 60, 60]; } if (data.column.index === 3) { var typeVal = String(data.cell.raw || ''); if (typeVal === 'Credit') data.cell.styles.textColor = [20, 160, 110]; else if (typeVal === 'Debit') data.cell.styles.textColor = [220, 60, 60]; } } }, margin: { left: 14, right: 14 } });
+    var pageCount = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150); doc.text('Universe Wallet • Secure • Fast', 14, pageHeight - 8); doc.text('Page ' + i + ' of ' + pageCount, pageWidth - 14, pageHeight - 8, { align: 'right' }); }
+    var dateFileStr = new Date().toISOString().slice(0, 10);
+    doc.save('statement_' + dateFileStr + '.pdf');
+    showAlert('PDF Downloaded', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', async function(){
+    var token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/'; return; }
+    try { var cachedUser = JSON.parse(localStorage.getItem('user') || '{}'); setAvatar(cachedUser); updateSidebarUser(cachedUser); state.user = cachedUser; } catch(e){ setAvatar({}); }
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) return;
+    fetchTransactions();
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').catch(function(){});
+    });
+}
+</script>
+
+</body>
+</html>
