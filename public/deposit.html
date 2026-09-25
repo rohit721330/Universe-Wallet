@@ -18,7 +18,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <style>
-/* ===== THEME VARIABLES (LIGHT) ===== */
 :root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --input-bg: #f0f2f5; --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --user-avatar-border: #dce6ef; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; }
 body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --input-bg: #101a2c; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --user-avatar-border: #334155; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; }
 
@@ -33,7 +32,6 @@ img { -webkit-user-drag: none; user-drag: none; }
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
 
-/* ==================== PIN GATE ==================== */
 .pin-gate-overlay { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
 body.dark .pin-gate-overlay { background: linear-gradient(135deg, #0d1526 0%, #1a2639 50%, #202d42 100%); }
 .pin-gate-overlay.hidden { display: none; }
@@ -65,7 +63,6 @@ body.dark .pin-key { background: #101a2c; border-color: #2b3a50; color: #edf3ff;
 .pin-key.go.loading i { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* HEADER */
 .header { padding: 16px 14px; display: flex; align-items: center; gap: 10px; background: var(--header-bg); border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
 .menu-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--menu-btn-border); border-radius: 11px; background: var(--menu-btn-bg); color: var(--menu-btn-color); font-size: 18px; cursor: pointer; flex-shrink: 0; }
 .header-title-block { flex: 1; min-width: 0; }
@@ -76,18 +73,15 @@ body.dark .pin-key { background: #101a2c; border-color: #2b3a50; color: #edf3ff;
 .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid var(--user-avatar-border); overflow: hidden; flex-shrink: 0; }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
-/* BALANCE */
 .balance-card { margin: 16px; padding: 18px 20px; background: linear-gradient(135deg, #087be9, #3169ee 55%, #773df0); border-radius: 16px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(38,103,220,.25); }
 .balance-card::after { content: ""; position: absolute; width: 220px; height: 120px; right: -50px; bottom: -65px; border-radius: 50%; background: rgba(255,255,255,.10); }
 .balance-label { font-size: 10px; letter-spacing: 1px; opacity: .85; font-weight: 700; text-transform: uppercase; position: relative; z-index: 2; }
 .balance-amount { margin-top: 6px; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; position: relative; z-index: 2; }
 .balance-badge { margin-top: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: rgba(255,255,255,.18); border-radius: 20px; font-size: 9px; font-weight: 700; position: relative; z-index: 2; }
 
-/* CONTAINER */
 .container { padding: 0 16px 20px; }
 .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 13px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 16px; }
 
-/* STEPPER */
 .stepper { display: flex; position: relative; justify-content: space-between; margin: 2px 5px 24px; }
 .stepper::before { content: ""; position: absolute; left: 15px; right: 15px; top: 15px; height: 2px; background: var(--card-border); z-index: 0; }
 .step { position: relative; z-index: 1; text-align: center; width: 33.33%; }
@@ -98,7 +92,6 @@ body.dark .pin-key { background: #101a2c; border-color: #2b3a50; color: #edf3ff;
 .step.active .step-title { color: #5046df; font-weight: 800; }
 .step.completed .step-title { color: #13ad82; font-weight: 800; }
 
-/* FORM */
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-title); }
 .input-box { position: relative; width: 100%; }
@@ -108,7 +101,6 @@ body.dark .pin-key { background: #101a2c; border-color: #2b3a50; color: #edf3ff;
 .input-box input:focus { border-color: #5046df; box-shadow: 0 0 0 3px rgba(80, 70, 223, .08); }
 .input-box input::placeholder { color: var(--muted-3); font-weight: 500; }
 
-/* QUICK AMOUNTS */
 .amount-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .amount-btn { height: 42px; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; color: var(--text); }
 .amount-btn.selected { color: white; background: #5046df; border-color: #5046df; }
@@ -171,14 +163,10 @@ body.dark .pending-actions .disabled-btn { background: #202d42; }
 .empty-deposits i { font-size: 28px; margin-bottom: 8px; display: block; opacity: 0.35; color: #5046df; }
 .empty-deposits p { font-size: 12px; font-weight: 700; }
 
-/* STEP CONTENT */
 .step-content { display: none; }
 .step-content.active { display: block; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* =========================================================
-   ✅ UNIVERSAL ALERT SYSTEM
-   ========================================================= */
 .otp-alert { display: none; width: calc(100% - 30px); max-width: 472px; min-height: 54px; margin: 19px auto; padding: 9px 14px 9px 21px; align-items: center; gap: 12px; background: #ffffff; border: 2px solid #ffd9d9; border-radius: 17px; box-shadow: 0 9px 22px rgba(40,60,110,.12), 0 3px 9px rgba(255,80,80,.06); font-family: 'Poppins','Inter',Arial,sans-serif; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .3s ease, transform .3s ease; }
 .otp-alert.show { display: flex; opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 .otp-alert .alert-icon { flex-shrink: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #ee4d56; color: #ffffff; font-size: 16px; font-weight: 700; line-height: 1; }
@@ -205,20 +193,6 @@ body.dark .otp-alert.warning .alert-message { color: #fbbf24; }
 body.dark .otp-alert .alert-close { color: #8491a6; }
 body.dark .otp-alert .alert-close:hover { color: #cbd5e1; }
 
-/* FIELD VALIDATION TOOLTIP */
-.field-tooltip { position: absolute; top: -12px; left: 20px; transform: translateY(-100%) scale(0.9); background: #ffffff; border: 2px solid #ff9800; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(255, 152, 0, 0.25); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.34, 1.2, 0.64, 1); pointer-events: none; max-width: 260px; }
-.field-tooltip.show { opacity: 1; visibility: visible; transform: translateY(-100%) scale(1); }
-.field-tooltip::before { content: ''; position: absolute; bottom: -10px; left: 20px; width: 16px; height: 16px; background: #ffffff; border-right: 2px solid #ff9800; border-bottom: 2px solid #ff9800; transform: rotate(45deg); }
-.field-tooltip .tip-icon { width: 32px; height: 32px; background: #ff9800; border-radius: 8px; color: #ffffff; font-size: 20px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.field-tooltip .tip-message { font-size: 12px; font-weight: 700; color: #172033; line-height: 1.35; }
-body.dark .field-tooltip { background: #1a2639; border-color: #ff9800; }
-body.dark .field-tooltip::before { background: #1a2639; border-color: #ff9800; }
-body.dark .field-tooltip .tip-message { color: #edf3ff; }
-.input-error { border-color: #ef5350 !important; box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important; animation: shakeError 0.4s ease; }
-@keyframes shakeError { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-@media (max-width: 480px) { .otp-alert { width: calc(100% - 24px); min-height: 52px; padding: 8px 11px 8px 15px; gap: 10px; border-radius: 15px; margin: 15px auto; } .otp-alert .alert-icon { width: 23px; height: 23px; font-size: 15px; } .otp-alert .alert-message { font-size: 12px; } .otp-alert .alert-close { font-size: 17px; } .field-tooltip { max-width: 220px; padding: 10px 12px; gap: 8px; } .field-tooltip .tip-icon { width: 28px; height: 28px; font-size: 18px; } .field-tooltip .tip-message { font-size: 11px; } }
-
-/* BOTTOM NAV */
 .bottom-nav { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 430px; height: 78px; display: flex; align-items: center; justify-content: space-around; padding: 6px 8px; background: var(--bottom-nav-bg); backdrop-filter: blur(16px); border: 2px solid var(--bottom-nav-border); border-radius: 46px; box-shadow: 0 15px 45px rgba(30, 100, 220, 0.15); z-index: 1000; }
 .bottom-nav .nav-item { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--bottom-nav-color); text-decoration: none; font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .bottom-nav .nav-item.active { color: var(--bottom-nav-active); }
@@ -231,7 +205,6 @@ body.dark .field-tooltip .tip-message { color: #edf3ff; }
 .bottom-nav .nav-item.active::after { content: ""; position: absolute; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: var(--bottom-nav-active); }
 .bottom-nav .scan-item::after { display: none; }
 
-/* SIDEBAR */
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
 .sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: var(--sidebar-bg); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
@@ -262,7 +235,6 @@ body.dark .field-tooltip .tip-message { color: #edf3ff; }
 .sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .sidebar-version { text-align: center; font-size: 9px; color: var(--muted-3); font-weight: 600; margin-top: 10px; }
 
-/* BLOCKED */
 .blocked-overlay { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, var(--blocked-bg-1) 0%, var(--blocked-bg-2) 50%, var(--blocked-bg-3) 100%); display: none; align-items: center; justify-content: center; padding: 20px; }
 .blocked-overlay.active { display: flex; }
 .blocked-card { background: var(--blocked-card-bg); border-radius: 24px; padding: 40px 30px; max-width: 420px; width: 100%; text-align: center; border: 1px solid var(--blocked-card-border); }
@@ -271,6 +243,8 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 .blocked-title { font-size: 24px; font-weight: 900; color: var(--text-title); margin-bottom: 12px; text-transform: uppercase; }
 .blocked-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
 .blocked-btn { width: 100%; padding: 15px; border-radius: 16px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; font-family: inherit; background: #1a56db; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.field-tooltip{position:absolute;top:-12px;left:20px;transform:translateY(-100%) scale(0.9);background:#f5f5f5;border:2px solid #a0a0a0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:1000;opacity:0;visibility:hidden;transition:all .25s cubic-bezier(.34,1.2,.64,1);pointer-events:none;max-width:260px}.field-tooltip.show{opacity:1;visibility:visible;transform:translateY(-100%) scale(1)}.field-tooltip::before{content:'';position:absolute;bottom:-10px;left:20px;width:16px;height:16px;background:#f5f5f5;border-right:2px solid #a0a0a0;border-bottom:2px solid #a0a0a0;transform:rotate(45deg)}.field-tooltip .tip-icon{width:38px;height:38px;background:#ff9800;border-radius:8px;color:#fff;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}.field-tooltip .tip-message{font-size:13px;font-weight:700;color:#172033;line-height:1.35}body.dark .field-tooltip{background:#1a2639;border-color:#5a6b85}body.dark .field-tooltip::before{background:#1a2639;border-color:#5a6b85}body.dark .field-tooltip .tip-message{color:#edf3ff}.input-error{border-color:#ef5350!important;box-shadow:0 0 0 3px rgba(239,83,80,.15)!important;animation:shakeError .4s ease}@keyframes shakeError{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
 @media (max-width: 480px) {
     .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; }
@@ -285,6 +259,13 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
     .balance-amount { font-size: 22px; }
     .pin-dot { width: 48px; height: 48px; font-size: 20px; }
     .pin-key { padding: 14px; font-size: 20px; }
+    .otp-alert { width: calc(100% - 24px); min-height: 52px; padding: 8px 11px 8px 15px; gap: 10px; border-radius: 15px; margin: 15px auto; }
+    .otp-alert .alert-icon { width: 23px; height: 23px; font-size: 15px; }
+    .otp-alert .alert-message { font-size: 12px; }
+    .otp-alert .alert-close { font-size: 17px; }
+    .field-tooltip { max-width: 220px; padding: 11px 13px; gap: 9px; }
+    .field-tooltip .tip-icon { width: 32px; height: 32px; font-size: 22px; }
+    .field-tooltip .tip-message { font-size: 12px; }
 }
 @media (max-width: 380px) {
     .bottom-nav { height: 66px; }
@@ -303,7 +284,6 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
 <body>
 
-<!-- BLOCKED OVERLAY -->
 <div class="blocked-overlay" id="blockedOverlay">
     <div class="blocked-card">
         <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
@@ -313,7 +293,6 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
     </div>
 </div>
 
-<!-- PIN GATE OVERLAY -->
 <div class="pin-gate-overlay" id="pinGateOverlay">
     <div class="pin-card">
         <div class="pin-icon-box"><i class="fa-solid fa-lock" id="pinGateIcon"></i></div>
@@ -346,10 +325,8 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
     </div>
 </div>
 
-<!-- SIDEBAR OVERLAY -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-user">
@@ -389,7 +366,6 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
     </div>
 </aside>
 
-<!-- PAGE CONTENT -->
 <div id="pageContent">
     <div class="app">
         <header class="header">
@@ -431,16 +407,20 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
                     <div class="form-group">
                         <label>Enter Amount (₹)</label>
-                        <div class="input-box">
+                        <div class="input-box" style="position: relative;">
                             <span>₹</span>
-                            <input type="number" id="amount" class="amount-input" value="500" min="1" max="5000" placeholder="Enter amount">
+                            <input type="number" id="amount" class="amount-input" value="" min="1" max="5000" placeholder="Enter amount">
+                            <div class="field-tooltip" id="tip-amount">
+                                <div class="tip-icon">!</div>
+                                <div class="tip-message">Please fill in this field.</div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="amount-buttons">
                         <button class="amount-btn" onclick="setAmount(50,this)">₹50</button>
                         <button class="amount-btn" onclick="setAmount(100,this)">₹100</button>
-                        <button class="amount-btn selected" onclick="setAmount(500,this)">₹500</button>
+                        <button class="amount-btn" onclick="setAmount(500,this)">₹500</button>
                         <button class="amount-btn" onclick="setAmount(1000,this)">₹1,000</button>
                         <button class="amount-btn" onclick="setAmount(2000,this)">₹2,000</button>
                         <button class="amount-btn" onclick="setAmount(5000,this)">₹5,000</button>
@@ -485,7 +465,13 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
                     <div class="form-group">
                         <label>Enter UTR / Transaction ID</label>
                         <div class="utr-help"><i class="fas fa-lightbulb"></i> Find UTR in your bank/UPI app receipt</div>
-                        <input type="text" id="utr" class="utr-input" placeholder="E.g.: 832617429012345">
+                        <div style="position: relative;">
+                            <input type="text" id="utr" class="utr-input" placeholder="E.g.: 832617429012345">
+                            <div class="field-tooltip" id="tip-utr">
+                                <div class="tip-icon">!</div>
+                                <div class="tip-message">Please fill in this field.</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="payment-box">
@@ -522,7 +508,6 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
     </div>
 </div>
 
-<!-- Universal Alert -->
 <div class="otp-alert" id="otpAlert">
     <div class="alert-icon" id="alertIcon">×</div>
     <div class="alert-message" id="alertMessage">Message</div>
@@ -550,9 +535,6 @@ var isReferred = false;
 var referralCompleted = false;
 var bonusAmount = 10;
 
-/* =========================================================
-   UNIVERSAL ALERT SYSTEM
-   ========================================================= */
 var _alertHideTimer = null;
 function showAlert(message, type) {
     type = type || 'error';
@@ -581,6 +563,49 @@ function closeOtpAlert() {
 }
 function showToast(message, type) { showAlert(message, type); }
 
+/* =========================================================
+   FIELD VALIDATION TOOLTIP
+   ========================================================= */
+var _tooltipTimers = {};
+
+function showFieldTooltip(fieldId, customMessage) {
+    var tooltip = document.getElementById('tip-' + fieldId);
+    var input = document.getElementById(fieldId);
+    if (!tooltip || !input) return;
+
+    if (customMessage) {
+        var msgEl = tooltip.querySelector('.tip-message');
+        if (msgEl) msgEl.textContent = customMessage;
+    }
+
+    if (_tooltipTimers[fieldId]) {
+        clearTimeout(_tooltipTimers[fieldId]);
+    }
+
+    input.classList.add('input-error');
+    tooltip.classList.add('show');
+
+    _tooltipTimers[fieldId] = setTimeout(function () {
+        hideFieldTooltip(fieldId);
+    }, 3000);
+}
+
+function hideFieldTooltip(fieldId) {
+    var tooltip = document.getElementById('tip-' + fieldId);
+    var input = document.getElementById(fieldId);
+    if (tooltip) tooltip.classList.remove('show');
+    if (input) input.classList.remove('input-error');
+    if (_tooltipTimers[fieldId]) {
+        clearTimeout(_tooltipTimers[fieldId]);
+        _tooltipTimers[fieldId] = null;
+    }
+}
+
+function hideAllFieldTooltips() {
+    hideFieldTooltip('amount');
+    hideFieldTooltip('utr');
+}
+
 /* THEME */
 function applyTheme(theme) {
     var isDark = (theme === 'dark');
@@ -589,31 +614,34 @@ function applyTheme(theme) {
     var btn = document.getElementById('themeBtn');
     if (btn) btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
+
 function initTheme() {
-    var saved = localStorage.getItem('uwTheme');
-    if (saved === 'dark' || saved === 'light') {
-        applyTheme(saved);
-        collectThemeData(saved);
+    var savedTheme = localStorage.getItem('uwTheme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+        applyTheme(savedTheme);
+        collectThemeData(savedTheme);
     } else {
-        var pd = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var autoTheme = pd ? 'dark' : 'light';
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var autoTheme = prefersDark ? 'dark' : 'light';
         applyTheme(autoTheme);
         collectThemeData(autoTheme);
     }
 }
+
 function toggleTheme() {
-    var nt = document.body.classList.contains('dark') ? 'light' : 'dark';
-    applyTheme(nt);
-    localStorage.setItem('uwTheme', nt);
-    collectThemeData(nt);
+    var isCurrentlyDark = document.body.classList.contains('dark');
+    var newTheme = isCurrentlyDark ? 'light' : 'dark';
+    applyTheme(newTheme);
+    localStorage.setItem('uwTheme', newTheme);
+    collectThemeData(newTheme);
 }
 
 function collectThemeData(theme) {
     try {
-        var data = JSON.parse(localStorage.getItem('uwThemeData') || '{}');
-        data.lastTheme = theme;
-        data.lastChangeAt = new Date().toISOString();
-        localStorage.setItem('uwThemeData', JSON.stringify(data));
+        localStorage.setItem('uwThemeData', JSON.stringify({
+            theme: theme,
+            collectedAt: new Date().toISOString()
+        }));
     } catch (e) {}
 }
 
@@ -878,6 +906,7 @@ function setAmount(amount, button) {
     document.getElementById('amount').value = amount;
     document.querySelectorAll('.amount-btn').forEach(function(b){ b.classList.remove('selected'); });
     if (button) button.classList.add('selected');
+    hideFieldTooltip('amount');
 }
 
 function copyUPI() {
@@ -906,10 +935,17 @@ function generateQR(amount) {
 
 function goToStep(step) {
     if (isAccountBlocked) return;
+    hideAllFieldTooltips();
     if (step === 2 || step === 3) {
         var amt = parseFloat(document.getElementById('amount').value);
-        if (!amt || amt < 1) { showAlert('Minimum Deposit Is ₹1', 'error'); return; }
-        if (amt > 5000) { showAlert('Maximum Deposit Is ₹5,000', 'error'); return; }
+        if (!amt || amt < 1) {
+            showFieldTooltip('amount', 'Please fill in this field.');
+            return;
+        }
+        if (amt > 5000) {
+            showFieldTooltip('amount', 'Maximum deposit is ₹5,000.');
+            return;
+        }
     }
     document.querySelectorAll('.step-content').forEach(function(el){ el.classList.remove('active'); });
     document.getElementById('step' + step).classList.add('active');
@@ -942,9 +978,16 @@ async function loadBalance() {
 
 async function proceedToPay() {
     if (isAccountBlocked) return;
+    hideAllFieldTooltips();
     var amount = parseFloat(document.getElementById('amount').value);
-    if (!amount || amount < 1) { showAlert('Minimum Deposit Is ₹1', 'error'); return; }
-    if (amount > 5000) { showAlert('Maximum Deposit Is ₹5,000', 'error'); return; }
+    if (!amount || amount < 1) {
+        showFieldTooltip('amount', 'Please fill in this field.');
+        return;
+    }
+    if (amount > 5000) {
+        showFieldTooltip('amount', 'Maximum deposit is ₹5,000.');
+        return;
+    }
 
     paymentAmount = amount;
     var btn = document.getElementById('proceedBtn');
@@ -985,9 +1028,16 @@ async function proceedToPay() {
 
 async function submitDeposit() {
     if (isAccountBlocked) return;
+    hideAllFieldTooltips();
     var utr = document.getElementById('utr').value.trim();
-    if (!utr) { showAlert('Please Enter UTR', 'error'); return; }
-    if (utr.length < 12) { showAlert('UTR Minimum 12 Characters', 'error'); return; }
+    if (!utr) {
+        showFieldTooltip('utr', 'Please fill in this field.');
+        return;
+    }
+    if (utr.length < 12) {
+        showFieldTooltip('utr', 'UTR minimum 12 characters.');
+        return;
+    }
     if (!currentDepositId) { showAlert('No Active Deposit', 'error'); return; }
     if (isSubmitting) return;
 
@@ -1074,17 +1124,6 @@ async function loadPendingDeposits() {
     } catch(e) {}
 }
 
-async function cancelDeposit(depositId) {
-    if (isAccountBlocked) return;
-    if (!confirm('Are You Sure You Want To Cancel This Deposit?')) return;
-    try {
-        var response = await fetch('/api/deposit/cancel/' + depositId, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-        var data = await response.json();
-        if (data.success) { showAlert('Deposit Cancelled', 'success'); loadPendingDeposits(); }
-        else showAlert(data.message || 'Cancel Failed', 'error');
-    } catch(e) { showAlert(e.message || 'Network Error', 'error'); }
-}
-
 (function setActiveNav(){
     var path = window.location.pathname;
     document.querySelectorAll('.bottom-nav .nav-item').forEach(function(n){ n.classList.remove('active'); });
@@ -1098,6 +1137,7 @@ async function cancelDeposit(depositId) {
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
     if (!token) return;
     initPinGate();
 });
