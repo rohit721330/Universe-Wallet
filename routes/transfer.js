@@ -7,7 +7,9 @@ const Transaction = require('../models/Transaction');
 const axios = require('axios');
 require('dotenv').config();
 
+// ============================================
 // CONSTANTS
+// ============================================
 const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TG = process.env.ADMIN_TG_ID;
@@ -27,7 +29,6 @@ async function generateUniqueTransactionId() {
             result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        // ✅ Check both transfer_send and transfer_receive
         const existing = await Transaction.findOne({
             tx_id: result,
             type: { $in: ['transfer_send', 'transfer_receive'] }
@@ -75,7 +76,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 // ============================================
-// HELPER: Send Message Via Telegram
+// HELPER: Telegram
 // ============================================
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) return { success: false, error: 'BOT_TOKEN not configured' };
@@ -118,6 +119,34 @@ function getCurrentDateTime() {
 function getClientIp(req) {
     return req.headers['x-forwarded-for'] || req.connection.remoteAddress ||
            req.socket.remoteAddress || req.ip || 'Unknown';
+}
+
+// ============================================
+// HELPER: Retryable Error Detection
+// ============================================
+function isRetryableError(error) {
+    if (!error) return false;
+    if (error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError')) return true;
+    if (error.code === 251 || error.codeName === 'NoSuchTransaction') return true;
+    const msg = error.message || '';
+    return msg.includes('catalog changes') ||
+           msg.includes('WriteConflict') ||
+           msg.includes('TransientTransactionError') ||
+           msg.includes('please retry');
+}
+
+// ============================================
+// HELPER: Validate single transfer row
+// ============================================
+function validateRow(t, index, senderMobile) {
+    const mob = String(t.mobile || '').trim();
+    const amt = parseFloat(t.amount);
+
+    if (!/^\d{10}$/.test(mob)) return `Row ${index + 1}: Invalid mobile number`;
+    if (mob === senderMobile) return `Row ${index + 1}: Cannot send to yourself`;
+    if (isNaN(amt) || amt < 1) return `Row ${index + 1}: Minimum amount is ₹1`;
+    if (amt > 5000) return `Row ${index + 1}: Maximum amount is ₹5,000`;
+    return null;
 }
 
 // ============================================
@@ -181,8 +210,7 @@ router.get('/balance', verifyToken, async (req, res) => {
 });
 
 // ============================================
-// SEND MONEY (TRANSFER) - POST /api/transfer/
-// ✅ With retry logic for catalog changes
+// SINGLE TRANSFER - POST /api/transfer/
 // ============================================
 router.post('/', verifyToken, async (req, res) => {
     const { mobile, amount, note } = req.body;
@@ -258,7 +286,6 @@ router.post('/', verifyToken, async (req, res) => {
                 });
             }
 
-            // Update balances
             freshSender.balance -= transferAmount;
             freshReceiver.balance += transferAmount;
 
@@ -268,7 +295,6 @@ router.post('/', verifyToken, async (req, res) => {
             const senderBalanceAfter = freshSender.balance;
             const receiverBalanceAfter = freshReceiver.balance;
 
-            // ✅ একই tx_id — compound index-এর কারণে conflict হবে না
             const transactionId = await generateUniqueTransactionId();
 
             // Sender Transaction
@@ -328,7 +354,7 @@ router.post('/', verifyToken, async (req, res) => {
             await session.commitTransaction();
             await session.endSession();
 
-            // ==================== TELEGRAM NOTIFICATIONS ====================
+            // ==================== TELEGRAM ====================
             try {
                 if (freshReceiver.telegramId) {
                     const receiverMessage =
@@ -398,16 +424,7 @@ Your payment has been processed successfully. 🎉
             lastError = error;
             console.error(`Transfer attempt ${attempt} failed:`, error.message);
 
-            const isRetryable =
-                error.message.includes('catalog changes') ||
-                error.message.includes('WriteConflict') ||
-                error.message.includes('TransientTransactionError') ||
-                error.message.includes('please retry') ||
-                error.code === 251 ||
-                error.codeName === 'NoSuchTransaction' ||
-                (error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError'));
-
-            if (isRetryable && attempt < MAX_RETRIES) {
+            if (isRetryableError(error) && attempt < MAX_RETRIES) {
                 console.log(`⏳ Retrying transfer (attempt ${attempt + 1}/${MAX_RETRIES})...`);
                 await new Promise(resolve => setTimeout(resolve, 500 * attempt));
                 continue;
@@ -427,9 +444,269 @@ Your payment has been processed successfully. 🎉
 });
 
 // ============================================
-// ✅ GET TRANSFER HISTORY (FIXED)
-// Sender → শুধু transfer_send দেখবে
-// Receiver → শুধু transfer_receive দেখবে
+// BULK TRANSFER - POST /api/transfer/bulk
+// ============================================
+router.post('/bulk', verifyToken, async (req, res) => {
+    const { transfers, note } = req.body;
+    const sender = req.user;
+    const dateTime = getCurrentDateTime();
+    const clientIp = getClientIp(req);
+
+    // ==================== BASIC VALIDATION ====================
+    if (!Array.isArray(transfers) || transfers.length === 0) {
+        return res.status(400).json({ success: false, error: 'No transfers provided' });
+    }
+
+    if (transfers.length > 50) {
+        return res.status(400).json({ success: false, error: 'Maximum 50 recipients allowed at once' });
+    }
+
+    // ==================== PER-ROW VALIDATION + DUPLICATE CHECK ====================
+    const seen = new Set();
+    for (let i = 0; i < transfers.length; i++) {
+        const t = transfers[i];
+        const rowError = validateRow(t, i, sender.mobile);
+        if (rowError) {
+            return res.status(400).json({ success: false, error: rowError });
+        }
+        const mob = String(t.mobile).trim();
+        if (seen.has(mob)) {
+            return res.status(400).json({ success: false, error: `Row ${i + 1}: Duplicate mobile number (${mob})` });
+        }
+        seen.add(mob);
+    }
+
+    const totalAmount = transfers.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+    if (sender.balance < totalAmount) {
+        return res.status(400).json({
+            success: false,
+            error: `Insufficient balance. Required ₹${totalAmount.toFixed(2)}, Available ₹${sender.balance.toFixed(2)}`
+        });
+    }
+
+    // ==================== FETCH ALL RECEIVERS ====================
+    const mobiles = transfers.map(t => String(t.mobile).trim());
+    const receivers = await User.find({ mobile: { $in: mobiles } });
+    const receiverMap = new Map(receivers.map(r => [r.mobile, r]));
+
+    for (let i = 0; i < transfers.length; i++) {
+        const mob = String(transfers[i].mobile).trim();
+        const rcv = receiverMap.get(mob);
+        if (!rcv) {
+            return res.status(404).json({ success: false, error: `Row ${i + 1}: Receiver ${mob} not found` });
+        }
+        if (rcv.isBlocked) {
+            return res.status(403).json({ success: false, error: `Row ${i + 1}: Receiver ${mob} is blocked` });
+        }
+    }
+
+    // ==================== BATCH ID ====================
+    const batchId = 'BULK' + Date.now().toString(36).toUpperCase() +
+                    Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    // ==================== RETRY LOGIC ====================
+    const MAX_RETRIES = 3;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        const session = await mongoose.startSession();
+
+        try {
+            session.startTransaction();
+
+            const freshSender = await User.findById(sender._id).session(session);
+            if (!freshSender) {
+                await session.abortTransaction();
+                await session.endSession();
+                return res.status(404).json({ success: false, error: 'Sender not found' });
+            }
+
+            if (freshSender.balance < totalAmount) {
+                await session.abortTransaction();
+                await session.endSession();
+                return res.status(400).json({
+                    success: false,
+                    error: `Insufficient balance. Required ₹${totalAmount.toFixed(2)}, Available ₹${freshSender.balance.toFixed(2)}`
+                });
+            }
+
+            // Deduct total from sender once
+            freshSender.balance -= totalAmount;
+            await freshSender.save({ session });
+
+            const results = [];
+            const notifications = []; // defer telegram till after commit
+
+            for (let i = 0; i < transfers.length; i++) {
+                const t = transfers[i];
+                const mob = String(t.mobile).trim();
+                const amt = parseFloat(t.amount);
+
+                const freshReceiver = await User.findById(receiverMap.get(mob)._id).session(session);
+                if (!freshReceiver) {
+                    throw new Error(`Receiver ${mob} disappeared mid-transaction`);
+                }
+
+                freshReceiver.balance += amt;
+                await freshReceiver.save({ session });
+
+                const transactionId = await generateUniqueTransactionId();
+                const senderBalAfter = freshSender.balance;
+
+                // Sender-side entry
+                await Transaction.create([{
+                    tx_id: transactionId,
+                    user_id: freshSender._id,
+                    sender_id: freshSender._id,
+                    receiver_id: freshReceiver._id,
+                    amount: amt,
+                    type: 'transfer_send',
+                    status: 'success',
+                    remark: note || 'Bulk Transfer',
+                    description: note || 'Bulk Transfer',
+                    tx_time: new Date(),
+                    metadata: {
+                        senderMobile: freshSender.mobile,
+                        receiverMobile: freshReceiver.mobile,
+                        senderName: freshSender.fullName,
+                        receiverName: freshReceiver.fullName,
+                        ipAddress: clientIp,
+                        timestamp: new Date(),
+                        transactionType: 'payment_sent',
+                        method: 'Bulk Transfer',
+                        category: 'Bulk P2P sent',
+                        batchId: batchId,
+                        balanceAfter: senderBalAfter,
+                        note: note || ''
+                    }
+                }], { session });
+
+                // Receiver-side entry
+                await Transaction.create([{
+                    tx_id: transactionId,
+                    user_id: freshReceiver._id,
+                    sender_id: freshSender._id,
+                    receiver_id: freshReceiver._id,
+                    amount: amt,
+                    type: 'transfer_receive',
+                    status: 'success',
+                    remark: note || 'Bulk Transfer',
+                    description: note || 'Bulk Transfer',
+                    tx_time: new Date(),
+                    metadata: {
+                        senderMobile: freshSender.mobile,
+                        receiverMobile: freshReceiver.mobile,
+                        senderName: freshSender.fullName,
+                        receiverName: freshReceiver.fullName,
+                        ipAddress: clientIp,
+                        timestamp: new Date(),
+                        transactionType: 'payment_received',
+                        method: 'Bulk Transfer',
+                        category: 'Bulk P2P received',
+                        batchId: batchId,
+                        balanceAfter: freshReceiver.balance,
+                        note: note || ''
+                    }
+                }], { session });
+
+                results.push({
+                    mobile: freshReceiver.mobile,
+                    name: freshReceiver.fullName || freshReceiver.username,
+                    amount: amt,
+                    txnId: transactionId,
+                    status: 'success'
+                });
+
+                if (freshReceiver.telegramId) {
+                    notifications.push({
+                        chatId: freshReceiver.telegramId,
+                        message:
+`💰 <b>Money Received</b> 💰
+
+Dear <b>${freshReceiver.fullName || freshReceiver.username}</b>,
+
+You have received a bulk payment. 🎉
+
+<b>💵 Amount:</b> ₹${amt.toFixed(2)}
+<b>👤 From:</b> ${freshSender.fullName || freshSender.username}
+<b>🆔 Transaction ID:</b> ${transactionId}
+<b>📦 Batch ID:</b> ${batchId}
+<b>📝 Note:</b> ${note || 'N/A'}
+<b>📅 Date:</b> ${dateTime}
+
+✅ Amount credited to your wallet.`
+                    });
+                }
+            }
+
+            await session.commitTransaction();
+            await session.endSession();
+
+            // ==================== TELEGRAM (after commit) ====================
+            for (const n of notifications) {
+                notifyUser(n.chatId, n.message).catch(() => {});
+            }
+
+            try {
+                if (freshSender.telegramId) {
+                    await notifyUser(freshSender.telegramId,
+`✅ <b>Bulk Payment Completed</b> ✅
+
+<b>📦 Batch ID:</b> ${batchId}
+<b>👥 Recipients:</b> ${results.length}
+<b>💵 Total Sent:</b> ₹${totalAmount.toFixed(2)}
+<b>💰 New Balance:</b> ₹${freshSender.balance.toFixed(2)}
+<b>📅 Date:</b> ${dateTime}`);
+                }
+                await notifyAdmin(
+`💸 <b>Bulk Transfer Completed</b> 💸
+
+<b>👤 Sender:</b> ${freshSender.fullName} (${freshSender.mobile})
+<b>📦 Batch ID:</b> ${batchId}
+<b>👥 Recipients:</b> ${results.length}
+<b>💵 Total:</b> ₹${totalAmount.toFixed(2)}
+<b>📝 Note:</b> ${note || 'No Comment'}
+<b>📅 Date:</b> ${dateTime}`);
+            } catch (e) { console.error('Bulk notify error:', e.message); }
+
+            return res.json({
+                success: true,
+                message: `Bulk transfer completed! ₹${totalAmount.toFixed(2)} sent to ${results.length} users`,
+                batchId,
+                totalAmount,
+                count: results.length,
+                newBalance: freshSender.balance,
+                results
+            });
+
+        } catch (error) {
+            try { await session.abortTransaction(); } catch (e) {}
+            try { await session.endSession(); } catch (e) {}
+
+            lastError = error;
+            console.error(`Bulk transfer attempt ${attempt} failed:`, error.message);
+
+            if (isRetryableError(error) && attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 500 * attempt));
+                continue;
+            }
+            break;
+        }
+    }
+
+    console.error('Bulk Transfer Error (all retries failed):', lastError ? lastError.message : 'Unknown');
+    return res.status(500).json({
+        success: false,
+        error: lastError && lastError.message.includes('catalog changes')
+            ? 'System is being updated. Please try again in a moment.'
+            : (lastError ? lastError.message : 'Bulk transfer failed. Please try again.')
+    });
+});
+
+// ============================================
+// GET TRANSFER HISTORY
+// Sender → transfer_send | Receiver → transfer_receive
 // ============================================
 router.get('/history', verifyToken, async (req, res) => {
     try {
@@ -437,7 +714,6 @@ router.get('/history', verifyToken, async (req, res) => {
         const { limit = 50, page = 1 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        // ✅ শুধু user-এর নিজের side
         const query = {
             $or: [
                 { sender_id: user._id, type: 'transfer_send' },
