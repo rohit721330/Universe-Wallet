@@ -375,7 +375,7 @@ body { padding-bottom: 100px; }
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-number total" id="dTotalUsers">0</div><div class="stat-label">Total Users</div></div>
             <div class="stat-card"><div class="stat-number completed" id="dVolume">₹0</div><div class="stat-label">Total Volume</div></div>
-            <div class="stat-card"><div class="stat-number pending" id="dPendingDeposits">0</div><div class="stat-label">Pending Deposits</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="dPendingDeposits">0</div><div class="stat-label">Awaiting Approval</div></div>
             <div class="stat-card"><div class="stat-number completed" id="dApprovedDeposits">0</div><div class="stat-label">Approved Deposits</div></div>
             <div class="stat-card"><div class="stat-number pending" id="dPendingWithdrawals">0</div><div class="stat-label">Pending Withdrawals</div></div>
             <div class="stat-card"><div class="stat-number total" id="dTotalWithdrawn">₹0</div><div class="stat-label">Total Withdrawn</div></div>
@@ -399,19 +399,19 @@ body { padding-bottom: 100px; }
 
     <div class="section" id="section-deposits">
         <div class="page-title">Deposits</div>
-        <div class="page-subtitle">Approve or reject deposit requests</div>
+        <div class="page-subtitle">Approve, reject, or cancel deposit requests</div>
         <div class="stats-grid cols-3">
             <div class="stat-card"><div class="stat-number total" id="depTotal">0</div><div class="stat-label">Total</div></div>
-            <div class="stat-card"><div class="stat-number pending" id="depPending">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number pending" id="depPending">0</div><div class="stat-label">Awaiting</div></div>
             <div class="stat-card"><div class="stat-number completed" id="depApproved">0</div><div class="stat-label">Approved</div></div>
         </div>
         <div class="filter-card">
             <div class="filter-tabs">
                 <button class="active" data-dep-filter="all" onclick="filterDeposits('all')">All</button>
-                <button data-dep-filter="pending_approval" onclick="filterDeposits('pending_approval')">Approval</button>
-                <button data-dep-filter="pending" onclick="filterDeposits('pending')">Pending</button>
+                <button data-dep-filter="pending_approval" onclick="filterDeposits('pending_approval')">Awaiting Approval</button>
                 <button data-dep-filter="approved" onclick="filterDeposits('approved')">Approved</button>
                 <button data-dep-filter="rejected" onclick="filterDeposits('rejected')">Rejected</button>
+                <button data-dep-filter="cancelled" onclick="filterDeposits('cancelled')">Cancelled</button>
             </div>
         </div>
         <div id="depositList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
@@ -849,6 +849,27 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
+<div class="modal-overlay" id="cancelDepositModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-ban"></i> Cancel Deposit</h3>
+            <button class="modal-close" onclick="closeModal('cancelDepositModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="cdId">
+        <div class="info-row"><span class="info-label">User</span><span class="info-value" id="cdUser">-</span></div>
+        <div class="info-row"><span class="info-label">Amount</span><span class="info-value" id="cdAmount">-</span></div>
+        <div class="info-row"><span class="info-label">Deposit ID</span><span class="info-value" id="cdDepositId">-</span></div>
+        <div class="form-group" style="margin-top:14px;">
+            <label><i class="fas fa-sticky-note"></i> Reason</label>
+            <input type="text" id="cdReason" placeholder="Reason for cancellation">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('cancelDepositModal')">Back</button>
+            <button class="btn-danger" onclick="confirmCancelDeposit()"><i class="fas fa-ban"></i> Cancel Deposit</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1280,9 +1301,16 @@ function renderDeposits() {
         var typeClass = isAuto ? 'badge-auto' : 'badge-manual';
         var typeIcon = isAuto ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-pen"></i>';
         var status = d.status || 'pending';
-        var canAct = status === 'pending' || status === 'pending_approval';
-        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge ' + typeClass + '">' + typeIcon + ' ' + typeLabel + '</span></div><div class="list-details"><span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span><span><i class="fas fa-hashtag"></i> ' + (d.depositId || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount">₹' + (d.amount || 0).toFixed(2) + '</div><span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span></div></div>';
-        if (canAct) { html += '<div class="list-actions"><button class="btn-approve" onclick="verifyDeposit(\'' + d._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button><button class="btn-reject" onclick="verifyDeposit(\'' + d._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button></div>'; }
+        var canAct = status === 'pending_approval';
+        var canCancel = status === 'pending_approval';
+        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge ' + typeClass + '">' + typeIcon + ' ' + typeLabel + '</span></div><div class="list-details"><span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span><span><i class="fas fa-hashtag"></i> ' + (d.depositId || 'N/A') + '</span>' + (d.transactionRef ? '<span><i class="fas fa-receipt"></i> UTR: ' + d.transactionRef + '</span>' : '') + '</div></div><div class="list-right"><div class="list-amount">₹' + (d.amount || 0).toFixed(2) + '</div><span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span></div></div>';
+        if (canAct) {
+            html += '<div class="list-actions"><button class="btn-approve" onclick="verifyDeposit(\'' + d._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button>';
+            html += '<button class="btn-reject" onclick="verifyDeposit(\'' + d._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button>';
+            html += '<button class="btn-delete" onclick="openCancelDepositModal(\'' + d._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', ' + (d.amount || 0) + ', \'' + (d.depositId || 'N/A') + '\')"><i class="fas fa-ban"></i> Cancel</button></div>';
+        } else if (canCancel) {
+            html += '<div class="list-actions"><button class="btn-delete" onclick="openCancelDepositModal(\'' + d._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', ' + (d.amount || 0) + ', \'' + (d.depositId || 'N/A') + '\')"><i class="fas fa-ban"></i> Cancel</button></div>';
+        }
         html += '</div>';
     });
     container.innerHTML = html;
@@ -1293,6 +1321,24 @@ async function verifyDeposit(id, action) {
     try {
         var data = await apiCall('/verify-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, action: action, adminNotes: notes }) });
         showToast(data.message, 'success');
+        loadDeposits();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+function openCancelDepositModal(id, userName, amount, depositId) {
+    document.getElementById('cdId').value = id;
+    document.getElementById('cdUser').textContent = userName;
+    document.getElementById('cdAmount').textContent = '₹' + parseFloat(amount).toFixed(2);
+    document.getElementById('cdDepositId').textContent = depositId;
+    document.getElementById('cdReason').value = '';
+    document.getElementById('cancelDepositModal').classList.add('active');
+}
+async function confirmCancelDeposit() {
+    var id = document.getElementById('cdId').value;
+    var reason = document.getElementById('cdReason').value.trim() || 'Cancelled by admin';
+    try {
+        var data = await apiCall('/cancel-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, reason: reason }) });
+        showToast(data.message, 'success');
+        closeModal('cancelDepositModal');
         loadDeposits();
     } catch (e) { showToast(e.message, 'error'); }
 }
