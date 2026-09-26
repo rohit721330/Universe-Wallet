@@ -257,7 +257,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
     <div class="sidebar-menu">
         <div class="sidebar-section-label">MAIN</div>
-        <a href="/dashboard" class="sidebar-item active" data-sidebar="dashboard"><span class="sidebar-item-icon"><i class="fas fa-house"></i></span><span class="sidebar-item-text">Dashboard</span></a>
+        <a href="/dashboard" class="sidebar-item" data-sidebar="dashboard"><span class="sidebar-item-icon"><i class="fas fa-house"></i></span><span class="sidebar-item-text">Dashboard</span></a>
         <a href="/transfer" class="sidebar-item" data-sidebar="transfer"><span class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></span><span class="sidebar-item-text">Transfer</span></a>
         <a href="/bulk" class="sidebar-item" data-sidebar="bulk"><span class="sidebar-item-icon"><i class="fas fa-users"></i></span><span class="sidebar-item-text">Bulk</span></a>
         <a href="/qr" class="sidebar-item" data-sidebar="qr"><span class="sidebar-item-icon"><i class="fas fa-qrcode"></i></span><span class="sidebar-item-text">Scan QR</span></a>
@@ -790,6 +790,39 @@ function renderTxns(txns, uid){
     else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="deposit"]');
     else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) active = document.querySelector('.bottom-nav .nav-item[data-nav="transactions"]');
     if (active) active.classList.add('active');
+})();
+
+/* =========================================================
+   ✅ SIDEBAR ACTIVE STATE FIX
+   ========================================================= */
+(function setActiveSidebar() {
+    var path = window.location.pathname;
+    var sidebarItems = document.querySelectorAll('.sidebar-item[data-sidebar]');
+
+    sidebarItems.forEach(function(item) {
+        item.classList.remove('active');
+    });
+
+    var activeKey = null;
+
+    if (path === '/' || path.indexOf('/dashboard') === 0) activeKey = 'dashboard';
+    else if (path.indexOf('/transfer') === 0) activeKey = 'transfer';
+    else if (path.indexOf('/bulk') === 0) activeKey = 'bulk';
+    else if (path.indexOf('/qr') === 0 || path.indexOf('/scan') === 0) activeKey = 'qr';
+    else if (path.indexOf('/deposit') === 0 || path.indexOf('/add') === 0) activeKey = 'deposit';
+    else if (path.indexOf('/withdraw') === 0) activeKey = 'withdraw';
+    else if (path.indexOf('/transactions') === 0 || path.indexOf('/history') === 0) activeKey = 'transactions';
+    else if (path.indexOf('/api') === 0) activeKey = 'api';
+    else if (path.indexOf('/profile') === 0) activeKey = 'profile';
+    else if (path.indexOf('/settings') === 0) activeKey = 'settings';
+    else if (path.indexOf('/support') === 0) activeKey = 'support';
+    else if (path.indexOf('/refer') === 0) activeKey = 'refer';
+    else if (path.indexOf('/gift') === 0) activeKey = 'gift';
+
+    if (activeKey) {
+        var activeItem = document.querySelector('.sidebar-item[data-sidebar="' + activeKey + '"]');
+        if (activeItem) activeItem.classList.add('active');
+    }
 })();
 
 document.addEventListener('DOMContentLoaded', function(){
