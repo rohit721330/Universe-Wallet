@@ -463,6 +463,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 <!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
+<!-- ================= SIDEBAR ================= -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-user">
@@ -475,68 +476,38 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
             </div>
         </div>
         <div class="sidebar-balance-box">
-            <span class="sidebar-balance-label">💰 Balance</span>
+            <span class="sidebar-balance-label"><i class="fas fa-wallet"></i> Balance</span>
             <span class="sidebar-balance-value">₹<span id="sidebarBalance">0.00</span></span>
         </div>
     </div>
 
     <div class="sidebar-menu">
         <div class="sidebar-section-label">MAIN</div>
-        <a href="/dashboard" class="sidebar-item" data-sidebar="dashboard">
-            <div class="sidebar-item-icon"><i class="fas fa-house"></i></div>
-            <span class="sidebar-item-text">Dashboard</span>
-        </a>
-        <a href="/transfer" class="sidebar-item" data-sidebar="transfer">
-            <div class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></div>
-            <span class="sidebar-item-text">Transfer</span>
-        </a>
-        <a href="/bulk" class="sidebar-item active"><div class="sidebar-item-icon"><i class="fas fa-user"></i></div><span class="sidebar-item-text">Bulk</span></a>
-        <a href="/qr" class="sidebar-item" data-sidebar="qr">
-            <div class="sidebar-item-icon"><i class="fas fa-qrcode"></i></div>
-            <span class="sidebar-item-text">Scan QR</span>
-        </a>
-        <a href="/deposit" class="sidebar-item" data-sidebar="deposit">
-            <div class="sidebar-item-icon"><i class="fas fa-circle-plus"></i></div>
-            <span class="sidebar-item-text">Add Funds</span>
-        </a>
-        <a href="/withdraw" class="sidebar-item" data-sidebar="withdraw">
-            <div class="sidebar-item-icon"><i class="fas fa-circle-minus"></i></div>
-            <span class="sidebar-item-text">Withdraw</span>
-        </a>
-        <a href="/transactions" class="sidebar-item" data-sidebar="transactions">
-            <div class="sidebar-item-icon"><i class="fas fa-clock-rotate-left"></i></div>
-            <span class="sidebar-item-text">Transactions</span>
-        </a>
-        <a href="/gift" class="sidebar-item active" data-sidebar="gift">
-            <div class="sidebar-item-icon"><i class="fas fa-gift"></i></div>
-            <span class="sidebar-item-text">Gift Code</span>
-        </a>
+        <a href="/dashboard" class="sidebar-item" data-sidebar="dashboard"><span class="sidebar-item-icon"><i class="fas fa-house"></i></span><span class="sidebar-item-text">Dashboard</span></a>
+        <a href="/transfer" class="sidebar-item" data-sidebar="transfer"><span class="sidebar-item-icon"><i class="fas fa-paper-plane"></i></span><span class="sidebar-item-text">Transfer</span></a>
+        <a href="/bulk" class="sidebar-item" data-sidebar="bulk"><span class="sidebar-item-icon"><i class="fas fa-users"></i></span><span class="sidebar-item-text">Bulk</span></a>
+        <a href="/qr" class="sidebar-item" data-sidebar="qr"><span class="sidebar-item-icon"><i class="fas fa-qrcode"></i></span><span class="sidebar-item-text">Scan QR</span></a>
+        <a href="/deposit" class="sidebar-item" data-sidebar="deposit"><span class="sidebar-item-icon"><i class="fas fa-circle-plus"></i></span><span class="sidebar-item-text">Add Funds</span></a>
+        <a href="/withdraw" class="sidebar-item" data-sidebar="withdraw"><span class="sidebar-item-icon"><i class="fas fa-circle-minus"></i></span><span class="sidebar-item-text">Withdraw</span></a>
+        <a href="/transactions" class="sidebar-item" data-sidebar="transactions"><span class="sidebar-item-icon"><i class="fas fa-clock-rotate-left"></i></span><span class="sidebar-item-text">Transactions</span></a>
+        <a href="/gift" class="sidebar-item active" data-sidebar="gift"><span class="sidebar-item-icon"><I class="fas fa-gift"></i></span><span class="sidebar-item-text">Gift Code</span></a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">API</div>
+        <a href="/api" class="sidebar-item" data-sidebar="api"><span class="sidebar-item-icon"><i class="fas fa-code"></i></span><span class="sidebar-item-text">API Integration</span></a>
         <div class="sidebar-divider"></div>
         <div class="sidebar-section-label">ACCOUNT</div>
-        <a href="/profile" class="sidebar-item" data-sidebar="profile">
-            <div class="sidebar-item-icon"><i class="fas fa-user"></i></div>
-            <span class="sidebar-item-text">My Profile</span>
-        </a>
-        <a href="/api" class="sidebar-item" data-sidebar="api">
-            <div class="sidebar-item-icon"><i class="fas fa-code"></i></div>
-            <span class="sidebar-item-text">API Settings</span>
-        </a>
-        <a href="/tg" class="sidebar-item" data-sidebar="tg">
-            <div class="sidebar-item-icon"><i class="fab fa-telegram"></i></div>
-            <span class="sidebar-item-text">Join Telegram</span>
-        </a>
-        <a href="https://t.me/UNIVERSAL_OFC_SUPPORT" target="_blank" class="sidebar-item" data-sidebar="support">
-            <div class="sidebar-item-icon"><i class="fas fa-headset"></i></div>
-            <span class="sidebar-item-text">Support</span>
-        </a>
+        <a href="/profile" class="sidebar-item" data-sidebar="profile"><span class="sidebar-item-icon"><i class="fas fa-user"></i></span><span class="sidebar-item-text">My Profile</span></a>
+        <a href="/settings" class="sidebar-item" data-sidebar="settings"><span class="sidebar-item-icon"><i class="fas fa-gear"></i></span><span class="sidebar-item-text">Settings</span></a>
+        <a href="/support" class="sidebar-item" data-sidebar="support"><span class="sidebar-item-icon"><i class="fas fa-headset"></i></span><span class="sidebar-item-text">Support</span></a>
+        <a href="/refer" class="sidebar-item" data-sidebar="refer"><span class="sidebar-item-icon"><i class="fas fa-gift"></i></span><span class="sidebar-item-text">Refer & Earn</span><span class="sidebar-item-badge">NEW</span></a>
     </div>
 
     <div class="sidebar-footer">
-        <button class="sidebar-logout" onclick="showLogoutModal()">
+        <button class="sidebar-logout" onclick="logout()">
             <i class="fas fa-right-from-bracket"></i>
             Logout
         </button>
-        <div class="sidebar-version">v2.0.1 • Universe Wallet</div>
+        <div class="sidebar-version">v2.0.1 • Universal Wallet</div>
     </div>
 </aside>
 
