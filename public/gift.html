@@ -29,6 +29,7 @@
     --text-title: #1a2a4a;
     --muted: #5a7a9a;
     --muted-2: #8a9ab0;
+    --muted-3: #a0a9b4;
     --header-bg: rgba(255, 255, 255, 0.92);
     --header-border: #c5d9f0;
     --card-bg: #ffffff;
@@ -88,6 +89,21 @@
     --modal-icon-claim-color: #1a56db;
     --modal-code-color: #1a56db;
     --modal-amount-color: #16a34a;
+
+    /* ✅ Sidebar Variables (Light) */
+    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
+    --sidebar-item-color: #40506a;
+    --sidebar-item-hover-bg: #eef4ff;
+    --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff);
+    --sidebar-item-icon-bg: #f0f5fb;
+    --sidebar-item-icon-color: #5a7a9a;
+    --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent);
+    --sidebar-footer-bg: #fff;
+    --sidebar-footer-border: #eef2f8;
+
+    /* ✅ Loader Variables */
+    --loader-bg: #ffffff;
 }
 
 /* ============================================
@@ -101,6 +117,7 @@ body.dark {
     --text-title: #edf3ff;
     --muted: #8491a6;
     --muted-2: #8491a6;
+    --muted-3: #8491a6;
     --header-bg: rgba(26, 38, 57, 0.96);
     --header-border: #2b3a50;
     --card-bg: #1a2639;
@@ -160,6 +177,21 @@ body.dark {
     --modal-icon-claim-color: #60a5fa;
     --modal-code-color: #60a5fa;
     --modal-amount-color: #10c993;
+
+    /* ✅ Sidebar Variables (Dark) */
+    --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%);
+    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
+    --sidebar-item-color: #b8c5d6;
+    --sidebar-item-hover-bg: #202d42;
+    --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f);
+    --sidebar-item-icon-bg: #202d42;
+    --sidebar-item-icon-color: #8491a6;
+    --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent);
+    --sidebar-footer-bg: #1a2639;
+    --sidebar-footer-border: #2b3a50;
+
+    /* ✅ Loader Variables */
+    --loader-bg: #000000;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -196,6 +228,20 @@ img {
 /* PAGE GATE */
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
+
+/* ============================================
+   ✅ PAGE LOADER (NEW)
+   ============================================ */
+.page-loader { position: fixed; inset: 0; z-index: 99998; display: none; align-items: center; justify-content: center; background: var(--loader-bg); }
+.page-loader.active { display: flex; }
+.loader { position: relative; width: 120px; height: 120px; }
+.outer, .inner { position: absolute; border-radius: 50%; }
+.outer { inset: 0; background: conic-gradient(#38bdf8 0 90deg, transparent 90deg 180deg, #f472b6 180deg 270deg, transparent 270deg); animation: r 1.2s linear infinite reverse; }
+.outer:before, .inner:before { content: ""; position: absolute; border-radius: 50%; background: var(--loader-bg); }
+.outer:before { inset: 12px; }
+.inner { inset: 28px; background: conic-gradient(#4ade80 0 90deg, transparent 90deg 180deg, #facc15 180deg 270deg, transparent 270deg); animation: r 1.2s linear infinite; }
+.inner:before { inset: 10px; }
+@keyframes r { to { transform: rotate(360deg); } }
 
 /* PIN GATE OVERLAY */
 .pin-gate-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--pin-gate-bg); display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: background .3s ease; }
@@ -247,54 +293,40 @@ body.dark .pin-dot.error { background: #3a2025; }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
 /* =========================
-   SIDEBAR
+   SIDEBAR (UPDATED)
 ========================= */
-.sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
-.sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background .3s ease; display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
-body.dark .sidebar { background: linear-gradient(180deg, #1a2639 0%, #172131 100%); }
+.sidebar { position: fixed; top: 0; left: 0; width: 290px; max-width: 85vw; height: 100vh; background: var(--sidebar-bg); z-index: 9999; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 6px 0 40px rgba(10, 40, 100, 0.15); overflow: hidden; }
 .sidebar.open { transform: translateX(0); }
-.sidebar-header { padding: 22px 18px 18px; background: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); color: #fff; position: relative; overflow: hidden; }
+.sidebar-header { padding: 22px 18px 18px; background: var(--sidebar-header); color: #fff; position: relative; overflow: hidden; }
 .sidebar-header::before { content: ''; position: absolute; width: 180px; height: 180px; right: -70px; top: -70px; border-radius: 50%; background: rgba(255,255,255,0.08); }
 .sidebar-header::after { content: ''; position: absolute; width: 120px; height: 120px; right: -30px; bottom: -60px; border-radius: 50%; background: rgba(255,255,255,0.06); }
 .sidebar-user { display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
-.sidebar-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; color: #fff; }
+.sidebar-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
 .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .sidebar-user-info { flex: 1; min-width: 0; }
-.sidebar-user-info h3 { font-size: 14px; font-weight: 800; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
-.sidebar-user-info p { font-size: 10px; opacity: 0.85; font-weight: 600; letter-spacing: 0.3px; color: #fff; }
+.sidebar-user-info h3 { font-size: 14px; font-weight: 800; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-info p { font-size: 10px; opacity: 0.85; font-weight: 600; letter-spacing: 0.3px; }
 .sidebar-balance-box { margin-top: 14px; padding: 10px 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
-.sidebar-balance-label { font-size: 9px; font-weight: 700; opacity: 0.85; letter-spacing: 0.5px; text-transform: uppercase; color: #fff; }
-.sidebar-balance-value { font-size: 16px; font-weight: 900; color: #fff; }
+.sidebar-balance-label { font-size: 9px; font-weight: 700; opacity: 0.85; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-balance-value { font-size: 16px; font-weight: 900; }
 .sidebar-menu { flex: 1; overflow-y: auto; padding: 14px 10px; }
 .sidebar-menu::-webkit-scrollbar { width: 4px; }
 .sidebar-menu::-webkit-scrollbar-thumb { background: #c5d9f0; border-radius: 4px; }
-.sidebar-section-label { font-size: 9px; font-weight: 800; color: #a0a9b4; letter-spacing: 1.2px; text-transform: uppercase; padding: 12px 12px 6px; }
-body.dark .sidebar-section-label { color: #8491a6; }
-.sidebar-item { display: flex; align-items: center; gap: 13px; padding: 12px 14px; margin-bottom: 3px; border-radius: 12px; color: #40506a; text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; position: relative; }
-body.dark .sidebar-item { color: #b8c5d6; }
-.sidebar-item:hover { background: #eef4ff; color: #1264ff; transform: translateX(3px); }
-body.dark .sidebar-item:hover { background: #202d42; color: #60a5fa; }
-.sidebar-item.active { background: linear-gradient(135deg, #e8f1ff, #dbe9ff); color: #1264ff; }
-body.dark .sidebar-item.active { background: linear-gradient(135deg, #172b55, #1e3a5f); color: #60a5fa; }
-.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3.5px; border-radius: 4px; background: #1264ff; }
-body.dark .sidebar-item.active::before { background: #60a5fa; }
-.sidebar-item-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: #f0f5fb; color: #5a7a9a; font-size: 14px; flex-shrink: 0; transition: 0.2s; }
-body.dark .sidebar-item-icon { background: #202d42; color: #8491a6; }
-.sidebar-item:hover .sidebar-item-icon { background: #dbe9ff; color: #1264ff; }
-body.dark .sidebar-item:hover .sidebar-item-icon { background: #172b55; color: #60a5fa; }
-.sidebar-item.active .sidebar-item-icon { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; box-shadow: 0 4px 10px rgba(26, 86, 219, 0.3); }
+.sidebar-section-label { font-size: 9px; font-weight: 800; color: var(--muted-3); letter-spacing: 1.2px; text-transform: uppercase; padding: 12px 12px 6px; }
+.sidebar-item { display: flex; align-items: center; gap: 13px; padding: 12px 14px; margin-bottom: 3px; border-radius: 12px; color: var(--sidebar-item-color); text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.sidebar-item:hover { background: var(--sidebar-item-hover-bg); color: var(--bottom-nav-active); transform: translateX(3px); }
+.sidebar-item.active { background: var(--sidebar-item-active-bg); color: var(--bottom-nav-active); }
+.sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3.5px; border-radius: 4px; background: var(--bottom-nav-active); }
+.sidebar-item-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: var(--sidebar-item-icon-bg); color: var(--sidebar-item-icon-color); font-size: 14px; flex-shrink: 0; }
+.sidebar-item.active .sidebar-item-icon { background: linear-gradient(135deg, #1a56db, #0088ff); color: #fff; }
 .sidebar-item-text { flex: 1; }
-.sidebar-divider { height: 1px; margin: 10px 14px; background: linear-gradient(90deg, transparent, #e0e8f2, transparent); }
-body.dark .sidebar-divider { background: linear-gradient(90deg, transparent, #2b3a50, transparent); }
-.sidebar-footer { padding: 14px 16px 20px; border-top: 1px solid #eef2f8; background: #fff; transition: background .3s ease, border .3s ease; }
-body.dark .sidebar-footer { background: #1a2639; border-color: #2b3a50; }
-.sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; letter-spacing: 0.5px; }
-.sidebar-logout:hover { background: #fecaca; }
-body.dark .sidebar-logout:hover { background: #4a282e; }
-.sidebar-logout:active { transform: scale(0.97); }
-.sidebar-version { text-align: center; font-size: 9px; color: #a0a9b4; font-weight: 600; margin-top: 10px; letter-spacing: 0.5px; }
-body.dark .sidebar-version { color: #8491a6; }
+.sidebar-item-badge { font-size: 8px; font-weight: 800; padding: 3px 7px; border-radius: 20px; background: #ff4444; color: #fff; }
+.sidebar-divider { height: 1px; margin: 10px 14px; background: var(--sidebar-divider); }
+.sidebar-footer { padding: 14px 16px 20px; border-top: 1px solid var(--sidebar-footer-border); background: var(--sidebar-footer-bg); }
+.sidebar-logout { width: 100%; padding: 12px; border: none; border-radius: 12px; background: #fee2e2; color: #dc2626; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.sidebar-version { text-align: center; font-size: 9px; color: var(--muted-3); font-weight: 600; margin-top: 10px; }
 
 /* =========================
    MAIN
@@ -416,6 +448,14 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 </style>
 </head>
 <body>
+
+<!-- ✅ PAGE LOADER (NEW) -->
+<div class="page-loader" id="pageLoader">
+    <div class="loader">
+        <div class="outer"></div>
+        <div class="inner"></div>
+    </div>
+</div>
 
 <!-- BLOCKED OVERLAY -->
 <div class="blocked-overlay" id="blockedOverlay">
@@ -667,13 +707,8 @@ window.handleAvatarError = function(imgEl) {
 };
 
 /* ============================================
-   ✅ THEME SYSTEM — সব পেজে একই রকম কাজ করবে
+   ✅ THEME SYSTEM
    ============================================ */
-
-/**
- * Theme apply করে body + documentElement এ
- * @param {string} theme - 'dark' অথবা 'light'
- */
 function applyTheme(theme) {
     var isDark = (theme === 'dark');
     if (isDark) {
@@ -694,23 +729,16 @@ function applyTheme(theme) {
     }
 }
 
-/**
- * localStorage থেকে theme পড়ে apply করে
- */
 function initTheme() {
     var savedTheme = localStorage.getItem('uwTheme');
     if (savedTheme === 'dark' || savedTheme === 'light') {
         applyTheme(savedTheme);
     } else {
-        // System preference detect
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         applyTheme(prefersDark ? 'dark' : 'light');
     }
 }
 
-/**
- * Toggle করে এবং localStorage এ save করে
- */
 function toggleTheme() {
     var isCurrentlyDark = document.body.classList.contains('dark');
     var newTheme = isCurrentlyDark ? 'light' : 'dark';
@@ -718,14 +746,12 @@ function toggleTheme() {
     localStorage.setItem('uwTheme', newTheme);
 }
 
-// ✅ Cross-tab sync — অন্য tab এ theme change হলে এই tab এ auto update
 window.addEventListener('storage', function(e) {
     if (e.key === 'uwTheme' && e.newValue) {
         applyTheme(e.newValue);
     }
 });
 
-// ✅ System preference change listener
 if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
         if (!localStorage.getItem('uwTheme')) {
@@ -736,6 +762,18 @@ if (window.matchMedia) {
 
 function goToProfile() {
     window.location.href = '/profile';
+}
+
+// ============================================
+// ✅ PAGE LOADER (NEW)
+// ============================================
+function showLoader() {
+    var el = document.getElementById('pageLoader');
+    if (el) el.classList.add('active');
+}
+function hideLoader() {
+    var el = document.getElementById('pageLoader');
+    if (el) el.classList.remove('active');
 }
 
 // ============================================
@@ -796,6 +834,7 @@ function showBlockedOverlay(title, message) {
     document.getElementById('blockedOverlay').classList.add('active');
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
+    hideLoader(); // Hide loader if blocked
 }
 
 // ============================================
@@ -1148,6 +1187,7 @@ async function callGateSetPin(pin) {
             showToast('PIN Set Successfully!', 'success');
             setTimeout(function(){
                 hidePinGate();
+                showLoader(); // Show loader before page ready
                 onPageReady();
             }, 500);
         } else {
@@ -1180,6 +1220,7 @@ async function callGateVerifyPin(pin) {
             showToast('PIN Verified!', 'success');
             setTimeout(function(){
                 hidePinGate();
+                showLoader(); // Show loader before page ready
                 onPageReady();
             }, 400);
         } else {
@@ -1198,6 +1239,7 @@ async function callGateVerifyPin(pin) {
 async function initPinGate() {
     if (sessionStorage.getItem('pin_verified') === 'true') {
         hidePinGate();
+        showLoader(); // Show loader
         onPageReady();
         return;
     }
@@ -1234,6 +1276,7 @@ async function initPinGate() {
 // PAGE READY
 // ============================================
 async function onPageReady() {
+    // Loader already shown from initPinGate or pin verification
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         updateSidebarProfile(cachedUser);
@@ -1242,6 +1285,9 @@ async function onPageReady() {
 
     await refreshWalletBalance();
     console.log('✅ Gift Code System Loaded');
+    
+    // Hide loader after everything is ready
+    hideLoader();
 }
 
 // ============================================
@@ -1508,10 +1554,10 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ============================================
-// ✅ INIT — DOMContentLoaded এ theme + app চালু
+// ✅ INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
-    // ✅ STEP 1: Theme apply করুন (সবার আগে)
+    // ✅ STEP 1: Theme apply করুন
     initTheme();
 
     // ✅ STEP 2: Check blocked/deleted status
