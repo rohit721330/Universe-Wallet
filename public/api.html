@@ -988,6 +988,9 @@ var PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
 var PIN_API_URL = '/api/pin';
 var AUTH_TOKEN = localStorage.getItem('token');
 
+// ✅ ডিফল্ট লোডিং সময় (milliseconds)
+var MIN_LOADER_TIME = 2500; // 2.5 সেকেন্ড
+
 var apiKey = '';
 var isApiActive = true;
 var isAccountBlocked = false;
@@ -1044,13 +1047,37 @@ if (window.matchMedia) {
 }
 
 // ============================================
-// ✅ PAGE LOADER
+// ✅ PAGE LOADER — ন্যূনতম 2.5 সেকেন্ড দেখাবে
 // ============================================
+var loaderStartTime = 0;
+
 function showLoader() {
     var el = document.getElementById('pageLoader');
-    if (el) el.classList.add('active');
+    if (el) {
+        el.classList.add('active');
+        loaderStartTime = Date.now();
+    }
 }
+
 function hideLoader() {
+    var el = document.getElementById('pageLoader');
+    if (!el) return;
+
+    // ✅ বাকি সময় হিসাব করুন
+    var elapsed = Date.now() - loaderStartTime;
+    var remaining = Math.max(0, MIN_LOADER_TIME - elapsed);
+
+    if (remaining > 0) {
+        setTimeout(function() {
+            el.classList.remove('active');
+        }, remaining);
+    } else {
+        el.classList.remove('active');
+    }
+}
+
+// লোডার সম্পূর্ণ force hide (blocked/logout এর জন্য)
+function forceHideLoader() {
     var el = document.getElementById('pageLoader');
     if (el) el.classList.remove('active');
 }
@@ -1205,7 +1232,7 @@ function showBlockedOverlay(title, message) {
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
     closeSidebar();
-    hideLoader();
+    forceHideLoader();
 }
 function setAvatar(user) {
     var avatarEl = document.getElementById('userAvatar');
@@ -1310,7 +1337,6 @@ async function callGateSetPin(pin) {
             setTimeout(function(){
                 hidePinGate();
                 showLoader();
-                // ✅ PIN সফল হলে পুরো পেজ রিলোডের মতো সব ডেটা লোড হবে
                 onPageReady();
             }, 500);
         } else {
@@ -1340,7 +1366,6 @@ async function callGateVerifyPin(pin) {
             setTimeout(function(){
                 hidePinGate();
                 showLoader();
-                // ✅ PIN সফল হলে পুরো পেজ রিলোডের মতো সব ডেটা লোড হবে
                 onPageReady();
             }, 400);
         } else {
@@ -1354,7 +1379,7 @@ async function callGateVerifyPin(pin) {
     }
 }
 async function initPinGate() {
-    // ✅ যদি PIN আগে থেকেই verify করা থাকে — লোডার তখনও active আছে, শুধু PIN হাইড করে onPageReady কল করব
+    // ✅ PIN verified থাকলে — লোডার তখনও active, onPageReady কল করব
     if (sessionStorage.getItem('pin_verified') === 'true') {
         hidePinGate();
         onPageReady();
@@ -1362,7 +1387,7 @@ async function initPinGate() {
     }
 
     // ✅ PIN verify করা নেই — লোডার হাইড করে PIN গেট দেখান
-    hideLoader();
+    forceHideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
 
@@ -1422,7 +1447,7 @@ function logout() {
 }
 
 // ============================================
-// ✅ PAGE READY (সব ডেটা লোড)
+// ✅ PAGE READY — সব ডেটা লোড
 // ============================================
 async function onPageReady() {
     // ✅ STEP 1: Cache থেকে sidebar + avatar আপডেট
@@ -1435,9 +1460,9 @@ async function onPageReady() {
         }
     } catch(e){ setAvatar({}); updateSidebarUser({}); }
 
-    // ✅ STEP 2: Fresh user verify + balance
+    // ✅ STEP 2: Fresh user verify
     var isUserValid = await verifyUserState();
-    if (!isUserValid) { hideLoader(); return; }
+    if (!isUserValid) { forceHideLoader(); return; }
 
     // ✅ STEP 3: সমস্ত ডেটা একসাথে লোড (parallel)
     await Promise.all([
@@ -1446,7 +1471,8 @@ async function onPageReady() {
         loadApiKeyFromDatabase()
     ]);
 
-    // ✅ STEP 4: সব ডেটা লোড শেষ — লোডার হাইড করুন
+    // ✅ STEP 4: hideLoader — যেটি বাকি সময় হিসাব করে লোডার হাইড করবে
+    // (নূন্যতম 2.5 সেকেন্ড পূর্ণ হওয়ার পরে)
     hideLoader();
 }
 
@@ -1988,19 +2014,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (!AUTH_TOKEN) return;
 
-    // STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background)
+    // STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background, 2.5 সেকেন্ড)
     showLoader();
 
-    // STEP 3: User state verify (blocked/deleted check) — লোডার দেখানোর সময়
+    // STEP 3: User state verify (blocked/deleted check)
     var isUserValid = await verifyUserState();
     if (!isUserValid) {
-        hideLoader();
+        forceHideLoader();
         return;
     }
 
-    // STEP 4: PIN gate চেক (সিদ্ধান্ত নেবে লোডার হাইড করবে কি না)
-    // - PIN verified থাকলে → লোডার তখনও থাকবে, onPageReady() কল হবে
-    // - PIN verified না থাকলে → লোডার হাইড, PIN gate দেখাবে
+    // STEP 4: PIN gate চেক
     await initPinGate();
 });
 
