@@ -72,6 +72,20 @@ img { -webkit-user-drag: none; user-drag: none; }
 .overview h1 span { color: #b8232f; }
 .puja-banner { margin-top: 10px; padding: 9px 14px; border-radius: 14px; background: linear-gradient(135deg, #fff1da, #ffe3c2); border: 1px solid #f4c876; display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700; color: #8a3d00; }
 body.dark .puja-banner { background: linear-gradient(135deg, #3a2a0f, #2b1a08); border-color: #5a3d10; color: #ffcf70; }
+.diya-row { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.diya-svg { width: 22px; height: 27px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.22)); flex-shrink: 0; }
+.diya-row .diya-svg:nth-child(2) { width: 30px; height: 36px; }
+.diya-svg .flame { transform-origin: 50% 100%; animation: diyaFlicker 1.3s ease-in-out infinite; }
+.diya-row .diya-svg:nth-child(1) .flame { animation-delay: .15s; }
+.diya-row .diya-svg:nth-child(3) .flame { animation-delay: .35s; }
+@keyframes diyaFlicker { 0%,100% { transform: scale(1,1) rotate(0deg); } 30% { transform: scale(1.07,.93) rotate(-3deg); } 60% { transform: scale(.93,1.07) rotate(3deg); } }
+.puja-countdown { margin: 14px 0 2px; padding: 11px 10px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,215,0,.22); }
+.puja-countdown-label { font-size: 8.5px; letter-spacing: .8px; text-align: center; opacity: .9; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.puja-countdown-label .diya-svg { width: 13px; height: 16px; }
+.puja-countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.puja-countdown-unit { text-align: center; }
+.puja-countdown-unit strong { display: block; font-size: 17px; font-weight: 900; }
+.puja-countdown-unit small { display: block; font-size: 7px; opacity: .78; letter-spacing: .4px; text-transform: uppercase; margin-top: 2px; }
 .balance-card { position: relative; min-height: 240px; padding: 24px 22px; overflow: hidden; border-radius: 18px; color: #fff; background: radial-gradient(circle at 90% 20%, rgba(255,205,80,.45), transparent 35%), linear-gradient(135deg, #8b0000, #d4145a); box-shadow: var(--balance-card-shadow); }
 .balance-card::after { content: ""; position: absolute; width: 240px; height: 140px; right: -50px; bottom: -70px; border-radius: 50%; background: rgba(255,215,0,.12); }
 .balance-content { position: relative; z-index: 2; }
@@ -305,17 +319,31 @@ body.dark .blocked-icon { background: #3a1210; border-color: #6b1f1f; }
     <section class="overview">
         <small id="overviewTapArea"><i class="fas fa-gauge-high"></i> OVERVIEW</small>
         <h1>Your <span>Dashboard</span></h1>
-        <div class="puja-banner">🪔 শুভ দুর্গাপূজা — উৎসবের শুভেচ্ছা!</div>
+        <div class="puja-banner">🪔 Happy Durga Puja — Festive Wishes To You!</div>
     </section>
 
     <section class="balance-card">
         <div class="balance-content">
+            <div class="diya-row">
+                <svg class="diya-svg" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/><path d="M14.4 15c-1-1.6-.6-3.3.6-4.6-.1 1 .4 1.7.9 2.5.3-.6.2-1.4 0-1.9 1 .9 1.4 2.3.5 3.5-.5.7-1.4.9-2 0.5z" fill="#ffd54d"/></g></svg>
+                <svg class="diya-svg" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/><path d="M14.4 15c-1-1.6-.6-3.3.6-4.6-.1 1 .4 1.7.9 2.5.3-.6.2-1.4 0-1.9 1 .9 1.4 2.3.5 3.5-.5.7-1.4.9-2 0.5z" fill="#ffd54d"/></g></svg>
+                <svg class="diya-svg" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/><path d="M14.4 15c-1-1.6-.6-3.3.6-4.6-.1 1 .4 1.7.9 2.5.3-.6.2-1.4 0-1.9 1 .9 1.4 2.3.5 3.5-.5.7-1.4.9-2 0.5z" fill="#ffd54d"/></g></svg>
+            </div>
             <div class="balance-top">
                 <div class="balance-label">AVAILABLE BALANCE</div>
                 <div class="premium"><i class="fas fa-crown"></i> Premium</div>
             </div>
             <div class="balance">₹<span id="balance">0.00</span></div>
             <div class="balance-line"></div>
+            <div class="puja-countdown">
+                <div class="puja-countdown-label"><svg class="diya-svg" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/><path d="M14.4 15c-1-1.6-.6-3.3.6-4.6-.1 1 .4 1.7.9 2.5.3-.6.2-1.4 0-1.9 1 .9 1.4 2.3.5 3.5-.5.7-1.4.9-2 0.5z" fill="#ffd54d"/></g></svg> Time Left For Maha Shashthi</div>
+                <div class="puja-countdown-grid">
+                    <div class="puja-countdown-unit"><strong id="pcDays">--</strong><small>Days</small></div>
+                    <div class="puja-countdown-unit"><strong id="pcHours">--</strong><small>Hours</small></div>
+                    <div class="puja-countdown-unit"><strong id="pcMins">--</strong><small>Mins</small></div>
+                    <div class="puja-countdown-unit"><strong id="pcSecs">--</strong><small>Secs</small></div>
+                </div>
+            </div>
             <div class="info-grid">
                 <div class="info-box"><small>PHONE</small><span id="infoMobile"><i class="fas fa-phone"></i> ---</span></div>
                 <div class="info-box"><small>EMAIL</small><span id="infoEmail"><i class="fas fa-envelope"></i> ---</span></div>
@@ -411,6 +439,37 @@ function closeOtpAlert() {
     clearTimeout(_alertHideTimer);
 }
 function showToast(message, type) { showAlert(message, type); }
+
+/* =========================================================
+   ✅ DURGA PUJA COUNTDOWN (Maha Shashthi — 17 Oct 2026, IST)
+   ========================================================= */
+function initPujaCountdown() {
+    var target = new Date('2026-10-17T00:00:00+05:30').getTime();
+    var dEl = document.getElementById('pcDays'), hEl = document.getElementById('pcHours'),
+        mEl = document.getElementById('pcMins'), sEl = document.getElementById('pcSecs'),
+        labelEl = document.querySelector('.puja-countdown-label');
+    if (!dEl) return;
+    function tick() {
+        var now = Date.now();
+        var diff = target - now;
+        if (diff <= 0) {
+            dEl.textContent = '00'; hEl.textContent = '00'; mEl.textContent = '00'; sEl.textContent = '00';
+            if (labelEl) labelEl.lastChild.textContent = ' Happy Durga Puja! 🙏';
+            clearInterval(timer);
+            return;
+        }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        dEl.textContent = String(d).padStart(2, '0');
+        hEl.textContent = String(h).padStart(2, '0');
+        mEl.textContent = String(m).padStart(2, '0');
+        sEl.textContent = String(s).padStart(2, '0');
+    }
+    tick();
+    var timer = setInterval(tick, 1000);
+}
 
 function initAdminAccess() {
     var tapArea = document.getElementById('overviewTapArea');
@@ -823,6 +882,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var token = localStorage.getItem('token');
     if (!token) { window.location.href = '/'; return; }
     initAdminAccess();
+    initPujaCountdown();
     try { var cachedUser = JSON.parse(localStorage.getItem('user') || '{}'); setAvatar(cachedUser); updateSidebarUser(cachedUser); } catch(e) { setAvatar({}); updateSidebarUser({}); }
     loadDashboard();
 });
