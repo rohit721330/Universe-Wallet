@@ -20,10 +20,188 @@
 
 <style>
 /* ===== THEME VARIABLES (LIGHT) ===== */
-:root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --input-bg: #f0f2f5; --input-focus-bg: #fff; --input-shadow: #cfe1ff; --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --icon-btn-bg: #fff; --icon-btn-border: #e5eaf0; --user-avatar-border: #dce6ef; --tab-bg: #f6f7f9; --tab-border: #e0e5eb; --tab-color: #667181; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #f6f7f9; --amount-btn-border: #e0e5eb; --amount-btn-color: #667181; --amount-btn-hover-bg: #e5efff; --summary-bg: #fafbfd; --summary-border: #dfe5eb; --summary-row-border: #edf0f4; --summary-row-color: #687587; --summary-strong: #263247; --section-bg: #fff; --section-header-border: #edf0f4; --payment-border: #edf0f4; --feature-border: #edf0f3; --feature-strong: #263044; --feature-small: #a0a9b4; --success-bg: #e7f8ef; --success-color: #18a473; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --modal-bg: #ffffff; --modal-detail-color: #172033; --modal-label-color: #8a9ab0; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #ffffff; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; }
+:root {
+    --bg: #f3f7fc;
+    --bg-pattern-1: rgba(255,255,255,.72);
+    --bg-pattern-2: rgba(244,248,253,.92);
+    --grid-color: rgba(80,120,170,.07);
+    --text: #172033;
+    --text-title: #172033;
+    --muted: #667181;
+    --muted-2: #9aa7b7;
+    --muted-3: #a0a9b4;
+    --header-bg: rgba(255,255,255,.96);
+    --header-border: #e8edf4;
+    --card-bg: rgba(255,255,255,.96);
+    --card-border: #e0e5eb;
+    --card-shadow: 0 5px 18px rgba(30,60,100,.08);
+    --input-bg: #f0f2f5;
+    --input-focus-bg: #fff;
+    --input-shadow: #cfe1ff;
+    --menu-btn-bg: #fff;
+    --menu-btn-border: #e4e9ef;
+    --menu-btn-color: #607080;
+    --theme-btn-bg: #fff;
+    --theme-btn-border: #e5eaf0;
+    --theme-btn-color: #718096;
+    --icon-btn-bg: #fff;
+    --icon-btn-border: #e5eaf0;
+    --user-avatar-border: #dce6ef;
+    --tab-bg: #f6f7f9;
+    --tab-border: #e0e5eb;
+    --tab-color: #667181;
+    --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff);
+    --amount-btn-bg: #f6f7f9;
+    --amount-btn-border: #e0e5eb;
+    --amount-btn-color: #667181;
+    --amount-btn-hover-bg: #e5efff;
+    --summary-bg: #fafbfd;
+    --summary-border: #dfe5eb;
+    --summary-row-border: #edf0f4;
+    --summary-row-color: #687587;
+    --summary-strong: #263247;
+    --section-bg: #fff;
+    --section-header-border: #edf0f4;
+    --payment-border: #edf0f4;
+    --feature-border: #edf0f3;
+    --feature-strong: #263044;
+    --feature-small: #a0a9b4;
+    --success-bg: #e7f8ef;
+    --success-color: #18a473;
+    --bottom-nav-bg: rgba(255, 255, 255, 0.98);
+    --bottom-nav-border: #dce9ff;
+    --bottom-nav-color: #8a9bb8;
+    --bottom-nav-active: #1264ff;
+    --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff);
+    --toast-bg-info: #dbeafe;
+    --toast-color-info: #1a56db;
+    --toast-bg-success: #dcfce7;
+    --toast-color-success: #16a34a;
+    --toast-bg-error: #fee2e2;
+    --toast-color-error: #dc2626;
+    --toast-bg-warning: #fef3c7;
+    --toast-color-warning: #d97706;
+
+    /* ✅ Sidebar Variables (Light) */
+    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
+    --sidebar-item-color: #40506a;
+    --sidebar-item-hover-bg: #eef4ff;
+    --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff);
+    --sidebar-item-icon-bg: #f0f5fb;
+    --sidebar-item-icon-color: #5a7a9a;
+    --sidebar-item-icon-hover-bg: #dbe9ff;
+    --sidebar-item-icon-hover-color: #1264ff;
+    --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent);
+    --sidebar-footer-bg: #fff;
+    --sidebar-footer-border: #eef2f8;
+
+    /* ✅ Modal Variables */
+    --modal-bg: #ffffff;
+    --modal-detail-color: #172033;
+    --modal-label-color: #8a9ab0;
+    --modal-header: linear-gradient(135deg, #1a56db, #0088ff);
+    --modal-footer: #ffffff;
+
+    /* ✅ Blocked Overlay */
+    --blocked-bg-1: #ffffff;
+    --blocked-bg-2: #e8f0fe;
+    --blocked-bg-3: #d4e4f7;
+    --blocked-card-bg: #ffffff;
+    --blocked-card-border: #c5d9f0;
+}
 
 /* ===== THEME VARIABLES (DARK) ===== */
-body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --input-bg: #101a2c; --input-focus-bg: #0d1526; --input-shadow: #1e3a5f; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --icon-btn-bg: #202d42; --icon-btn-border: #2b3a50; --user-avatar-border: #334155; --tab-bg: #202d42; --tab-border: #2b3a50; --tab-color: #8491a6; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #202d42; --amount-btn-border: #2b3a50; --amount-btn-color: #8491a6; --amount-btn-hover-bg: #172b55; --summary-bg: #111b2a; --summary-border: #2b3a50; --summary-row-border: #2b3a50; --summary-row-color: #8491a6; --summary-strong: #edf3ff; --section-bg: #1a2639; --section-header-border: #2b3a50; --payment-border: #2b3a50; --feature-border: #2b3a50; --feature-strong: #edf3ff; --feature-small: #8491a6; --success-bg: #12352f; --success-color: #10c993; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --modal-bg: #1a2639; --modal-detail-color: #edf3ff; --modal-label-color: #8491a6; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #1a2639; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; }
+body.dark {
+    --bg: #0d1526;
+    --bg-pattern-1: rgba(20, 30, 50, 0.7);
+    --bg-pattern-2: rgba(13, 21, 38, 0.92);
+    --grid-color: rgba(90, 120, 170, 0.05);
+    --text: #edf3ff;
+    --text-title: #edf3ff;
+    --muted: #8491a6;
+    --muted-2: #8e9caf;
+    --muted-3: #8491a6;
+    --header-bg: rgba(26, 38, 57, 0.96);
+    --header-border: #2b3a50;
+    --card-bg: rgba(26, 38, 57, 0.96);
+    --card-border: #2b3a50;
+    --card-shadow: 0 5px 18px rgba(0,0,0,.3);
+    --input-bg: #101a2c;
+    --input-focus-bg: #0d1526;
+    --input-shadow: #1e3a5f;
+    --menu-btn-bg: #202d42;
+    --menu-btn-border: #2b3a50;
+    --menu-btn-color: #b8c5d6;
+    --theme-btn-bg: #202d42;
+    --theme-btn-border: #2b3a50;
+    --theme-btn-color: #cbd5e1;
+    --icon-btn-bg: #202d42;
+    --icon-btn-border: #2b3a50;
+    --user-avatar-border: #334155;
+    --tab-bg: #202d42;
+    --tab-border: #2b3a50;
+    --tab-color: #8491a6;
+    --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff);
+    --amount-btn-bg: #202d42;
+    --amount-btn-border: #2b3a50;
+    --amount-btn-color: #8491a6;
+    --amount-btn-hover-bg: #172b55;
+    --summary-bg: #111b2a;
+    --summary-border: #2b3a50;
+    --summary-row-border: #2b3a50;
+    --summary-row-color: #8491a6;
+    --summary-strong: #edf3ff;
+    --section-bg: #1a2639;
+    --section-header-border: #2b3a50;
+    --payment-border: #2b3a50;
+    --feature-border: #2b3a50;
+    --feature-strong: #edf3ff;
+    --feature-small: #8491a6;
+    --success-bg: #12352f;
+    --success-color: #10c993;
+    --bottom-nav-bg: rgba(26, 38, 57, 0.98);
+    --bottom-nav-border: #2b3a50;
+    --bottom-nav-color: #8491a6;
+    --bottom-nav-active: #60a5fa;
+    --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42);
+    --toast-bg-info: #172b55;
+    --toast-color-info: #60a5fa;
+    --toast-bg-success: #12352f;
+    --toast-color-success: #10c993;
+    --toast-bg-error: #3a2025;
+    --toast-color-error: #f87171;
+    --toast-bg-warning: #39331d;
+    --toast-color-warning: #fbbf24;
+
+    /* ✅ Sidebar Variables (Dark) */
+    --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%);
+    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
+    --sidebar-item-color: #b8c5d6;
+    --sidebar-item-hover-bg: #202d42;
+    --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f);
+    --sidebar-item-icon-bg: #202d42;
+    --sidebar-item-icon-color: #8491a6;
+    --sidebar-item-icon-hover-bg: #172b55;
+    --sidebar-item-icon-hover-color: #60a5fa;
+    --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent);
+    --sidebar-footer-bg: #1a2639;
+    --sidebar-footer-border: #2b3a50;
+
+    /* ✅ Modal Variables */
+    --modal-bg: #1a2639;
+    --modal-detail-color: #edf3ff;
+    --modal-label-color: #8491a6;
+    --modal-header: linear-gradient(135deg, #1a56db, #0088ff);
+    --modal-footer: #1a2639;
+
+    /* ✅ Blocked Overlay */
+    --blocked-bg-1: #0d1526;
+    --blocked-bg-2: #1a2639;
+    --blocked-bg-3: #202d42;
+    --blocked-card-bg: #1a2639;
+    --blocked-card-border: #2b3a50;
+}
 
 /* ===== RESET ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -47,6 +225,49 @@ img { -webkit-user-drag: none; user-drag: none; }
 
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
+
+/* ==================== PAGE LOADER (Blurred Background) ==================== */
+.page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: background 0.3s ease;
+}
+body.dark .page-loader {
+    background: rgba(13, 21, 38, 0.35);
+}
+.page-loader.active { display: flex; }
+
+.loader { position: relative; width: 120px; height: 120px; }
+.outer, .inner { position: absolute; border-radius: 50%; }
+
+.outer {
+    inset: 0;
+    background: conic-gradient(#38bdf8 0 90deg, transparent 90deg 180deg, #f472b6 180deg 270deg, transparent 270deg);
+    animation: r 1.2s linear infinite reverse;
+}
+.outer:before, .inner:before {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: transparent;
+}
+.outer:before { inset: 12px; }
+
+.inner {
+    inset: 28px;
+    background: conic-gradient(#4ade80 0 90deg, transparent 90deg 180deg, #facc15 180deg 270deg, transparent 270deg);
+    animation: r 1.2s linear infinite;
+}
+.inner:before { inset: 10px; }
+
+@keyframes r { to { transform: rotate(360deg); } }
 
 /* ==================== PIN GATE ==================== */
 .pin-gate-overlay { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #d4e4f7 100%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
@@ -358,6 +579,14 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 </head>
 
 <body>
+
+<!-- ================= PAGE LOADER (Blurred) ================= -->
+<div class="page-loader" id="pageLoader">
+    <div class="loader">
+        <div class="outer"></div>
+        <div class="inner"></div>
+    </div>
+</div>
 
 <!-- ================= SIDEBAR OVERLAY ================= -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -815,6 +1044,18 @@ if (window.matchMedia) {
 }
 
 // ============================================
+// ✅ PAGE LOADER
+// ============================================
+function showLoader() {
+    var el = document.getElementById('pageLoader');
+    if (el) el.classList.add('active');
+}
+function hideLoader() {
+    var el = document.getElementById('pageLoader');
+    if (el) el.classList.remove('active');
+}
+
+// ============================================
 // SIDEBAR
 // ============================================
 function openSidebar() {
@@ -964,6 +1205,7 @@ function showBlockedOverlay(title, message) {
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
     closeSidebar();
+    hideLoader();
 }
 function setAvatar(user) {
     var avatarEl = document.getElementById('userAvatar');
@@ -1065,7 +1307,7 @@ async function callGateSetPin(pin) {
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Set Successfully!', 'success');
-            setTimeout(function(){ hidePinGate(); onPageReady(); }, 500);
+            setTimeout(function(){ hidePinGate(); showLoader(); onPageReady(); }, 500);
         } else {
             showToast(data.message || 'Error Setting PIN', 'error');
             gateStep = 1; gateStep1Value = ''; gateCode = '';
@@ -1090,7 +1332,7 @@ async function callGateVerifyPin(pin) {
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Verified!', 'success');
-            setTimeout(function(){ hidePinGate(); onPageReady(); }, 400);
+            setTimeout(function(){ hidePinGate(); showLoader(); onPageReady(); }, 400);
         } else {
             showToast(data.message || 'Wrong PIN', 'error');
             updatePinGateDots(true);
@@ -1102,7 +1344,8 @@ async function callGateVerifyPin(pin) {
     }
 }
 async function initPinGate() {
-    if (sessionStorage.getItem('pin_verified') === 'true') { hidePinGate(); onPageReady(); return; }
+    if (sessionStorage.getItem('pin_verified') === 'true') { hidePinGate(); hideLoader(); onPageReady(); return; }
+    hideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
     try {
@@ -1145,7 +1388,6 @@ async function verifyUserState() {
         localStorage.setItem('user', JSON.stringify(user));
         setAvatar(user);
         updateSidebarUser(user);
-        // ✅ Balance থাকলে সাথে সাথে sidebar-এ দেখান
         if (user.balance !== undefined && user.balance !== null) {
             updateSidebarBalance(user.balance);
         }
@@ -1165,7 +1407,6 @@ function logout() {
 // PAGE READY
 // ============================================
 async function onPageReady() {
-    // ✅ Cache থেকে সাথে সাথে display
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         setAvatar(cachedUser);
@@ -1176,19 +1417,16 @@ async function onPageReady() {
     } catch(e){ setAvatar({}); updateSidebarUser({}); }
 
     var isUserValid = await verifyUserState();
-    if (!isUserValid) return;
+    if (!isUserValid) { hideLoader(); return; }
 
-    // ✅ Fresh balance fetch
     await refreshWalletBalance();
-
     await loadApiStatus();
     await loadApiKeyFromDatabase();
+    hideLoader();
 }
 
 // ============================================
-// ✅ FRESH BALANCE FETCH
-// Endpoint: /api/wallet/balance
-// Response: { status: 'success', data: { balance: 36, ... } }
+// FRESH BALANCE FETCH
 // ============================================
 async function refreshWalletBalance() {
     if (isAccountBlocked) return;
@@ -1199,7 +1437,6 @@ async function refreshWalletBalance() {
 
         let balance = null;
 
-        // ✅ Try 1: /api/wallet/balance (primary)
         try {
             const res = await fetch('/api/wallet/balance', {
                 headers: {
@@ -1210,11 +1447,9 @@ async function refreshWalletBalance() {
 
             if (res.ok) {
                 const data = await res.json();
-                // ✅ Shape: { status: 'success', data: { balance: 36 } }
                 if (data.status === 'success' && data.data && data.data.balance !== undefined) {
                     balance = parseFloat(data.data.balance);
                 }
-                // ✅ Fallback shape: { status: 'success', balance: 36 }
                 else if (data.status === 'success' && data.balance !== undefined) {
                     balance = parseFloat(data.balance);
                 }
@@ -1223,7 +1458,6 @@ async function refreshWalletBalance() {
             console.warn('wallet/balance fetch failed:', e.message);
         }
 
-        // ✅ Try 2: /api/auth/me (fallback)
         if (balance === null || isNaN(balance)) {
             try {
                 const res = await fetch('/api/auth/me', {
@@ -1245,7 +1479,6 @@ async function refreshWalletBalance() {
             }
         }
 
-        // ✅ Update sidebar + cache
         if (balance !== null && !isNaN(balance)) {
             updateSidebarBalance(balance);
             try {
@@ -1724,10 +1957,17 @@ function copyCurlCommand() {
 // ============================================
 // INIT
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // ✅ STEP 1: Theme apply করুন
     initTheme();
+
     if (!AUTH_TOKEN) return;
-    initPinGate();
+
+    // ✅ STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background)
+    showLoader();
+
+    // ✅ STEP 3: PIN gate চেক করুন
+    await initPinGate();
 });
 
 // ============================================
