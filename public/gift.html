@@ -230,7 +230,7 @@ img {
 #pageContent.visible { display: block; }
 
 /* ============================================
-   ✅ PAGE LOADER (NEW)
+   ✅ PAGE LOADER
    ============================================ */
 .page-loader { position: fixed; inset: 0; z-index: 99998; display: none; align-items: center; justify-content: center; background: var(--loader-bg); }
 .page-loader.active { display: flex; }
@@ -293,7 +293,7 @@ body.dark .pin-dot.error { background: #3a2025; }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
 /* =========================
-   SIDEBAR (UPDATED)
+   SIDEBAR
 ========================= */
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(10, 25, 50, 0.5); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
@@ -449,7 +449,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 </head>
 <body>
 
-<!-- ✅ PAGE LOADER (NEW) -->
+<!-- ✅ PAGE LOADER -->
 <div class="page-loader" id="pageLoader">
     <div class="loader">
         <div class="outer"></div>
@@ -720,7 +720,6 @@ function applyTheme(theme) {
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
     }
-    // Update button icon
     var themeBtn = document.getElementById('themeBtn');
     if (themeBtn) {
         themeBtn.innerHTML = isDark 
@@ -765,7 +764,7 @@ function goToProfile() {
 }
 
 // ============================================
-// ✅ PAGE LOADER (NEW)
+// ✅ PAGE LOADER
 // ============================================
 function showLoader() {
     var el = document.getElementById('pageLoader');
@@ -834,7 +833,7 @@ function showBlockedOverlay(title, message) {
     document.getElementById('blockedOverlay').classList.add('active');
     var pinGate = document.getElementById('pinGateOverlay');
     if (pinGate) pinGate.classList.add('hidden');
-    hideLoader(); // Hide loader if blocked
+    hideLoader();
 }
 
 // ============================================
@@ -1187,7 +1186,7 @@ async function callGateSetPin(pin) {
             showToast('PIN Set Successfully!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                showLoader(); // Show loader before page ready
+                showLoader();
                 onPageReady();
             }, 500);
         } else {
@@ -1220,7 +1219,7 @@ async function callGateVerifyPin(pin) {
             showToast('PIN Verified!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                showLoader(); // Show loader before page ready
+                showLoader();
                 onPageReady();
             }, 400);
         } else {
@@ -1239,11 +1238,12 @@ async function callGateVerifyPin(pin) {
 async function initPinGate() {
     if (sessionStorage.getItem('pin_verified') === 'true') {
         hidePinGate();
-        showLoader(); // Show loader
+        hideLoader();
         onPageReady();
         return;
     }
 
+    hideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
 
@@ -1276,7 +1276,6 @@ async function initPinGate() {
 // PAGE READY
 // ============================================
 async function onPageReady() {
-    // Loader already shown from initPinGate or pin verification
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         updateSidebarProfile(cachedUser);
@@ -1285,8 +1284,6 @@ async function onPageReady() {
 
     await refreshWalletBalance();
     console.log('✅ Gift Code System Loaded');
-    
-    // Hide loader after everything is ready
     hideLoader();
 }
 
@@ -1554,24 +1551,30 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ============================================
-// ✅ INIT
+// ✅ INIT — DOMContentLoaded এ theme + app চালু
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
     // ✅ STEP 1: Theme apply করুন
     initTheme();
 
-    // ✅ STEP 2: Check blocked/deleted status
-    var isUserValid = await verifyUserState();
-    if (!isUserValid) return;
+    // ✅ STEP 2: সবার আগে লোডিং এনিমেশন দেখান
+    showLoader();
 
-    // ✅ STEP 3: Update sidebar + header avatar
+    // ✅ STEP 3: Check blocked/deleted status
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) {
+        hideLoader();
+        return;
+    }
+
+    // ✅ STEP 4: Update sidebar + header avatar
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         updateSidebarProfile(cachedUser);
         setHeaderAvatar(cachedUser);
     } catch(e){}
 
-    // ✅ STEP 4: Only NOW show PIN gate
+    // ✅ STEP 5: সব চেক শেষ, এখন PIN gate দেখান
     initPinGate();
 });
 
