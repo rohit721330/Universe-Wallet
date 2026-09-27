@@ -226,7 +226,7 @@ img { -webkit-user-drag: none; user-drag: none; }
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
 
-/* ==================== PAGE LOADER (Blurred Background + আপনার ডিজাইন) ==================== */
+/* ==================== PAGE LOADER (হুবহু আপনার ডিজাইন) ==================== */
 .page-loader {
     position: fixed;
     inset: 0;
@@ -234,7 +234,7 @@ img { -webkit-user-drag: none; user-drag: none; }
     display: none;
     align-items: center;
     justify-content: center;
-    /* ✅ ব্লার্ড ব্যাকগ্রাউন্ড — পেছনে পেজ ঘোলা দেখা যাবে */
+    /* ✅ ব্লার্ড ব্যাকগ্রাউন্ড */
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -250,7 +250,6 @@ img { -webkit-user-drag: none; user-drag: none; }
     background: conic-gradient(#38bdf8 0 90deg, #0000 90deg 180deg, #f472b6 180deg 270deg, #0000 270deg);
     animation: r 1.2s linear infinite reverse;
 }
-/* ✅ রিংয়ের ভেতরের অংশ কালো (আপনার কোডের মতোই) */
 .outer:before, .inner:before {
     content: "";
     position: absolute;
@@ -577,7 +576,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
 <body>
 
-<!-- ================= PAGE LOADER (Blurred Background + আপনার ডিজাইন) ================= -->
+<!-- ================= PAGE LOADER ================= -->
 <div class="page-loader" id="pageLoader">
     <div class="loader">
         <div class="outer"></div>
@@ -985,7 +984,7 @@ var PAYMENT_API_URL = 'https://universe-wallet.vercel.app/api/payment';
 var PIN_API_URL = '/api/pin';
 var AUTH_TOKEN = localStorage.getItem('token');
 
-// ✅ ডিফল্ট লোডিং সময় (milliseconds)
+// ✅ লোডিং সময় (milliseconds)
 var MIN_LOADER_TIME = 2500; // 2.5 সেকেন্ড
 
 var apiKey = '';
@@ -1044,7 +1043,8 @@ if (window.matchMedia) {
 }
 
 // ============================================
-// ✅ PAGE LOADER — ন্যূনতম 2.5 সেকেন্ড দেখাবে
+// ✅ PAGE LOADER
+// ✅ শুধু একবারই দেখাবে (প্রথম লোডে), ২.৫ সেকেন্ড
 // ============================================
 var loaderStartTime = 0;
 
@@ -1060,7 +1060,7 @@ function hideLoader() {
     var el = document.getElementById('pageLoader');
     if (!el) return;
 
-    // ✅ বাকি সময় হিসাব করুন
+    // ✅ বাকি সময় হিসাব করুন যাতে কমপক্ষে 2.5 সেকেন্ড হয়
     var elapsed = Date.now() - loaderStartTime;
     var remaining = Math.max(0, MIN_LOADER_TIME - elapsed);
 
@@ -1073,7 +1073,7 @@ function hideLoader() {
     }
 }
 
-// লোডার সম্পূর্ণ force hide (blocked/logout এর জন্য)
+// লোডার সম্পূর্ণ force hide (blocked/logout/PIN দেখানোর জন্য)
 function forceHideLoader() {
     var el = document.getElementById('pageLoader');
     if (el) el.classList.remove('active');
@@ -1333,7 +1333,7 @@ async function callGateSetPin(pin) {
             showToast('PIN Set Successfully!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                showLoader();
+                // ✅ কোনো লোডার নেই — সরাসরি পেজ রেডি
                 onPageReady();
             }, 500);
         } else {
@@ -1362,7 +1362,7 @@ async function callGateVerifyPin(pin) {
             showToast('PIN Verified!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                showLoader();
+                // ✅ কোনো লোডার নেই — সরাসরি পেজ রেডি
                 onPageReady();
             }, 400);
         } else {
@@ -1445,6 +1445,8 @@ function logout() {
 
 // ============================================
 // ✅ PAGE READY — সব ডেটা লোড
+// ✅ এই ফাংশন থেকে কোনো লোডার show/hide হবে না
+// ✅ লোডার শুধু DOMContentLoaded থেকে handle হবে
 // ============================================
 async function onPageReady() {
     // ✅ STEP 1: Cache থেকে sidebar + avatar আপডেট
@@ -1468,8 +1470,12 @@ async function onPageReady() {
         loadApiKeyFromDatabase()
     ]);
 
-    // ✅ STEP 4: hideLoader — যেটি বাকি সময় হিসাব করে লোডার হাইড করবে
-    hideLoader();
+    // ✅ STEP 4: লোডার হাইড — শুধু প্রথমবার পেজ লোডের সময়
+    // (২.৫ সেকেন্ড পূর্ণ হলেই হাইড হবে)
+    // পরেরবার (PIN verify/set এর পরে) লোডার ইতিমধ্যে হাইড করা আছে, তাই কিছু হবে না
+    if (loaderStartTime > 0) {
+        hideLoader();
+    }
 }
 
 // ============================================
@@ -2002,7 +2008,7 @@ function copyCurlCommand() {
 })();
 
 // ============================================
-// ✅ INIT — সঠিক ক্রম
+// ✅ INIT — লোডার শুধু একবারই দেখাবে
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
     // STEP 1: Theme apply করুন (সবার আগে)
@@ -2010,7 +2016,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (!AUTH_TOKEN) return;
 
-    // STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background, 2.5 সেকেন্ড)
+    // STEP 2: ✅ সবার আগে লোডিং এনিমেশন দেখান (শুধু একবারই)
+    // ২.৫ সেকেন্ড দেখাবে, ডেটা যত দ্রুতই লোড হোক না কেন
     showLoader();
 
     // STEP 3: User state verify (blocked/deleted check)
@@ -2021,6 +2028,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // STEP 4: PIN gate চেক
+    // - PIN verified থাকলে → hidePinGate() + onPageReady() → লোডার হাইড হবে
+    // - PIN verified না থাকলে → forceHideLoader() + PIN gate দেখাবে
+    //   (PIN verify সফল হওয়ার পরে onPageReady() কল হবে, কোনো লোডার ছাড়াই)
     await initPinGate();
 });
 
