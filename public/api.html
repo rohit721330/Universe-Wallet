@@ -20,248 +20,31 @@
 
 <style>
 /* ===== THEME VARIABLES (LIGHT) ===== */
-:root {
-    --bg: #f3f7fc;
-    --bg-pattern-1: rgba(255,255,255,.72);
-    --bg-pattern-2: rgba(244,248,253,.92);
-    --grid-color: rgba(80,120,170,.07);
-    --text: #172033;
-    --text-title: #172033;
-    --muted: #667181;
-    --muted-2: #9aa7b7;
-    --muted-3: #a0a9b4;
-    --header-bg: rgba(255,255,255,.96);
-    --header-border: #e8edf4;
-    --card-bg: rgba(255,255,255,.96);
-    --card-border: #e0e5eb;
-    --card-shadow: 0 5px 18px rgba(30,60,100,.08);
-    --input-bg: #f0f2f5;
-    --input-focus-bg: #fff;
-    --input-shadow: #cfe1ff;
-    --menu-btn-bg: #fff;
-    --menu-btn-border: #e4e9ef;
-    --menu-btn-color: #607080;
-    --theme-btn-bg: #fff;
-    --theme-btn-border: #e5eaf0;
-    --theme-btn-color: #718096;
-    --icon-btn-bg: #fff;
-    --icon-btn-border: #e5eaf0;
-    --user-avatar-border: #dce6ef;
-    --tab-bg: #f6f7f9;
-    --tab-border: #e0e5eb;
-    --tab-color: #667181;
-    --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff);
-    --amount-btn-bg: #f6f7f9;
-    --amount-btn-border: #e0e5eb;
-    --amount-btn-color: #667181;
-    --amount-btn-hover-bg: #e5efff;
-    --summary-bg: #fafbfd;
-    --summary-border: #dfe5eb;
-    --summary-row-border: #edf0f4;
-    --summary-row-color: #687587;
-    --summary-strong: #263247;
-    --section-bg: #fff;
-    --section-header-border: #edf0f4;
-    --payment-border: #edf0f4;
-    --feature-border: #edf0f3;
-    --feature-strong: #263044;
-    --feature-small: #a0a9b4;
-    --success-bg: #e7f8ef;
-    --success-color: #18a473;
-    --bottom-nav-bg: rgba(255, 255, 255, 0.98);
-    --bottom-nav-border: #dce9ff;
-    --bottom-nav-color: #8a9bb8;
-    --bottom-nav-active: #1264ff;
-    --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff);
-    --toast-bg-info: #dbeafe;
-    --toast-color-info: #1a56db;
-    --toast-bg-success: #dcfce7;
-    --toast-color-success: #16a34a;
-    --toast-bg-error: #fee2e2;
-    --toast-color-error: #dc2626;
-    --toast-bg-warning: #fef3c7;
-    --toast-color-warning: #d97706;
-
-    /* ✅ Sidebar Variables (Light) */
-    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
-    --sidebar-item-color: #40506a;
-    --sidebar-item-hover-bg: #eef4ff;
-    --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff);
-    --sidebar-item-icon-bg: #f0f5fb;
-    --sidebar-item-icon-color: #5a7a9a;
-    --sidebar-item-icon-hover-bg: #dbe9ff;
-    --sidebar-item-icon-hover-color: #1264ff;
-    --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent);
-    --sidebar-footer-bg: #fff;
-    --sidebar-footer-border: #eef2f8;
-
-    /* ✅ Modal Variables */
-    --modal-bg: #ffffff;
-    --modal-detail-color: #172033;
-    --modal-label-color: #8a9ab0;
-    --modal-header: linear-gradient(135deg, #1a56db, #0088ff);
-    --modal-footer: #ffffff;
-
-    /* ✅ Blocked Overlay */
-    --blocked-bg-1: #ffffff;
-    --blocked-bg-2: #e8f0fe;
-    --blocked-bg-3: #d4e4f7;
-    --blocked-card-bg: #ffffff;
-    --blocked-card-border: #c5d9f0;
-}
+:root { --bg: #f3f7fc; --bg-pattern-1: rgba(255,255,255,.72); --bg-pattern-2: rgba(244,248,253,.92); --grid-color: rgba(80,120,170,.07); --text: #172033; --text-title: #172033; --muted: #667181; --muted-2: #9aa7b7; --muted-3: #a0a9b4; --header-bg: rgba(255,255,255,.96); --header-border: #e8edf4; --card-bg: rgba(255,255,255,.96); --card-border: #e0e5eb; --card-shadow: 0 5px 18px rgba(30,60,100,.08); --input-bg: #f0f2f5; --input-focus-bg: #fff; --input-shadow: #cfe1ff; --menu-btn-bg: #fff; --menu-btn-border: #e4e9ef; --menu-btn-color: #607080; --theme-btn-bg: #fff; --theme-btn-border: #e5eaf0; --theme-btn-color: #718096; --icon-btn-bg: #fff; --icon-btn-border: #e5eaf0; --user-avatar-border: #dce6ef; --tab-bg: #f6f7f9; --tab-border: #e0e5eb; --tab-color: #667181; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #f6f7f9; --amount-btn-border: #e0e5eb; --amount-btn-color: #667181; --amount-btn-hover-bg: #e5efff; --summary-bg: #fafbfd; --summary-border: #dfe5eb; --summary-row-border: #edf0f4; --summary-row-color: #687587; --summary-strong: #263247; --section-bg: #fff; --section-header-border: #edf0f4; --payment-border: #edf0f4; --feature-border: #edf0f3; --feature-strong: #263044; --feature-small: #a0a9b4; --success-bg: #e7f8ef; --success-color: #18a473; --bottom-nav-bg: rgba(255, 255, 255, 0.98); --bottom-nav-border: #dce9ff; --bottom-nav-color: #8a9bb8; --bottom-nav-active: #1264ff; --scan-circle-bg: linear-gradient(145deg, #ffffff, #eaf3ff); --toast-bg-info: #dbeafe; --toast-color-info: #1a56db; --toast-bg-success: #dcfce7; --toast-color-success: #16a34a; --toast-bg-error: #fee2e2; --toast-color-error: #dc2626; --toast-bg-warning: #fef3c7; --toast-color-warning: #d97706; --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #40506a; --sidebar-item-hover-bg: #eef4ff; --sidebar-item-active-bg: linear-gradient(135deg, #e8f1ff, #dbe9ff); --sidebar-item-icon-bg: #f0f5fb; --sidebar-item-icon-color: #5a7a9a; --sidebar-item-icon-hover-bg: #dbe9ff; --sidebar-item-icon-hover-color: #1264ff; --sidebar-divider: linear-gradient(90deg, transparent, #e0e8f2, transparent); --sidebar-footer-bg: #fff; --sidebar-footer-border: #eef2f8; --modal-bg: #ffffff; --modal-detail-color: #172033; --modal-label-color: #8a9ab0; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #ffffff; --blocked-bg-1: #ffffff; --blocked-bg-2: #e8f0fe; --blocked-bg-3: #d4e4f7; --blocked-card-bg: #ffffff; --blocked-card-border: #c5d9f0; }
 
 /* ===== THEME VARIABLES (DARK) ===== */
-body.dark {
-    --bg: #0d1526;
-    --bg-pattern-1: rgba(20, 30, 50, 0.7);
-    --bg-pattern-2: rgba(13, 21, 38, 0.92);
-    --grid-color: rgba(90, 120, 170, 0.05);
-    --text: #edf3ff;
-    --text-title: #edf3ff;
-    --muted: #8491a6;
-    --muted-2: #8e9caf;
-    --muted-3: #8491a6;
-    --header-bg: rgba(26, 38, 57, 0.96);
-    --header-border: #2b3a50;
-    --card-bg: rgba(26, 38, 57, 0.96);
-    --card-border: #2b3a50;
-    --card-shadow: 0 5px 18px rgba(0,0,0,.3);
-    --input-bg: #101a2c;
-    --input-focus-bg: #0d1526;
-    --input-shadow: #1e3a5f;
-    --menu-btn-bg: #202d42;
-    --menu-btn-border: #2b3a50;
-    --menu-btn-color: #b8c5d6;
-    --theme-btn-bg: #202d42;
-    --theme-btn-border: #2b3a50;
-    --theme-btn-color: #cbd5e1;
-    --icon-btn-bg: #202d42;
-    --icon-btn-border: #2b3a50;
-    --user-avatar-border: #334155;
-    --tab-bg: #202d42;
-    --tab-border: #2b3a50;
-    --tab-color: #8491a6;
-    --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff);
-    --amount-btn-bg: #202d42;
-    --amount-btn-border: #2b3a50;
-    --amount-btn-color: #8491a6;
-    --amount-btn-hover-bg: #172b55;
-    --summary-bg: #111b2a;
-    --summary-border: #2b3a50;
-    --summary-row-border: #2b3a50;
-    --summary-row-color: #8491a6;
-    --summary-strong: #edf3ff;
-    --section-bg: #1a2639;
-    --section-header-border: #2b3a50;
-    --payment-border: #2b3a50;
-    --feature-border: #2b3a50;
-    --feature-strong: #edf3ff;
-    --feature-small: #8491a6;
-    --success-bg: #12352f;
-    --success-color: #10c993;
-    --bottom-nav-bg: rgba(26, 38, 57, 0.98);
-    --bottom-nav-border: #2b3a50;
-    --bottom-nav-color: #8491a6;
-    --bottom-nav-active: #60a5fa;
-    --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42);
-    --toast-bg-info: #172b55;
-    --toast-color-info: #60a5fa;
-    --toast-bg-success: #12352f;
-    --toast-color-success: #10c993;
-    --toast-bg-error: #3a2025;
-    --toast-color-error: #f87171;
-    --toast-bg-warning: #39331d;
-    --toast-color-warning: #fbbf24;
-
-    /* ✅ Sidebar Variables (Dark) */
-    --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%);
-    --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%);
-    --sidebar-item-color: #b8c5d6;
-    --sidebar-item-hover-bg: #202d42;
-    --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f);
-    --sidebar-item-icon-bg: #202d42;
-    --sidebar-item-icon-color: #8491a6;
-    --sidebar-item-icon-hover-bg: #172b55;
-    --sidebar-item-icon-hover-color: #60a5fa;
-    --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent);
-    --sidebar-footer-bg: #1a2639;
-    --sidebar-footer-border: #2b3a50;
-
-    /* ✅ Modal Variables */
-    --modal-bg: #1a2639;
-    --modal-detail-color: #edf3ff;
-    --modal-label-color: #8491a6;
-    --modal-header: linear-gradient(135deg, #1a56db, #0088ff);
-    --modal-footer: #1a2639;
-
-    /* ✅ Blocked Overlay */
-    --blocked-bg-1: #0d1526;
-    --blocked-bg-2: #1a2639;
-    --blocked-bg-3: #202d42;
-    --blocked-card-bg: #1a2639;
-    --blocked-card-border: #2b3a50;
-}
+body.dark { --bg: #0d1526; --bg-pattern-1: rgba(20, 30, 50, 0.7); --bg-pattern-2: rgba(13, 21, 38, 0.92); --grid-color: rgba(90, 120, 170, 0.05); --text: #edf3ff; --text-title: #edf3ff; --muted: #8491a6; --muted-2: #8e9caf; --muted-3: #8491a6; --header-bg: rgba(26, 38, 57, 0.96); --header-border: #2b3a50; --card-bg: rgba(26, 38, 57, 0.96); --card-border: #2b3a50; --card-shadow: 0 5px 18px rgba(0,0,0,.3); --input-bg: #101a2c; --input-focus-bg: #0d1526; --input-shadow: #1e3a5f; --menu-btn-bg: #202d42; --menu-btn-border: #2b3a50; --menu-btn-color: #b8c5d6; --theme-btn-bg: #202d42; --theme-btn-border: #2b3a50; --theme-btn-color: #cbd5e1; --icon-btn-bg: #202d42; --icon-btn-border: #2b3a50; --user-avatar-border: #334155; --tab-bg: #202d42; --tab-border: #2b3a50; --tab-color: #8491a6; --tab-active-bg: linear-gradient(135deg, #1a56db, #0088ff); --amount-btn-bg: #202d42; --amount-btn-border: #2b3a50; --amount-btn-color: #8491a6; --amount-btn-hover-bg: #172b55; --summary-bg: #111b2a; --summary-border: #2b3a50; --summary-row-border: #2b3a50; --summary-row-color: #8491a6; --summary-strong: #edf3ff; --section-bg: #1a2639; --section-header-border: #2b3a50; --payment-border: #2b3a50; --feature-border: #2b3a50; --feature-strong: #edf3ff; --feature-small: #8491a6; --success-bg: #12352f; --success-color: #10c993; --bottom-nav-bg: rgba(26, 38, 57, 0.98); --bottom-nav-border: #2b3a50; --bottom-nav-color: #8491a6; --bottom-nav-active: #60a5fa; --scan-circle-bg: linear-gradient(145deg, #1a2639, #202d42); --toast-bg-info: #172b55; --toast-color-info: #60a5fa; --toast-bg-success: #12352f; --toast-color-success: #10c993; --toast-bg-error: #3a2025; --toast-color-error: #f87171; --toast-bg-warning: #39331d; --toast-color-warning: #fbbf24; --sidebar-bg: linear-gradient(180deg, #1a2639 0%, #172131 100%); --sidebar-header: linear-gradient(135deg, #1a56db 0%, #0088ff 100%); --sidebar-item-color: #b8c5d6; --sidebar-item-hover-bg: #202d42; --sidebar-item-active-bg: linear-gradient(135deg, #172b55, #1e3a5f); --sidebar-item-icon-bg: #202d42; --sidebar-item-icon-color: #8491a6; --sidebar-item-icon-hover-bg: #172b55; --sidebar-item-icon-hover-color: #60a5fa; --sidebar-divider: linear-gradient(90deg, transparent, #2b3a50, transparent); --sidebar-footer-bg: #1a2639; --sidebar-footer-border: #2b3a50; --modal-bg: #1a2639; --modal-detail-color: #edf3ff; --modal-label-color: #8491a6; --modal-header: linear-gradient(135deg, #1a56db, #0088ff); --modal-footer: #1a2639; --blocked-bg-1: #0d1526; --blocked-bg-2: #1a2639; --blocked-bg-3: #202d42; --blocked-card-bg: #1a2639; --blocked-card-border: #2b3a50; }
 
 /* ===== RESET ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Inter', Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); transition: background .3s ease, color .3s ease; }
 
-* {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-}
-input, textarea, select, [contenteditable="true"], .api-url-link, .copy-btn, [data-copy] {
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
-    user-select: text !important;
-    -webkit-touch-callout: default !important;
-}
+* { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select, [contenteditable="true"], .api-url-link, .copy-btn, [data-copy] { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; -webkit-touch-callout: default !important; }
 img { -webkit-user-drag: none; user-drag: none; }
 
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
 
-/* ==================== PAGE LOADER (হুবহু আপনার ডিজাইন) ==================== */
-.page-loader {
-    position: fixed;
-    inset: 0;
-    z-index: 99998;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    /* ✅ ব্লার্ড ব্যাকগ্রাউন্ড */
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: background 0.3s ease;
-}
+/* ==================== PAGE LOADER ==================== */
+.page-loader { position: fixed; inset: 0; z-index: 99998; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: background 0.3s ease; }
 .page-loader.active { display: flex; }
-
-/* ✅ আপনার দেওয়া কোডের মতো লোডার */
 .loader { position: relative; width: 120px; height: 120px; }
 .outer, .inner { position: absolute; border-radius: 50%; }
-.outer {
-    inset: 0;
-    background: conic-gradient(#38bdf8 0 90deg, #0000 90deg 180deg, #f472b6 180deg 270deg, #0000 270deg);
-    animation: r 1.2s linear infinite reverse;
-}
-.outer:before, .inner:before {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    background: #000;
-}
+.outer { inset: 0; background: conic-gradient(#38bdf8 0 90deg, #0000 90deg 180deg, #f472b6 180deg 270deg, #0000 270deg); animation: r 1.2s linear infinite reverse; }
+.outer:before, .inner:before { content: ""; position: absolute; border-radius: 50%; background: #000; }
 .outer:before { inset: 12px; }
-.inner {
-    inset: 28px;
-    background: conic-gradient(#4ade80 0 90deg, #0000 90deg 180deg, #facc15 180deg 270deg, #0000 270deg);
-    animation: r 1.2s linear infinite;
-}
+.inner { inset: 28px; background: conic-gradient(#4ade80 0 90deg, #0000 90deg 180deg, #facc15 180deg 270deg, #0000 270deg); animation: r 1.2s linear infinite; }
 .inner:before { inset: 10px; }
 @keyframes r { to { transform: rotate(360deg); } }
 
@@ -312,11 +95,9 @@ body.dark .pin-key:hover { background: #202d42; }
 .menu-btn:active { transform: scale(0.95); }
 .title { font-size: 15px; font-weight: 700; color: var(--text-title); }
 .header-right { display: flex; align-items: center; gap: 7px; }
-
 .theme-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: var(--theme-btn-bg); border: 1px solid var(--theme-btn-border); border-radius: 50%; color: var(--theme-btn-color); font-size: 15px; cursor: pointer; transition: all 0.25s ease; }
 .theme-btn:hover { transform: rotate(20deg) scale(1.08); border-color: var(--bottom-nav-active); color: var(--bottom-nav-active); }
 .theme-btn:active { transform: scale(0.95); }
-
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a56db, #0088ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid var(--user-avatar-border); overflow: hidden; box-shadow: 0 3px 10px rgba(26, 86, 219, 0.25); transition: transform 0.2s; }
 .user-avatar:hover { transform: scale(1.05); }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
@@ -360,8 +141,6 @@ body.dark .pin-key:hover { background: #202d42; }
 
 /* ==================== MAIN ==================== */
 .main { padding: 16px 12px; }
-
-/* ===== CARDS ===== */
 .card { margin-top: 16px; padding: 16px; background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); transition: background .3s ease, border .3s ease, box-shadow .3s ease; }
 .card-title { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: var(--muted-2); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
 .card-title::before { content: ""; width: 4px; height: 13px; border-radius: 5px; background: #2779e8; }
@@ -379,10 +158,9 @@ body.dark .pin-key:hover { background: #202d42; }
 .toggle.off::after { transform: translateX(0); }
 .toggle:not(.off)::after { transform: translateX(20px); }
 .toggle.loading { opacity: 0.6; pointer-events: none; }
-
 .description { color: var(--muted); font-size: 10px; margin-bottom: 14px; line-height: 1.5; font-weight: 600; }
 
-/* ===== STATS (4 boxes) ===== */
+/* ===== STATS ===== */
 .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 14px; }
 .stat { padding: 10px; background: var(--input-bg); border-radius: 7px; border: 1px solid var(--card-border); }
 .stat small { color: var(--muted-3); display: block; font-size: 9px; margin-bottom: 3px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
@@ -398,7 +176,7 @@ body.dark .pin-key:hover { background: #202d42; }
 .action.purple:hover { box-shadow: 0 6px 18px rgba(109, 69, 223, 0.35); }
 .action:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-/* ===== INPUTS / API Key & URL link-style ===== */
+/* ===== INPUTS ===== */
 .input-group { margin-bottom: 14px; }
 .input-group label { display: block; color: var(--muted); font-size: 10px; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
 .input-group label i { color: var(--bottom-nav-active); margin-right: 5px; font-size: 10px; }
@@ -407,27 +185,8 @@ body.dark .pin-key:hover { background: #202d42; }
 .copy-btn:hover { background: var(--bottom-nav-active); color: white; border-color: var(--bottom-nav-active); }
 .copy-btn:active { transform: scale(0.96); }
 .copy-btn i { font-size: 10px; }
-
-/* ===== API URL / Key (Link Style) ===== */
 .api-url { display: flex; gap: 7px; align-items: stretch; }
-.api-url-link {
-    flex: 1;
-    min-height: 36px;
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    background: var(--input-bg);
-    color: var(--bottom-nav-active);
-    padding: 10px 12px;
-    font-size: 12px;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    line-height: 1.5;
-    word-break: break-all;
-    overflow-wrap: anywhere;
-    cursor: text;
-    user-select: all;
-    transition: background .2s, border-color .2s;
-}
+.api-url-link { flex: 1; min-height: 36px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--input-bg); color: var(--bottom-nav-active); padding: 10px 12px; font-size: 12px; font-family: 'Inter', system-ui, sans-serif; font-weight: 600; line-height: 1.5; word-break: break-all; overflow-wrap: anywhere; cursor: text; user-select: all; transition: background .2s, border-color .2s; }
 .api-url-link:hover { background: var(--input-focus-bg); border-color: var(--bottom-nav-active); }
 
 /* ===== SECURITY NOTICE ===== */
@@ -510,7 +269,6 @@ tr:last-child td { border-bottom: 0; }
 .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255, 255, 255, 0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ===== DISABLED ===== */
 .api-disabled { opacity: 0.55; pointer-events: none; user-select: none; }
 
 /* ===== BLOCKED OVERLAY ===== */
@@ -540,15 +298,8 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 .bottom-nav .scan-item::after { display: none; }
 
 /* ===== RESPONSIVE ===== */
-@media (min-width: 700px) {
-    .stats { grid-template-columns: repeat(4, 1fr); }
-    .title { font-size: 16px; }
-}
-@media (max-width: 700px) {
-    .test-grid { grid-template-columns: 1fr; }
-    .api-url { flex-direction: column; }
-    .api-url-link { font-size: 11px; padding: 9px 11px; }
-}
+@media (min-width: 700px) { .stats { grid-template-columns: repeat(4, 1fr); } .title { font-size: 16px; } }
+@media (max-width: 700px) { .test-grid { grid-template-columns: 1fr; } .api-url { flex-direction: column; } .api-url-link { font-size: 11px; padding: 9px 11px; } }
 @media (max-width: 480px) {
     .bottom-nav { width: calc(100% - 16px); height: 72px; bottom: 10px; padding: 6px 6px; border-radius: 40px; }
     .bottom-nav .nav-item { font-size: 8px; letter-spacing: 0.4px; gap: 2px; }
@@ -708,58 +459,33 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
                     </div>
                     <div class="toggle" id="apiToggle" onclick="toggleApiStatus()"></div>
                 </div>
-
                 <p class="description" id="statusDesc">Your API endpoints are live and accepting requests.</p>
-
                 <div class="stats">
-                    <div class="stat">
-                        <small><i class="fas fa-chart-line" style="color:var(--bottom-nav-active)"></i>Total Calls</small>
-                        <strong id="totalCalls">0</strong>
-                    </div>
-                    <div class="stat">
-                        <small><i class="fas fa-circle-check" style="color:var(--success-color)"></i>Success</small>
-                        <strong id="successCalls" style="color:var(--success-color)">0</strong>
-                    </div>
-                    <div class="stat">
-                        <small><i class="fas fa-circle-xmark" style="color:var(--toast-color-error)"></i>Failed</small>
-                        <strong id="failedCalls" style="color:var(--toast-color-error)">0</strong>
-                    </div>
-                    <div class="stat">
-                        <small><i class="fas fa-clock" style="color:var(--bottom-nav-active)"></i>Last Used</small>
-                        <strong id="lastUsed">Never</strong>
-                    </div>
+                    <div class="stat"><small><i class="fas fa-chart-line" style="color:var(--bottom-nav-active)"></i>Total Calls</small><strong id="totalCalls">0</strong></div>
+                    <div class="stat"><small><i class="fas fa-circle-check" style="color:var(--success-color)"></i>Success</small><strong id="successCalls" style="color:var(--success-color)">0</strong></div>
+                    <div class="stat"><small><i class="fas fa-circle-xmark" style="color:var(--toast-color-error)"></i>Failed</small><strong id="failedCalls" style="color:var(--toast-color-error)">0</strong></div>
+                    <div class="stat"><small><i class="fas fa-clock" style="color:var(--bottom-nav-active)"></i>Last Used</small><strong id="lastUsed">Never</strong></div>
                 </div>
             </section>
 
             <!-- ===== QUICK ACTIONS ===== -->
             <section class="card">
                 <div class="card-title">QUICK ACTIONS</div>
-
-                <button class="action" onclick="generateNewToken()">
-                    <i class="fas fa-plus-circle"></i> Generate New Key
-                </button>
-
-                <button class="action purple" onclick="regenerateApiKey()">
-                    <i class="fas fa-rotate"></i> Regenerate API Key
-                </button>
+                <button class="action" onclick="generateNewToken()"><i class="fas fa-plus-circle"></i> Generate New Key</button>
+                <button class="action purple" onclick="regenerateApiKey()"><i class="fas fa-rotate"></i> Regenerate API Key</button>
             </section>
 
             <!-- ===== API CREDENTIALS ===== -->
             <section class="card" id="apiCredentialsCard">
                 <div class="card-title">API CREDENTIALS</div>
-
                 <p class="description">Keep these credentials secure. Do not share them publicly.</p>
-
                 <div class="input-group">
                     <label><i class="fas fa-key"></i> API Key (10 characters)</label>
                     <div class="api-url">
                         <div class="api-url-link" id="apiKeyDisplay">Loading...</div>
-                        <button class="copy-btn" onclick="copyApiKey()">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+                        <button class="copy-btn" onclick="copyApiKey()"><i class="fas fa-copy"></i> Copy</button>
                     </div>
                 </div>
-
                 <div class="security">
                     <i class="fas fa-shield-halved"></i>
                     <div>
@@ -772,109 +498,53 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
             <!-- ===== API ENDPOINT ===== -->
             <section class="card" id="apiEndpointCard">
                 <div class="card-title">API ENDPOINT</div>
-
                 <p class="description">Use this URL to make payment requests.</p>
-
                 <div class="input-group">
                     <label><i class="fas fa-link"></i> API URL</label>
                     <div class="api-url">
                         <div class="api-url-link" id="apiUrlDisplay">https://universe-wallet.vercel.app/api/payment?key=—&number={number}&amount={amount}&comment={comment}</div>
-                        <button class="copy-btn" onclick="copyApiUrl()">
-                            <i class="fas fa-copy"></i> Copy URL
-                        </button>
+                        <button class="copy-btn" onclick="copyApiUrl()"><i class="fas fa-copy"></i> Copy URL</button>
                     </div>
                 </div>
 
-                <!-- TEST API -->
                 <div class="test-box" id="testApiCard">
                     <div class="test-title"><i class="fas fa-flask"></i> TEST API REQUEST</div>
-
                     <div class="test-grid">
-                        <div>
-                            <label>number</label>
-                            <input type="text" id="payNumber" placeholder="9876543210" value="9876543210">
-                        </div>
-                        <div>
-                            <label>amount</label>
-                            <input type="number" id="testAmount" placeholder="500" step="0.1" min="0.1" value="500">
-                        </div>
-                        <div>
-                            <label>comment</label>
-                            <input type="text" id="testComment" placeholder="Test payment" value="Test Payment">
-                        </div>
+                        <div><label>number</label><input type="text" id="payNumber" placeholder="9876543210" value="9876543210"></div>
+                        <div><label>amount</label><input type="number" id="testAmount" placeholder="500" step="0.1" min="0.1" value="500"></div>
+                        <div><label>comment</label><input type="text" id="testComment" placeholder="Test payment" value="Test Payment"></div>
                     </div>
-
                     <div class="test-buttons">
-                        <button class="btn btn-primary" id="testPaymentBtn" onclick="makeTestPayment()">
-                            <i class="fas fa-play"></i> Test API Call
-                        </button>
-                        <button class="btn btn-dark" onclick="showCurlCommand()">
-                            <i class="fas fa-terminal"></i> cURL Command
-                        </button>
+                        <button class="btn btn-primary" id="testPaymentBtn" onclick="makeTestPayment()"><i class="fas fa-play"></i> Test API Call</button>
+                        <button class="btn btn-dark" onclick="showCurlCommand()"><i class="fas fa-terminal"></i> cURL Command</button>
                     </div>
                 </div>
 
-                <!-- CURL -->
                 <div class="curl-box" id="curlBox">
                     <div class="curl-header">
                         <div class="curl-title"><i class="fas fa-terminal"></i> cURL Command</div>
-                        <button class="curl-copy-btn" onclick="copyCurlCommand()">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+                        <button class="curl-copy-btn" onclick="copyCurlCommand()"><i class="fas fa-copy"></i> Copy</button>
                     </div>
-                    <div class="curl-content" id="curlContent">
-                        <code id="curlCode"></code>
-                    </div>
-                    <div class="curl-hint">
-                        <i class="fas fa-arrows-left-right"></i>
-                        Swipe left or right to see the full command
-                    </div>
+                    <div class="curl-content" id="curlContent"><code id="curlCode"></code></div>
+                    <div class="curl-hint"><i class="fas fa-arrows-left-right"></i> Swipe left or right to see the full command</div>
                 </div>
 
-                <!-- RESPONSE -->
                 <div class="payment-response" id="testResponse">
                     <div class="response-label"><i class="fas fa-list"></i> RESPONSE</div>
                     <div class="response-box" id="testResponseContent"></div>
                 </div>
 
-                <!-- REQUIRED PARAMETERS -->
                 <div class="card-title" style="margin-top:20px;">REQUIRED PARAMETERS</div>
-
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr>
-                                <th>PARAMETER</th>
-                                <th>TYPE</th>
-                                <th>REQUIRED</th>
-                                <th>DESCRIPTION</th>
-                            </tr>
+                            <tr><th>PARAMETER</th><th>TYPE</th><th>REQUIRED</th><th>DESCRIPTION</th></tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>key</td>
-                                <td>String</td>
-                                <td><span class="required">Required</span></td>
-                                <td>Your 10-character API key</td>
-                            </tr>
-                            <tr>
-                                <td>number</td>
-                                <td>String</td>
-                                <td><span class="required">Required</span></td>
-                                <td>10-digit recipient mobile number</td>
-                            </tr>
-                            <tr>
-                                <td>amount</td>
-                                <td>Number</td>
-                                <td><span class="required">Required</span></td>
-                                <td>Payment amount (minimum ₹0.1)</td>
-                            </tr>
-                            <tr>
-                                <td>comment</td>
-                                <td>String</td>
-                                <td><span class="optional">Optional</span></td>
-                                <td>Transaction description</td>
-                            </tr>
+                            <tr><td>key</td><td>String</td><td><span class="required">Required</span></td><td>Your 10-character API key</td></tr>
+                            <tr><td>number</td><td>String</td><td><span class="required">Required</span></td><td>10-digit recipient mobile number</td></tr>
+                            <tr><td>amount</td><td>Number</td><td><span class="required">Required</span></td><td>Payment amount (minimum ₹0.1)</td></tr>
+                            <tr><td>comment</td><td>String</td><td><span class="optional">Optional</span></td><td>Transaction description</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -883,7 +553,6 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
             <!-- ===== JS EXAMPLE ===== -->
             <section class="card">
                 <div class="card-title">JAVASCRIPT EXAMPLE</div>
-
                 <div class="code-box" id="jsExample"><span class="comment">// Make Payment Request — Universal Wallet</span>
 <span class="keyword">async function</span> <span class="function">makePayment</span>() {
     <span class="keyword">const</span> apiUrl = <span class="string">'https://universe-wallet.vercel.app/api/payment'</span>;
@@ -906,16 +575,12 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
         <span class="function">console</span>.<span class="function">error</span>(<span class="string">'API Error:'</span>, error);
     }
 }</div>
-
-                <button class="copy-btn" style="margin-top:10px; height:34px;" onclick="copyCode('jsExample', 'JavaScript')">
-                    <i class="fas fa-copy"></i> Copy Code
-                </button>
+                <button class="copy-btn" style="margin-top:10px; height:34px;" onclick="copyCode('jsExample', 'JavaScript')"><i class="fas fa-copy"></i> Copy Code</button>
             </section>
 
             <!-- ===== PYTHON EXAMPLE ===== -->
             <section class="card">
                 <div class="card-title">PYTHON EXAMPLE</div>
-
                 <div class="code-box" id="pythonExample"><span class="comment"># Make Payment Request — Universal Wallet</span>
 <span class="keyword">import</span> requests
 
@@ -939,10 +604,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
     <span class="keyword">except</span> requests.exceptions.RequestException <span class="keyword">as</span> e:
         <span class="function">print</span>(<span class="string">f'Request Failed: {e}'</span>)</div>
-
-                <button class="copy-btn" style="margin-top:10px; height:34px;" onclick="copyCode('pythonExample', 'Python')">
-                    <i class="fas fa-copy"></i> Copy Code
-                </button>
+                <button class="copy-btn" style="margin-top:10px; height:34px;" onclick="copyCode('pythonExample', 'Python')"><i class="fas fa-copy"></i> Copy Code</button>
             </section>
 
         </main>
@@ -951,26 +613,11 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
-        <a href="/dashboard" class="nav-item" data-nav="dashboard">
-            <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
-            <span>Home</span>
-        </a>
-        <a href="/transfer" class="nav-item" data-nav="transfer">
-            <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div>
-            <span>Send</span>
-        </a>
-        <a href="/qr" class="nav-item scan-item" data-nav="qr">
-            <div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div>
-            <span>Scan</span>
-        </a>
-        <a href="/deposit" class="nav-item" data-nav="deposit">
-            <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
-            <span>Add</span>
-        </a>
-        <a href="/transactions" class="nav-item" data-nav="transactions">
-            <div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
-            <span>History</span>
-        </a>
+        <a href="/dashboard" class="nav-item" data-nav="dashboard"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><span>Home</span></a>
+        <a href="/transfer" class="nav-item" data-nav="transfer"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div><span>Send</span></a>
+        <a href="/qr" class="nav-item scan-item" data-nav="qr"><div class="scan-circle"><svg class="qr-icon" viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4-6h2v2h-2v-2zm2 0h2v2h-2v-2zm2 0h2v2h-2v-2z"/></svg></div><span>Scan</span></a>
+        <a href="/deposit" class="nav-item" data-nav="deposit"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><span>Add</span></a>
+        <a href="/transactions" class="nav-item" data-nav="transactions"><div class="nav-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><span>History</span></a>
     </div>
 
 </div>
@@ -1043,8 +690,7 @@ if (window.matchMedia) {
 }
 
 // ============================================
-// ✅ PAGE LOADER
-// ✅ শুধু একবারই দেখাবে (প্রথম লোডে), ২.৫ সেকেন্ড
+// ✅ PAGE LOADER — শুধু একবারই দেখাবে (প্রথম লোডে), ২.৫ সেকেন্ড
 // ============================================
 var loaderStartTime = 0;
 
@@ -1059,21 +705,15 @@ function showLoader() {
 function hideLoader() {
     var el = document.getElementById('pageLoader');
     if (!el) return;
-
-    // ✅ বাকি সময় হিসাব করুন যাতে কমপক্ষে 2.5 সেকেন্ড হয়
     var elapsed = Date.now() - loaderStartTime;
     var remaining = Math.max(0, MIN_LOADER_TIME - elapsed);
-
     if (remaining > 0) {
-        setTimeout(function() {
-            el.classList.remove('active');
-        }, remaining);
+        setTimeout(function() { el.classList.remove('active'); }, remaining);
     } else {
         el.classList.remove('active');
     }
 }
 
-// লোডার সম্পূর্ণ force hide (blocked/logout/PIN দেখানোর জন্য)
 function forceHideLoader() {
     var el = document.getElementById('pageLoader');
     if (el) el.classList.remove('active');
@@ -1131,9 +771,7 @@ function closeSidebar() {
         if (dx > 70 && dy < 60) openSidebar();
     }, { passive: true });
 })();
-document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeSidebar();
-});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSidebar(); });
 
 // ============================================
 // SIDEBAR DATA
@@ -1333,7 +971,6 @@ async function callGateSetPin(pin) {
             showToast('PIN Set Successfully!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                // ✅ কোনো লোডার নেই — সরাসরি পেজ রেডি
                 onPageReady();
             }, 500);
         } else {
@@ -1362,7 +999,6 @@ async function callGateVerifyPin(pin) {
             showToast('PIN Verified!', 'success');
             setTimeout(function(){
                 hidePinGate();
-                // ✅ কোনো লোডার নেই — সরাসরি পেজ রেডি
                 onPageReady();
             }, 400);
         } else {
@@ -1376,18 +1012,14 @@ async function callGateVerifyPin(pin) {
     }
 }
 async function initPinGate() {
-    // ✅ PIN verified থাকলে — লোডার তখনও active, onPageReady কল করব
     if (sessionStorage.getItem('pin_verified') === 'true') {
         hidePinGate();
         onPageReady();
         return;
     }
-
-    // ✅ PIN verify করা নেই — লোডার হাইড করে PIN গেট দেখান
     forceHideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
-
     try {
         var response = await fetch(PIN_API_URL + '/check-pin-status', {
             headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
@@ -1444,12 +1076,9 @@ function logout() {
 }
 
 // ============================================
-// ✅ PAGE READY — সব ডেটা লোড
-// ✅ এই ফাংশন থেকে কোনো লোডার show/hide হবে না
-// ✅ লোডার শুধু DOMContentLoaded থেকে handle হবে
+// PAGE READY
 // ============================================
 async function onPageReady() {
-    // ✅ STEP 1: Cache থেকে sidebar + avatar আপডেট
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         setAvatar(cachedUser);
@@ -1459,20 +1088,16 @@ async function onPageReady() {
         }
     } catch(e){ setAvatar({}); updateSidebarUser({}); }
 
-    // ✅ STEP 2: Fresh user verify
     var isUserValid = await verifyUserState();
     if (!isUserValid) { forceHideLoader(); return; }
 
-    // ✅ STEP 3: সমস্ত ডেটা একসাথে লোড (parallel)
     await Promise.all([
         refreshWalletBalance(),
         loadApiStatus(),
         loadApiKeyFromDatabase()
     ]);
 
-    // ✅ STEP 4: লোডার হাইড — শুধু প্রথমবার পেজ লোডের সময়
-    // (২.৫ সেকেন্ড পূর্ণ হলেই হাইড হবে)
-    // পরেরবার (PIN verify/set এর পরে) লোডার ইতিমধ্যে হাইড করা আছে, তাই কিছু হবে না
+    // ✅ লোডার হাইড — শুধু প্রথমবার পেজ লোডের সময়
     if (loaderStartTime > 0) {
         hideLoader();
     }
@@ -1483,53 +1108,32 @@ async function onPageReady() {
 // ============================================
 async function refreshWalletBalance() {
     if (isAccountBlocked) return;
-
     try {
         const token = localStorage.getItem('token');
         if (!token) return;
-
         let balance = null;
-
         try {
             const res = await fetch('/api/wallet/balance', {
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
             });
-
             if (res.ok) {
                 const data = await res.json();
-                if (data.status === 'success' && data.data && data.data.balance !== undefined) {
-                    balance = parseFloat(data.data.balance);
-                }
-                else if (data.status === 'success' && data.balance !== undefined) {
-                    balance = parseFloat(data.balance);
-                }
+                if (data.status === 'success' && data.data && data.data.balance !== undefined) balance = parseFloat(data.data.balance);
+                else if (data.status === 'success' && data.balance !== undefined) balance = parseFloat(data.balance);
             }
-        } catch (e) {
-            console.warn('wallet/balance fetch failed:', e.message);
-        }
+        } catch (e) { console.warn('wallet/balance fetch failed:', e.message); }
 
         if (balance === null || isNaN(balance)) {
             try {
                 const res = await fetch('/api/auth/me', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
                 });
-
                 if (res.ok) {
                     const data = await res.json();
                     const user = extractUser(data);
-                    if (user && user.balance !== undefined) {
-                        balance = parseFloat(user.balance);
-                    }
+                    if (user && user.balance !== undefined) balance = parseFloat(user.balance);
                 }
-            } catch (e) {
-                console.warn('auth/me fetch failed:', e.message);
-            }
+            } catch (e) { console.warn('auth/me fetch failed:', e.message); }
         }
 
         if (balance !== null && !isNaN(balance)) {
@@ -1540,9 +1144,7 @@ async function refreshWalletBalance() {
                 localStorage.setItem('user', JSON.stringify(u));
             } catch (e) {}
         }
-    } catch (error) {
-        console.error('Refresh balance error:', error);
-    }
+    } catch (error) { console.error('Refresh balance error:', error); }
 }
 
 // ============================================
@@ -1552,21 +1154,15 @@ async function loadApiStatus() {
     const toggle = document.getElementById('apiToggle');
     const statusEl = document.getElementById('statusText');
     const statusDesc = document.getElementById('statusDesc');
-
     try {
         const token = localStorage.getItem('token');
         if (!token) return;
         toggle.classList.add('loading');
-
-        const response = await fetch(`${API_BASE}/api-key/status`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`${API_BASE}/api-key/status`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!response.ok) throw new Error('Failed to load status');
         const data = await response.json();
         if (!data.success) throw new Error(data.message || 'Failed');
-
         isApiActive = data.apiKeyActive !== false;
-
         if (isApiActive) {
             toggle.classList.remove('off');
             statusEl.classList.remove('inactive');
@@ -1586,15 +1182,12 @@ async function loadApiStatus() {
             document.getElementById('testApiCard').classList.add('api-disabled');
             document.getElementById('testPaymentBtn').disabled = true;
         }
-
         updateApiUsageStats(data);
     } catch (error) {
         console.error('Load API status error:', error);
         statusEl.textContent = 'Status unavailable';
         statusDesc.textContent = 'Could not load API status from server.';
-    } finally {
-        toggle.classList.remove('loading');
-    }
+    } finally { toggle.classList.remove('loading'); }
 }
 
 function updateApiUsageStats(data) {
@@ -1602,21 +1195,14 @@ function updateApiUsageStats(data) {
     const successCallsEl = document.getElementById('successCalls');
     const failedCallsEl = document.getElementById('failedCalls');
     const lastUsedEl = document.getElementById('lastUsed');
-
     if (totalCallsEl) totalCallsEl.textContent = data.totalApiCalls || 0;
     if (successCallsEl) successCallsEl.textContent = data.successfulApiCalls || 0;
     if (failedCallsEl) failedCallsEl.textContent = data.failedApiCalls || 0;
-
     if (lastUsedEl) {
         if (data.lastApiUsedAt) {
             const d = new Date(data.lastApiUsedAt);
-            lastUsedEl.textContent = d.toLocaleString('en-IN', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: true
-            });
-        } else {
-            lastUsedEl.textContent = 'Never';
-        }
+            lastUsedEl.textContent = d.toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+        } else { lastUsedEl.textContent = 'Never'; }
     }
 }
 
@@ -1625,18 +1211,14 @@ function updateApiUsageStats(data) {
 // ============================================
 function updateApiDisplay(key) {
     apiKey = key;
-
     const apiKeyEl = document.getElementById('apiKeyDisplay');
     const jsKeyEl = document.getElementById('jsKey');
     const pyKeyEl = document.getElementById('pyKey');
-
     if (apiKeyEl) apiKeyEl.textContent = key || '—';
     if (jsKeyEl) jsKeyEl.textContent = key || 'YOUR_KEY';
     if (pyKeyEl) pyKeyEl.textContent = key || 'YOUR_KEY';
-
     updateApiUrl();
 }
-
 function updateApiUrl() {
     const urlEl = document.getElementById('apiUrlDisplay');
     if (!urlEl) return;
@@ -1651,30 +1233,15 @@ async function loadApiKeyFromDatabase() {
     try {
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = '/'; return; }
-
         const response = await fetch(`${API_BASE}/api-key`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
-
-        if (!response.ok) {
-            updateApiDisplay('—');
-            return;
-        }
-
+        if (!response.ok) { updateApiDisplay('—'); return; }
         const data = await response.json();
-
-        if (data.success && data.apiKey) {
-            updateApiDisplay(data.apiKey);
-        } else {
-            updateApiDisplay('—');
-        }
-    } catch (error) {
-        updateApiDisplay('—');
-    }
+        if (data.success && data.apiKey) updateApiDisplay(data.apiKey);
+        else updateApiDisplay('—');
+    } catch (error) { updateApiDisplay('—'); }
 }
 
 // ============================================
@@ -1684,31 +1251,19 @@ async function toggleApiStatus() {
     const toggle = document.getElementById('apiToggle');
     const statusEl = document.getElementById('statusText');
     const statusDesc = document.getElementById('statusDesc');
-
     if (toggle.classList.contains('loading')) return;
-
     const newActive = !isApiActive;
     toggle.classList.add('loading');
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE}/api-key/toggle`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ active: newActive })
         });
-
         const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Failed to toggle');
-        }
-
+        if (!response.ok || !data.success) throw new Error(data.message || 'Failed to toggle');
         isApiActive = data.apiKeyActive;
-
         if (isApiActive) {
             toggle.classList.remove('off');
             statusEl.classList.remove('inactive');
@@ -1730,15 +1285,9 @@ async function toggleApiStatus() {
             document.getElementById('testPaymentBtn').disabled = true;
             showToast('API payments disabled', 'warning');
         }
-
-        if (data.apiKey && data.apiKey !== apiKey) {
-            updateApiDisplay(data.apiKey);
-        }
-    } catch (error) {
-        showToast(error.message || 'Failed to toggle API', 'error');
-    } finally {
-        toggle.classList.remove('loading');
-    }
+        if (data.apiKey && data.apiKey !== apiKey) updateApiDisplay(data.apiKey);
+    } catch (error) { showToast(error.message || 'Failed to toggle API', 'error'); }
+    finally { toggle.classList.remove('loading'); }
 }
 
 // ============================================
@@ -1758,11 +1307,8 @@ function copyApiKey() {
             document.body.removeChild(textarea);
             showToast('API Key copied!', 'success');
         });
-    } else {
-        showToast('Nothing to copy', 'warning');
-    }
+    } else { showToast('Nothing to copy', 'warning'); }
 }
-
 function copyApiUrl() {
     const urlEl = document.getElementById('apiUrlDisplay');
     if (urlEl && urlEl.textContent.trim() && urlEl.textContent.trim() !== '—') {
@@ -1777,11 +1323,8 @@ function copyApiUrl() {
             document.body.removeChild(textarea);
             showToast('API URL copied!', 'success');
         });
-    } else {
-        showToast('Nothing to copy', 'warning');
-    }
+    } else { showToast('Nothing to copy', 'warning'); }
 }
-
 function copyCode(elementId, label) {
     const element = document.getElementById(elementId);
     const text = element.textContent.trim();
@@ -1803,122 +1346,70 @@ async function generateNewToken() {
     const originalText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(59,130,246,0.3);border-top-color:#3b82f6;"></span>';
-
     try {
         const token = localStorage.getItem('token');
         if (!token) { showToast('Please login first', 'error'); return; }
-
         const response = await fetch(`${API_BASE}/api-key/regenerate`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         const data = await response.json();
-
         if (response.ok && data.success && data.apiKey) {
             updateApiDisplay(data.apiKey);
             showToast('New API key generated!', 'success');
-        } else {
-            throw new Error(data.message || 'Failed to generate');
-        }
-    } catch (error) {
-        showToast(error.message || 'Failed to generate API key', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
+        } else { throw new Error(data.message || 'Failed to generate'); }
+    } catch (error) { showToast(error.message || 'Failed to generate API key', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
-
 async function regenerateApiKey() {
     const btn = event.target.closest('button');
     const originalText = btn.innerHTML;
-
-    if (!confirm('Are you sure you want to regenerate your API key? The old key will stop working immediately.')) {
-        return;
-    }
-
+    if (!confirm('Are you sure you want to regenerate your API key? The old key will stop working immediately.')) return;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(139,92,246,0.3);border-top-color:#8b5cf6;"></span>';
-
     try {
         const token = localStorage.getItem('token');
         if (!token) { showToast('Please login first', 'error'); return; }
-
         const response = await fetch(`${API_BASE}/api-key/regenerate`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         const data = await response.json();
-
         if (response.ok && data.success && data.apiKey) {
             updateApiDisplay(data.apiKey);
             showToast('API key regenerated!', 'success');
-        } else {
-            throw new Error(data.message || 'Failed to regenerate');
-        }
-    } catch (error) {
-        showToast(error.message || 'Failed to regenerate API key', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
+        } else { throw new Error(data.message || 'Failed to regenerate'); }
+    } catch (error) { showToast(error.message || 'Failed to regenerate API key', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
 
 // ============================================
 // TEST PAYMENT
 // ============================================
 async function makeTestPayment() {
-    if (!isApiActive) {
-        showToast('API payments are disabled. Enable first.', 'warning');
-        return;
-    }
-
+    if (!isApiActive) { showToast('API payments are disabled. Enable first.', 'warning'); return; }
     const numberInput = document.getElementById('payNumber');
     const amountInput = document.getElementById('testAmount');
     const commentInput = document.getElementById('testComment');
-
     const number = numberInput.value.trim();
     const amount = amountInput.value;
     const comment = commentInput.value.trim();
-
-    if (!number || number.length < 10) {
-        showToast('Enter a valid 10-digit number', 'warning');
-        numberInput.focus();
-        return;
-    }
-    if (!amount || parseFloat(amount) <= 0) {
-        showToast('Enter a valid amount', 'warning');
-        amountInput.focus();
-        return;
-    }
-
+    if (!number || number.length < 10) { showToast('Enter a valid 10-digit number', 'warning'); numberInput.focus(); return; }
+    if (!amount || parseFloat(amount) <= 0) { showToast('Enter a valid amount', 'warning'); amountInput.focus(); return; }
     const key = apiKey;
-    if (!key || key === '—' || key === 'YOUR_KEY') {
-        showToast('No valid API key. Regenerate.', 'warning');
-        return;
-    }
-
+    if (!key || key === '—' || key === 'YOUR_KEY') { showToast('No valid API key. Regenerate.', 'warning'); return; }
     const btn = document.getElementById('testPaymentBtn');
     const originalText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Processing...';
-
     try {
         const url = `${PAYMENT_API_URL}?key=${key}&number=${number}&amount=${amount}&comment=${encodeURIComponent(comment)}`;
         const response = await fetch(url, { method: 'GET' });
         const data = await response.json();
-
         const responseContainer = document.getElementById('testResponse');
         const responseContent = document.getElementById('testResponseContent');
-
         const formattedJson = JSON.stringify(data, null, 4);
         let coloredJson = formattedJson;
-
         coloredJson = coloredJson.replace(/"status": "success"/g, '"status": "<span class="success">success</span>"');
         coloredJson = coloredJson.replace(/"status": "failed"/g, '"status": "<span class="error">failed</span>"');
         coloredJson = coloredJson.replace(/"([^"]+)":/g, (match, k) => {
@@ -1933,24 +1424,14 @@ async function makeTestPayment() {
             if (match.includes('span class')) return match;
             return `: <span class="number">${value}</span>`;
         });
-
         responseContent.innerHTML = coloredJson;
         responseContainer.classList.add('show');
-
-        if (data.status === 'success') {
-            showToast('Payment successful!', 'success');
-        } else {
-            showToast(data.message || 'Payment failed', 'error');
-        }
-
+        if (data.status === 'success') showToast('Payment successful!', 'success');
+        else showToast(data.message || 'Payment failed', 'error');
         await loadApiStatus();
         await refreshWalletBalance();
-    } catch (error) {
-        showToast('Network error: ' + error.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
+    } catch (error) { showToast('Network error: ' + error.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
 
 // ============================================
@@ -1961,20 +1442,16 @@ function showCurlCommand() {
     const amount = document.getElementById('testAmount').value || '500';
     const comment = document.getElementById('testComment').value.trim() || 'Test Payment';
     const key = apiKey || 'YOUR_KEY';
-
     const fullUrl = `${PAYMENT_API_URL}?key=${key}&number=${number}&amount=${amount}&comment=${encodeURIComponent(comment)}`;
     const curlCmd = `curl -X GET "${fullUrl}"`;
     const coloredCmd = `<span class="curl-cmd">curl</span> -X <span class="curl-param">GET</span> "<span class="curl-url">${fullUrl}</span>"`;
-
     document.getElementById('curlCode').innerHTML = coloredCmd;
     const curlBox = document.getElementById('curlBox');
     curlBox.classList.add('show');
     curlBox.dataset.rawCommand = curlCmd;
-
     setTimeout(() => { curlBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
     showToast('cURL command generated!', 'info');
 }
-
 function copyCurlCommand() {
     const curlBox = document.getElementById('curlBox');
     const rawCmd = curlBox.dataset.rawCommand || document.getElementById('curlCode').textContent;
@@ -2008,29 +1485,14 @@ function copyCurlCommand() {
 })();
 
 // ============================================
-// ✅ INIT — লোডার শুধু একবারই দেখাবে
+// INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
-    // STEP 1: Theme apply করুন (সবার আগে)
     initTheme();
-
     if (!AUTH_TOKEN) return;
-
-    // STEP 2: ✅ সবার আগে লোডিং এনিমেশন দেখান (শুধু একবারই)
-    // ২.৫ সেকেন্ড দেখাবে, ডেটা যত দ্রুতই লোড হোক না কেন
     showLoader();
-
-    // STEP 3: User state verify (blocked/deleted check)
     var isUserValid = await verifyUserState();
-    if (!isUserValid) {
-        forceHideLoader();
-        return;
-    }
-
-    // STEP 4: PIN gate চেক
-    // - PIN verified থাকলে → hidePinGate() + onPageReady() → লোডার হাইড হবে
-    // - PIN verified না থাকলে → forceHideLoader() + PIN gate দেখাবে
-    //   (PIN verify সফল হওয়ার পরে onPageReady() কল হবে, কোনো লোডার ছাড়াই)
+    if (!isUserValid) { forceHideLoader(); return; }
     await initPinGate();
 });
 
