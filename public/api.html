@@ -1307,7 +1307,12 @@ async function callGateSetPin(pin) {
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Set Successfully!', 'success');
-            setTimeout(function(){ hidePinGate(); showLoader(); onPageReady(); }, 500);
+            setTimeout(function(){
+                hidePinGate();
+                showLoader();
+                // ✅ PIN সফল হলে পুরো পেজ রিলোডের মতো সব ডেটা লোড হবে
+                onPageReady();
+            }, 500);
         } else {
             showToast(data.message || 'Error Setting PIN', 'error');
             gateStep = 1; gateStep1Value = ''; gateCode = '';
@@ -1332,7 +1337,12 @@ async function callGateVerifyPin(pin) {
             sessionStorage.setItem('pin_verified', 'true');
             pinVerified = true;
             showToast('PIN Verified!', 'success');
-            setTimeout(function(){ hidePinGate(); showLoader(); onPageReady(); }, 400);
+            setTimeout(function(){
+                hidePinGate();
+                showLoader();
+                // ✅ PIN সফল হলে পুরো পেজ রিলোডের মতো সব ডেটা লোড হবে
+                onPageReady();
+            }, 400);
         } else {
             showToast(data.message || 'Wrong PIN', 'error');
             updatePinGateDots(true);
@@ -1344,10 +1354,18 @@ async function callGateVerifyPin(pin) {
     }
 }
 async function initPinGate() {
-    if (sessionStorage.getItem('pin_verified') === 'true') { hidePinGate(); hideLoader(); onPageReady(); return; }
+    // ✅ যদি PIN আগে থেকেই verify করা থাকে — লোডার তখনও active আছে, শুধু PIN হাইড করে onPageReady কল করব
+    if (sessionStorage.getItem('pin_verified') === 'true') {
+        hidePinGate();
+        onPageReady();
+        return;
+    }
+
+    // ✅ PIN verify করা নেই — লোডার হাইড করে PIN গেট দেখান
     hideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
+
     try {
         var response = await fetch(PIN_API_URL + '/check-pin-status', {
             headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
@@ -1404,9 +1422,10 @@ function logout() {
 }
 
 // ============================================
-// PAGE READY
+// ✅ PAGE READY (সব ডেটা লোড)
 // ============================================
 async function onPageReady() {
+    // ✅ STEP 1: Cache থেকে sidebar + avatar আপডেট
     try {
         var cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
         setAvatar(cachedUser);
@@ -1416,12 +1435,18 @@ async function onPageReady() {
         }
     } catch(e){ setAvatar({}); updateSidebarUser({}); }
 
+    // ✅ STEP 2: Fresh user verify + balance
     var isUserValid = await verifyUserState();
     if (!isUserValid) { hideLoader(); return; }
 
-    await refreshWalletBalance();
-    await loadApiStatus();
-    await loadApiKeyFromDatabase();
+    // ✅ STEP 3: সমস্ত ডেটা একসাথে লোড (parallel)
+    await Promise.all([
+        refreshWalletBalance(),
+        loadApiStatus(),
+        loadApiKeyFromDatabase()
+    ]);
+
+    // ✅ STEP 4: সব ডেটা লোড শেষ — লোডার হাইড করুন
     hideLoader();
 }
 
@@ -1955,18 +1980,27 @@ function copyCurlCommand() {
 })();
 
 // ============================================
-// INIT
+// ✅ INIT — সঠিক ক্রম
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
-    // ✅ STEP 1: Theme apply করুন
+    // STEP 1: Theme apply করুন (সবার আগে)
     initTheme();
 
     if (!AUTH_TOKEN) return;
 
-    // ✅ STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background)
+    // STEP 2: সবার আগে লোডিং এনিমেশন দেখান (blurred background)
     showLoader();
 
-    // ✅ STEP 3: PIN gate চেক করুন
+    // STEP 3: User state verify (blocked/deleted check) — লোডার দেখানোর সময়
+    var isUserValid = await verifyUserState();
+    if (!isUserValid) {
+        hideLoader();
+        return;
+    }
+
+    // STEP 4: PIN gate চেক (সিদ্ধান্ত নেবে লোডার হাইড করবে কি না)
+    // - PIN verified থাকলে → লোডার তখনও থাকবে, onPageReady() কল হবে
+    // - PIN verified না থাকলে → লোডার হাইড, PIN gate দেখাবে
     await initPinGate();
 });
 
