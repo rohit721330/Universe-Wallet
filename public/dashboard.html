@@ -79,13 +79,47 @@ body.dark .puja-banner { background: linear-gradient(135deg, #3a2a0f, #2b1a08); 
 .diya-row .diya-svg:nth-child(1) .flame { animation-delay: .15s; }
 .diya-row .diya-svg:nth-child(3) .flame { animation-delay: .35s; }
 @keyframes diyaFlicker { 0%,100% { transform: scale(1,1) rotate(0deg); } 30% { transform: scale(1.07,.93) rotate(-3deg); } 60% { transform: scale(.93,1.07) rotate(3deg); } }
-.puja-countdown { margin: 14px 0 2px; padding: 11px 10px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,215,0,.22); }
-.puja-countdown-label { font-size: 8.5px; letter-spacing: .8px; text-align: center; opacity: .9; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-.puja-countdown-label .diya-svg { width: 13px; height: 16px; }
-.puja-countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.puja-countdown-unit { text-align: center; }
-.puja-countdown-unit strong { display: block; font-size: 17px; font-weight: 900; }
-.puja-countdown-unit small { display: block; font-size: 7px; opacity: .78; letter-spacing: .4px; text-transform: uppercase; margin-top: 2px; }
+.puja-countdown-card { margin-top: 16px; padding: 20px 16px 18px; border-radius: 18px; position: relative; overflow: hidden; background: linear-gradient(135deg, #fff3d6 0%, #ffe1b8 100%); border: 2px solid #f4b400; box-shadow: 0 10px 26px rgba(139,0,0,.15); }
+body.dark .puja-countdown-card { background: linear-gradient(135deg, #3a2a0f 0%, #2b1a08 100%); border-color: #a3123f; box-shadow: 0 10px 26px rgba(0,0,0,.4); }
+.puja-countdown-card::before { content: ""; position: absolute; width: 150px; height: 150px; background: radial-gradient(circle, rgba(184,35,47,.16), transparent 70%); top: -55px; right: -55px; border-radius: 50%; }
+.puja-countdown-card::after { content: ""; position: absolute; width: 110px; height: 110px; background: radial-gradient(circle, rgba(244,180,0,.2), transparent 70%); bottom: -40px; left: -35px; border-radius: 50%; }
+.puja-countdown-title { text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #8a3d00; margin: 2px 0 4px; position: relative; z-index: 2; }
+body.dark .puja-countdown-title { color: #ffcf70; }
+.puja-countdown-sub { text-align: center; font-size: 9.5px; color: #a15c00; opacity: .8; margin-bottom: 14px; position: relative; z-index: 2; }
+body.dark .puja-countdown-sub { color: #dcbba5; }
+.puja-countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; position: relative; z-index: 2; }
+.puja-countdown-unit { background: rgba(255,255,255,.55); border: 1px solid rgba(244,180,0,.45); border-radius: 12px; padding: 11px 4px; text-align: center; }
+body.dark .puja-countdown-unit { background: rgba(0,0,0,.25); border-color: rgba(255,207,77,.25); }
+.puja-countdown-unit strong { display: block; font-size: 22px; font-weight: 900; color: #8b0000; }
+body.dark .puja-countdown-unit strong { color: #ffb020; }
+.puja-countdown-unit small { display: block; font-size: 8px; opacity: .8; letter-spacing: .5px; text-transform: uppercase; margin-top: 4px; color: #8a3d00; }
+body.dark .puja-countdown-unit small { color: #dcbba5; }
+
+/* Festive strip: hanging diyas + kash grass, below header */
+.festive-strip { padding: 8px 16px 6px; }
+.hanging-diyas { display: flex; justify-content: space-around; }
+.hanging-diya { display: flex; flex-direction: column; align-items: center; transform-origin: top center; animation: hangSwing 2.6s ease-in-out infinite; }
+.hanging-diya:nth-child(2n) { animation-delay: .5s; }
+.hanging-diya:nth-child(3n) { animation-delay: .9s; }
+.hanging-diya .string { width: 1px; height: 13px; background: var(--muted-3); }
+@keyframes hangSwing { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+.kash-strip { display: flex; justify-content: space-between; margin-top: -2px; padding: 0 6px; }
+.kash-svg { width: 26px; height: 32px; opacity: .9; }
+.kash-svg.flip { transform: scaleX(-1); }
+.kash-svg .blade { transform-origin: bottom center; animation: kashSway 3.2s ease-in-out infinite; }
+.kash-svg .blade:nth-child(3) { animation-delay: .6s; }
+@keyframes kashSway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
+/* Motif row inside countdown card: panch-pradip, dhak, kash */
+.motif-row { display: flex; justify-content: center; align-items: flex-end; gap: 16px; margin-bottom: 6px; position: relative; z-index: 2; }
+.motif-svg { width: 40px; height: 30px; overflow: visible; }
+.motif-svg .flame { transform-origin: 50% 100%; animation: diyaFlicker 1.2s ease-in-out infinite; }
+.motif-svg .stick { transform-origin: 60% 80%; animation: drumBeat .5s ease-in-out infinite; }
+@keyframes drumBeat { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-18deg); } }
+
+/* Firecracker sparks inside the countdown card */
+.spark { position: absolute; width: 5px; height: 5px; border-radius: 50%; top: 16%; animation: sparkBurst 1.6s ease-out infinite; z-index: 1; }
+@keyframes sparkBurst { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx),var(--dy)) scale(0); opacity: 0; } }
 .balance-card { position: relative; min-height: 240px; padding: 24px 22px; overflow: hidden; border-radius: 18px; color: #fff; background: radial-gradient(circle at 90% 20%, rgba(255,205,80,.45), transparent 35%), linear-gradient(135deg, #8b0000, #d4145a); box-shadow: var(--balance-card-shadow); }
 .balance-card::after { content: ""; position: absolute; width: 240px; height: 140px; right: -50px; bottom: -70px; border-radius: 50%; background: rgba(255,215,0,.12); }
 .balance-content { position: relative; z-index: 2; }
@@ -315,6 +349,21 @@ body.dark .blocked-icon { background: #3a1210; border-color: #6b1f1f; }
             <div class="user-avatar" id="userAvatar" onclick="goToProfile()"></div>
         </div>
     </header>
+<div class="festive-strip">
+    <div class="hanging-diyas">
+        <div class="hanging-diya"><div class="string"></div><svg class="diya-svg small" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/></g></svg></div>
+        <div class="hanging-diya"><div class="string"></div><svg class="diya-svg small" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/></g></svg></div>
+        <div class="hanging-diya"><div class="string"></div><svg class="diya-svg small" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/></g></svg></div>
+        <div class="hanging-diya"><div class="string"></div><svg class="diya-svg small" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/></g></svg></div>
+        <div class="hanging-diya"><div class="string"></div><svg class="diya-svg small" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/></g></svg></div>
+    </div>
+    <div class="kash-strip">
+        <svg class="kash-svg" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg"><line x1="15" y1="34" x2="15" y2="10" stroke="#8a9a5a" stroke-width="2"/><path class="blade" d="M15 10c-6-5-10-3-13 1c5-1 9 1 10 5c1-4 5-5 3-6z" fill="#f4f1e8"/><path class="blade" d="M15 10c6-5 10-3 13 1c-5-1-9 1-10 5c-1-4-5-5-3-6z" fill="#f4f1e8"/></svg>
+        <svg class="kash-svg" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg"><line x1="15" y1="34" x2="15" y2="10" stroke="#8a9a5a" stroke-width="2"/><path class="blade" d="M15 10c-6-5-10-3-13 1c5-1 9 1 10 5c1-4 5-5 3-6z" fill="#f4f1e8"/><path class="blade" d="M15 10c6-5 10-3 13 1c-5-1-9 1-10 5c-1-4-5-5-3-6z" fill="#f4f1e8"/></svg>
+        <svg class="kash-svg flip" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg"><line x1="15" y1="34" x2="15" y2="10" stroke="#8a9a5a" stroke-width="2"/><path class="blade" d="M15 10c-6-5-10-3-13 1c5-1 9 1 10 5c1-4 5-5 3-6z" fill="#f4f1e8"/><path class="blade" d="M15 10c6-5 10-3 13 1c-5-1-9 1-10 5c-1-4-5-5-3-6z" fill="#f4f1e8"/></svg>
+        <svg class="kash-svg flip" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg"><line x1="15" y1="34" x2="15" y2="10" stroke="#8a9a5a" stroke-width="2"/><path class="blade" d="M15 10c-6-5-10-3-13 1c5-1 9 1 10 5c1-4 5-5 3-6z" fill="#f4f1e8"/><path class="blade" d="M15 10c6-5 10-3 13 1c-5-1-9 1-10 5c-1-4-5-5-3-6z" fill="#f4f1e8"/></svg>
+    </div>
+</div>
 <main class="main">
     <section class="overview">
         <small id="overviewTapArea"><i class="fas fa-gauge-high"></i> OVERVIEW</small>
@@ -335,21 +384,32 @@ body.dark .blocked-icon { background: #3a1210; border-color: #6b1f1f; }
             </div>
             <div class="balance">₹<span id="balance">0.00</span></div>
             <div class="balance-line"></div>
-            <div class="puja-countdown">
-                <div class="puja-countdown-label"><svg class="diya-svg" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="19" rx="12" ry="3" fill="#8a4a1e"/><path d="M2 19c0 5.5 5.4 9.5 12 9.5s12-4 12-9.5H2z" fill="#c97a2b"/><g class="flame"><path d="M14 16c-2.2-3-1.3-6.3 1-8.6-0.4 2 .8 3.3 1.6 4.8.6-1.1.4-2.6-.1-3.6 2.1 1.7 2.9 4.4 1.2 6.8-1 1.4-2.6 1.8-3.7.6z" fill="#ff8a1e"/><path d="M14.4 15c-1-1.6-.6-3.3.6-4.6-.1 1 .4 1.7.9 2.5.3-.6.2-1.4 0-1.9 1 .9 1.4 2.3.5 3.5-.5.7-1.4.9-2 0.5z" fill="#ffd54d"/></g></svg> Time Left For Maha Shashthi</div>
-                <div class="puja-countdown-grid">
-                    <div class="puja-countdown-unit"><strong id="pcDays">--</strong><small>Days</small></div>
-                    <div class="puja-countdown-unit"><strong id="pcHours">--</strong><small>Hours</small></div>
-                    <div class="puja-countdown-unit"><strong id="pcMins">--</strong><small>Mins</small></div>
-                    <div class="puja-countdown-unit"><strong id="pcSecs">--</strong><small>Secs</small></div>
-                </div>
-            </div>
             <div class="info-grid">
                 <div class="info-box"><small>PHONE</small><span id="infoMobile"><i class="fas fa-phone"></i> ---</span></div>
                 <div class="info-box"><small>EMAIL</small><span id="infoEmail"><i class="fas fa-envelope"></i> ---</span></div>
                 <div class="info-box"><small>WALLET ID</small><span id="infoWallet"><i class="fas fa-wallet"></i> ---</span></div>
                 <div class="info-box"><small>MEMBER SINCE</small><span id="infoJoined"><i class="fas fa-calendar"></i> ---</span></div>
             </div>
+        </div>
+    </section>
+
+    <section class="puja-countdown-card">
+        <div class="spark" style="left:10%; background:#ffd54d; --dx:14px; --dy:-18px; animation-delay:0s;"></div>
+        <div class="spark" style="left:28%; background:#ff8a1e; --dx:-10px; --dy:-20px; animation-delay:.4s;"></div>
+        <div class="spark" style="right:22%; background:#ffb3c6; --dx:12px; --dy:-16px; animation-delay:.8s;"></div>
+        <div class="spark" style="right:9%; background:#ffd54d; --dx:-14px; --dy:-14px; animation-delay:1.2s;"></div>
+        <div class="motif-row">
+            <svg class="motif-svg" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path d="M4 24c6-16 46-16 52 0" stroke="#f4b400" stroke-width="2" fill="none" opacity=".5"/><g class="flame"><ellipse cx="8" cy="22" rx="2.4" ry="4" fill="#ffd54d"/></g><g class="flame"><ellipse cx="21" cy="14" rx="2.6" ry="4.4" fill="#ffd54d"/></g><g class="flame"><ellipse cx="30" cy="10" rx="3" ry="5" fill="#ffcf4d"/></g><g class="flame"><ellipse cx="39" cy="14" rx="2.6" ry="4.4" fill="#ffd54d"/></g><g class="flame"><ellipse cx="52" cy="22" rx="2.4" ry="4" fill="#ffd54d"/></g></svg>
+            <svg class="motif-svg" viewBox="0 0 50 34" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="38" height="16" rx="5" fill="#7a3b12"/><rect x="6" y="10" width="38" height="3" fill="#e2a55a"/><rect x="6" y="23" width="38" height="3" fill="#e2a55a"/><line x1="12" y1="13" x2="9" y2="26" stroke="#3a1c08" stroke-width="1"/><line x1="20" y1="13" x2="18" y2="26" stroke="#3a1c08" stroke-width="1"/><line x1="30" y1="13" x2="32" y2="26" stroke="#3a1c08" stroke-width="1"/><line x1="38" y1="13" x2="41" y2="26" stroke="#3a1c08" stroke-width="1"/><g class="stick"><line x1="25" y1="18" x2="14" y2="4" stroke="#c97a2b" stroke-width="2.4" stroke-linecap="round"/></g></svg>
+            <svg class="motif-svg" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg"><line x1="15" y1="34" x2="15" y2="10" stroke="#8a9a5a" stroke-width="2"/><path class="blade" d="M15 10c-6-5-10-3-13 1c5-1 9 1 10 5c1-4 5-5 3-6z" fill="#f4f1e8"/><path class="blade" d="M15 10c6-5 10-3 13 1c-5-1-9 1-10 5c-1-4-5-5-3-6z" fill="#f4f1e8"/></svg>
+        </div>
+        <div class="puja-countdown-title">Time Left For Maha Shashthi</div>
+        <div class="puja-countdown-sub">The festivities begin soon</div>
+        <div class="puja-countdown-grid">
+            <div class="puja-countdown-unit"><strong id="pcDays">--</strong><small>Days</small></div>
+            <div class="puja-countdown-unit"><strong id="pcHours">--</strong><small>Hours</small></div>
+            <div class="puja-countdown-unit"><strong id="pcMins">--</strong><small>Mins</small></div>
+            <div class="puja-countdown-unit"><strong id="pcSecs">--</strong><small>Secs</small></div>
         </div>
     </section>
 
@@ -447,14 +507,14 @@ function initPujaCountdown() {
     var target = new Date('2026-10-17T00:00:00+05:30').getTime();
     var dEl = document.getElementById('pcDays'), hEl = document.getElementById('pcHours'),
         mEl = document.getElementById('pcMins'), sEl = document.getElementById('pcSecs'),
-        labelEl = document.querySelector('.puja-countdown-label');
+        subEl = document.querySelector('.puja-countdown-sub');
     if (!dEl) return;
     function tick() {
         var now = Date.now();
         var diff = target - now;
         if (diff <= 0) {
             dEl.textContent = '00'; hEl.textContent = '00'; mEl.textContent = '00'; sEl.textContent = '00';
-            if (labelEl) labelEl.lastChild.textContent = ' Happy Durga Puja! 🙏';
+            if (subEl) subEl.textContent = 'Happy Durga Puja! 🙏';
             clearInterval(timer);
             return;
         }
