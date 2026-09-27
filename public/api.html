@@ -226,7 +226,7 @@ img { -webkit-user-drag: none; user-drag: none; }
 #pageContent { display: none; }
 #pageContent.visible { display: block; }
 
-/* ==================== PAGE LOADER (Blurred Background) ==================== */
+/* ==================== PAGE LOADER (Blurred Background + আপনার ডিজাইন) ==================== */
 .page-loader {
     position: fixed;
     inset: 0;
@@ -234,39 +234,36 @@ img { -webkit-user-drag: none; user-drag: none; }
     display: none;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.35);
+    /* ✅ ব্লার্ড ব্যাকগ্রাউন্ড — পেছনে পেজ ঘোলা দেখা যাবে */
+    background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     transition: background 0.3s ease;
 }
-body.dark .page-loader {
-    background: rgba(13, 21, 38, 0.35);
-}
 .page-loader.active { display: flex; }
 
+/* ✅ আপনার দেওয়া কোডের মতো লোডার */
 .loader { position: relative; width: 120px; height: 120px; }
 .outer, .inner { position: absolute; border-radius: 50%; }
-
 .outer {
     inset: 0;
-    background: conic-gradient(#38bdf8 0 90deg, transparent 90deg 180deg, #f472b6 180deg 270deg, transparent 270deg);
+    background: conic-gradient(#38bdf8 0 90deg, #0000 90deg 180deg, #f472b6 180deg 270deg, #0000 270deg);
     animation: r 1.2s linear infinite reverse;
 }
+/* ✅ রিংয়ের ভেতরের অংশ কালো (আপনার কোডের মতোই) */
 .outer:before, .inner:before {
     content: "";
     position: absolute;
     border-radius: 50%;
-    background: transparent;
+    background: #000;
 }
 .outer:before { inset: 12px; }
-
 .inner {
     inset: 28px;
-    background: conic-gradient(#4ade80 0 90deg, transparent 90deg 180deg, #facc15 180deg 270deg, transparent 270deg);
+    background: conic-gradient(#4ade80 0 90deg, #0000 90deg 180deg, #facc15 180deg 270deg, #0000 270deg);
     animation: r 1.2s linear infinite;
 }
 .inner:before { inset: 10px; }
-
 @keyframes r { to { transform: rotate(360deg); } }
 
 /* ==================== PIN GATE ==================== */
@@ -580,7 +577,7 @@ body.dark .blocked-icon { background: #3a2025; border-color: #7f1d1d; }
 
 <body>
 
-<!-- ================= PAGE LOADER (Blurred) ================= -->
+<!-- ================= PAGE LOADER (Blurred Background + আপনার ডিজাইন) ================= -->
 <div class="page-loader" id="pageLoader">
     <div class="loader">
         <div class="outer"></div>
@@ -1472,7 +1469,6 @@ async function onPageReady() {
     ]);
 
     // ✅ STEP 4: hideLoader — যেটি বাকি সময় হিসাব করে লোডার হাইড করবে
-    // (নূন্যতম 2.5 সেকেন্ড পূর্ণ হওয়ার পরে)
     hideLoader();
 }
 
