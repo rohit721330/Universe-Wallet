@@ -325,6 +325,7 @@ app.get('/index.html', (req, res) => {
 
 // ==================== HTML ROUTES (Order Matters!) ====================
 app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
 app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', 'download.html')));
