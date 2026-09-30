@@ -763,21 +763,21 @@ router.post('/register', async (req, res) => {
             if (existingUser.mobile === mobile && existingUser.telegramId === tgId) {
                 errorMsg = 'User already exists with this mobile and Telegram ID. Please login.';
             } else if (existingUser.mobile === mobile) {
-                errorMsg = 'This mobile number is already registered. Please login.';
+                errorMsg = 'This mobile number is already registered. Please Try To login.';
             } else if (existingUser.telegramId === tgId) {
-                errorMsg = 'This Telegram ID is already registered. Please login.';
+                errorMsg = 'This Telegram ID is already registered. Please Try To login.';
             } else if (existingUser.email === normalizedEmail) {
-                errorMsg = 'This email is already registered. Please login.';
+                errorMsg = 'This email is already registered. Please Try To login.';
             }
             return res.status(200).json({ success: false, message: errorMsg });
         }
 
         const tgStoredData = await getOtp(tgId.toString(), 'register_telegram');
         if (!tgStoredData) {
-            return res.status(200).json({ success: false, message: 'No Telegram OTP found. Please request a new OTP.' });
+            return res.status(200).json({ success: false, message: 'No Telegram OTP Found. Please Request a New OTP.' });
         }
         if (tgStoredData.otp !== otp) {
-            return res.status(200).json({ success: false, message: 'Invalid Telegram OTP. Please enter the correct 6-digit code.' });
+            return res.status(200).json({ success: false, message: 'Invalid Telegram OTP. Please Enter The Correct 6-Digit Code.' });
         }
 
         // Generate unique walletId, apiKey, referralCode
@@ -830,7 +830,7 @@ router.post('/register', async (req, res) => {
         if (referralCode && typeof referralCode === 'string') {
             referralResult = await applyReferralIfProvided(user, referralCode);
             if (referralResult) {
-                console.log(`🎁 Referral applied for ${user.mobile} → ${referralResult.referrerName}`);
+                console.log(`🎁 Referral Applied For ${user.mobile} → ${referralResult.referrerName}`);
             }
         }
 
@@ -852,19 +852,16 @@ router.post('/register', async (req, res) => {
 
             if (referralResult) {
                 welcomeMessage += `
-
 <b>─────────────────</b>
-<b>🎉 Referral Applied!</b>
+<b>🎉 Welcome to Universal Wallet!</b>
 <b>─────────────────</b>
 
-<b>👤 Referred By:</b> ${referralResult.referrerName}
-<b>💰 Welcome Bonus:</b> ₹${referralResult.bonusAmount} (on first transaction)`;
+<b>👤 Referred By:</b> ${referralResult.referrerName};
             }
-
             welcomeMessage += `
 
 ───────────────────────
-🔒 Please set your PIN to secure your account.
+🛡️ TEAM UNIVERSE WALLET
 ───────────────────────`;
 
             sendTelegramMessage(user.telegramId, welcomeMessage).catch(() => {});
