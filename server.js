@@ -115,10 +115,12 @@ app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
-// ✅ /setup-admin — Create FIRST admin from CURRENT LOGGED-IN USER
-// ⚠️ Only works if NO admin exists yet. Once an admin exists, this route is locked.
+// ✅ GET /setup-admin — Create FIRST admin using SECRET KEY (no token needed)
+// ⚠️ Only works if NO admin exists yet. Once an admin exists, LOCKED forever.
+// Usage: /setup-admin?secret=YOUR_SETUP_SECRET
+//        /setup-admin?secret=YOUR_SETUP_SECRET&mobile=9876543210  (optional)
 // ============================================================
-app.post('/setup-admin', async (req, res) => {
+app.get('/setup-admin', async (req, res) => {
     try {
         await connectDB();
 
@@ -130,18 +132,55 @@ app.post('/setup-admin', async (req, res) => {
             });
         }
 
-        // ---------- 0. LOCK CHECK: No admin must exist ----------
+        // ---------- 0. SECRET KEY CHECK ----------
+        const SETUP_SECRET = process.env.SETUP_SECRET;
+
+        if (!SETUP_SECRET) {
+            console.error('❌ [SETUP-ADMIN] SETUP_SECRET is not configured in environment variables.');
+            return res.status(500).json({
+                success: false,
+                message: 'Setup secret is not configured on the server.',
+                hint: 'Add SETUP_SECRET=your_secret_value to your Vercel environment variables and redeploy.'
+            });
+        }
+
+        const providedSecret = req.query.secret;
+
+        if (!providedSecret) {
+            return res.status(403).json({
+                success: false,
+                message: '❌ Secret key required.',
+                hint: 'Visit: /setup-admin?secret=YOUR_SETUP_SECRET',
+                example: '/setup-admin?secret=universe2024'
+            });
+        }
+
+        if (providedSecret !== SETUP_SECRET) {
+            console.warn(`[SETUP-ADMIN] Wrong secret attempt from IP: ${req.ip}`);
+            return res.status(403).json({
+                success: false,
+                message: '❌ Invalid secret key.',
+                hint: 'Check your SETUP_SECRET value and try again.'
+            });
+        }
+
+        console.log(`✅ [SETUP-ADMIN] Secret verified. IP: ${req.ip}`);
+
+        // ---------- 1. LOCK CHECK: No admin must exist ----------
         const Admin = require('./models/Admin');
         const User = require('./models/User');
 
         const existingAdminCount = await Admin.countDocuments({});
         if (existingAdminCount > 0) {
-            const existingAdmin = await Admin.findOne({}).select('adminId fullName role mobile createdAt').lean();
+            const existingAdmin = await Admin.findOne({})
+                .select('adminId fullName role mobile createdAt')
+                .lean();
 
-            console.warn(`[SETUP-ADMIN] Blocked attempt — admin already exists: ${existingAdmin?.adminId}`);
+            console.warn(`[SETUP-ADMIN] Blocked — admin already exists: ${existingAdmin?.adminId}`);
 
             return res.status(403).json({
                 success: false,
+                locked: true,
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
                 hint: 'To create more admins, login to the admin panel and use "Create Admin Account" (/api/admin/create-admin-account).',
                 existingAdmin: {
@@ -152,71 +191,74 @@ app.post('/setup-admin', async (req, res) => {
             });
         }
 
-        // ---------- 1. Verify JWT ----------
-        const authHeader = req.headers.authorization || '';
-        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+        // ---------- 2. Find the user who will become admin ----------
+        // Priority: ?mobile=... query → else the FIRST registered user in DB
+        const targetMobile = req.query.mobile ? String(req.query.mobile).trim() : null;
 
-        if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: 'No token provided. Please login first and send Authorization: Bearer <token>.'
-            });
+        let currentUser = null;
+
+        if (targetMobile) {
+            if (!/^[0-9]{10}$/.test(targetMobile)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid ?mobile= value — must be 10 digits.'
+                });
+            }
+            currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false });
+            if (!currentUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No active user found with mobile ${targetMobile}.`
+                });
+            }
+        } else {
+            // No mobile provided → pick the oldest active user
+            currentUser = await User.findOne({
+                isDeleted: false,
+                isBlocked: false
+            })
+            .sort({ createdAt: 1 })
+            .select('+password');
+
+            if (!currentUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'No active user found in the database.',
+                    hint: 'Please register a user first, OR provide ?mobile=9876543210 to specify which user should become admin.'
+                });
+            }
         }
 
-        const JWT_SECRET = process.env.JWT_SECRET;
-        if (!JWT_SECRET) {
-            return res.status(500).json({ success: false, message: 'JWT_SECRET not configured.' });
-        }
-
-        let decoded;
-        try {
-            decoded = jwt.verify(token, JWT_SECRET);
-        } catch (err) {
-            return res.status(401).json({
-                success: false,
-                message: err.name === 'TokenExpiredError'
-                    ? 'Token expired. Please login again.'
-                    : 'Invalid token.'
-            });
-        }
-
-        if (!decoded.userId) {
-            return res.status(401).json({ success: false, message: 'Invalid token payload.' });
-        }
-
-        // ---------- 2. Load current user ----------
-        const currentUser = await User.findById(decoded.userId);
-        if (!currentUser) {
-            return res.status(404).json({ success: false, message: 'User not found for this token.' });
-        }
         if (currentUser.isDeleted) {
-            return res.status(403).json({ success: false, message: 'This account has been deleted.' });
+            return res.status(403).json({ success: false, message: 'This user account has been deleted.' });
         }
         if (currentUser.isBlocked) {
-            return res.status(403).json({ success: false, message: 'This account is blocked.' });
+            return res.status(403).json({ success: false, message: 'This user account is blocked.' });
         }
 
-        // ---------- 3. Build admin data from current user ----------
+        // ---------- 3. Build admin data from that user ----------
         const adminId = (currentUser.walletId || `u${currentUser._id}`).toLowerCase();
 
         const plainPassword = currentUser.password;
         if (!plainPassword) {
             return res.status(400).json({
                 success: false,
-                message: 'Current user has no password set. Please set one first.'
+                message: 'Selected user has no password set. Please set one first.'
             });
         }
 
-        // ---------- 4. Double-check for race conditions ----------
-        // In case two requests hit at the exact same time.
+        // ---------- 4. Race-condition double-check ----------
         const raceCheck = await Admin.findOne({
             $or: [{ adminId }, { mobile: currentUser.mobile }]
         });
         if (raceCheck) {
             return res.status(409).json({
                 success: false,
-                message: 'An admin with your ID / mobile already exists.',
-                hint: 'Please login to the admin panel instead.'
+                message: 'An admin with this ID / mobile already exists. /setup-admin is locked.',
+                existingAdmin: {
+                    adminId: raceCheck.adminId,
+                    role: raceCheck.role
+                }
             });
         }
 
@@ -242,11 +284,17 @@ app.post('/setup-admin', async (req, res) => {
             await currentUser.save();
         }
 
-        console.log(`✅ [SETUP-ADMIN] First super_admin created: ${admin.adminId}`);
+        console.log(`✅ [SETUP-ADMIN] First super_admin created: ${admin.adminId} (from user ${currentUser.mobile})`);
 
         return res.json({
             success: true,
-            message: '✅ First admin (super_admin) created from your current user.',
+            message: '✅ First admin (super_admin) created successfully.',
+            sourceUser: {
+                fullName: currentUser.fullName,
+                mobile: currentUser.mobile,
+                email: currentUser.email,
+                walletId: currentUser.walletId
+            },
             admin: {
                 adminId: admin.adminId,
                 fullName: admin.fullName,
@@ -257,18 +305,18 @@ app.post('/setup-admin', async (req, res) => {
             },
             credentials: {
                 adminId: admin.adminId,
-                password: '(same as your user password)'
+                password: '(same as the selected user\'s password)'
             },
             nextSteps: [
                 '1. Go to /admin or /rohit (admin panel)',
-                '2. Enter your pattern',
+                '2. Enter your pattern (ADMIN_PATTERN env)',
                 `3. Admin ID: ${admin.adminId}`,
-                '4. Password: your existing user password',
+                '4. Password: the selected user\'s existing password',
                 '5. ⚠️ Change the password from admin settings after first login.',
-                '6. ⚠️ This /setup-admin route is now LOCKED forever — no new admin can be created from here.'
+                '6. ⚠️ This /setup-admin route is now permanently LOCKED.'
             ],
             locked: true,
-            lockMessage: '🔒 /setup-admin is now permanently locked. Use /api/admin/create-admin-account (as super_admin) to add more admins.'
+            securityNote: '🔐 Keep your SETUP_SECRET safe. Change it in Vercel env variables if compromised.'
         });
 
     } catch (err) {
