@@ -14,7 +14,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ ADMIN_WALLET_ID
-const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID || 'UWLN427970';
+const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
+
+// ✅ SETUP SECRET (from env)
+const SETUP_SECRET = process.env.SETUP_SECRET;
 
 // ✅ Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
@@ -133,8 +136,6 @@ app.get('/setup-admin', async (req, res) => {
         }
 
         // ---------- 0. SECRET KEY CHECK ----------
-        const SETUP_SECRET = process.env.SETUP_SECRET;
-
         if (!SETUP_SECRET) {
             console.error('❌ [SETUP-ADMIN] SETUP_SECRET is not configured in environment variables.');
             return res.status(500).json({
@@ -150,8 +151,7 @@ app.get('/setup-admin', async (req, res) => {
             return res.status(403).json({
                 success: false,
                 message: '❌ Secret key required.',
-                hint: 'Visit: /setup-admin?secret=YOUR_SETUP_SECRET',
-                example: '/setup-admin?secret=universe2024'
+                hint: 'Visit: /setup-admin?secret=YOUR_SETUP_SECRET'
             });
         }
 
@@ -192,7 +192,6 @@ app.get('/setup-admin', async (req, res) => {
         }
 
         // ---------- 2. Find the user who will become admin ----------
-        // Priority: ?mobile=... query → else the FIRST registered user in DB
         const targetMobile = req.query.mobile ? String(req.query.mobile).trim() : null;
 
         let currentUser = null;
@@ -204,7 +203,7 @@ app.get('/setup-admin', async (req, res) => {
                     message: 'Invalid ?mobile= value — must be 10 digits.'
                 });
             }
-            currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false });
+            currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false }).select('+password');
             if (!currentUser) {
                 return res.status(404).json({
                     success: false,
@@ -212,7 +211,6 @@ app.get('/setup-admin', async (req, res) => {
                 });
             }
         } else {
-            // No mobile provided → pick the oldest active user
             currentUser = await User.findOne({
                 isDeleted: false,
                 isBlocked: false
@@ -270,7 +268,7 @@ app.get('/setup-admin', async (req, res) => {
             mobile: currentUser.mobile,
             email: currentUser.email,
             telegramId: currentUser.telegramId,
-            role: 'super_admin', // first admin is always super_admin
+            role: 'super_admin',
             isActive: true,
             isBlocked: false,
             createdBy: 'setup-admin-route'
@@ -278,7 +276,6 @@ app.get('/setup-admin', async (req, res) => {
 
         await admin.save();
 
-        // Mark User.isAdmin = true
         if (!currentUser.isAdmin) {
             currentUser.isAdmin = true;
             await currentUser.save();
@@ -335,7 +332,7 @@ app.get('/setup-admin', async (req, res) => {
         });
     }
 });
-                
+
 // ⚠️ TEMPORARY — Delete after use
 app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
@@ -598,7 +595,8 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
         console.log(`🚀 Server Running On Port ${PORT}`);
         console.log(`🌐 http://localhost:${PORT}`);
         console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
-        console.log(`⚠️  /setup-admin route is ACTIVE — DELETE after creating admin!`);
+        console.log(`🔐 /setup-admin route is ACTIVE (secret required)`);
+        console.log(`⚠️  SETUP_SECRET configured: ${SETUP_SECRET ? 'YES ✅' : 'NO ❌'}`);
     });
 }
 
