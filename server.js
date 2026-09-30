@@ -115,76 +115,179 @@ app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
-// ⚠️⚠️⚠️ TEMPORARY ROUTE — DELETE AFTER CREATING ADMIN ⚠️⚠️⚠️
+// ✅ /setup-admin — Create FIRST admin from CURRENT LOGGED-IN USER
+// ⚠️ Only works if NO admin exists yet. Once an admin exists, this route is locked.
 // ============================================================
-app.get('/setup-admin', async (req, res) => {
+app.post('/setup-admin', async (req, res) => {
     try {
         await connectDB();
 
         if (mongoose.connection.readyState !== 1) {
             return res.status(503).json({
                 success: false,
-                error: 'MongoDB not connected yet. Try again in 5 seconds.',
+                message: 'MongoDB not connected yet. Try again in 5 seconds.',
                 readyState: mongoose.connection.readyState
             });
         }
 
+        // ---------- 0. LOCK CHECK: No admin must exist ----------
         const Admin = require('./models/Admin');
+        const User = require('./models/User');
 
-        const existing = await Admin.findOne({ role: 'super_admin' });
-        if (existing) {
-            return res.json({
+        const existingAdminCount = await Admin.countDocuments({});
+        if (existingAdminCount > 0) {
+            const existingAdmin = await Admin.findOne({}).select('adminId fullName role mobile createdAt').lean();
+
+            console.warn(`[SETUP-ADMIN] Blocked attempt — admin already exists: ${existingAdmin?.adminId}`);
+
+            return res.status(403).json({
                 success: false,
-                message: 'Super admin already exists',
-                adminId: existing.adminId,
-                mobile: existing.mobile,
-                role: existing.role,
-                hint: 'If you forgot password, delete this document from MongoDB Atlas and visit /setup-admin again'
+                message: '🔒 Admin setup is locked. An admin already exists in the system.',
+                hint: 'To create more admins, login to the admin panel and use "Create Admin Account" (/api/admin/create-admin-account).',
+                existingAdmin: {
+                    adminId: existingAdmin?.adminId || 'unknown',
+                    role: existingAdmin?.role || 'unknown',
+                    createdAt: existingAdmin?.createdAt || null
+                }
             });
         }
 
-        const superAdmin = new Admin({
-            adminId: 'UWLE099106',
-            password: 'Universe@330',
-            fullName: 'Universe',
-            mobile: '9477379243',
-            email: 'business.universewallet@gmail.com',
-            role: 'super_admin',
+        // ---------- 1. Verify JWT ----------
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided. Please login first and send Authorization: Bearer <token>.'
+            });
+        }
+
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET) {
+            return res.status(500).json({ success: false, message: 'JWT_SECRET not configured.' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({
+                success: false,
+                message: err.name === 'TokenExpiredError'
+                    ? 'Token expired. Please login again.'
+                    : 'Invalid token.'
+            });
+        }
+
+        if (!decoded.userId) {
+            return res.status(401).json({ success: false, message: 'Invalid token payload.' });
+        }
+
+        // ---------- 2. Load current user ----------
+        const currentUser = await User.findById(decoded.userId);
+        if (!currentUser) {
+            return res.status(404).json({ success: false, message: 'User not found for this token.' });
+        }
+        if (currentUser.isDeleted) {
+            return res.status(403).json({ success: false, message: 'This account has been deleted.' });
+        }
+        if (currentUser.isBlocked) {
+            return res.status(403).json({ success: false, message: 'This account is blocked.' });
+        }
+
+        // ---------- 3. Build admin data from current user ----------
+        const adminId = (currentUser.walletId || `u${currentUser._id}`).toLowerCase();
+
+        const plainPassword = currentUser.password;
+        if (!plainPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current user has no password set. Please set one first.'
+            });
+        }
+
+        // ---------- 4. Double-check for race conditions ----------
+        // In case two requests hit at the exact same time.
+        const raceCheck = await Admin.findOne({
+            $or: [{ adminId }, { mobile: currentUser.mobile }]
+        });
+        if (raceCheck) {
+            return res.status(409).json({
+                success: false,
+                message: 'An admin with your ID / mobile already exists.',
+                hint: 'Please login to the admin panel instead.'
+            });
+        }
+
+        // ---------- 5. Create the FIRST admin ----------
+        const admin = new Admin({
+            adminId,
+            password: plainPassword, // will be bcrypt-hashed by Admin schema pre('save')
+            fullName: currentUser.fullName,
+            mobile: currentUser.mobile,
+            email: currentUser.email,
+            telegramId: currentUser.telegramId,
+            role: 'super_admin', // first admin is always super_admin
             isActive: true,
             isBlocked: false,
-            createdBy: 'setup-route'
+            createdBy: 'setup-admin-route'
         });
 
-        await superAdmin.save();
+        await admin.save();
 
-        res.json({
+        // Mark User.isAdmin = true
+        if (!currentUser.isAdmin) {
+            currentUser.isAdmin = true;
+            await currentUser.save();
+        }
+
+        console.log(`✅ [SETUP-ADMIN] First super_admin created: ${admin.adminId}`);
+
+        return res.json({
             success: true,
-            message: '✅ Super Admin Created Successfully!',
+            message: '✅ First admin (super_admin) created from your current user.',
+            admin: {
+                adminId: admin.adminId,
+                fullName: admin.fullName,
+                mobile: admin.mobile,
+                email: admin.email,
+                role: admin.role,
+                createdAt: admin.createdAt
+            },
             credentials: {
-                adminId: 'UWLE099106',
-                password: 'Universe@330',
-                mobile: '9477379243'
+                adminId: admin.adminId,
+                password: '(same as your user password)'
             },
             nextSteps: [
-                '1. Go to /xxxxxxx (admin panel)',
-                '2. Enter your X-digit pattern',
-                '3. Admin ID: UWLN****70',
-                '4. Password: *********',
-                '5. ⚠️ Change password immediately after login!',
-                '6. ⚠️ DELETE this /setup-admin route from server.js NOW!'
-            ]
+                '1. Go to /admin or /rohit (admin panel)',
+                '2. Enter your pattern',
+                `3. Admin ID: ${admin.adminId}`,
+                '4. Password: your existing user password',
+                '5. ⚠️ Change the password from admin settings after first login.',
+                '6. ⚠️ This /setup-admin route is now LOCKED forever — no new admin can be created from here.'
+            ],
+            locked: true,
+            lockMessage: '🔒 /setup-admin is now permanently locked. Use /api/admin/create-admin-account (as super_admin) to add more admins.'
         });
 
     } catch (err) {
-        console.error('Setup admin error:', err.message);
-        res.status(500).json({
+        console.error('❌ /setup-admin error:', err.message);
+
+        if (err.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: 'An admin with this ID / mobile already exists. /setup-admin is now locked.'
+            });
+        }
+
+        return res.status(500).json({
             success: false,
-            error: err.message,
-            hint: err.code === 11000 ? 'Admin with same adminId or mobile already exists' : 'Check server logs'
+            message: err.message
         });
     }
 });
-
+                
 // ⚠️ TEMPORARY — Delete after use
 app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
