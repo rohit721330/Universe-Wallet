@@ -856,7 +856,7 @@ router.post('/register', async (req, res) => {
 <b>🎉 Welcome to Universal Wallet!</b>
 <b>─────────────────</b>
 
-<b>👤 Referred By:</b> ${referralResult.referrerName};
+<b>👤 Referred By:</b> ${referralResult.referrerName}`;
             }
             welcomeMessage += `
 
