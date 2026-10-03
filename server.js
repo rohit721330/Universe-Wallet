@@ -182,7 +182,7 @@ app.get('/setup-admin', async (req, res) => {
                 success: false,
                 locked: true,
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
-                hint: 'To create more admins, login to the admin panel and use "Create Admin Account" (/api/admin/create-admin-account).',
+                hint: 'To create more admins, login to the admin panel and Add Admins.',
                 existingAdmin: {
                     adminId: existingAdmin?.adminId || 'unknown',
                     role: existingAdmin?.role || 'unknown',
