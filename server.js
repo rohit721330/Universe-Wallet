@@ -186,17 +186,14 @@ app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
 // ✅ POST /setup-admin — Create FIRST admin using SECRET KEY
-// ⚠️ Only works if NO admin exists yet. Once an admin exists, LOCKED forever.
-//
-// Admin ID और Admin Wallet ID both come from the selected USER's real walletId.
+// ⚠️ Only works if NO admin exists yet.
+// Admin ID = User's real Wallet ID (lowercase)
+// Wallet ID = User's real Wallet ID (uppercase)
 //
 // Usage (POST with header — secret never in URL logs):
 //   POST /setup-admin
 //   Headers: X-Setup-Secret: YOUR_SETUP_SECRET
 //   Body: { "mobile": "9477379243" }
-//
-// Backward-compatible GET (query param — less secure):
-//   GET /setup-admin?secret=YOUR_SETUP_SECRET&mobile=9477379243
 // ============================================================
 const setupAdminHandler = async (req, res) => {
     try {
@@ -257,7 +254,7 @@ const setupAdminHandler = async (req, res) => {
                 success: false,
                 locked: true,
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
-                hint: 'To create more admins, login to the admin panel and Add Admins. To fully reset, use /reset-admin.',
+                hint: 'To reset, use /reset-admin first. Then call /setup-admin again.',
                 existingAdmin: {
                     adminId: maskAdminId(existingAdmin?.adminId),
                     role: existingAdmin?.role || 'unknown',
@@ -323,8 +320,8 @@ const setupAdminHandler = async (req, res) => {
         }
 
         const rawWalletId = String(currentUser.walletId).trim();
-        const adminId = rawWalletId.toLowerCase();      // ✅ Admin ID = User's wallet ID (lowercase)
-        const adminWalletId = rawWalletId.toUpperCase(); // ✅ Wallet ID = User's wallet ID (uppercase)
+        const adminId = rawWalletId.toLowerCase();
+        const adminWalletId = rawWalletId.toUpperCase();
 
         const plainPassword = currentUser.password;
         if (!plainPassword) {
@@ -352,7 +349,7 @@ const setupAdminHandler = async (req, res) => {
         // ---------- 6. Create the FIRST admin ----------
         const admin = new Admin({
             adminId: adminId,
-            walletId: adminWalletId,          // ✅ User's real Wallet ID
+            walletId: adminWalletId,
             password: plainPassword,
             fullName: currentUser.fullName,
             mobile: currentUser.mobile,
@@ -406,10 +403,8 @@ const setupAdminHandler = async (req, res) => {
                 `   OR Telegram ID: ${admin.telegramId || 'not set'}`,
                 `   OR Wallet ID: ${admin.walletId}`,
                 '4. Password: the selected user\'s existing password',
-                '5. ⚠️ Change the password from admin settings after first login.',
-                '6. ⚠️ This /setup-admin route is now permanently LOCKED.'
+                '5. ⚠️ Change the password from admin settings after first login.'
             ],
-            locked: true,
             securityNote: '🔐 Keep your SETUP_SECRET safe. Change it in env variables if compromised.'
         });
 
@@ -437,15 +432,15 @@ app.post('/setup-admin', setupAdminHandler);
 app.get('/setup-admin', setupAdminHandler);
 
 // ============================================================
-// ✅ POST /reset-admin — Wipe ALL admins, create a fresh super_admin
+// ✅ POST /reset-admin — Wipe ALL admins (delete only, NO new admin created)
 // ⚠️ DANGEROUS. Requires secret + explicit confirm=YES
 //
-// Admin ID और Admin Wallet ID both come from the selected USER's real walletId.
+// After this, call /setup-admin to create a fresh admin.
 //
 // Usage (POST with header — secret never in URL logs):
 //   POST /reset-admin
 //   Headers: X-Setup-Secret: YOUR_SETUP_SECRET
-//   Body: { "confirm": "YES", "mobile": "9477379243" }
+//   Body: { "confirm": "YES" }
 // ============================================================
 const resetAdminHandler = async (req, res) => {
     try {
@@ -507,57 +502,8 @@ const resetAdminHandler = async (req, res) => {
         logSetupAttempt('RESET-ADMIN', req, true, 'Secret + confirm verified');
 
         const Admin = require('./models/Admin');
-        const User = require('./models/User');
 
-        // ---------- 2. Get mobile input ----------
-        const targetMobileRaw =
-            (req.body && req.body.mobile) ||
-            (req.query && req.query.mobile) ||
-            null;
-        const targetMobile = targetMobileRaw ? String(targetMobileRaw).trim() : null;
-
-        // ---------- 3. Find target user ----------
-        let currentUser = null;
-
-        if (targetMobile) {
-            if (!/^[0-9]{10}$/.test(targetMobile)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid mobile — must be 10 digits.'
-                });
-            }
-            currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false }).select('+password');
-            if (!currentUser) {
-                return res.status(404).json({
-                    success: false,
-                    message: `No active user found with mobile ${targetMobile}.`
-                });
-            }
-        } else {
-            currentUser = await User.findOne({
-                isDeleted: false,
-                isBlocked: false
-            })
-            .sort({ createdAt: 1 })
-            .select('+password');
-
-            if (!currentUser) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'No active user found in the database.',
-                    hint: 'Register a user first, OR provide mobile.'
-                });
-            }
-        }
-
-        if (currentUser.isDeleted) {
-            return res.status(403).json({ success: false, message: 'This user account has been deleted.' });
-        }
-        if (currentUser.isBlocked) {
-            return res.status(403).json({ success: false, message: 'This user account is blocked.' });
-        }
-
-        // ---------- 4. Snapshot existing admins (masked) ----------
+        // ---------- 2. Snapshot existing admins (masked, for response) ----------
         const existingAdmins = await Admin.find({})
             .select('adminId fullName role mobile telegramId walletId createdAt')
             .lean();
@@ -570,107 +516,35 @@ const resetAdminHandler = async (req, res) => {
 
         const deletedCount = existingAdmins.length;
 
-        // ---------- 5. Build new admin data — Admin ID = User's real Wallet ID ----------
-        if (!currentUser.walletId || String(currentUser.walletId).trim() === '') {
-            return res.status(400).json({
-                success: false,
-                message: 'Selected user has no Wallet ID. Cannot create admin without it.'
-            });
-        }
-
-        const rawWalletId = String(currentUser.walletId).trim();
-        const adminId = rawWalletId.toLowerCase();       // ✅ Admin ID = User's wallet ID (lowercase)
-        const adminWalletId = rawWalletId.toUpperCase(); // ✅ Wallet ID = User's wallet ID (uppercase)
-
-        const plainPassword = currentUser.password;
-        if (!plainPassword) {
-            return res.status(400).json({
-                success: false,
-                message: 'Selected user has no password set. Please set one first.'
-            });
-        }
-
-        // ---------- 6. DELETE all existing admins (mobile, telegram, wallet — সব রিমুভ) ----------
+        // ---------- 3. DELETE all admins (mobile, telegram, wallet — সব রিমুভ) ----------
+        let deleted = 0;
         if (deletedCount > 0) {
             const delResult = await Admin.deleteMany({});
-            console.log(`🗑️  [RESET-ADMIN] Deleted ${delResult.deletedCount} existing admin(s) with all details.`);
+            deleted = delResult.deletedCount || 0;
+            console.log(`🗑️  [RESET-ADMIN] Deleted ${deleted} existing admin(s) with all details.`);
+        } else {
+            console.log('ℹ️  [RESET-ADMIN] No admins found to delete.');
         }
 
-        // ---------- 7. Create fresh super_admin ----------
-        const admin = new Admin({
-            adminId: adminId,
-            walletId: adminWalletId,          // ✅ User's real Wallet ID
-            password: plainPassword,
-            fullName: currentUser.fullName,
-            mobile: currentUser.mobile,
-            telegramId: currentUser.telegramId || undefined,
-            email: currentUser.email,
-            role: 'super_admin',
-            isActive: true,
-            isBlocked: false,
-            createdBy: 'reset-admin-route'
-        });
-
-        await admin.save();
-
-        if (!currentUser.isAdmin) {
-            currentUser.isAdmin = true;
-            await currentUser.save();
-        }
-
-        console.log(`✅ [RESET-ADMIN] New super_admin created: ${maskAdminId(admin.adminId)} (from user ${currentUser.mobile}). Old admins deleted: ${deletedCount}`);
-
+        // ---------- 4. Return result (NO new admin created) ----------
         return res.json({
             success: true,
-            message: '✅ Admin reset successful. Old admins deleted, new super_admin created.',
-            deletedAdminsCount: deletedCount,
+            message: deleted > 0
+                ? `✅ Reset successful. Deleted ${deleted} admin(s). Call /setup-admin to create a fresh admin.`
+                : 'ℹ️ Reset complete. No admins existed to delete. Call /setup-admin to create a fresh admin.',
+            deletedAdminsCount: deleted,
             deletedAdmins: maskedExisting,
-            sourceUser: {
-                fullName: currentUser.fullName,
-                mobile: currentUser.mobile,
-                email: currentUser.email,
-                walletId: currentUser.walletId
-            },
-            newAdmin: {
-                adminId: admin.adminId,
-                fullName: admin.fullName,
-                mobile: admin.mobile,
-                telegramId: admin.telegramId,
-                walletId: admin.walletId,
-                email: admin.email,
-                role: admin.role,
-                createdAt: admin.createdAt
-            },
-            credentials: {
-                adminId: admin.adminId,
-                mobile: admin.mobile,
-                telegramId: admin.telegramId || 'not set',
-                walletId: admin.walletId,
-                password: '(same as the selected user\'s password)'
-            },
             nextSteps: [
-                '1. Go to /admin or /rohit (admin panel)',
-                '2. Enter your pattern (ADMIN_PATTERN env)',
-                `3. Login via Mobile: ${admin.mobile}`,
-                `   OR Telegram ID: ${admin.telegramId || 'not set'}`,
-                `   OR Wallet ID: ${admin.walletId}`,
-                '4. Password: the selected user\'s existing password',
-                '5. ⚠️ Change the password from admin settings after first login.',
-                '6. ⚠️ Consider removing /reset-admin from the code once done.'
+                '1. All admin accounts have been removed.',
+                '2. Now call POST /setup-admin with X-Setup-Secret header to create a new super_admin.',
+                '3. Example: { "mobile": "9477379243" }',
+                '4. Then login to /admin with that user\'s credentials.'
             ],
-            securityNote: '🔐 This route is extremely powerful. Keep SETUP_SECRET safe.'
+            securityNote: '🔐 /reset-admin does NOT create any admin. Setup and Reset are separate operations.'
         });
 
     } catch (err) {
         console.error('❌ /reset-admin error:', err.message);
-
-        if (err.code === 11000) {
-            return res.status(409).json({
-                success: false,
-                message: 'Duplicate key conflict while creating new admin. Some admin may still exist.',
-                hint: 'Try again — the route deletes admins before creating.'
-            });
-        }
 
         return res.status(500).json({
             success: false,
