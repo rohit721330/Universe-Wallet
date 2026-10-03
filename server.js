@@ -15,9 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ ADMIN_WALLET_ID
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
-
-// ✅ SETUP SECRET (from env)
 const SETUP_SECRET = process.env.SETUP_SECRET;
+const MONGO_URI = process.env.MONGODB_URI;
 
 // ✅ Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
@@ -25,8 +24,6 @@ global.regOtpStore = new Map();
 global.resetOtpStore = new Map();
 global.tgIdStore = new Map();
 global.emailOtpStore = new Map();
-
-const MONGO_URI = process.env.MONGODB_URI;
 
 // =========================================================
 // ✅ HELPER: Mask an admin ID for display
@@ -36,7 +33,6 @@ function maskAdminId(adminId) {
     if (!adminId || typeof adminId !== 'string') return 'unknown';
     const id = adminId.trim();
     if (id.length <= 4) {
-        // Too short to mask meaningfully — show only asterisks
         return '*'.repeat(id.length || 4);
     }
     const firstTwo = id.slice(0, 2);
@@ -193,17 +189,15 @@ app.get('/setup-admin', async (req, res) => {
                 .select('adminId fullName role mobile createdAt')
                 .lean();
 
-            // Log full ID only in server logs (never exposed to client)
             console.warn(`[SETUP-ADMIN] Blocked — admin already exists: ${existingAdmin?.adminId}`);
 
-            // Mask the adminId for the response
             const maskedAdminId = maskAdminId(existingAdmin?.adminId);
 
             return res.status(403).json({
                 success: false,
                 locked: true,
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
-                hint: 'To create more admins, login to the admin panel and Add Admins.',
+                hint: 'To create more admins, login to the admin panel and Add Admins. To fully reset, use /reset-admin.',
                 existingAdmin: {
                     adminId: maskedAdminId,
                     role: existingAdmin?.role || 'unknown',
@@ -284,7 +278,7 @@ app.get('/setup-admin', async (req, res) => {
         // ---------- 5. Create the FIRST admin ----------
         const admin = new Admin({
             adminId,
-            password: plainPassword, // will be bcrypt-hashed by Admin schema pre('save')
+            password: plainPassword,
             fullName: currentUser.fullName,
             mobile: currentUser.mobile,
             email: currentUser.email,
@@ -344,6 +338,219 @@ app.get('/setup-admin', async (req, res) => {
             return res.status(409).json({
                 success: false,
                 message: 'An admin with this ID / mobile already exists. /setup-admin is now locked.'
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+});
+
+// ============================================================
+// ✅ GET /reset-admin — Wipe ALL admins and set a fresh super_admin from a user
+// ⚠️ DANGEROUS. Requires secret + explicit ?confirm=YES
+// Usage: /reset-admin?secret=YOUR_SETUP_SECRET&confirm=YES
+//        /reset-admin?secret=YOUR_SETUP_SECRET&confirm=YES&mobile=9876543210
+// ============================================================
+app.get('/reset-admin', async (req, res) => {
+    try {
+        await connectDB();
+
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                success: false,
+                message: 'MongoDB not connected yet. Try again in 5 seconds.',
+                readyState: mongoose.connection.readyState
+            });
+        }
+
+        // ---------- 0. SECRET KEY CHECK ----------
+        if (!SETUP_SECRET) {
+            console.error('❌ [RESET-ADMIN] SETUP_SECRET is not configured in environment variables.');
+            return res.status(500).json({
+                success: false,
+                message: 'Setup secret is not configured on the server.',
+                hint: 'Add SETUP_SECRET=your_secret_value to your Vercel environment variables and redeploy.'
+            });
+        }
+
+        const providedSecret = req.query.secret;
+
+        if (!providedSecret) {
+            return res.status(403).json({
+                success: false,
+                message: '❌ Secret key required.',
+                hint: 'Visit: /reset-admin?secret=YOUR_SETUP_SECRET&confirm=YES'
+            });
+        }
+
+        if (providedSecret !== SETUP_SECRET) {
+            console.warn(`[RESET-ADMIN] Wrong secret attempt from IP: ${req.ip}`);
+            return res.status(403).json({
+                success: false,
+                message: '❌ Invalid secret key.',
+                hint: 'Check your SETUP_SECRET value and try again.'
+            });
+        }
+
+        // ---------- 1. CONFIRMATION CHECK ----------
+        const confirm = String(req.query.confirm || '').toUpperCase();
+        if (confirm !== 'YES') {
+            return res.status(400).json({
+                success: false,
+                message: '⚠️ Confirmation required. This will DELETE all admins.',
+                hint: 'Add &confirm=YES to the URL to proceed.',
+                example: '/reset-admin?secret=YOUR_SETUP_SECRET&confirm=YES'
+            });
+        }
+
+        console.log(`⚠️ [RESET-ADMIN] Secret + confirm verified. IP: ${req.ip}`);
+
+        const Admin = require('./models/Admin');
+        const User = require('./models/User');
+
+        // ---------- 2. Find target user (who will become new super_admin) ----------
+        const targetMobile = req.query.mobile ? String(req.query.mobile).trim() : null;
+
+        let currentUser = null;
+
+        if (targetMobile) {
+            if (!/^[0-9]{10}$/.test(targetMobile)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid ?mobile= value — must be 10 digits.'
+                });
+            }
+            currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false }).select('+password');
+            if (!currentUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No active user found with mobile ${targetMobile}.`
+                });
+            }
+        } else {
+            currentUser = await User.findOne({
+                isDeleted: false,
+                isBlocked: false
+            })
+            .sort({ createdAt: 1 })
+            .select('+password');
+
+            if (!currentUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'No active user found in the database.',
+                    hint: 'Register a user first, OR provide ?mobile=9876543210.'
+                });
+            }
+        }
+
+        if (currentUser.isDeleted) {
+            return res.status(403).json({ success: false, message: 'This user account has been deleted.' });
+        }
+        if (currentUser.isBlocked) {
+            return res.status(403).json({ success: false, message: 'This user account is blocked.' });
+        }
+
+        // ---------- 3. Snapshot existing admins (for response, masked) ----------
+        const existingAdmins = await Admin.find({})
+            .select('adminId fullName role mobile createdAt')
+            .lean();
+
+        const maskedExisting = existingAdmins.map(a => ({
+            adminId: maskAdminId(a.adminId),
+            role: a.role || 'unknown',
+            createdAt: a.createdAt || null
+        }));
+
+        const deletedCount = existingAdmins.length;
+
+        // ---------- 4. Build new admin data ----------
+        const adminId = (currentUser.walletId || `u${currentUser._id}`).toLowerCase();
+
+        const plainPassword = currentUser.password;
+        if (!plainPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Selected user has no password set. Please set one first.'
+            });
+        }
+
+        // ---------- 5. DELETE all existing admins ----------
+        // Done BEFORE creating new one so unique indexes (adminId, mobile) don't conflict.
+        if (deletedCount > 0) {
+            const delResult = await Admin.deleteMany({});
+            console.log(`🗑️  [RESET-ADMIN] Deleted ${delResult.deletedCount} existing admin(s).`);
+        }
+
+        // ---------- 6. Create fresh super_admin ----------
+        const admin = new Admin({
+            adminId,
+            password: plainPassword, // bcrypt-hashed by Admin schema pre('save')
+            fullName: currentUser.fullName,
+            mobile: currentUser.mobile,
+            email: currentUser.email,
+            telegramId: currentUser.telegramId,
+            role: 'super_admin',
+            isActive: true,
+            isBlocked: false,
+            createdBy: 'reset-admin-route'
+        });
+
+        await admin.save();
+
+        // ---------- 7. Ensure User.isAdmin = true ----------
+        if (!currentUser.isAdmin) {
+            currentUser.isAdmin = true;
+            await currentUser.save();
+        }
+
+        console.log(`✅ [RESET-ADMIN] New super_admin created: ${admin.adminId} (from user ${currentUser.mobile}). Old admins deleted: ${deletedCount}`);
+
+        return res.json({
+            success: true,
+            message: '✅ Admin reset successful. Old admins deleted, new super_admin created.',
+            deletedAdminsCount: deletedCount,
+            deletedAdmins: maskedExisting,
+            sourceUser: {
+                fullName: currentUser.fullName,
+                mobile: currentUser.mobile,
+                email: currentUser.email,
+                walletId: currentUser.walletId
+            },
+            newAdmin: {
+                adminId: admin.adminId,
+                fullName: admin.fullName,
+                mobile: admin.mobile,
+                email: admin.email,
+                role: admin.role,
+                createdAt: admin.createdAt
+            },
+            credentials: {
+                adminId: admin.adminId,
+                password: '(same as the selected user\'s password)'
+            },
+            nextSteps: [
+                '1. Go to /admin or /rohit (admin panel)',
+                '2. Enter your pattern (ADMIN_PATTERN env)',
+                `3. Admin ID: ${admin.adminId}`,
+                '4. Password: the selected user\'s existing password',
+                '5. ⚠️ Change the password from admin settings after first login.',
+                '6. ⚠️ Consider removing /reset-admin from the code once done.'
+            ],
+            securityNote: '🔐 This route is extremely powerful. Keep SETUP_SECRET safe.'
+        });
+
+    } catch (err) {
+        console.error('❌ /reset-admin error:', err.message);
+
+        if (err.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: 'Duplicate key conflict while creating new admin. Some admin may still exist.',
+                hint: 'Try again — the route deletes admins before creating.'
             });
         }
 
@@ -617,6 +824,7 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
         console.log(`🌐 http://localhost:${PORT}`);
         console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
         console.log(`🔐 /setup-admin route is ACTIVE (secret required)`);
+        console.log(`⚠️  /reset-admin route is ACTIVE (secret + confirm=YES required)`);
         console.log(`⚠️  SETUP_SECRET configured: ${SETUP_SECRET ? 'YES ✅' : 'NO ❌'}`);
     });
 }
