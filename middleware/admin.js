@@ -39,17 +39,16 @@ const adminAuth = async (req, res, next) => {
         req.user = {
             isAdmin: true,
             adminDbId: admin._id.toString(),
-            adminId: admin.adminId,
+            walletId: admin.walletId,
             fullName: admin.fullName,
             role: admin.role,
             tokenType: 'admin_jwt'
         };
         req.adminDetails = {
             id: admin._id,
-            adminId: admin.adminId,
+            walletId: admin.walletId,
             fullName: admin.fullName,
             mobile: admin.mobile,
-            walletId: admin.walletId,
             telegramId: admin.telegramId,
             email: admin.email,
             role: admin.role,
@@ -84,12 +83,19 @@ const optionalAdminAuth = async (req, res, next) => {
                 if (admin && admin.isActive && !admin.isBlocked) {
                     req.admin = admin;
                     req.adminId = admin._id;
+                    req.user = {
+                        isAdmin: true,
+                        adminDbId: admin._id.toString(),
+                        walletId: admin.walletId,
+                        fullName: admin.fullName,
+                        role: admin.role,
+                        tokenType: 'admin_jwt'
+                    };
                     req.adminDetails = {
                         id: admin._id,
-                        adminId: admin.adminId,
+                        walletId: admin.walletId,
                         fullName: admin.fullName,
                         mobile: admin.mobile,
-                        walletId: admin.walletId,
                         telegramId: admin.telegramId,
                         email: admin.email,
                         role: admin.role,
@@ -118,7 +124,7 @@ const adminLogger = async (req, res, next) => {
         let responseData;
         try { responseData = JSON.parse(data); } catch (e) { responseData = { status: 'non-json' }; }
         if (admin) {
-            console.log(`📋 Admin Activity: Admin: ${admin.fullName || 'Unknown'} (${admin.adminId}) | Path: ${method} ${path} | Time: ${timestamp} | Response: ${responseData.success ? '✅ Success' : '❌ Failed'}`);
+            console.log(`📋 Admin Activity: Admin: ${admin.fullName || 'Unknown'} (${admin.walletId}) | Path: ${method} ${path} | Time: ${timestamp} | Response: ${responseData.success ? '✅ Success' : '❌ Failed'}`);
         }
         originalSend.call(this, data);
     };
@@ -135,7 +141,6 @@ const adminPermission = (permission) => {
             if (!admin) {
                 return res.status(401).json({ success: false, message: 'Admin Not Authenticated' });
             }
-            // Super admin always has all permissions
             if (admin.role === 'super_admin') {
                 return next();
             }
