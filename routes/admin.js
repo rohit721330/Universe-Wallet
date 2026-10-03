@@ -31,7 +31,7 @@ if (!JWT_SECRET) {
 // LOGGER HELPERS
 // ============================================
 function logRequest(req, tag) {
-    var adminInfo = req.user ? (req.user.adminId || req.user.adminDbId || 'unknown') : 'unauth';
+    var adminInfo = req.user ? (req.user.walletId || req.user.adminDbId || 'unknown') : 'unauth';
     console.log(`[${new Date().toISOString()}] [${tag}] ${req.method} ${req.originalUrl} | Admin: ${adminInfo} | IP: ${req.ip || 'N/A'}`);
 }
 
@@ -131,19 +131,19 @@ async function verifyAdminToken(req, res, next) {
             const decoded = jwt.verify(token, JWT_SECRET);
 
             if (!decoded.isAdmin || decoded.tokenType !== 'admin_jwt') {
-                logWarn(tag, 'Access denied - not admin token', { adminId: decoded.adminId });
+                logWarn(tag, 'Access denied - not admin token', { walletId: decoded.walletId });
                 return res.status(403).json({ success: false, message: 'Access Denied.' });
             }
 
             req.user = {
                 isAdmin: true,
                 adminDbId: decoded.adminDbId,
-                adminId: decoded.adminId,
+                walletId: decoded.walletId,
                 fullName: decoded.fullName,
                 role: decoded.role,
                 tokenType: 'admin_jwt'
             };
-            logSuccess(tag, 'Token verified', { adminId: decoded.adminId });
+            logSuccess(tag, 'Token verified', { walletId: decoded.walletId });
             return next();
         } catch (jwtError) {
             if (jwtError.name === 'TokenExpiredError') {
@@ -253,24 +253,24 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
         }
 
         if (admin.isBlocked) {
-            logWarn(tag, 'Admin blocked', { adminId: admin.adminId });
+            logWarn(tag, 'Admin blocked', { walletId: admin.walletId });
             return res.status(403).json({ success: false, message: 'Account blocked.' });
         }
         if (!admin.isActive) {
-            logWarn(tag, 'Admin inactive', { adminId: admin.adminId });
+            logWarn(tag, 'Admin inactive', { walletId: admin.walletId });
             return res.status(403).json({ success: false, message: 'Account inactive.' });
         }
 
         // 3. Compare password
         const isMatch = await admin.comparePassword(password);
         if (!isMatch) {
-            logWarn(tag, 'Wrong password', { adminId: admin.adminId, via: lookupLabel });
+            logWarn(tag, 'Wrong password', { walletId: admin.walletId, via: lookupLabel });
             await notifyAdmin(
 `❌ <b>Admin Login Failed</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `📝 <b>Reason:</b> Wrong password\n` +
 `🎯 <b>Via:</b> ${lookupLabel}\n` +
-`🆔 <b>Admin ID:</b> ${admin.adminId}\n\n` +
+`💼 <b>Wallet ID:</b> ${admin.walletId}\n\n` +
 `🔒 Security Alert!`
             );
             return res.status(401).json({ success: false, message: 'Invalid credentials.' });
@@ -285,7 +285,7 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
         const adminToken = jwt.sign(
             {
                 adminDbId: admin._id.toString(),
-                adminId: admin.adminId,
+                walletId: admin.walletId,
                 fullName: admin.fullName,
                 role: admin.role,
                 isAdmin: true,
@@ -295,13 +295,14 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             { expiresIn: '7d' }
         );
 
-        logSuccess(tag, 'Admin logged in', { adminId: admin.adminId, via: lookupLabel });
+        logSuccess(tag, 'Admin logged in', { walletId: admin.walletId, via: lookupLabel });
 
         await notifyAdmin(
 `✅ <b>Admin Login Successful</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Name:</b> ${admin.fullName}\n` +
-`🆔 <b>Admin ID:</b> ${admin.adminId}\n` +
+`💼 <b>Wallet ID:</b> ${admin.walletId}\n` +
+`📱 <b>Mobile:</b> ${admin.mobile}\n` +
 `🎯 <b>Via:</b> ${lookupLabel}\n` +
 `🎭 <b>Role:</b> ${admin.role}\n\n` +
 `🎉 Welcome back!`
@@ -314,7 +315,6 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             isAdmin: true,
             admin: {
                 _id: admin._id,
-                adminId: admin.adminId,
                 walletId: admin.walletId,
                 fullName: admin.fullName,
                 mobile: admin.mobile,
@@ -388,7 +388,7 @@ router.get('/my-profile', verifyAdminToken, async (req, res) => {
             logWarn(tag, 'Admin not found', { adminDbId: req.user.adminDbId });
             return res.status(404).json({ success: false, message: 'Admin not found.' });
         }
-        logSuccess(tag, 'Profile fetched', { adminId: admin.adminId });
+        logSuccess(tag, 'Profile fetched', { walletId: admin.walletId });
         res.json({ success: true, admin });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -428,10 +428,10 @@ router.put('/update-my-profile', verifyAdminToken, async (req, res) => {
             }
             admin.telegramId = telegramId;
         }
-        admin.updatedBy = admin.adminId;
+        admin.updatedBy = admin.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Profile updated', { adminId: admin.adminId });
+        logSuccess(tag, 'Profile updated', { walletId: admin.walletId });
         res.json({ success: true, message: 'Profile updated.', admin });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -461,15 +461,15 @@ router.put('/change-my-password', verifyAdminToken, async (req, res) => {
 
         const isMatch = await admin.comparePassword(currentPassword);
         if (!isMatch) {
-            logWarn(tag, 'Wrong current password', { adminId: admin.adminId });
+            logWarn(tag, 'Wrong current password', { walletId: admin.walletId });
             return res.status(401).json({ success: false, message: 'Current password incorrect.' });
         }
 
         admin.password = newPassword;
-        admin.updatedBy = admin.adminId;
+        admin.updatedBy = admin.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Password changed', { adminId: admin.adminId });
+        logSuccess(tag, 'Password changed', { walletId: admin.walletId });
         res.json({ success: true, message: 'Password changed.' });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -505,10 +505,10 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
             logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-        const { adminId, password, fullName, mobile, email, telegramId, walletId, role } = req.body;
-        if (!adminId || !password || !fullName || !mobile) {
+        const { walletId, password, fullName, mobile, email, telegramId, role } = req.body;
+        if (!walletId || !password || !fullName || !mobile) {
             logWarn(tag, 'Required fields missing');
-            return res.status(400).json({ success: false, message: 'Required fields missing.' });
+            return res.status(400).json({ success: false, message: 'Wallet ID, Password, Full Name and Mobile required.' });
         }
         if (password.length < 6) {
             logWarn(tag, 'Password too short');
@@ -518,44 +518,42 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Mobile must be 10 digits.' });
         }
 
+        const normalizedWalletId = String(walletId).trim().toUpperCase();
+
         const orConditions = [
-            { adminId: adminId.toLowerCase() },
+            { walletId: normalizedWalletId },
             { mobile }
         ];
         if (telegramId && String(telegramId).trim()) {
             orConditions.push({ telegramId: String(telegramId).trim() });
         }
-        if (walletId && String(walletId).trim()) {
-            orConditions.push({ walletId: String(walletId).trim().toUpperCase() });
-        }
 
         const existing = await Admin.findOne({ $or: orConditions });
         if (existing) {
-            logWarn(tag, 'Admin ID / Mobile / Telegram / Wallet exists', { adminId, mobile });
-            return res.status(400).json({ success: false, message: 'Admin ID / Mobile / Telegram / Wallet already exists.' });
+            logWarn(tag, 'Wallet ID / Mobile / Telegram exists');
+            return res.status(400).json({ success: false, message: 'Wallet ID / Mobile / Telegram already exists.' });
         }
 
         const newAdmin = new Admin({
-            adminId: adminId.toLowerCase(),
+            walletId: normalizedWalletId,
             password,
             fullName,
             mobile,
             email: email || undefined,
             telegramId: (telegramId && String(telegramId).trim()) ? String(telegramId).trim() : undefined,
-            walletId: (walletId && String(walletId).trim()) ? String(walletId).trim().toUpperCase() : undefined,
             role: role || 'admin',
-            createdBy: req.user.adminId
+            createdBy: req.user.walletId
         });
         await newAdmin.save();
 
-        logSuccess(tag, 'Admin created', { adminId: newAdmin.adminId, walletId: newAdmin.walletId });
+        logSuccess(tag, 'Admin created', { walletId: newAdmin.walletId });
         await notifyAdmin(
 `🆕 <b>New Admin Created</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Name:</b> ${fullName}\n` +
-`🆔 <b>Admin ID:</b> ${adminId}\n` +
 `💼 <b>Wallet ID:</b> ${newAdmin.walletId}\n` +
 `📱 <b>Mobile:</b> ${mobile}\n` +
+`📨 <b>Telegram:</b> ${newAdmin.telegramId || 'N/A'}\n` +
 `🎭 <b>Role:</b> ${newAdmin.role}\n` +
 `✍️ <b>Created By:</b> ${req.user.fullName}\n\n` +
 `🎉 Welcome to the team!`
@@ -565,9 +563,10 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
             success: true,
             message: 'Admin created.',
             admin: {
-                adminId: newAdmin.adminId,
                 walletId: newAdmin.walletId,
                 fullName: newAdmin.fullName,
+                mobile: newAdmin.mobile,
+                telegramId: newAdmin.telegramId,
                 role: newAdmin.role
             }
         });
@@ -620,17 +619,17 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
                 const dup = await Admin.findOne({ walletId: wId, _id: { $ne: admin._id } });
                 if (dup) return res.status(400).json({ success: false, message: 'Wallet ID already in use.' });
             }
-            admin.walletId = wId || admin.walletId;
+            if (wId) admin.walletId = wId;
         }
 
         if (role) admin.role = role;
         if (typeof isActive === 'boolean') admin.isActive = isActive;
         if (typeof isBlocked === 'boolean') admin.isBlocked = isBlocked;
         if (newPassword) admin.password = newPassword;
-        admin.updatedBy = req.user.adminId;
+        admin.updatedBy = req.user.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Admin updated', { adminId: admin.adminId });
+        logSuccess(tag, 'Admin updated', { walletId: admin.walletId });
         res.json({ success: true, message: 'Admin updated.' });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -657,12 +656,13 @@ router.delete('/delete-admin/:adminDbId', verifyAdminToken, async (req, res) => 
         }
         await Admin.findByIdAndDelete(req.params.adminDbId);
 
-        logSuccess(tag, 'Admin deleted', { adminId: admin.adminId });
+        logSuccess(tag, 'Admin deleted', { walletId: admin.walletId });
         await notifyAdmin(
 `🗑️ <b>Admin Deleted</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Name:</b> ${admin.fullName}\n` +
-`🆔 <b>Admin ID:</b> ${admin.adminId}\n` +
+`💼 <b>Wallet ID:</b> ${admin.walletId}\n` +
+`📱 <b>Mobile:</b> ${admin.mobile}\n` +
 `✍️ <b>Deleted By:</b> ${req.user.fullName}\n\n` +
 `⚠️ Account removed from system.`
         );
@@ -736,7 +736,7 @@ router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
         if (typeof taxEnabled === 'boolean') update['depositSettings.taxEnabled'] = taxEnabled;
 
         update['depositSettings.updatedAt'] = new Date();
-        update['depositSettings.updatedBy'] = req.user.adminId;
+        update['depositSettings.updatedBy'] = req.user.walletId;
 
         const superAdmin = await Admin.findOne({ role: 'super_admin' });
         if (!superAdmin) {
@@ -814,7 +814,7 @@ router.put('/referral-settings', verifyAdminToken, async (req, res) => {
         if (typeof maxReferralsPerUser === 'number' && maxReferralsPerUser > 0) update['referralSettings.maxReferralsPerUser'] = maxReferralsPerUser;
 
         update['referralSettings.updatedAt'] = new Date();
-        update['referralSettings.updatedBy'] = req.user.adminId;
+        update['referralSettings.updatedBy'] = req.user.walletId;
 
         const superAdmin = await Admin.findOne({ role: 'super_admin' });
         if (!superAdmin) {
@@ -1596,7 +1596,7 @@ router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
             return res.json({ success: true, message: 'No changes made.' });
         }
 
-        user.updatedBy = req.user.adminId;
+        user.updatedBy = req.user.walletId;
         await user.save();
 
         logSuccess(tag, 'User updated', { userId, changes: changes.length });
@@ -1773,7 +1773,7 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
             }
 
             deposit.status = 'approved';
-            deposit.approvedBy = req.user.adminId || req.user.fullName;
+            deposit.approvedBy = req.user.walletId || req.user.fullName;
             deposit.approvedAt = new Date();
             deposit.adminNote = adminNotes || 'Approved by admin';
             deposit.taxPercent = taxPercent;
@@ -1878,7 +1878,7 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
             });
         } else {
             deposit.status = 'rejected';
-            deposit.rejectedBy = req.user.adminId || req.user.fullName;
+            deposit.rejectedBy = req.user.walletId || req.user.fullName;
             deposit.rejectedAt = new Date();
             deposit.adminNote = adminNotes || 'Rejected by admin';
 
@@ -1945,7 +1945,7 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
         deposit.status = 'cancelled';
         deposit.adminNote = cancelReason;
         deposit.cancelledAt = new Date();
-        deposit.cancelledBy = req.user.adminId || req.user.fullName;
+        deposit.cancelledBy = req.user.walletId || req.user.fullName;
         await deposit.save();
 
         logSuccess(tag, 'Deposit cancelled', { depositId: deposit.depositId });
