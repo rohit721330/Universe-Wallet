@@ -29,6 +29,23 @@ global.emailOtpStore = new Map();
 const MONGO_URI = process.env.MONGODB_URI;
 
 // =========================================================
+// ✅ HELPER: Mask an admin ID for display
+// Example: "uwab123456" → "uw******56"
+// =========================================================
+function maskAdminId(adminId) {
+    if (!adminId || typeof adminId !== 'string') return 'unknown';
+    const id = adminId.trim();
+    if (id.length <= 4) {
+        // Too short to mask meaningfully — show only asterisks
+        return '*'.repeat(id.length || 4);
+    }
+    const firstTwo = id.slice(0, 2);
+    const lastTwo = id.slice(-2);
+    const maskLength = Math.max(id.length - 4, 3);
+    return firstTwo + '*'.repeat(maskLength) + lastTwo;
+}
+
+// =========================================================
 // ✅ VERCEL-SAFE MongoDB Connection with Global Cache
 // =========================================================
 let cached = global.mongoose;
@@ -176,7 +193,11 @@ app.get('/setup-admin', async (req, res) => {
                 .select('adminId fullName role mobile createdAt')
                 .lean();
 
+            // Log full ID only in server logs (never exposed to client)
             console.warn(`[SETUP-ADMIN] Blocked — admin already exists: ${existingAdmin?.adminId}`);
+
+            // Mask the adminId for the response
+            const maskedAdminId = maskAdminId(existingAdmin?.adminId);
 
             return res.status(403).json({
                 success: false,
@@ -184,7 +205,7 @@ app.get('/setup-admin', async (req, res) => {
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
                 hint: 'To create more admins, login to the admin panel and Add Admins.',
                 existingAdmin: {
-                    adminId: existingAdmin?.adminId || 'unknown',
+                    adminId: maskedAdminId,
                     role: existingAdmin?.role || 'unknown',
                     createdAt: existingAdmin?.createdAt || null
                 }
@@ -254,7 +275,7 @@ app.get('/setup-admin', async (req, res) => {
                 success: false,
                 message: 'An admin with this ID / mobile already exists. /setup-admin is locked.',
                 existingAdmin: {
-                    adminId: raceCheck.adminId,
+                    adminId: maskAdminId(raceCheck.adminId),
                     role: raceCheck.role
                 }
             });
