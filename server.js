@@ -188,17 +188,15 @@ app.use('/referral', dbConnectMiddleware);
 // ✅ POST /setup-admin — Create FIRST admin using SECRET KEY
 // ⚠️ Only works if NO admin exists yet. Once an admin exists, LOCKED forever.
 //
+// Admin ID और Admin Wallet ID both come from the selected USER's real walletId.
+//
 // Usage (POST with header — secret never in URL logs):
 //   POST /setup-admin
 //   Headers: X-Setup-Secret: YOUR_SETUP_SECRET
-//   Body: {
-//     "mobile": "9876543210",
-//     "telegramId": "123456789",
-//     "walletId": "MYWALLET001"
-//   }
+//   Body: { "mobile": "9477379243" }
 //
 // Backward-compatible GET (query param — less secure):
-//   GET /setup-admin?secret=YOUR_SETUP_SECRET&mobile=...&telegramId=...&walletId=...
+//   GET /setup-admin?secret=YOUR_SETUP_SECRET&mobile=9477379243
 // ============================================================
 const setupAdminHandler = async (req, res) => {
     try {
@@ -268,24 +266,12 @@ const setupAdminHandler = async (req, res) => {
             });
         }
 
-        // ---------- 2. Get inputs (mobile, telegramId, walletId) ----------
+        // ---------- 2. Get mobile input ----------
         const targetMobileRaw =
             (req.body && req.body.mobile) ||
             (req.query && req.query.mobile) ||
             null;
         const targetMobile = targetMobileRaw ? String(targetMobileRaw).trim() : null;
-
-        const providedTelegramId = (req.body && req.body.telegramId)
-            ? String(req.body.telegramId).trim()
-            : (req.query && req.query.telegramId)
-                ? String(req.query.telegramId).trim()
-                : null;
-
-        const providedWalletId = (req.body && req.body.walletId)
-            ? String(req.body.walletId).trim().toUpperCase()
-            : (req.query && req.query.walletId)
-                ? String(req.query.walletId).trim().toUpperCase()
-                : null;
 
         // ---------- 3. Find the user who will become admin ----------
         let currentUser = null;
@@ -328,8 +314,17 @@ const setupAdminHandler = async (req, res) => {
             return res.status(403).json({ success: false, message: 'This user account is blocked.' });
         }
 
-        // ---------- 4. Build admin data ----------
-        const adminId = (currentUser.walletId || `u${currentUser._id}`).toLowerCase();
+        // ---------- 4. Build admin data — Admin ID = User's real Wallet ID ----------
+        if (!currentUser.walletId || String(currentUser.walletId).trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Selected user has no Wallet ID. Cannot create admin without it.'
+            });
+        }
+
+        const rawWalletId = String(currentUser.walletId).trim();
+        const adminId = rawWalletId.toLowerCase();      // ✅ Admin ID = User's wallet ID (lowercase)
+        const adminWalletId = rawWalletId.toUpperCase(); // ✅ Wallet ID = User's wallet ID (uppercase)
 
         const plainPassword = currentUser.password;
         if (!plainPassword) {
@@ -356,12 +351,12 @@ const setupAdminHandler = async (req, res) => {
 
         // ---------- 6. Create the FIRST admin ----------
         const admin = new Admin({
-            adminId,
+            adminId: adminId,
+            walletId: adminWalletId,          // ✅ User's real Wallet ID
             password: plainPassword,
             fullName: currentUser.fullName,
             mobile: currentUser.mobile,
-            telegramId: providedTelegramId || currentUser.telegramId || undefined,
-            walletId: providedWalletId || undefined,
+            telegramId: currentUser.telegramId || undefined,
             email: currentUser.email,
             role: 'super_admin',
             isActive: true,
@@ -401,7 +396,7 @@ const setupAdminHandler = async (req, res) => {
                 adminId: admin.adminId,
                 mobile: admin.mobile,
                 telegramId: admin.telegramId || 'not set',
-                walletId: admin.walletId || 'not set',
+                walletId: admin.walletId,
                 password: '(same as the selected user\'s password)'
             },
             nextSteps: [
@@ -409,7 +404,7 @@ const setupAdminHandler = async (req, res) => {
                 '2. Enter your pattern (ADMIN_PATTERN env)',
                 `3. Login via Mobile: ${admin.mobile}`,
                 `   OR Telegram ID: ${admin.telegramId || 'not set'}`,
-                `   OR Wallet ID: ${admin.walletId || 'not set'}`,
+                `   OR Wallet ID: ${admin.walletId}`,
                 '4. Password: the selected user\'s existing password',
                 '5. ⚠️ Change the password from admin settings after first login.',
                 '6. ⚠️ This /setup-admin route is now permanently LOCKED.'
@@ -445,15 +440,12 @@ app.get('/setup-admin', setupAdminHandler);
 // ✅ POST /reset-admin — Wipe ALL admins, create a fresh super_admin
 // ⚠️ DANGEROUS. Requires secret + explicit confirm=YES
 //
+// Admin ID और Admin Wallet ID both come from the selected USER's real walletId.
+//
 // Usage (POST with header — secret never in URL logs):
 //   POST /reset-admin
 //   Headers: X-Setup-Secret: YOUR_SETUP_SECRET
-//   Body: {
-//     "confirm": "YES",
-//     "mobile": "9876543210",
-//     "telegramId": "123456789",
-//     "walletId": "MYWALLET001"
-//   }
+//   Body: { "confirm": "YES", "mobile": "9477379243" }
 // ============================================================
 const resetAdminHandler = async (req, res) => {
     try {
@@ -517,24 +509,12 @@ const resetAdminHandler = async (req, res) => {
         const Admin = require('./models/Admin');
         const User = require('./models/User');
 
-        // ---------- 2. Get inputs (mobile, telegramId, walletId) ----------
+        // ---------- 2. Get mobile input ----------
         const targetMobileRaw =
             (req.body && req.body.mobile) ||
             (req.query && req.query.mobile) ||
             null;
         const targetMobile = targetMobileRaw ? String(targetMobileRaw).trim() : null;
-
-        const providedTelegramId = (req.body && req.body.telegramId)
-            ? String(req.body.telegramId).trim()
-            : (req.query && req.query.telegramId)
-                ? String(req.query.telegramId).trim()
-                : null;
-
-        const providedWalletId = (req.body && req.body.walletId)
-            ? String(req.body.walletId).trim().toUpperCase()
-            : (req.query && req.query.walletId)
-                ? String(req.query.walletId).trim().toUpperCase()
-                : null;
 
         // ---------- 3. Find target user ----------
         let currentUser = null;
@@ -590,8 +570,17 @@ const resetAdminHandler = async (req, res) => {
 
         const deletedCount = existingAdmins.length;
 
-        // ---------- 5. Build new admin data ----------
-        const adminId = (currentUser.walletId || `u${currentUser._id}`).toLowerCase();
+        // ---------- 5. Build new admin data — Admin ID = User's real Wallet ID ----------
+        if (!currentUser.walletId || String(currentUser.walletId).trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Selected user has no Wallet ID. Cannot create admin without it.'
+            });
+        }
+
+        const rawWalletId = String(currentUser.walletId).trim();
+        const adminId = rawWalletId.toLowerCase();       // ✅ Admin ID = User's wallet ID (lowercase)
+        const adminWalletId = rawWalletId.toUpperCase(); // ✅ Wallet ID = User's wallet ID (uppercase)
 
         const plainPassword = currentUser.password;
         if (!plainPassword) {
@@ -609,12 +598,12 @@ const resetAdminHandler = async (req, res) => {
 
         // ---------- 7. Create fresh super_admin ----------
         const admin = new Admin({
-            adminId,
+            adminId: adminId,
+            walletId: adminWalletId,          // ✅ User's real Wallet ID
             password: plainPassword,
             fullName: currentUser.fullName,
             mobile: currentUser.mobile,
-            telegramId: providedTelegramId || currentUser.telegramId || undefined,
-            walletId: providedWalletId || undefined,
+            telegramId: currentUser.telegramId || undefined,
             email: currentUser.email,
             role: 'super_admin',
             isActive: true,
@@ -656,7 +645,7 @@ const resetAdminHandler = async (req, res) => {
                 adminId: admin.adminId,
                 mobile: admin.mobile,
                 telegramId: admin.telegramId || 'not set',
-                walletId: admin.walletId || 'not set',
+                walletId: admin.walletId,
                 password: '(same as the selected user\'s password)'
             },
             nextSteps: [
@@ -664,7 +653,7 @@ const resetAdminHandler = async (req, res) => {
                 '2. Enter your pattern (ADMIN_PATTERN env)',
                 `3. Login via Mobile: ${admin.mobile}`,
                 `   OR Telegram ID: ${admin.telegramId || 'not set'}`,
-                `   OR Wallet ID: ${admin.walletId || 'not set'}`,
+                `   OR Wallet ID: ${admin.walletId}`,
                 '4. Password: the selected user\'s existing password',
                 '5. ⚠️ Change the password from admin settings after first login.',
                 '6. ⚠️ Consider removing /reset-admin from the code once done.'
