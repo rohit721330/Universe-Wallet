@@ -12,18 +12,11 @@
 html, body { font-family: 'Inter', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 body { padding-bottom: 100px; }
 
-/* SECURITY GATE */
-.security-gate { position: fixed; inset: 0; background: linear-gradient(135deg, #f5f7fb 0%, #e8edf4 100%); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.security-gate.hidden { display: none; }
-.security-gate-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); animation: gateIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1); }
-@keyframes gateIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.gate-spinner { display: inline-block; width: 34px; height: 34px; border: 3px solid #e0e8ff; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* LOGIN */
 .login-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, #f5f7fb 0%, #e8edf4 100%); z-index: 99998; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
 .login-overlay.show { display: flex; }
 .login-modal { background: #fff; border: 1px solid var(--border); border-radius: 24px; padding: 32px 24px; max-width: 400px; width: 100%; box-shadow: var(--shadow-lg); animation: gateIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1); margin: auto; }
+@keyframes gateIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .login-modal .modal-logo { text-align: center; margin-bottom: 24px; }
 .login-modal .modal-logo i { font-size: 48px; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; display: block; margin-bottom: 8px; }
 .login-modal .modal-logo h2 { font-size: 22px; font-weight: 800; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.5px; }
@@ -99,8 +92,6 @@ body { padding-bottom: 100px; }
 .menu-item.logout { margin-top: 8px; border-top: 1px solid var(--border-soft); padding-top: 14px; color: var(--danger); }
 .menu-item.logout i { color: var(--danger); }
 .menu-item.logout:hover { background: #fee2e2; }
-.menu-item.super-only { display: none; }
-.menu-item.super-only.visible { display: flex; }
 
 /* CONTAINER */
 .container { max-width: 500px; margin: 0 auto; padding: 16px; }
@@ -172,7 +163,7 @@ body { padding-bottom: 100px; }
 .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; display: inline-flex; align-items: center; gap: 4px; }
 .status-badge.pending { background: #fef3c7; color: var(--warning); }
 .status-badge.pending_approval { background: #ede9fe; color: #7c3aed; }
-.status-badge.approved, .status-badge.completed, .status-badge.paid { background: #dcfce7; color: var(--success); }
+.status-badge.approved, .status-badge.completed, .status-badge.paid, .status-badge.success { background: #dcfce7; color: var(--success); }
 .status-badge.rejected, .status-badge.failed { background: #fee2e2; color: var(--danger); }
 .status-badge.cancelled, .status-badge.expired { background: #f1f5f9; color: #64748b; }
 .list-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-soft); }
@@ -182,37 +173,14 @@ body { padding-bottom: 100px; }
 .btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
 .btn-view { background: var(--accent-light); color: var(--accent); border: 1px solid #d0d8ff; }
 .btn-delete { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
-
-/* WALLET / USER SEARCH */
-.wallet-card { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 10px; display: flex; align-items: center; gap: 12px; animation: cardIn 0.3s ease; }
-@keyframes cardIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-.wallet-card.wallet-verifying { border-color: #c7d2fe; background: linear-gradient(135deg, #f0f4ff, #eef7ff); }
-.wallet-card.wallet-found { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
-.wallet-card.wallet-not-found { border-color: #fecaca; background: linear-gradient(135deg, #fef2f2, #fee2e2); }
-.spinner { width: 36px; height: 36px; border: 3px solid rgba(80, 70, 223, 0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-.wallet-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(80, 70, 223, 0.25); }
-.wallet-details { flex: 1; min-width: 0; }
-.verify-title, .wallet-success-title, .not-found-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-.verify-title { color: var(--accent); }
-.wallet-success-title { color: var(--success); display: flex; align-items: center; gap: 4px; }
-.not-found-title { color: var(--danger); }
-.check-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--success); color: #fff; border-radius: 50%; font-size: 9px; font-weight: 900; }
-.wallet-name { font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wallet-id { font-size: 11px; color: var(--text-sec); font-weight: 600; margin-top: 2px; font-family: monospace; }
-.wallet-check { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
-.not-found-icon { width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; }
-.not-found-text { font-size: 11px; color: var(--text-sec); font-weight: 500; }
-.not-found-number { font-size: 12px; color: var(--danger); font-weight: 800; font-family: monospace; margin-top: 2px; }
-.user-info { background: linear-gradient(135deg, #f0f4ff, #eef7ff); border: 1.5px solid #d0d8ff; border-radius: 12px; padding: 14px 16px; margin-top: 12px; margin-bottom: 12px; }
-.user-info .info-row { border-bottom: 1px solid rgba(80, 70, 223, 0.1); }
-.user-info .info-row:last-child { border-bottom: none; }
-.user-info .info-value.balance { color: var(--accent); font-size: 16px; }
+.btn-adjust { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
 
 /* STATES */
 .loading-state, .empty-state { text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; color: var(--text-sec); box-shadow: var(--shadow); }
 .loading-state i { font-size: 30px; margin-bottom: 10px; display: block; color: var(--accent); animation: spin 1s linear infinite; }
 .empty-state i { font-size: 34px; display: block; margin-bottom: 10px; opacity: 0.3; color: var(--accent); }
 .loading-state p, .empty-state p { font-size: 12px; font-weight: 700; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15, 30, 60, 0.5); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 16px; }
@@ -229,8 +197,8 @@ body { padding-bottom: 100px; }
 .modal-footer .btn-danger { background: var(--danger); color: #fff; }
 .modal-footer .btn-success { background: var(--success); color: #fff; }
 
-/* CONFIRM MODAL ENHANCEMENTS */
-#confirmMessage, #actionMessage, #promptMessage, #cancelDepositMessage {
+/* CONFIRM MODAL */
+#confirmMessage, #actionMessage, #promptMessage {
     white-space: pre-line;
     font-size: 13px;
     color: var(--text-sec);
@@ -239,20 +207,9 @@ body { padding-bottom: 100px; }
     text-align: center;
     padding: 8px 4px 14px;
 }
-#confirmMessage strong, #actionMessage strong {
-    color: var(--text);
-    font-weight: 800;
-}
-.confirm-icon-wrap {
-    text-align: center;
-    margin: 4px 0 8px;
-}
-.confirm-icon-wrap i {
-    font-size: 42px;
-    display: inline-block;
-    padding: 16px;
-    border-radius: 50%;
-}
+#confirmMessage strong, #actionMessage strong { color: var(--text); font-weight: 800; }
+.confirm-icon-wrap { text-align: center; margin: 4px 0 8px; }
+.confirm-icon-wrap i { font-size: 42px; display: inline-block; padding: 16px; border-radius: 50%; }
 .confirm-icon-wrap i.icon-accent { color: var(--accent); background: var(--accent-light); }
 .confirm-icon-wrap i.icon-danger { color: var(--danger); background: #fee2e2; }
 .confirm-icon-wrap i.icon-success { color: var(--success); background: #dcfce7; }
@@ -269,9 +226,6 @@ body { padding-bottom: 100px; }
 .admin-item .admin-role.super_admin { background: var(--accent-light); color: var(--accent); }
 .admin-item .admin-role.admin { background: #dcfce7; color: var(--success); }
 .admin-item .admin-role.moderator { background: #fef3c7; color: var(--warning); }
-.admin-item .admin-actions { display: flex; gap: 4px; }
-.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--text-sec); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-.icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
 
 /* LEADERBOARD */
 .leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow); }
@@ -295,10 +249,6 @@ body { padding-bottom: 100px; }
 .toast.warning { background: var(--warning); color: #fff; }
 .toast.info { background: var(--accent); color: #fff; }
 
-/* NOTE BOX */
-.note-box { margin-top: 14px; padding: 12px; background: var(--bg-soft); border-radius: 10px; font-size: 11px; color: var(--text-sec); line-height: 1.7; font-weight: 600; border: 1px solid var(--border-soft); }
-.note-box i.dot { font-size: 6px; color: var(--accent); margin-right: 4px; }
-
 @media (max-width: 480px) {
     .pattern-wrapper { width: 220px; height: 220px; }
     .pattern-grid { gap: 16px; }
@@ -311,14 +261,6 @@ body { padding-bottom: 100px; }
 </head>
 <body>
 
-<!-- SECURITY GATE -->
-<div class="security-gate hidden" id="securityGate">
-    <div class="security-gate-card" id="securityGateContent">
-        <div class="gate-spinner"></div>
-        <p style="color:#788394;font-weight:700;">Checking access...</p>
-    </div>
-</div>
-
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay show" id="loginOverlay">
     <div class="login-modal">
@@ -328,7 +270,7 @@ body { padding-bottom: 100px; }
             <p>Universal Wallet • Secure Access</p>
         </div>
 
-        <!-- STEP 1: PATTERN -->
+        <!-- STEP 1 -->
         <div id="loginStep1">
             <div class="login-step-title"><i class="fas fa-shield-alt"></i> Step 1 of 2 - Security Pattern</div>
             <div class="pattern-container">
@@ -345,13 +287,13 @@ body { padding-bottom: 100px; }
             </div>
         </div>
 
-        <!-- STEP 2: PASSWORD -->
+        <!-- STEP 2 -->
         <div id="loginStep2" class="hidden">
-            <div class="login-step-title"><i class="fas fa-lock"></i> Step 2 of 2 - Password</div>
+            <div class="login-step-title"><i class="fas fa-lock"></i> Step 2 of 2 - Credentials</div>
 
             <div class="login-field">
-                <label><i class="fas fa-user"></i> Admin ID / Mobile / Wallet ID</label>
-                <input type="text" id="loginIdentifier" placeholder="Enter your ID" autocomplete="username">
+                <label><i class="fas fa-user"></i> Mobile / Telegram ID / Wallet ID</label>
+                <input type="text" id="loginIdentifier" placeholder="Enter your identifier" autocomplete="username">
             </div>
 
             <div class="login-field">
@@ -394,24 +336,17 @@ body { padding-bottom: 100px; }
         <div class="menu-label">Main Menu</div>
         <button class="menu-item active" data-section="dashboard" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
         <button class="menu-item" data-section="deposits" onclick="showSection('deposits')"><i class="fas fa-coins"></i><span>Deposits</span></button>
-        <button class="menu-item" data-section="deposit-settings" onclick="showSection('deposit-settings')"><i class="fas fa-cog"></i><span>Deposit Settings</span></button>
         <button class="menu-item" data-section="withdrawals" onclick="showSection('withdrawals')"><i class="fas fa-arrow-up"></i><span>Withdrawals</span></button>
         <button class="menu-item" data-section="users" onclick="showSection('users')"><i class="fas fa-users"></i><span>Users</span></button>
-        <button class="menu-item" data-section="adjust" onclick="showSection('adjust')"><i class="fas fa-sliders-h"></i><span>Adjust Balance</span></button>
         <button class="menu-item" data-section="gift" onclick="showSection('gift')"><i class="fas fa-gift"></i><span>Gift Codes</span></button>
         <button class="menu-item" data-section="lifafa" onclick="showSection('lifafa')"><i class="fas fa-envelope"></i><span>Lifafa</span></button>
         <button class="menu-item" data-section="invoices" onclick="showSection('invoices')"><i class="fas fa-file-invoice"></i><span>Invoices</span></button>
         <button class="menu-item" data-section="transactions" onclick="showSection('transactions')"><i class="fas fa-exchange-alt"></i><span>Transactions</span></button>
-
-        <div class="menu-label">Referral System</div>
-        <button class="menu-item" data-section="referrals" onclick="showSection('referrals')"><i class="fas fa-user-plus"></i><span>All Referrals</span></button>
-        <button class="menu-item" data-section="top-referrers" onclick="showSection('top-referrers')"><i class="fas fa-trophy"></i><span>Top Referrers</span></button>
-        <button class="menu-item" data-section="referral-settings" onclick="showSection('referral-settings')"><i class="fas fa-cog"></i><span>Referral Settings</span></button>
+        <button class="menu-item" data-section="referrals" onclick="showSection('referrals')"><i class="fas fa-user-plus"></i><span>Referrals</span></button>
 
         <div class="menu-label">Admin Account</div>
         <button class="menu-item" data-section="profile" onclick="showSection('profile')"><i class="fas fa-user-circle"></i><span>My Profile</span></button>
-        <button class="menu-item" data-section="password" onclick="showSection('password')"><i class="fas fa-key"></i><span>Change Password</span></button>
-        <button class="menu-item" data-section="admins" id="menuAdmins" onclick="showSection('admins')"><i class="fas fa-user-shield"></i><span>Admin List</span></button>
+        <button class="menu-item" data-section="admins" onclick="showSection('admins')"><i class="fas fa-user-shield"></i><span>Admin List</span></button>
         <button class="menu-item logout" onclick="handleLogout()"><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>
     </div>
 </div>
@@ -462,54 +397,73 @@ body { padding-bottom: 100px; }
     <!-- DEPOSITS -->
     <div class="section" id="section-deposits">
         <div class="page-title">Deposits</div>
-        <div class="page-subtitle">Approve, reject, or cancel deposit requests</div>
-        <div id="depositList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
-    </div>
-
-    <!-- DEPOSIT SETTINGS -->
-    <div class="section" id="section-deposit-settings">
-        <div class="page-title">Deposit Settings</div>
-        <div class="page-subtitle">Configure deposit limits and tax</div>
+        <div class="page-subtitle">Configure and manage deposits</div>
 
         <div class="card">
-            <div class="card-title"><i class="fas fa-sliders-h"></i> Settings</div>
-
+            <div class="card-title"><i class="fas fa-cog"></i> Deposit Settings</div>
             <div class="form-group">
                 <label><i class="fas fa-arrow-down"></i> Min Deposit (₹)</label>
                 <input type="number" id="dsMin" placeholder="10" min="1" value="10">
             </div>
-
             <div class="form-group">
                 <label><i class="fas fa-arrow-up"></i> Max Deposit (₹)</label>
                 <input type="number" id="dsMax" placeholder="100000" min="1" value="100000">
             </div>
-
             <div class="form-group">
                 <label><i class="fas fa-percent"></i> Tax Percent (%)</label>
                 <input type="number" id="dsTax" placeholder="0" min="0" max="100" step="0.01" value="0">
             </div>
-
+            <div class="form-group">
+                <label><i class="fas fa-toggle-on"></i> Tax Enabled</label>
+                <select id="dsTaxEnabled">
+                    <option value="false">OFF</option>
+                    <option value="true">ON</option>
+                </select>
+            </div>
             <button class="btn btn-primary btn-block" onclick="saveDepositSettings()">
                 <i class="fas fa-save"></i> Save Settings
             </button>
         </div>
+
+        <div class="card-title" style="margin-top:20px;"><i class="fas fa-list"></i> All Deposits</div>
+        <div id="depositList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
     <!-- WITHDRAWALS -->
     <div class="section" id="section-withdrawals">
         <div class="page-title">Withdrawals</div>
-        <div class="page-subtitle">Manage withdrawal requests</div>
+        <div class="page-subtitle">Configure and manage withdrawals</div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-cog"></i> Withdrawal Settings</div>
+            <div class="form-group">
+                <label><i class="fas fa-arrow-down"></i> Min Withdrawal (₹)</label>
+                <input type="number" id="wsMin" placeholder="100" min="1" value="100">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-arrow-up"></i> Max Withdrawal (₹)</label>
+                <input type="number" id="wsMax" placeholder="50000" min="1" value="50000">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-percent"></i> Withdrawal Fee (%)</label>
+                <input type="number" id="wsFee" placeholder="0" min="0" max="100" step="0.01" value="0">
+            </div>
+            <button class="btn btn-primary btn-block" onclick="saveWithdrawalSettings()">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+
+        <div class="card-title" style="margin-top:20px;"><i class="fas fa-list"></i> All Withdrawals</div>
         <div id="withdrawList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
     <!-- USERS -->
     <div class="section" id="section-users">
         <div class="page-title">Users</div>
-        <div class="page-subtitle">Search, block, or manage users</div>
+        <div class="page-subtitle">Search, manage, and adjust balances</div>
         <div class="card">
-            <div class="form-group">
-                <label><i class="fas fa-search"></i> Search Users</label>
-                <input type="text" id="userSearchInput" placeholder="Name, mobile, or wallet ID..." onkeyup="searchUsersList(event)">
+            <div class="form-group" style="margin-bottom:0;">
+                <input type="text" id="userSearchInput" placeholder="Search name, mobile, or wallet ID..." onkeyup="searchUsersList(event)">
             </div>
         </div>
         <div id="usersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
@@ -520,17 +474,20 @@ body { padding-bottom: 100px; }
         <div class="page-title">Adjust Balance</div>
         <div class="page-subtitle">Add or deduct user balance</div>
         <div class="card">
+            <button class="btn btn-secondary btn-block" onclick="showSection('users')" style="margin-bottom:14px;">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </button>
             <div class="card-title"><i class="fas fa-sliders-h"></i> Adjust User Balance</div>
-            <div class="form-group">
-                <label><i class="fas fa-search"></i> Search User</label>
-                <input type="text" id="walletInput" placeholder="Mobile / Wallet ID" autocomplete="off">
+            <div id="adjUserInfo" style="display:none;">
+                <div class="user-info" style="background:linear-gradient(135deg, #f0f4ff, #eef7ff);border:1.5px solid #d0d8ff;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="adjUserName">-</span></div>
+                    <div class="info-row"><span class="info-label">Mobile</span><span class="info-value" id="adjUserMobile">-</span></div>
+                    <div class="info-row"><span class="info-label">Wallet</span><span class="info-value" id="adjUserWallet">-</span></div>
+                    <div class="info-row"><span class="info-label">Balance</span><span class="info-value balance" id="adjUserBalance">₹0.00</span></div>
+                </div>
             </div>
-            <div id="walletResult"></div>
-            <div class="user-info" id="adjUserInfo" style="display:none;">
-                <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="adjUserName">-</span></div>
-                <div class="info-row"><span class="info-label">Mobile</span><span class="info-value" id="adjUserMobile">-</span></div>
-                <div class="info-row"><span class="info-label">Wallet</span><span class="info-value" id="adjUserWallet">-</span></div>
-                <div class="info-row"><span class="info-label">Balance</span><span class="info-value balance" id="adjUserBalance">₹0.00</span></div>
+            <div id="adjUserPlaceholder" style="padding:14px;text-align:center;background:var(--bg-soft);border-radius:10px;border:1px dashed var(--border);color:var(--text-muted);font-size:12px;font-weight:600;">
+                Select a user from Users page to adjust balance
             </div>
             <div class="form-group" style="margin-top:14px;">
                 <label><i class="fas fa-rupee-sign"></i> Amount (₹)</label>
@@ -574,7 +531,7 @@ body { padding-bottom: 100px; }
     <!-- INVOICES -->
     <div class="section" id="section-invoices">
         <div class="page-title">Invoices</div>
-        <div class="page-subtitle">Manage all invoices</div>
+        <div class="page-subtitle">All invoices</div>
         <div id="invoiceList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
@@ -583,69 +540,63 @@ body { padding-bottom: 100px; }
         <div class="page-title">Transactions</div>
         <div class="page-subtitle">All system transactions</div>
         <div class="card">
-            <div class="form-group">
-                <label><i class="fas fa-search"></i> Search</label>
-                <input type="text" id="txSearchInput" placeholder="Transaction ID, remark..." onkeyup="searchTransactions(event)">
+            <div class="form-group" style="margin-bottom:0;">
+                <input type="text" id="txSearchInput" placeholder="Search transaction ID, remark..." onkeyup="searchTransactions(event)">
             </div>
         </div>
         <div id="transactionsList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
-    <!-- ALL REFERRALS -->
+    <!-- REFERRALS -->
     <div class="section" id="section-referrals">
-        <div class="page-title">All Referrals</div>
-        <div class="page-subtitle">Manage all user referrals</div>
+        <div class="page-title">Referrals</div>
+        <div class="page-subtitle">Settings, referrers, and leaderboard</div>
+
         <div class="card">
+            <div class="card-title"><i class="fas fa-cog"></i> Referral Settings</div>
             <div class="form-group">
-                <label><i class="fas fa-search"></i> Search</label>
-                <input type="text" id="refSearchInput" placeholder="Name, mobile, or code..." onkeyup="searchReferrals(event)">
+                <label><i class="fas fa-rupee-sign"></i> Referral Bonus (₹)</label>
+                <input type="number" id="refBonusAmount" placeholder="10" min="1" value="10">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-hand-holding-usd"></i> Minimum Total Deposit (₹)</label>
+                <input type="number" id="refMinDeposit" placeholder="50" min="1" value="50">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-hashtag"></i> Max Referrals Per User</label>
+                <input type="number" id="refMaxReferrals" placeholder="100" min="1" value="100">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-toggle-on"></i> Program Status</label>
+                <select id="refEnabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="saveReferralSettings()">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-trophy"></i> Top Referrers</div>
+            <div id="topReferrersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
+        </div>
+
+        <div class="card-title" style="margin-top:20px;"><i class="fas fa-list"></i> All Referrals</div>
+        <div class="card">
+            <div class="form-group" style="margin-bottom:0;">
+                <input type="text" id="refSearchInput" placeholder="Search name, mobile, or code..." onkeyup="searchReferrals(event)">
             </div>
         </div>
         <div id="referralsList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
-    <!-- TOP REFERRERS -->
-    <div class="section" id="section-top-referrers">
-        <div class="page-title">Top Referrers</div>
-        <div class="page-subtitle">Leaderboard of best referrers</div>
-        <div id="topReferrersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
-    </div>
-
-    <!-- REFERRAL SETTINGS -->
-    <div class="section" id="section-referral-settings">
-        <div class="page-title">Referral Settings</div>
-        <div class="page-subtitle">Configure referral program</div>
-
-        <div class="card">
-            <div class="card-title"><i class="fas fa-cog"></i> Settings</div>
-
-            <div class="form-group">
-                <label><i class="fas fa-rupee-sign"></i> Referral Bonus (₹)</label>
-                <input type="number" id="refBonusAmount" placeholder="10" min="1" value="10">
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-hand-holding-usd"></i> Minimum Total Deposit (₹)</label>
-                <input type="number" id="refMinDeposit" placeholder="50" min="1" value="50">
-            </div>
-
-            <button class="btn btn-primary btn-block" onclick="saveReferralSettings()">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
-
-            <div class="note-box">
-                <strong>How it works:</strong><br>
-                <i class="fas fa-circle dot"></i> Referred user deposits any amount<br>
-                <i class="fas fa-circle dot"></i> When total reaches min, referrer earns bonus<br>
-                <i class="fas fa-circle dot"></i> Referred user gets no bonus
-            </div>
-        </div>
-    </div>
-
     <!-- PROFILE -->
     <div class="section" id="section-profile">
         <div class="page-title">My Profile</div>
-        <div class="page-subtitle">Manage your admin account</div>
+        <div class="page-subtitle">Manage your account settings</div>
+
         <div class="card">
             <div class="card-title"><i class="fas fa-user-circle"></i> Account Info</div>
             <div class="info-row"><span class="info-label">Admin ID</span><span class="info-value" id="profAdminId">-</span></div>
@@ -653,26 +604,22 @@ body { padding-bottom: 100px; }
             <div class="info-row"><span class="info-label">Role</span><span class="info-value" id="profRole">-</span></div>
             <div class="info-row"><span class="info-label">Last Login</span><span class="info-value" id="profLastLogin">-</span></div>
         </div>
+
         <div class="card">
             <div class="card-title"><i class="fas fa-edit"></i> Edit Profile</div>
             <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="profFullName"></div>
             <div class="form-group"><label><i class="fas fa-phone"></i> Mobile</label><input type="text" id="profMobile" maxlength="10"></div>
             <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="profEmail"></div>
             <div class="form-group"><label><i class="fab fa-telegram"></i> Telegram ID</label><input type="text" id="profTelegram"></div>
-            <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save"></i> Save</button>
+            <button class="btn btn-primary btn-block" onclick="saveProfile()"><i class="fas fa-save"></i> Save Profile</button>
         </div>
-    </div>
 
-    <!-- CHANGE PASSWORD -->
-    <div class="section" id="section-password">
-        <div class="page-title">Change Password</div>
-        <div class="page-subtitle">Update your account password</div>
         <div class="card">
-            <div class="card-title"><i class="fas fa-key"></i> Password Update</div>
+            <div class="card-title"><i class="fas fa-key"></i> Change Password</div>
             <div class="form-group"><label><i class="fas fa-lock"></i> Current Password</label><input type="password" id="cpCurrent"></div>
             <div class="form-group"><label><i class="fas fa-lock"></i> New Password</label><input type="password" id="cpNew" placeholder="Min 6 characters"></div>
             <div class="form-group"><label><i class="fas fa-lock"></i> Confirm Password</label><input type="password" id="cpConfirm"></div>
-            <button class="btn btn-primary btn-block" onclick="changePassword()"><i class="fas fa-shield-alt"></i> Update</button>
+            <button class="btn btn-primary btn-block" onclick="changePassword()"><i class="fas fa-shield-alt"></i> Update Password</button>
         </div>
     </div>
 
@@ -699,7 +646,7 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
-<!-- UNIVERSAL CONFIRM MODAL -->
+<!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal">
         <div class="modal-header">
@@ -723,25 +670,7 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
-<!-- UNIVERSAL PROMPT MODAL -->
-<div class="modal-overlay" id="promptModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3><i class="fas fa-edit"></i> <span id="promptTitle">Input</span></h3>
-            <button class="modal-close" onclick="closePromptModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <p id="promptMessage"></p>
-        <div class="form-group">
-            <input type="text" id="promptInput" placeholder="">
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closePromptModal()">Cancel</button>
-            <button class="btn-confirm" id="promptOkBtn">OK</button>
-        </div>
-    </div>
-</div>
-
-<!-- ACTION CHOICE MODAL (Approve/Reject) -->
+<!-- ACTION CHOICE MODAL -->
 <div class="modal-overlay" id="actionModal">
     <div class="modal">
         <div class="modal-header">
@@ -750,12 +679,8 @@ body { padding-bottom: 100px; }
         </div>
         <p id="actionMessage"></p>
         <div class="btn-group" style="margin-bottom:10px;">
-            <button class="btn btn-success" onclick="actionChoice('approve')">
-                <i class="fas fa-check"></i> Approve
-            </button>
-            <button class="btn btn-danger" onclick="actionChoice('reject')">
-                <i class="fas fa-times"></i> Reject
-            </button>
+            <button class="btn btn-success" onclick="actionChoice('approve')"><i class="fas fa-check"></i> Approve</button>
+            <button class="btn btn-danger" onclick="actionChoice('reject')"><i class="fas fa-times"></i> Reject</button>
         </div>
         <div class="form-group">
             <label><i class="fas fa-sticky-note"></i> Notes (optional)</label>
@@ -822,34 +747,6 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
-<!-- EDIT REFERRAL MODAL -->
-<div class="modal-overlay" id="editReferralModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3><i class="fas fa-edit"></i> Edit Referral</h3>
-            <button class="modal-close" onclick="closeModal('editReferralModal')"><i class="fas fa-times"></i></button>
-        </div>
-        <input type="hidden" id="editRefId">
-        <div class="form-group">
-            <label><i class="fas fa-info-circle"></i> Status</label>
-            <select id="editRefStatus">
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed</option>
-                <option value="expired">Expired</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-sticky-note"></i> Notes</label>
-            <textarea id="editRefNotes" placeholder="Admin notes..."></textarea>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('editReferralModal')">Cancel</button>
-            <button class="btn-confirm" onclick="saveReferralEdit()"><i class="fas fa-save"></i> Save</button>
-        </div>
-    </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -868,7 +765,13 @@ var canvas, ctx;
 var currentMousePos = null;
 
 var state = {
-    deposits: [], users: [], gifts: [], lifafas: [], invoices: [], transactions: [], referrals: [],
+    deposits: [], 
+    users: [], 
+    gifts: [], 
+    lifafas: [], 
+    invoices: [], 
+    transactions: [], 
+    referrals: [],
     adjSelectedUserId: null
 };
 
@@ -896,34 +799,31 @@ async function apiCall(endpoint, options) {
         headers: headers,
         body: options.body || null
     });
-    if (r.status === 401 || r.status === 403) { handleSessionExpired(); throw new Error('Session expired'); }
+    if (r.status === 401 || r.status === 403) { 
+        handleSessionExpired(); 
+        throw new Error('Session expired'); 
+    }
     var data = await r.json();
     if (!r.ok) throw new Error(data.message || 'API error');
     return data;
 }
 
 // ============================================
-// UNIVERSAL MODAL HELPERS
+// UNIVERSAL CONFIRM MODAL
 // ============================================
-
-// ---------- CONFIRM MODAL ----------
 var _confirmResolver = null;
 
 function showConfirm(title, message, options) {
     options = options || {};
     return new Promise(function(resolve) {
         _confirmResolver = resolve;
-
         document.getElementById('confirmTitle').textContent = title;
         document.getElementById('confirmMessage').innerHTML = message;
 
-        // Header icon
         var headerIcon = document.getElementById('confirmIcon');
         headerIcon.className = 'fas ' + (options.icon || 'fa-question-circle');
-        if (options.iconColor) headerIcon.style.color = options.iconColor;
-        else headerIcon.style.color = 'var(--accent)';
+        headerIcon.style.color = options.iconColor || 'var(--accent)';
 
-        // Big icon
         var bigIcon = document.getElementById('confirmBigIcon');
         bigIcon.className = 'fas ' + (options.icon || 'fa-question-circle');
         if (options.danger) bigIcon.className += ' icon-danger';
@@ -931,7 +831,6 @@ function showConfirm(title, message, options) {
         else if (options.warning) bigIcon.className += ' icon-warning';
         else bigIcon.className += ' icon-accent';
 
-        // OK button
         var okBtn = document.getElementById('confirmOkBtn');
         if (options.danger) {
             okBtn.className = 'btn-danger';
@@ -945,7 +844,6 @@ function showConfirm(title, message, options) {
         }
         okBtn.innerHTML = options.okText || 'Confirm';
 
-        // Optional input
         var extra = document.getElementById('confirmExtra');
         var input = document.getElementById('confirmInput');
         if (options.input) {
@@ -982,52 +880,9 @@ function confirmOk() {
     }
 }
 
-// Bind OK button
-document.addEventListener('DOMContentLoaded', function() {
-    var okBtn = document.getElementById('confirmOkBtn');
-    if (okBtn) okBtn.onclick = confirmOk;
-});
-
-// ---------- PROMPT MODAL ----------
-var _promptResolver = null;
-
-function showPrompt(title, message, placeholder, defaultValue) {
-    return new Promise(function(resolve) {
-        _promptResolver = resolve;
-        document.getElementById('promptTitle').textContent = title;
-        document.getElementById('promptMessage').textContent = message || '';
-        var input = document.getElementById('promptInput');
-        input.placeholder = placeholder || '';
-        input.value = defaultValue || '';
-        document.getElementById('promptModal').classList.add('active');
-        setTimeout(function(){ input.focus(); input.select(); }, 250);
-    });
-}
-
-function closePromptModal() {
-    document.getElementById('promptModal').classList.remove('active');
-    if (_promptResolver) {
-        _promptResolver(null);
-        _promptResolver = null;
-    }
-}
-
-function promptOk() {
-    var input = document.getElementById('promptInput');
-    var val = input.value.trim();
-    document.getElementById('promptModal').classList.remove('active');
-    if (_promptResolver) {
-        _promptResolver(val);
-        _promptResolver = null;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    var okBtn = document.getElementById('promptOkBtn');
-    if (okBtn) okBtn.onclick = promptOk;
-});
-
-// ---------- ACTION CHOICE MODAL ----------
+// ============================================
+// ACTION CHOICE MODAL
+// ============================================
 var _actionResolver = null;
 
 function showActionChoice(title, message) {
@@ -1057,20 +912,24 @@ function actionChoice(choice) {
     }
 }
 
-// ---------- GENERIC MODAL CLOSE ----------
+// ============================================
+// MODAL CLOSE
+// ============================================
 function closeModal(id) { 
     var el = document.getElementById(id);
     if (el) el.classList.remove('active'); 
 }
 
-// Overlay click to close
 document.addEventListener('DOMContentLoaded', function() {
+    // Confirm OK
+    var okBtn = document.getElementById('confirmOkBtn');
+    if (okBtn) okBtn.onclick = confirmOk;
+    
+    // Overlay click
     document.querySelectorAll('.modal-overlay').forEach(function(m) {
         m.addEventListener('click', function(e) { 
             if (e.target === this) {
-                // Use appropriate closer
                 if (this.id === 'confirmModal') closeConfirmModal();
-                else if (this.id === 'promptModal') closePromptModal();
                 else if (this.id === 'actionModal') closeActionModal();
                 else this.classList.remove('active');
             }
@@ -1271,7 +1130,7 @@ function clearPattern() {
 }
 
 // ============================================
-// VERIFY PATTERN (STEP 1)
+// VERIFY PATTERN
 // ============================================
 async function verifyPattern() {
     var status = document.getElementById('patternStatus');
@@ -1317,7 +1176,7 @@ async function verifyPattern() {
 }
 
 // ============================================
-// TOGGLE PASSWORD VISIBILITY
+// TOGGLE PASSWORD
 // ============================================
 function togglePwField(inputId, btn) {
     var input = document.getElementById(inputId);
@@ -1332,7 +1191,12 @@ function togglePwField(inputId, btn) {
 }
 
 // ============================================
-// STEP 2 — SUBMIT LOGIN
+// SUBMIT LOGIN
+// Backend supports 3 lookup methods:
+//   - login-step2: mobile
+//   - login-step3: telegramId  
+//   - login-step4: walletId
+// Auto-detect identifier type
 // ============================================
 async function submitLogin() {
     if (!patternTempToken) {
@@ -1345,19 +1209,37 @@ async function submitLogin() {
     var password = document.getElementById('loginPassword').value;
     var errEl = document.getElementById('loginError2');
 
-    if (!identifier) { errEl.textContent = 'ID required.'; return; }
+    if (!identifier) { errEl.textContent = 'Identifier required.'; return; }
     if (!password) { errEl.textContent = 'Password required.'; return; }
     errEl.innerHTML = '';
 
+    // Auto-detect which endpoint to use
+    var endpoint = '/login-step4'; // default walletId
+    var payload = { tempToken: patternTempToken, password: password };
+
+    if (/^[0-9]{10}$/.test(identifier)) {
+        // 10-digit → mobile
+        endpoint = '/login-step2';
+        payload.mobile = identifier;
+    } else if (/^[A-Za-z0-9_]{3,}$/.test(identifier) && !/^[0-9]+$/.test(identifier) && identifier === identifier.toUpperCase()) {
+        // ALL CAPS alphanumeric → walletId
+        endpoint = '/login-step4';
+        payload.walletId = identifier.toUpperCase();
+    } else if (/^[0-9]{5,}$/.test(identifier)) {
+        // Numeric ID → could be telegram
+        endpoint = '/login-step3';
+        payload.telegramId = identifier;
+    } else {
+        // Fallback: try wallet ID
+        endpoint = '/login-step4';
+        payload.walletId = identifier.toUpperCase();
+    }
+
     try {
-        var r = await fetch('/api/admin/login-step2', {
+        var r = await fetch('/api/admin' + endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                tempToken: patternTempToken, 
-                identifier: identifier, 
-                password: password 
-            })
+            body: JSON.stringify(payload)
         });
         var data = await r.json();
 
@@ -1367,7 +1249,6 @@ async function submitLogin() {
             localStorage.setItem('adminToken', data.token);
             localStorage.setItem('adminData', JSON.stringify(data.admin));
             updateAdminUI(data.admin);
-            applyRoleVisibility();
 
             document.getElementById('loginOverlay').classList.remove('show');
             patternTempToken = null;
@@ -1389,9 +1270,6 @@ async function submitLogin() {
     }
 }
 
-// ============================================
-// BACK TO STEP 1
-// ============================================
 function backToStep1() {
     patternTempToken = null;
     document.getElementById('loginStep1').classList.remove('hidden');
@@ -1412,7 +1290,7 @@ function backToStep1() {
 // ============================================
 function updateAdminUI(admin) {
     if (!admin) return;
-    var name = admin.fullName || admin.adminId || 'Admin';
+    var name = admin.fullName || admin.walletId || 'Admin';
     var initial = name.charAt(0).toUpperCase();
     var role = (admin.role || 'admin').replace('_', ' ').toUpperCase();
     document.getElementById('sidebarName').textContent = name;
@@ -1422,14 +1300,6 @@ function updateAdminUI(admin) {
     var icon = admin.role === 'super_admin' ? 'fa-crown' : 'fa-user-shield';
     document.getElementById('sidebarRole').innerHTML = '<i class="fas ' + icon + '"></i> ' + role;
     document.getElementById('headerBadge').innerHTML = '<i class="fas fa-bolt"></i> ' + (admin.role === 'super_admin' ? 'Super Admin' : 'Admin');
-}
-
-function applyRoleVisibility() {
-    if (!currentAdmin) return;
-    // সব admin সব মেনু দেখবে
-    document.querySelectorAll('.menu-item.super-only').forEach(function(item){
-        item.classList.add('visible');
-    });
 }
 
 function handleSessionExpired() {
@@ -1453,7 +1323,7 @@ async function checkSession() {
         var data = await r.json();
         if (data && data.success) {
             document.getElementById('loginOverlay').classList.remove('show');
-            if (currentAdmin) { updateAdminUI(currentAdmin); applyRoleVisibility(); }
+            if (currentAdmin) updateAdminUI(currentAdmin);
             showSection('dashboard');
         } else { showLogin(); }
     } catch (e) { showLogin(); }
@@ -1524,40 +1394,33 @@ function showSection(name) {
     if (menuItem) menuItem.classList.add('active');
     
     var titles = {
-        dashboard: 'Panel', 
-        deposits: 'Deposits', 
-        'deposit-settings': 'Deposit Settings',
+        dashboard: 'Panel',
+        deposits: 'Deposits',
         withdrawals: 'Withdrawals',
-        users: 'Users', 
-        adjust: 'Adjust', 
-        gift: 'Gifts', 
+        users: 'Users',
+        adjust: 'Adjust Balance',
+        gift: 'Gifts',
         lifafa: 'Lifafa',
-        invoices: 'Invoices', 
-        transactions: 'Transactions', 
+        invoices: 'Invoices',
+        transactions: 'Transactions',
+        referrals: 'Referrals',
         profile: 'Profile',
-        password: 'Password', 
-        admins: 'Admins',
-        referrals: 'Referrals', 
-        'top-referrers': 'Top Referrers', 
-        'referral-settings': 'Settings'
+        admins: 'Admins'
     };
     document.getElementById('headerSection').textContent = titles[name] || 'Panel';
     closeSidebar();
     
     if (name === 'dashboard') loadDashboard();
-    else if (name === 'deposits') loadDeposits();
-    else if (name === 'deposit-settings') loadDepositSettings();
-    else if (name === 'withdrawals') loadWithdrawals();
+    else if (name === 'deposits') { loadDeposits(); loadDepositSettings(); }
+    else if (name === 'withdrawals') { loadWithdrawals(); loadWithdrawalSettings(); }
     else if (name === 'users') loadUsers();
     else if (name === 'gift') loadGifts();
     else if (name === 'lifafa') loadLifafas();
     else if (name === 'invoices') loadInvoices();
     else if (name === 'transactions') loadTransactions();
+    else if (name === 'referrals') { loadReferrals(); loadReferralSettings(); loadTopReferrers(); }
     else if (name === 'profile') loadProfile();
     else if (name === 'admins') loadAdmins();
-    else if (name === 'referrals') loadReferrals();
-    else if (name === 'top-referrers') loadTopReferrers();
-    else if (name === 'referral-settings') loadReferralSettings();
 }
 
 // ============================================
@@ -1603,7 +1466,22 @@ function renderRecentTx(txs) {
     txs.forEach(function(tx) {
         var isNeg = ['withdrawal', 'admin_deduct', 'transfer'].indexOf(tx.type) > -1;
         var time = new Date(tx.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-        html += '<div class="list-item"><div class="list-header"><div><div class="list-user">' + (tx.tx_id || tx._id).toString().substring(0, 20) + '</div><div class="list-details"><span><i class="fas fa-clock"></i> ' + time + '</span><span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span></div></div><div class="list-right"><div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div><span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div></div></div>';
+        var uName = (tx.user_id && tx.user_id.fullName) || (tx.sender_id && tx.sender_id.fullName) || 'N/A';
+        html += '<div class="list-item">' +
+            '<div class="list-header">' +
+                '<div>' +
+                    '<div class="list-user">' + uName + '</div>' +
+                    '<div class="list-details">' +
+                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
+                        '<span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="list-right">' +
+                    '<div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
+                    '<span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
     });
     container.innerHTML = html;
 }
@@ -1739,15 +1617,17 @@ async function loadDepositSettings() {
             document.getElementById('dsMin').value = data.settings.minDeposit || 10;
             document.getElementById('dsMax').value = data.settings.maxDeposit || 100000;
             document.getElementById('dsTax').value = data.settings.taxPercent || 0;
+            document.getElementById('dsTaxEnabled').value = data.settings.taxEnabled ? 'true' : 'false';
         }
-    } catch (e) { showToast(e.message, 'error'); }
+    } catch (e) { console.log('Deposit settings load error:', e.message); }
 }
 
 async function saveDepositSettings() {
     var payload = {
         minDeposit: parseFloat(document.getElementById('dsMin').value),
         maxDeposit: parseFloat(document.getElementById('dsMax').value),
-        taxPercent: parseFloat(document.getElementById('dsTax').value)
+        taxPercent: parseFloat(document.getElementById('dsTax').value),
+        taxEnabled: document.getElementById('dsTaxEnabled').value === 'true'
     };
     if (!payload.minDeposit || payload.minDeposit < 1) { showToast('Invalid min deposit', 'error'); return; }
     if (!payload.maxDeposit || payload.maxDeposit < payload.minDeposit) { showToast('Invalid max deposit', 'error'); return; }
@@ -1757,7 +1637,7 @@ async function saveDepositSettings() {
         'Save Deposit Settings',
         'Min: <strong>₹' + payload.minDeposit + '</strong><br>' +
         'Max: <strong>₹' + payload.maxDeposit + '</strong><br>' +
-        'Tax: <strong>' + payload.taxPercent + '%</strong>',
+        'Tax: <strong>' + payload.taxPercent + '%</strong> (' + (payload.taxEnabled ? 'ON' : 'OFF') + ')',
         {
             icon: 'fa-save',
             iconColor: 'var(--accent)',
@@ -1774,7 +1654,72 @@ async function saveDepositSettings() {
 }
 
 // ============================================
+// WITHDRAWAL SETTINGS
+// (Backend এ endpoint নেই — local storage এ save হবে)
+// ============================================
+async function loadWithdrawalSettings() {
+    try {
+        // Try backend first
+        var data = await apiCall('/withdrawal-settings');
+        if (data.success) {
+            document.getElementById('wsMin').value = data.settings.minWithdrawal || 100;
+            document.getElementById('wsMax').value = data.settings.maxWithdrawal || 50000;
+            document.getElementById('wsFee').value = data.settings.withdrawalFee || 0;
+            return;
+        }
+    } catch (e) {
+        // Fallback to localStorage
+        var local = localStorage.getItem('withdrawalSettings');
+        if (local) {
+            try {
+                var s = JSON.parse(local);
+                document.getElementById('wsMin').value = s.minWithdrawal || 100;
+                document.getElementById('wsMax').value = s.maxWithdrawal || 50000;
+                document.getElementById('wsFee').value = s.withdrawalFee || 0;
+            } catch (err) {}
+        }
+    }
+}
+
+async function saveWithdrawalSettings() {
+    var payload = {
+        minWithdrawal: parseFloat(document.getElementById('wsMin').value),
+        maxWithdrawal: parseFloat(document.getElementById('wsMax').value),
+        withdrawalFee: parseFloat(document.getElementById('wsFee').value)
+    };
+    if (!payload.minWithdrawal || payload.minWithdrawal < 1) { showToast('Invalid min', 'error'); return; }
+    if (!payload.maxWithdrawal || payload.maxWithdrawal < payload.minWithdrawal) { showToast('Invalid max', 'error'); return; }
+    if (payload.withdrawalFee < 0 || payload.withdrawalFee > 100) { showToast('Fee must be 0-100', 'error'); return; }
+    
+    var result = await showConfirm(
+        'Save Withdrawal Settings',
+        'Min: <strong>₹' + payload.minWithdrawal + '</strong><br>' +
+        'Max: <strong>₹' + payload.maxWithdrawal + '</strong><br>' +
+        'Fee: <strong>' + payload.withdrawalFee + '%</strong>',
+        {
+            icon: 'fa-save',
+            iconColor: 'var(--accent)',
+            okText: '<i class="fas fa-save"></i> Save'
+        }
+    );
+    if (!result || !result.confirmed) return;
+    
+    try {
+        var data = await apiCall('/withdrawal-settings', { method: 'PUT', body: JSON.stringify(payload) });
+        if (data.success) showToast('Settings saved', 'success');
+        else showToast(data.message, 'error');
+    } catch (e) { 
+        // Fallback to localStorage
+        localStorage.setItem('withdrawalSettings', JSON.stringify(payload));
+        showToast('Settings saved locally', 'success');
+    }
+}
+
+// ============================================
 // WITHDRAWALS
+// Note: Backend এ /verify-withdrawal endpoint নেই।
+// Frontend শুধু transaction list দেখাবে এবং
+// admin manual step নেবে (transaction update endpoint দরকার)।
 // ============================================
 async function loadWithdrawals() {
     var container = document.getElementById('withdrawList');
@@ -1788,7 +1733,7 @@ async function loadWithdrawals() {
         }
         var html = '';
         txs.forEach(function(tx) {
-            var u = tx.user_id || {};
+            var u = tx.user_id || tx.sender_id || {};
             var status = tx.status || 'pending';
             var canAct = (status === 'pending');
             
@@ -1824,7 +1769,7 @@ async function loadWithdrawals() {
         });
         container.innerHTML = html;
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -1861,16 +1806,16 @@ async function processWithdrawal(id, action) {
         showToast(data.message || 'Withdrawal ' + action + 'd', 'success');
         loadWithdrawals();
     } catch (e) { 
-        showToast(e.message, 'error'); 
+        showToast('Backend endpoint missing: ' + e.message, 'error');
     }
 }
 
 async function viewWithdrawalDetails(id) {
     try {
-        var data = await apiCall('/transaction/' + id);
-        if (!data.success) { showToast('Failed to load', 'error'); return; }
-        var tx = data.transaction;
-        var u = tx.user_id || {};
+        var data = await apiCall('/transactions?limit=200');
+        var tx = (data.transactions || []).find(function(t){ return t._id === id; });
+        if (!tx) { showToast('Not found', 'error'); return; }
+        var u = tx.user_id || tx.sender_id || {};
         
         var html = '';
         html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (tx.tx_id || '-') + '</span></div>';
@@ -1879,12 +1824,9 @@ async function viewWithdrawalDetails(id) {
         html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value">' + (u.walletId || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (tx.amount || 0).toFixed(2) + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (tx.status || '-') + '</span></div>';
-        if (tx.upiId) html += '<div class="info-row"><span class="info-label">UPI ID</span><span class="info-value">' + tx.upiId + '</span></div>';
-        if (tx.bankAccount) html += '<div class="info-row"><span class="info-label">Bank Account</span><span class="info-value">' + tx.bankAccount + '</span></div>';
-        if (tx.ifsc) html += '<div class="info-row"><span class="info-label">IFSC</span><span class="info-value">' + tx.ifsc + '</span></div>';
-        if (tx.accountHolder) html += '<div class="info-row"><span class="info-label">Account Holder</span><span class="info-value">' + tx.accountHolder + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Type</span><span class="info-value">' + (tx.type || '-') + '</span></div>';
         if (tx.remark) html += '<div class="info-row"><span class="info-label">Remark</span><span class="info-value">' + tx.remark + '</span></div>';
-        if (tx.adminNotes) html += '<div class="info-row"><span class="info-label">Admin Notes</span><span class="info-value">' + tx.adminNotes + '</span></div>';
+        if (tx.description) html += '<div class="info-row"><span class="info-label">Description</span><span class="info-value">' + tx.description + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(tx.createdAt).toLocaleString('en-IN') + '</span></div>';
         
         document.getElementById('modalTitle').textContent = 'Withdrawal Details';
@@ -1909,7 +1851,7 @@ async function loadUsers() {
         state.users = data.users || [];
         renderUsers();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -1947,7 +1889,8 @@ function renderUsers() {
             '</div>' +
             '<div class="list-actions">' +
                 '<button class="btn-view" onclick="viewUserDetails(\'' + u._id + '\')"><i class="fas fa-eye"></i> View</button>' +
-                '<button class="btn-view" style="background:#ede9fe;color:#7c3aed;border-color:#ddd6fe;" onclick="openEditUserModal(\'' + u._id + '\')"><i class="fas fa-edit"></i> Edit</button>';
+                '<button class="btn-view" style="background:#ede9fe;color:#7c3aed;border-color:#ddd6fe;" onclick="openEditUserModal(\'' + u._id + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn-adjust" onclick="goToAdjustBalance(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', \'' + (u.mobile || '') + '\', \'' + (u.walletId || '') + '\', ' + (u.balance || 0) + ')"><i class="fas fa-sliders-h"></i> Adjust</button>';
         
         if (!isDeleted) {
             html += '<button class="' + (isBlocked ? 'btn-approve' : 'btn-reject') + '" onclick="toggleBlockUser(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\')"><i class="fas fa-' + (isBlocked ? 'unlock' : 'ban') + '"></i> ' + (isBlocked ? 'Unblock' : 'Block') + '</button>';
@@ -1958,6 +1901,23 @@ function renderUsers() {
         html += '</div></div>';
     });
     container.innerHTML = html;
+}
+
+function goToAdjustBalance(userId, name, mobile, walletId, balance) {
+    state.adjSelectedUserId = userId;
+    showSection('adjust');
+    
+    document.getElementById('adjUserName').textContent = name;
+    document.getElementById('adjUserMobile').textContent = mobile || '-';
+    document.getElementById('adjUserWallet').textContent = walletId || '-';
+    document.getElementById('adjUserBalance').textContent = '₹' + parseFloat(balance || 0).toFixed(2);
+    document.getElementById('adjUserInfo').style.display = 'block';
+    document.getElementById('adjUserPlaceholder').style.display = 'none';
+    
+    document.getElementById('adjAmount').value = '';
+    document.getElementById('adjReason').value = '';
+    
+    setTimeout(function(){ document.getElementById('adjAmount').focus(); }, 300);
 }
 
 async function toggleBlockUser(id, name) {
@@ -2046,7 +2006,7 @@ async function viewUserDetails(id) {
             var refData = await apiCall('/user-referrals/' + id);
             if (refData.success) {
                 html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-user-plus"></i> Referral Info</div>';
-                html += '<div class="info-row"><span class="info-label">Total Refs</span><span class="info-value">' + (refData.asReferrer?.length || 0) + '</span></div>';
+                html += '<div class="info-row"><span class="info-label">Total Refs</span><span class="info-value">' + (refData.asReferrer ? refData.asReferrer.length : 0) + '</span></div>';
                 if (refData.asReferred) {
                     var rU = refData.asReferred.referrerId || {};
                     html += '<div class="info-row"><span class="info-label">Referred By</span><span class="info-value">' + (rU.fullName || 'Unknown') + ' (' + (rU.referralCode || '-') + ')</span></div>';
@@ -2129,62 +2089,8 @@ async function saveUserEdit() {
 }
 
 // ============================================
-// ADJUST BALANCE — WALLET SEARCH
+// ADJUST BALANCE
 // ============================================
-var walletInput = document.getElementById('walletInput');
-var walletResult = document.getElementById('walletResult');
-var searchTimer;
-if (walletInput) {
-    walletInput.addEventListener('input', function() {
-        var value = this.value.trim();
-        clearTimeout(searchTimer);
-        walletResult.innerHTML = '';
-        document.getElementById('adjUserInfo').style.display = 'none';
-        state.adjSelectedUserId = null;
-        if (value.length < 6) return;
-        searchTimer = setTimeout(function() { findWallet(value); }, 500);
-    });
-}
-
-function findWallet(identifier) {
-    walletResult.innerHTML = '<div class="wallet-card wallet-verifying"><div class="spinner"></div><div class="wallet-details"><div class="verify-title">VERIFYING...</div><div class="wallet-id">' + identifier + '</div></div></div>';
-    var token = adminToken || localStorage.getItem('adminToken');
-    if (!token) return;
-    fetch('/api/admin/users?search=' + encodeURIComponent(identifier) + '&limit=10', { headers: { 'Authorization': 'Bearer ' + token } })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        var users = data.users || [];
-        if (users.length === 0) { showNotFound(identifier); return; }
-        var best = null;
-        for (var i = 0; i < users.length; i++) { 
-            if (users[i].mobile === identifier) { best = users[i]; break; } 
-        }
-        if (!best) best = users[0];
-        showUser(best);
-    })
-    .catch(function(err) { 
-        walletResult.innerHTML = '<div class="wallet-card wallet-not-found"><div class="not-found-icon"><i class="fas fa-exclamation"></i></div><div class="wallet-details"><div class="not-found-title">ERROR</div><div class="not-found-text">' + err.message + '</div></div></div>'; 
-    });
-}
-
-function showUser(user) {
-    var name = user.fullName || 'Unknown';
-    var initials = name.split(' ').map(function(w){ return w[0]; }).slice(0, 2).join('').toUpperCase();
-    state.adjSelectedUserId = user._id;
-    walletResult.innerHTML = '<div class="wallet-card wallet-found"><div class="wallet-avatar">' + initials + '</div><div class="wallet-details"><div class="wallet-success-title"><span class="check-icon"><i class="fas fa-check"></i></span> ADJUSTING</div><div class="wallet-name">' + name + '</div><div class="wallet-id">' + (user.mobile || user.walletId) + '</div></div><div class="wallet-check"><i class="fas fa-check"></i></div></div>';
-    document.getElementById('adjUserName').textContent = name;
-    document.getElementById('adjUserMobile').textContent = user.mobile || '-';
-    document.getElementById('adjUserWallet').textContent = user.walletId || '-';
-    document.getElementById('adjUserBalance').textContent = '₹' + (user.balance || 0).toFixed(2);
-    document.getElementById('adjUserInfo').style.display = 'block';
-}
-
-function showNotFound(identifier) {
-    walletResult.innerHTML = '<div class="wallet-card wallet-not-found"><div class="not-found-icon"><i class="fas fa-times"></i></div><div class="wallet-details"><div class="not-found-title">NOT FOUND</div><div class="not-found-text">No account linked to</div><div class="not-found-number">' + identifier + '</div></div></div>';
-    document.getElementById('adjUserInfo').style.display = 'none';
-    state.adjSelectedUserId = null;
-}
-
 async function adjustBalance(type) {
     if (!state.adjSelectedUserId) { showToast('Select user first', 'error'); return; }
     var amount = parseFloat(document.getElementById('adjAmount').value);
@@ -2241,7 +2147,7 @@ async function loadGifts() {
         state.gifts = data.gifts || [];
         renderGifts();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2309,14 +2215,14 @@ async function createGift() {
         });
         var data = await r.json();
         if (data.success) { 
-            showToast(data.giftsCreated + ' gift(s) created', 'success'); 
+            showToast((data.giftsCreated || quantity) + ' gift(s) created', 'success'); 
             document.getElementById('giftAmount').value = ''; 
             document.getElementById('giftNote').value = ''; 
             document.getElementById('giftQty').value = '1'; 
             loadGifts(); 
         }
         else showToast(data.message, 'error');
-    } catch (e) { showToast('Failed', 'error'); }
+    } catch (e) { showToast('Failed: ' + e.message, 'error'); }
 }
 
 async function deleteGift(id) {
@@ -2333,14 +2239,10 @@ async function deleteGift(id) {
     if (!result || !result.confirmed) return;
     
     try {
-        var r = await fetch('/api/gift-mgmt/delete/' + id, { 
-            method: 'DELETE', 
-            headers: { 'Authorization': 'Bearer ' + adminToken } 
-        });
-        var data = await r.json();
+        var data = await apiCall('/delete-gift/' + id, { method: 'DELETE' });
         if (data.success) { showToast('Deleted', 'success'); loadGifts(); }
         else showToast(data.message, 'error');
-    } catch (e) { showToast('Failed', 'error'); }
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 function copyGiftCode(code) {
@@ -2383,7 +2285,7 @@ async function loadLifafas() {
         });
         container.innerHTML = html;
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2414,12 +2316,14 @@ async function loadInvoices() {
     var container = document.getElementById('invoiceList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
-        var r = await fetch('/api/admin-invoice/invoices?limit=30', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+        var r = await fetch('/api/admin-invoice/invoices?limit=30', { 
+            headers: { 'Authorization': 'Bearer ' + adminToken } 
+        });
         var data = await r.json();
         state.invoices = data.invoices || [];
         renderInvoices();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2463,7 +2367,7 @@ async function loadTransactions() {
         state.transactions = data.transactions || [];
         renderTransactions();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2518,7 +2422,7 @@ async function loadReferrals() {
         state.referrals = data.referrals || [];
         renderReferrals();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2565,6 +2469,7 @@ function renderReferrals() {
             '</div>' +
             '<div class="list-actions">' +
                 '<button class="btn-view" onclick="openEditReferralModal(\'' + r._id + '\', \'' + status + '\', \'' + (r.notes || '').replace(/'/g, '') + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn-approve" onclick="forceCompleteReferral(\'' + r._id + '\')"><i class="fas fa-bolt"></i> Force</button>' +
                 '<button class="btn-delete" onclick="deleteReferral(\'' + r._id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
             '</div>' +
         '</div>';
@@ -2573,31 +2478,62 @@ function renderReferrals() {
 }
 
 function openEditReferralModal(id, status, notes) {
-    document.getElementById('editRefId').value = id;
-    document.getElementById('editRefStatus').value = status;
-    document.getElementById('editRefNotes').value = notes || '';
-    document.getElementById('editReferralModal').classList.add('active');
+    // Simple edit — inline replacement with confirm flow
+    editReferralFlow(id, status, notes);
 }
 
-async function saveReferralEdit() {
-    var id = document.getElementById('editRefId').value;
-    var status = document.getElementById('editRefStatus').value;
-    var notes = document.getElementById('editRefNotes').value.trim();
-    
+async function editReferralFlow(id, currentStatus, currentNotes) {
     var result = await showConfirm(
-        'Save Referral',
-        'Update this referral record?',
+        'Edit Referral',
+        'Current status: <strong>' + currentStatus + '</strong><br><br>' +
+        'Change status to:<br>' +
+        '<span style="color:var(--accent);font-size:12px;">Type "pending", "completed", or "failed" in the notes below</span><br>' +
+        '<span style="font-size:11px;">Leave blank to keep current status</span>',
         {
-            icon: 'fa-save',
+            icon: 'fa-edit',
             iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
+            okText: '<i class="fas fa-save"></i> Save',
+            input: true,
+            inputLabel: 'New Status / Notes',
+            inputPlaceholder: 'pending | completed | failed',
+            inputValue: currentNotes || ''
+        }
+    );
+    if (!result || !result.confirmed) return;
+    
+    var newStatus = currentStatus;
+    var newNotes = result.value || '';
+    if (['pending', 'completed', 'failed'].indexOf(newNotes.toLowerCase()) > -1) {
+        newStatus = newNotes.toLowerCase();
+        newNotes = '';
+    }
+    
+    try {
+        var data = await apiCall('/update-referral/' + id, { 
+            method: 'PUT', 
+            body: JSON.stringify({ status: newStatus, notes: newNotes }) 
+        });
+        if (data.success) { showToast('Referral updated', 'success'); loadReferrals(); }
+        else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function forceCompleteReferral(id) {
+    var result = await showConfirm(
+        'Force Complete Referral',
+        'This will <strong>credit the bonus</strong> to the referrer immediately, regardless of deposit progress.<br><br>Continue?',
+        {
+            icon: 'fa-bolt',
+            iconColor: 'var(--warning)',
+            warning: true,
+            okText: '<i class="fas fa-bolt"></i> Force Complete'
         }
     );
     if (!result || !result.confirmed) return;
     
     try {
-        var data = await apiCall('/update-referral/' + id, { method: 'PUT', body: JSON.stringify({ status: status, notes: notes }) });
-        if (data.success) { showToast('Referral updated', 'success'); closeModal('editReferralModal'); loadReferrals(); }
+        var data = await apiCall('/force-complete-referral/' + id, { method: 'POST', body: JSON.stringify({}) });
+        if (data.success) { showToast(data.message, 'success'); loadReferrals(); loadTopReferrers(); }
         else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
@@ -2657,7 +2593,7 @@ async function loadTopReferrers() {
         });
         container.innerHTML = html;
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2671,21 +2607,28 @@ async function loadReferralSettings() {
         var s = data.settings;
         document.getElementById('refBonusAmount').value = s.bonusAmount || 10;
         document.getElementById('refMinDeposit').value = s.minDepositAmount || 50;
+        document.getElementById('refMaxReferrals').value = s.maxReferralsPerUser || 100;
+        document.getElementById('refEnabled').value = s.enabled !== false ? 'true' : 'false';
     } catch (e) { 
-        console.error('Load referral settings error:', e.message); 
-        showToast(e.message, 'error'); 
+        console.log('Referral settings error:', e.message); 
     }
 }
 
 async function saveReferralSettings() {
+    var enabled = document.getElementById('refEnabled').value === 'true';
     var bonusAmount = parseFloat(document.getElementById('refBonusAmount').value);
     var minDepositAmount = parseFloat(document.getElementById('refMinDeposit').value);
+    var maxReferralsPerUser = parseInt(document.getElementById('refMaxReferrals').value);
     if (!bonusAmount || bonusAmount < 1) { showToast('Bonus must be at least ₹1', 'error'); return; }
     if (!minDepositAmount || minDepositAmount < 1) { showToast('Min deposit must be at least ₹1', 'error'); return; }
+    if (!maxReferralsPerUser || maxReferralsPerUser < 1) { showToast('Max referrals must be at least 1', 'error'); return; }
     
     var result = await showConfirm(
         'Save Referral Settings',
-        'Bonus: <strong>₹' + bonusAmount + '</strong><br>Min Deposit: <strong>₹' + minDepositAmount + '</strong>',
+        'Program: <strong>' + (enabled ? 'ENABLED' : 'DISABLED') + '</strong><br>' +
+        'Bonus: <strong>₹' + bonusAmount + '</strong><br>' +
+        'Min Deposit: <strong>₹' + minDepositAmount + '</strong><br>' +
+        'Max Refs/User: <strong>' + maxReferralsPerUser + '</strong>',
         {
             icon: 'fa-save',
             iconColor: 'var(--accent)',
@@ -2698,8 +2641,10 @@ async function saveReferralSettings() {
         var data = await apiCall('/referral-settings', { 
             method: 'PUT', 
             body: JSON.stringify({ 
+                enabled: enabled,
                 bonusAmount: bonusAmount, 
-                minDepositAmount: minDepositAmount 
+                minDepositAmount: minDepositAmount,
+                maxReferralsPerUser: maxReferralsPerUser
             }) 
         });
         if (data.success) { showToast('Settings saved', 'success'); loadReferralSettings(); }
@@ -2716,7 +2661,7 @@ async function loadProfile() {
         if (!data.success) return;
         var a = data.admin;
         currentAdmin = a;
-        document.getElementById('profAdminId').textContent = a.adminId || '-';
+        document.getElementById('profAdminId').textContent = a.adminId || a.walletId || '-';
         document.getElementById('profWalletId').textContent = a.walletId || '-';
         document.getElementById('profRole').textContent = (a.role || 'admin').replace('_', ' ').toUpperCase();
         document.getElementById('profLastLogin').textContent = a.lastLoginAt ? new Date(a.lastLoginAt).toLocaleString('en-IN') : 'First login';
@@ -2759,9 +2704,6 @@ async function saveProfile() {
     } catch (e) { showToast(e.message, 'error'); }
 }
 
-// ============================================
-// CHANGE PASSWORD
-// ============================================
 async function changePassword() {
     var current = document.getElementById('cpCurrent').value;
     var newPw = document.getElementById('cpNew').value;
@@ -2822,17 +2764,16 @@ async function loadAdmins() {
                 '<div class="admin-info">' +
                     '<div class="admin-name">' + (a.fullName || 'Unknown') + '</div>' +
                     '<div class="admin-meta">' +
-                        '<span>@' + (a.adminId || '-') + '</span>' +
+                        '<span>@' + (a.walletId || '-') + '</span>' +
                         '<span>' + (a.mobile || '-') + '</span>' +
                         '<span class="admin-role ' + a.role + '">' + (a.role || 'admin').replace('_', ' ') + '</span>' +
                     '</div>' +
-                    (a.walletId ? '<div class="admin-meta" style="margin-top:2px;"><span style="color:var(--accent);">💼 ' + a.walletId + '</span></div>' : '') +
                 '</div>' +
             '</div>';
         });
         container.innerHTML = html;
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
@@ -2842,7 +2783,6 @@ async function loadAdmins() {
 document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
     
-    // Login flow
     var overlay = document.getElementById('loginOverlay');
     if (overlay.classList.contains('show')) {
         var step1 = document.getElementById('loginStep1');
@@ -2855,17 +2795,9 @@ document.addEventListener('keydown', function(e) {
         return;
     }
     
-    // Confirm modal
     var confirmModal = document.getElementById('confirmModal');
     if (confirmModal && confirmModal.classList.contains('active')) {
         confirmOk();
-        return;
-    }
-    
-    // Prompt modal
-    var promptModal = document.getElementById('promptModal');
-    if (promptModal && promptModal.classList.contains('active')) {
-        promptOk();
         return;
     }
 });
@@ -2881,7 +2813,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.addEventListener('resize', function() { if (canvas) setTimeout(resizeCanvas, 100); });
 setInterval(function() { if (adminToken && currentSection === 'dashboard') loadDashboard(); }, 30000);
-
 </script>
 
 </body>
