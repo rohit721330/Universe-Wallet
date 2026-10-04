@@ -770,10 +770,10 @@ body { padding-bottom: 100px; }
 // ============================================
 // CONFIG — Backend base URLs
 // ============================================
-var ADMIN_API = '/api/admin';                    // routes/admin.js
-var WITHDRAW_API = '/api/withdraw-settings';     // routes/withdraw-settings.js
-var GIFT_API = '/api/gift-mgmt';                 // Gift management
-var INVOICE_API = '/api/admin-invoice';          // Invoice management
+var ADMIN_API = '/api/admin';
+var WITHDRAW_API = '/api/withdraw-settings';
+var GIFT_API = '/api/gift-mgmt';
+var INVOICE_API = '/api/admin-invoice';
 
 // ============================================
 // GLOBAL STATE
@@ -853,7 +853,7 @@ async function withdrawalApiCall(endpoint, options) {
 }
 
 // ============================================
-// UNIVERSAL CONFIRM MODAL
+// CONFIRM MODAL
 // ============================================
 var _confirmResolver = null;
 
@@ -1136,7 +1136,7 @@ function clearPattern() {
 }
 
 // ============================================
-// VERIFY PATTERN (STEP 1)
+// VERIFY PATTERN
 // ============================================
 async function verifyPattern() {
     var status = document.getElementById('patternStatus');
@@ -1197,7 +1197,7 @@ function togglePwField(inputId, btn) {
 }
 
 // ============================================
-// SUBMIT LOGIN (auto-detect identifier type)
+// SUBMIT LOGIN
 // ============================================
 async function submitLogin() {
     if (!patternTempToken) {
@@ -1725,7 +1725,7 @@ async function loadWithdrawals() {
     var container = document.getElementById('withdrawList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
-        var data = await withdrawalApiCall('/withdrawals?limit=50');
+        var data = await withdrawalApiCall('/withdrawals?limit=50&_t=' + Date.now());
         state.withdrawals = data.withdrawals || [];
         renderWithdrawals();
     } catch (e) { 
@@ -1744,17 +1744,31 @@ function renderWithdrawals() {
         var u = w.userId || {};
         var status = w.status || 'pending';
         var canAct = (status === 'pending' || status === 'processing');
-        var methodLabel = w.method === 'upi' ? 'UPI' : (w.method === 'bank' ? 'Bank' : (w.method || 'N/A'));
-        var methodIcon = w.method === 'upi' ? 'fa-mobile-alt' : 'fa-university';
+        
+        // Description: only "UPI Withdraw" or "Bank Withdraw"
+        var descText = 'Withdraw';
+        var descIcon = 'fa-arrow-up';
+        if (w.method === 'upi') {
+            descText = 'UPI Withdraw';
+            descIcon = 'fa-mobile-alt';
+        } else if (w.method === 'bank') {
+            descText = 'Bank Withdraw';
+            descIcon = 'fa-university';
+        }
+        
+        // Time
+        var time = new Date(w.createdAt).toLocaleString('en-IN', { 
+            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+        });
         
         html += '<div class="list-item">' +
             '<div class="list-header">' +
                 '<div>' +
-                    '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto"><i class="fas ' + methodIcon + '"></i> ' + methodLabel + '</span></div>' +
+                    '<div class="list-user">' + (u.fullName || 'Unknown') + '</div>' +
                     '<div class="list-details">' +
+                        '<span><i class="fas ' + descIcon + '"></i> ' + descText + '</span>' +
                         '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                        '<span><i class="fas fa-hashtag"></i> ' + (w.transactionId || 'N/A') + '</span>' +
-                        (u.walletId ? '<span><i class="fas fa-wallet"></i> ' + u.walletId + '</span>' : '') +
+                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
                     '</div>' +
                 '</div>' +
                 '<div class="list-right">' +
@@ -1805,8 +1819,24 @@ async function approveWithdrawal(id) {
                 adminNote: result.value || 'Approved by admin'
             })
         });
-        showToast(data.message || 'Withdrawal approved', 'success');
-        loadWithdrawals();
+        
+        if (data.success) {
+            // Update local state immediately so UI shows new status
+            var idx = state.withdrawals.findIndex(function(w) { return w._id === id; });
+            if (idx !== -1) {
+                state.withdrawals[idx].status = 'completed';
+                state.withdrawals[idx].processedAt = new Date();
+                state.withdrawals[idx].processedBy = currentAdmin ? currentAdmin.fullName : 'Admin';
+                state.withdrawals[idx].adminNote = result.value || 'Approved by admin';
+            }
+            renderWithdrawals();
+            showToast(data.message || 'Withdrawal approved', 'success');
+            
+            // Reload from server after a short delay to confirm
+            setTimeout(function() { loadWithdrawals(); }, 800);
+        } else {
+            showToast(data.message || 'Failed', 'error');
+        }
     } catch (e) { 
         showToast(e.message, 'error'); 
     }
@@ -1842,8 +1872,23 @@ async function rejectWithdrawal(id) {
                 adminNote: result.value
             })
         });
-        showToast(data.message || 'Withdrawal rejected and refunded', 'success');
-        loadWithdrawals();
+        
+        if (data.success) {
+            // Update local state immediately
+            var idx = state.withdrawals.findIndex(function(w) { return w._id === id; });
+            if (idx !== -1) {
+                state.withdrawals[idx].status = 'failed';
+                state.withdrawals[idx].processedAt = new Date();
+                state.withdrawals[idx].processedBy = currentAdmin ? currentAdmin.fullName : 'Admin';
+                state.withdrawals[idx].adminNote = result.value;
+            }
+            renderWithdrawals();
+            showToast(data.message || 'Withdrawal rejected', 'success');
+            
+            setTimeout(function() { loadWithdrawals(); }, 800);
+        } else {
+            showToast(data.message || 'Failed', 'error');
+        }
     } catch (e) { 
         showToast(e.message, 'error'); 
     }
@@ -1856,22 +1901,53 @@ async function viewWithdrawalDetails(id) {
         var w = data.withdrawal;
         var u = w.userId || {};
         
+        // Description
+        var descText = 'Withdraw';
+        var descIcon = 'fa-arrow-up';
+        if (w.method === 'upi') {
+            descText = 'UPI Withdraw';
+            descIcon = 'fa-mobile-alt';
+        } else if (w.method === 'bank') {
+            descText = 'Bank Withdraw';
+            descIcon = 'fa-university';
+        }
+        
         var html = '';
-        html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (w.transactionId || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">User</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + (u.mobile || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value">' + (u.walletId || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (w.amount || 0).toFixed(2) + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Method</span><span class="info-value">' + (w.method ? w.method.toUpperCase() : '-') + '</span></div>';
-        if (w.upiId) html += '<div class="info-row"><span class="info-label">UPI ID</span><span class="info-value">' + w.upiId + '</span></div>';
-        if (w.bankName) html += '<div class="info-row"><span class="info-label">Bank</span><span class="info-value">' + w.bankName + '</span></div>';
-        if (w.accountNumber) html += '<div class="info-row"><span class="info-label">Account</span><span class="info-value">' + w.accountNumber + '</span></div>';
-        if (w.ifscCode) html += '<div class="info-row"><span class="info-label">IFSC</span><span class="info-value">' + w.ifscCode + '</span></div>';
-        if (w.accountHolder) html += '<div class="info-row"><span class="info-label">Account Holder</span><span class="info-value">' + w.accountHolder + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (w.status || '-') + '</span></div>';
-        if (w.adminNote) html += '<div class="info-row"><span class="info-label">Admin Note</span><span class="info-value">' + w.adminNote + '</span></div>';
+        
+        // Big header
+        html += '<div style="text-align:center;padding:16px;background:#fee2e2;border-radius:14px;margin-bottom:16px;">';
+        html += '<i class="fas ' + descIcon + '" style="font-size:32px;color:var(--danger);margin-bottom:8px;display:block;"></i>';
+        html += '<div style="font-size:28px;font-weight:900;color:var(--danger);letter-spacing:-1px;">-₹' + (w.amount || 0).toFixed(2) + '</div>';
+        html += '<div style="font-size:11px;font-weight:800;color:var(--danger);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">' + descText + '</div>';
+        html += '</div>';
+        
+        // User Info
+        html += '<div class="card-title" style="margin-top:8px;"><i class="fas fa-user"></i> User Info</div>';
+        html += '<div class="info-row"><span class="info-label">Name</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
+        if (u.mobile) html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + u.mobile + '</span></div>';
+        if (u.walletId) html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value" style="font-family:monospace;">' + u.walletId + '</span></div>';
+        
+        // Payment Details
+        if (w.method === 'upi' && w.upiId) {
+            html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-mobile-alt"></i> Payment Details</div>';
+            html += '<div class="info-row"><span class="info-label">UPI ID</span><span class="info-value" style="font-family:monospace;">' + w.upiId + '</span></div>';
+        } else if (w.method === 'bank') {
+            html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-university"></i> Bank Details</div>';
+            if (w.bankName) html += '<div class="info-row"><span class="info-label">Bank</span><span class="info-value">' + w.bankName + '</span></div>';
+            if (w.accountNumber) html += '<div class="info-row"><span class="info-label">Account</span><span class="info-value" style="font-family:monospace;">' + w.accountNumber + '</span></div>';
+            if (w.ifscCode) html += '<div class="info-row"><span class="info-label">IFSC</span><span class="info-value" style="font-family:monospace;">' + w.ifscCode + '</span></div>';
+            if (w.accountHolder) html += '<div class="info-row"><span class="info-label">Holder</span><span class="info-value">' + w.accountHolder + '</span></div>';
+        }
+        
+        // Transaction Info
+        html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-receipt"></i> Transaction Info</div>';
+        if (w.transactionId) {
+            html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + w.transactionId + '</span></div>';
+        }
+        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge ' + (w.status || 'pending') + '">' + (w.status || 'pending') + '</span></span></div>';
+        if (w.adminNote) html += '<div class="info-row"><span class="info-label">Note</span><span class="info-value">' + w.adminNote + '</span></div>';
         if (w.processedBy) html += '<div class="info-row"><span class="info-label">Processed By</span><span class="info-value">' + w.processedBy + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(w.createdAt).toLocaleString('en-IN') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Requested</span><span class="info-value">' + new Date(w.createdAt).toLocaleString('en-IN') + '</span></div>';
         if (w.processedAt) html += '<div class="info-row"><span class="info-label">Processed</span><span class="info-value">' + new Date(w.processedAt).toLocaleString('en-IN') + '</span></div>';
         
         document.getElementById('modalTitle').textContent = 'Withdrawal Details';
@@ -2399,7 +2475,7 @@ function renderInvoices() {
 }
 
 // ============================================
-// TRANSACTIONS (with click-to-view details)
+// TRANSACTIONS
 // ============================================
 async function loadTransactions() {
     var container = document.getElementById('transactionsList');
@@ -2458,7 +2534,7 @@ function renderTransactions() {
 }
 
 // ============================================
-// VIEW TRANSACTION DETAILS (Popup)
+// VIEW TRANSACTION DETAILS
 // ============================================
 async function viewTransactionDetails(txId) {
     try {
@@ -2501,7 +2577,7 @@ async function viewTransactionDetails(txId) {
         
         // Transaction Info
         html += '<div class="card-title" style="margin-top:8px;"><i class="fas fa-receipt"></i> Transaction Info</div>';
-        html += '<div class="info-row"><span class="info-label">Tx ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (tx.tx_id || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (tx.tx_id || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Type</span><span class="info-value">' + (tx.type || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (tx.amount || 0).toFixed(2) + '</span></div>';
         if (tx.fee) html += '<div class="info-row"><span class="info-label">Fee</span><span class="info-value">₹' + (tx.fee || 0).toFixed(2) + '</span></div>';
@@ -2519,7 +2595,7 @@ async function viewTransactionDetails(txId) {
             if (displayUser.walletId) html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value" style="font-family:monospace;">' + displayUser.walletId + '</span></div>';
         }
         
-        // Sender/Receiver (if different)
+        // Sender/Receiver
         if (sender.fullName && receiver.fullName && sender._id !== receiver._id) {
             html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-people-arrows"></i> Sender / Receiver</div>';
             html += '<div class="info-row"><span class="info-label">From</span><span class="info-value">' + (sender.fullName || '-') + (sender.mobile ? ' (' + sender.mobile + ')' : '') + '</span></div>';
