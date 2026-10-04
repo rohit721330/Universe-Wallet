@@ -163,6 +163,7 @@ body { padding-bottom: 100px; }
 .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; display: inline-flex; align-items: center; gap: 4px; }
 .status-badge.pending { background: #fef3c7; color: var(--warning); }
 .status-badge.pending_approval { background: #ede9fe; color: #7c3aed; }
+.status-badge.processing { background: #dbeafe; color: #2563eb; }
 .status-badge.approved, .status-badge.completed, .status-badge.paid, .status-badge.success { background: #dcfce7; color: var(--success); }
 .status-badge.rejected, .status-badge.failed { background: #fee2e2; color: var(--danger); }
 .status-badge.cancelled, .status-badge.expired { background: #f1f5f9; color: #64748b; }
@@ -198,7 +199,7 @@ body { padding-bottom: 100px; }
 .modal-footer .btn-success { background: var(--success); color: #fff; }
 
 /* CONFIRM MODAL */
-#confirmMessage, #actionMessage, #promptMessage {
+#confirmMessage, #actionMessage {
     white-space: pre-line;
     font-size: 13px;
     color: var(--text-sec);
@@ -215,32 +216,6 @@ body { padding-bottom: 100px; }
 .confirm-icon-wrap i.icon-success { color: var(--success); background: #dcfce7; }
 .confirm-icon-wrap i.icon-warning { color: var(--warning); background: #fef3c7; }
 
-/* ADMIN ITEMS */
-.admin-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-soft); border: 1px solid var(--border-soft); border-radius: 12px; margin-bottom: 8px; }
-.admin-item.blocked { opacity: 0.6; border-color: #fecaca; }
-.admin-item .admin-avatar-sm { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
-.admin-item .admin-info { flex: 1; min-width: 0; }
-.admin-item .admin-name { font-size: 14px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.admin-item .admin-meta { font-size: 10.5px; color: var(--text-muted); display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; font-weight: 600; }
-.admin-item .admin-role { padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-.admin-item .admin-role.super_admin { background: var(--accent-light); color: var(--accent); }
-.admin-item .admin-role.admin { background: #dcfce7; color: var(--success); }
-.admin-item .admin-role.moderator { background: #fef3c7; color: var(--warning); }
-
-/* LEADERBOARD */
-.leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow); }
-.leaderboard-rank { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; flex-shrink: 0; }
-.leaderboard-rank.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
-.leaderboard-rank.rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
-.leaderboard-rank.rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
-.leaderboard-rank.rank-other { background: var(--bg-soft); border: 1.5px solid var(--border); color: var(--text-sec); font-size: 12px; }
-.leaderboard-info { flex: 1; min-width: 0; }
-.leaderboard-name { font-size: 13px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.leaderboard-meta { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 2px; font-family: monospace; }
-.leaderboard-stats { text-align: right; flex-shrink: 0; }
-.leaderboard-count { font-size: 15px; font-weight: 900; color: var(--accent); }
-.leaderboard-earned { font-size: 10px; color: var(--success); font-weight: 700; }
-
 /* TOAST */
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-10px); padding: 12px 22px; border-radius: 30px; font-size: 12px; font-weight: 800; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; max-width: 92%; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -248,6 +223,15 @@ body { padding-bottom: 100px; }
 .toast.error { background: var(--danger); color: #fff; }
 .toast.warning { background: var(--warning); color: #fff; }
 .toast.info { background: var(--accent); color: #fff; }
+
+/* WALLET CARD */
+.wallet-card { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 10px; display: flex; align-items: center; gap: 12px; }
+.wallet-card.wallet-found { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+.wallet-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.wallet-details { flex: 1; min-width: 0; }
+.wallet-success-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; color: var(--success); }
+.wallet-name { font-size: 15px; font-weight: 800; color: var(--text); }
+.wallet-id { font-size: 11px; color: var(--text-sec); font-weight: 600; margin-top: 2px; font-family: monospace; }
 
 @media (max-width: 480px) {
     .pattern-wrapper { width: 220px; height: 220px; }
@@ -436,18 +420,81 @@ body { padding-bottom: 100px; }
 
         <div class="card">
             <div class="card-title"><i class="fas fa-cog"></i> Withdrawal Settings</div>
+
             <div class="form-group">
-                <label><i class="fas fa-arrow-down"></i> Min Withdrawal (₹)</label>
-                <input type="number" id="wsMin" placeholder="100" min="1" value="100">
+                <label><i class="fas fa-toggle-on"></i> Withdrawals Enabled</label>
+                <select id="wsEnabled">
+                    <option value="true">ON</option>
+                    <option value="false">OFF</option>
+                </select>
             </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-arrow-down"></i> Min Amount (₹)</label>
+                    <input type="number" id="wsMin" placeholder="1" min="0" value="1">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-arrow-up"></i> Max Amount (₹)</label>
+                    <input type="number" id="wsMax" placeholder="5000" min="0" value="5000">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-percent"></i> Fee</label>
+                    <input type="number" id="wsFee" placeholder="0" min="0" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Fee Type</label>
+                    <select id="wsFeeType">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed (₹)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-day"></i> Max Daily</label>
+                    <input type="number" id="wsMaxDaily" placeholder="10" min="0" value="10">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Max Monthly</label>
+                    <input type="number" id="wsMaxMonthly" placeholder="50" min="0" value="50">
+                </div>
+            </div>
+
             <div class="form-group">
-                <label><i class="fas fa-arrow-up"></i> Max Withdrawal (₹)</label>
-                <input type="number" id="wsMax" placeholder="50000" min="1" value="50000">
+                <label><i class="fas fa-check-circle"></i> Approval Required</label>
+                <select id="wsApprovalRequired">
+                    <option value="true">Yes</option>
+                    <option value="false">No (Auto-approve)</option>
+                </select>
             </div>
+
             <div class="form-group">
-                <label><i class="fas fa-percent"></i> Withdrawal Fee (%)</label>
-                <input type="number" id="wsFee" placeholder="0" min="0" max="100" step="0.01" value="0">
+                <label><i class="fas fa-bolt"></i> Auto Approve Below (₹)</label>
+                <input type="number" id="wsAutoApprove" placeholder="0" min="0" step="0.01" value="0">
             </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-university"></i> Require Bank Details</label>
+                    <select id="wsRequireBank">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-mobile-alt"></i> Require UPI Details</label>
+                    <select id="wsRequireUpi">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+
             <button class="btn btn-primary btn-block" onclick="saveWithdrawalSettings()">
                 <i class="fas fa-save"></i> Save Settings
             </button>
@@ -670,28 +717,6 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
-<!-- ACTION CHOICE MODAL -->
-<div class="modal-overlay" id="actionModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3><i class="fas fa-tasks"></i> <span id="actionTitle">Choose Action</span></h3>
-            <button class="modal-close" onclick="closeActionModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <p id="actionMessage"></p>
-        <div class="btn-group" style="margin-bottom:10px;">
-            <button class="btn btn-success" onclick="actionChoice('approve')"><i class="fas fa-check"></i> Approve</button>
-            <button class="btn btn-danger" onclick="actionChoice('reject')"><i class="fas fa-times"></i> Reject</button>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-sticky-note"></i> Notes (optional)</label>
-            <input type="text" id="actionNotes" placeholder="Admin notes...">
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeActionModal()">Cancel</button>
-        </div>
-    </div>
-</div>
-
 <!-- CANCEL DEPOSIT MODAL -->
 <div class="modal-overlay" id="cancelDepositModal">
     <div class="modal">
@@ -751,6 +776,15 @@ body { padding-bottom: 100px; }
 
 <script>
 // ============================================
+// CONFIG
+// Base URLs for different backend routes
+// ============================================
+var ADMIN_API = '/api/admin';                          // routes/admin.js
+var WITHDRAW_API = '/api/withdraw-settings';           // routes/withdraw-settings.js
+var GIFT_API = '/api/gift-mgmt';                       // Gift management (if exists)
+var INVOICE_API = '/api/admin-invoice';                // Invoice management (if exists)
+
+// ============================================
 // GLOBAL STATE
 // ============================================
 var currentAdmin = null;
@@ -767,6 +801,7 @@ var currentMousePos = null;
 var state = {
     deposits: [], 
     users: [], 
+    withdrawals: [],
     gifts: [], 
     lifafas: [], 
     invoices: [], 
@@ -788,13 +823,34 @@ function showToast(msg, type) {
 }
 
 // ============================================
-// API CALL HELPER
+// API CALL HELPERS
 // ============================================
+
+// For routes/admin.js (base: /api/admin)
 async function apiCall(endpoint, options) {
     options = options || {};
     var headers = { 'Content-Type': 'application/json' };
     if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
-    var r = await fetch('/api/admin' + endpoint, {
+    var r = await fetch(ADMIN_API + endpoint, {
+        method: options.method || 'GET',
+        headers: headers,
+        body: options.body || null
+    });
+    if (r.status === 401 || r.status === 403) { 
+        handleSessionExpired(); 
+        throw new Error('Session expired'); 
+    }
+    var data = await r.json();
+    if (!r.ok) throw new Error(data.message || 'API error');
+    return data;
+}
+
+// For routes/withdraw-settings.js (base: /api/withdraw-settings)
+async function withdrawalApiCall(endpoint, options) {
+    options = options || {};
+    var headers = { 'Content-Type': 'application/json' };
+    if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+    var r = await fetch(WITHDRAW_API + endpoint, {
         method: options.method || 'GET',
         headers: headers,
         body: options.body || null
@@ -880,57 +936,19 @@ function confirmOk() {
     }
 }
 
-// ============================================
-// ACTION CHOICE MODAL
-// ============================================
-var _actionResolver = null;
-
-function showActionChoice(title, message) {
-    return new Promise(function(resolve) {
-        _actionResolver = resolve;
-        document.getElementById('actionTitle').textContent = title;
-        document.getElementById('actionMessage').innerHTML = message;
-        document.getElementById('actionNotes').value = '';
-        document.getElementById('actionModal').classList.add('active');
-    });
-}
-
-function closeActionModal() {
-    document.getElementById('actionModal').classList.remove('active');
-    if (_actionResolver) {
-        _actionResolver(null);
-        _actionResolver = null;
-    }
-}
-
-function actionChoice(choice) {
-    var notes = document.getElementById('actionNotes').value.trim();
-    document.getElementById('actionModal').classList.remove('active');
-    if (_actionResolver) {
-        _actionResolver({ action: choice, notes: notes });
-        _actionResolver = null;
-    }
-}
-
-// ============================================
-// MODAL CLOSE
-// ============================================
 function closeModal(id) { 
     var el = document.getElementById(id);
     if (el) el.classList.remove('active'); 
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Confirm OK
     var okBtn = document.getElementById('confirmOkBtn');
     if (okBtn) okBtn.onclick = confirmOk;
     
-    // Overlay click
     document.querySelectorAll('.modal-overlay').forEach(function(m) {
         m.addEventListener('click', function(e) { 
             if (e.target === this) {
                 if (this.id === 'confirmModal') closeConfirmModal();
-                else if (this.id === 'actionModal') closeActionModal();
                 else this.classList.remove('active');
             }
         });
@@ -1130,7 +1148,7 @@ function clearPattern() {
 }
 
 // ============================================
-// VERIFY PATTERN
+// VERIFY PATTERN (STEP 1)
 // ============================================
 async function verifyPattern() {
     var status = document.getElementById('patternStatus');
@@ -1144,7 +1162,7 @@ async function verifyPattern() {
     status.textContent = 'Verifying...'; 
     status.className = 'pattern-status';
     try {
-        var r = await fetch('/api/admin/login-step1', { 
+        var r = await fetch(ADMIN_API + '/login-step1', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
             body: JSON.stringify({ pattern: patternString }) 
@@ -1191,12 +1209,7 @@ function togglePwField(inputId, btn) {
 }
 
 // ============================================
-// SUBMIT LOGIN
-// Backend supports 3 lookup methods:
-//   - login-step2: mobile
-//   - login-step3: telegramId  
-//   - login-step4: walletId
-// Auto-detect identifier type
+// SUBMIT LOGIN (Auto-detect identifier type)
 // ============================================
 async function submitLogin() {
     if (!patternTempToken) {
@@ -1213,30 +1226,26 @@ async function submitLogin() {
     if (!password) { errEl.textContent = 'Password required.'; return; }
     errEl.innerHTML = '';
 
-    // Auto-detect which endpoint to use
-    var endpoint = '/login-step4'; // default walletId
+    // Auto-detect: 10-digit → mobile, all-caps → walletId, else → telegram
+    var endpoint = '/login-step4';
     var payload = { tempToken: patternTempToken, password: password };
 
     if (/^[0-9]{10}$/.test(identifier)) {
-        // 10-digit → mobile
         endpoint = '/login-step2';
         payload.mobile = identifier;
-    } else if (/^[A-Za-z0-9_]{3,}$/.test(identifier) && !/^[0-9]+$/.test(identifier) && identifier === identifier.toUpperCase()) {
-        // ALL CAPS alphanumeric → walletId
+    } else if (identifier === identifier.toUpperCase() && /^[A-Z0-9_]{2,}$/.test(identifier)) {
         endpoint = '/login-step4';
         payload.walletId = identifier.toUpperCase();
     } else if (/^[0-9]{5,}$/.test(identifier)) {
-        // Numeric ID → could be telegram
         endpoint = '/login-step3';
         payload.telegramId = identifier;
     } else {
-        // Fallback: try wallet ID
         endpoint = '/login-step4';
         payload.walletId = identifier.toUpperCase();
     }
 
     try {
-        var r = await fetch('/api/admin' + endpoint, {
+        var r = await fetch(ADMIN_API + endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -1318,7 +1327,7 @@ async function checkSession() {
     if (!adminToken) { showLogin(); return; }
     try {
         if (adminData) { try { currentAdmin = JSON.parse(adminData); } catch (e) {} }
-        var r = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+        var r = await fetch(ADMIN_API + '/stats', { headers: { 'Authorization': 'Bearer ' + adminToken } });
         if (r.status === 401 || r.status === 403) { handleSessionExpired(); return; }
         var data = await r.json();
         if (data && data.success) {
@@ -1398,7 +1407,7 @@ function showSection(name) {
         deposits: 'Deposits',
         withdrawals: 'Withdrawals',
         users: 'Users',
-        adjust: 'Adjust Balance',
+        adjust: 'Adjust',
         gift: 'Gifts',
         lifafa: 'Lifafa',
         invoices: 'Invoices',
@@ -1412,7 +1421,7 @@ function showSection(name) {
     
     if (name === 'dashboard') loadDashboard();
     else if (name === 'deposits') { loadDeposits(); loadDepositSettings(); }
-    else if (name === 'withdrawals') { loadWithdrawals(); loadWithdrawalSettings(); }
+    else if (name === 'withdrawals') { loadWithdrawals(); loadWithdrawalSettings(); loadWithdrawalStats(); }
     else if (name === 'users') loadUsers();
     else if (name === 'gift') loadGifts();
     else if (name === 'lifafa') loadLifafas();
@@ -1551,7 +1560,7 @@ async function verifyDeposit(id, action) {
         isApprove ? 'Approve Deposit' : 'Reject Deposit',
         isApprove 
             ? 'Are you sure you want to <strong>approve</strong> this deposit? The amount will be credited to the user\'s wallet.' 
-            : 'Are you sure you want to <strong>reject</strong> this deposit? The user will be notified.',
+            : 'Are you sure you want to <strong>reject</strong> this deposit?',
         {
             icon: isApprove ? 'fa-check-circle' : 'fa-times-circle',
             iconColor: isApprove ? 'var(--success)' : 'var(--danger)',
@@ -1629,9 +1638,9 @@ async function saveDepositSettings() {
         taxPercent: parseFloat(document.getElementById('dsTax').value),
         taxEnabled: document.getElementById('dsTaxEnabled').value === 'true'
     };
-    if (!payload.minDeposit || payload.minDeposit < 1) { showToast('Invalid min deposit', 'error'); return; }
-    if (!payload.maxDeposit || payload.maxDeposit < payload.minDeposit) { showToast('Invalid max deposit', 'error'); return; }
-    if (payload.taxPercent < 0 || payload.taxPercent > 100) { showToast('Tax must be 0-100', 'error'); return; }
+    if (!payload.minDeposit || payload.minDeposit < 1) { showToast('Invalid min', 'error'); return; }
+    if (!payload.maxDeposit || payload.maxDeposit < payload.minDeposit) { showToast('Invalid max', 'error'); return; }
+    if (payload.taxPercent < 0 || payload.taxPercent > 100) { showToast('Tax 0-100', 'error'); return; }
     
     var result = await showConfirm(
         'Save Deposit Settings',
@@ -1655,47 +1664,58 @@ async function saveDepositSettings() {
 
 // ============================================
 // WITHDRAWAL SETTINGS
-// (Backend এ endpoint নেই — local storage এ save হবে)
+// Uses /api/withdraw-settings/ endpoints
 // ============================================
 async function loadWithdrawalSettings() {
     try {
-        // Try backend first
-        var data = await apiCall('/withdrawal-settings');
-        if (data.success) {
-            document.getElementById('wsMin').value = data.settings.minWithdrawal || 100;
-            document.getElementById('wsMax').value = data.settings.maxWithdrawal || 50000;
-            document.getElementById('wsFee').value = data.settings.withdrawalFee || 0;
-            return;
+        var data = await withdrawalApiCall('/');
+        if (data.success && data.settings) {
+            var s = data.settings;
+            document.getElementById('wsEnabled').value = s.enabled !== false ? 'true' : 'false';
+            document.getElementById('wsMin').value = s.minAmount || 1;
+            document.getElementById('wsMax').value = s.maxAmount || 5000;
+            document.getElementById('wsFee').value = s.fee || 0;
+            document.getElementById('wsFeeType').value = s.feeType || 'percentage';
+            document.getElementById('wsMaxDaily').value = s.maxDailyWithdrawals || 10;
+            document.getElementById('wsMaxMonthly').value = s.maxMonthlyWithdrawals || 50;
+            document.getElementById('wsApprovalRequired').value = s.approvalRequired !== false ? 'true' : 'false';
+            document.getElementById('wsAutoApprove').value = s.autoApproveBelow || 0;
+            document.getElementById('wsRequireBank').value = s.requireBankDetails !== false ? 'true' : 'false';
+            document.getElementById('wsRequireUpi').value = s.requireUpiDetails !== false ? 'true' : 'false';
         }
-    } catch (e) {
-        // Fallback to localStorage
-        var local = localStorage.getItem('withdrawalSettings');
-        if (local) {
-            try {
-                var s = JSON.parse(local);
-                document.getElementById('wsMin').value = s.minWithdrawal || 100;
-                document.getElementById('wsMax').value = s.maxWithdrawal || 50000;
-                document.getElementById('wsFee').value = s.withdrawalFee || 0;
-            } catch (err) {}
-        }
+    } catch (e) { 
+        console.log('Withdrawal settings error:', e.message);
+        showToast('Failed to load withdrawal settings', 'error');
     }
 }
 
 async function saveWithdrawalSettings() {
     var payload = {
-        minWithdrawal: parseFloat(document.getElementById('wsMin').value),
-        maxWithdrawal: parseFloat(document.getElementById('wsMax').value),
-        withdrawalFee: parseFloat(document.getElementById('wsFee').value)
+        enabled: document.getElementById('wsEnabled').value === 'true',
+        minAmount: parseFloat(document.getElementById('wsMin').value),
+        maxAmount: parseFloat(document.getElementById('wsMax').value),
+        fee: parseFloat(document.getElementById('wsFee').value),
+        feeType: document.getElementById('wsFeeType').value,
+        maxDailyWithdrawals: parseInt(document.getElementById('wsMaxDaily').value),
+        maxMonthlyWithdrawals: parseInt(document.getElementById('wsMaxMonthly').value),
+        approvalRequired: document.getElementById('wsApprovalRequired').value === 'true',
+        autoApproveBelow: parseFloat(document.getElementById('wsAutoApprove').value),
+        requireBankDetails: document.getElementById('wsRequireBank').value === 'true',
+        requireUpiDetails: document.getElementById('wsRequireUpi').value === 'true'
     };
-    if (!payload.minWithdrawal || payload.minWithdrawal < 1) { showToast('Invalid min', 'error'); return; }
-    if (!payload.maxWithdrawal || payload.maxWithdrawal < payload.minWithdrawal) { showToast('Invalid max', 'error'); return; }
-    if (payload.withdrawalFee < 0 || payload.withdrawalFee > 100) { showToast('Fee must be 0-100', 'error'); return; }
+    
+    if (isNaN(payload.minAmount) || payload.minAmount < 0) { showToast('Invalid min', 'error'); return; }
+    if (isNaN(payload.maxAmount) || payload.maxAmount < 0) { showToast('Invalid max', 'error'); return; }
+    if (payload.minAmount > payload.maxAmount) { showToast('Min cannot exceed max', 'error'); return; }
+    if (isNaN(payload.fee) || payload.fee < 0) { showToast('Invalid fee', 'error'); return; }
     
     var result = await showConfirm(
         'Save Withdrawal Settings',
-        'Min: <strong>₹' + payload.minWithdrawal + '</strong><br>' +
-        'Max: <strong>₹' + payload.maxWithdrawal + '</strong><br>' +
-        'Fee: <strong>' + payload.withdrawalFee + '%</strong>',
+        'Enabled: <strong>' + (payload.enabled ? 'YES' : 'NO') + '</strong><br>' +
+        'Min: <strong>₹' + payload.minAmount + '</strong><br>' +
+        'Max: <strong>₹' + payload.maxAmount + '</strong><br>' +
+        'Fee: <strong>' + payload.fee + (payload.feeType === 'percentage' ? '%' : '₹') + '</strong><br>' +
+        'Approval: <strong>' + (payload.approvalRequired ? 'Required' : 'Auto') + '</strong>',
         {
             icon: 'fa-save',
             iconColor: 'var(--accent)',
@@ -1705,129 +1725,182 @@ async function saveWithdrawalSettings() {
     if (!result || !result.confirmed) return;
     
     try {
-        var data = await apiCall('/withdrawal-settings', { method: 'PUT', body: JSON.stringify(payload) });
-        if (data.success) showToast('Settings saved', 'success');
-        else showToast(data.message, 'error');
-    } catch (e) { 
-        // Fallback to localStorage
-        localStorage.setItem('withdrawalSettings', JSON.stringify(payload));
-        showToast('Settings saved locally', 'success');
-    }
+        var data = await withdrawalApiCall('/', { method: 'PUT', body: JSON.stringify(payload) });
+        if (data.success) {
+            showToast('Settings saved', 'success');
+            loadWithdrawalSettings();
+        } else showToast(data.message, 'error');
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 // ============================================
-// WITHDRAWALS
-// Note: Backend এ /verify-withdrawal endpoint নেই।
-// Frontend শুধু transaction list দেখাবে এবং
-// admin manual step নেবে (transaction update endpoint দরকার)।
+// WITHDRAWAL STATS (dashboard-like)
+// ============================================
+async function loadWithdrawalStats() {
+    // Optional: silently fetch stats for future use
+    try {
+        await withdrawalApiCall('/stats');
+    } catch (e) { /* silent */ }
+}
+
+// ============================================
+// WITHDRAWALS LIST + APPROVE/REJECT
+// Uses /api/withdraw-settings/withdrawals and /api/withdraw-settings/withdrawal/approve|reject
 // ============================================
 async function loadWithdrawals() {
     var container = document.getElementById('withdrawList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
-        var data = await apiCall('/transactions?type=withdraw&limit=50');
-        var txs = data.transactions || [];
-        if (txs.length === 0) { 
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-arrow-up"></i><p>No withdrawals</p></div>'; 
-            return; 
-        }
-        var html = '';
-        txs.forEach(function(tx) {
-            var u = tx.user_id || tx.sender_id || {};
-            var status = tx.status || 'pending';
-            var canAct = (status === 'pending');
-            
-            html += '<div class="list-item">' +
-                '<div class="list-header">' +
-                    '<div>' +
-                        '<div class="list-user">' + (u.fullName || 'Unknown') + '</div>' +
-                        '<div class="list-details">' +
-                            '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                            '<span><i class="fas fa-hashtag"></i> ' + (tx.tx_id || 'N/A') + '</span>' +
-                            (u.walletId ? '<span><i class="fas fa-wallet"></i> ' + u.walletId + '</span>' : '') +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="list-right">' +
-                        '<div class="list-amount" style="color:var(--danger);">-₹' + (tx.amount || 0).toFixed(2) + '</div>' +
-                        '<span class="status-badge ' + status + '">' + status + '</span>' +
-                    '</div>' +
-                '</div>';
-            
-            if (canAct) {
-                html += '<div class="list-actions">' +
-                    '<button class="btn-approve" onclick="processWithdrawal(\'' + tx._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button>' +
-                    '<button class="btn-reject" onclick="processWithdrawal(\'' + tx._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button>' +
-                    '<button class="btn-view" onclick="viewWithdrawalDetails(\'' + tx._id + '\')"><i class="fas fa-eye"></i> Details</button>' +
-                '</div>';
-            } else {
-                html += '<div class="list-actions">' +
-                    '<button class="btn-view" onclick="viewWithdrawalDetails(\'' + tx._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
-                '</div>';
-            }
-            
-            html += '</div>';
-        });
-        container.innerHTML = html;
+        var data = await withdrawalApiCall('/withdrawals?limit=50');
+        state.withdrawals = data.withdrawals || [];
+        renderWithdrawals();
     } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load: ' + e.message + '</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
     }
 }
 
-async function processWithdrawal(id, action) {
-    var isApprove = action === 'approve';
+function renderWithdrawals() {
+    var container = document.getElementById('withdrawList');
+    if (!state.withdrawals || state.withdrawals.length === 0) { 
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-arrow-up"></i><p>No withdrawals</p></div>'; 
+        return; 
+    }
+    var html = '';
+    state.withdrawals.forEach(function(w) {
+        var u = w.userId || {};
+        var status = w.status || 'pending';
+        var canAct = (status === 'pending' || status === 'processing');
+        var methodLabel = w.method === 'upi' ? 'UPI' : (w.method === 'bank' ? 'Bank' : (w.method || 'N/A'));
+        var methodIcon = w.method === 'upi' ? 'fa-mobile-alt' : 'fa-university';
+        
+        html += '<div class="list-item">' +
+            '<div class="list-header">' +
+                '<div>' +
+                    '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto"><i class="fas ' + methodIcon + '"></i> ' + methodLabel + '</span></div>' +
+                    '<div class="list-details">' +
+                        '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
+                        '<span><i class="fas fa-hashtag"></i> ' + (w.transactionId || 'N/A') + '</span>' +
+                        (u.walletId ? '<span><i class="fas fa-wallet"></i> ' + u.walletId + '</span>' : '') +
+                        (w.upiId ? '<span><i class="fas fa-mobile-alt"></i> ' + w.upiId + '</span>' : '') +
+                        (w.accountNumber ? '<span><i class="fas fa-university"></i> ' + (w.bankName || 'Bank') + ' ' + (w.accountNumber || '') + '</span>' : '') +
+                    '</div>' +
+                '</div>' +
+                '<div class="list-right">' +
+                    '<div class="list-amount" style="color:var(--danger);">-₹' + (w.amount || 0).toFixed(2) + '</div>' +
+                    '<span class="status-badge ' + status + '">' + status + '</span>' +
+                '</div>' +
+            '</div>';
+        
+        if (canAct) {
+            html += '<div class="list-actions">' +
+                '<button class="btn-approve" onclick="approveWithdrawal(\'' + w._id + '\')"><i class="fas fa-check"></i> Approve</button>' +
+                '<button class="btn-reject" onclick="rejectWithdrawal(\'' + w._id + '\')"><i class="fas fa-times"></i> Reject</button>' +
+                '<button class="btn-view" onclick="viewWithdrawalDetails(\'' + w._id + '\')"><i class="fas fa-eye"></i> Details</button>' +
+            '</div>';
+        } else {
+            html += '<div class="list-actions">' +
+                '<button class="btn-view" onclick="viewWithdrawalDetails(\'' + w._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
+            '</div>';
+        }
+        
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+
+async function approveWithdrawal(id) {
     var result = await showConfirm(
-        isApprove ? 'Approve Withdrawal' : 'Reject Withdrawal',
-        isApprove 
-            ? 'Approve this withdrawal? The amount will be <strong>sent</strong> to the user.' 
-            : 'Reject this withdrawal? The amount will be <strong>refunded</strong> to the user.',
+        'Approve Withdrawal',
+        'Are you sure you want to <strong>approve</strong> this withdrawal?<br>The amount will be marked as sent.',
         {
-            icon: isApprove ? 'fa-check-circle' : 'fa-times-circle',
-            iconColor: isApprove ? 'var(--success)' : 'var(--danger)',
-            danger: !isApprove,
-            success: isApprove,
-            okText: isApprove ? '<i class="fas fa-check"></i> Approve' : '<i class="fas fa-times"></i> Reject',
+            icon: 'fa-check-circle',
+            iconColor: 'var(--success)',
+            success: true,
+            okText: '<i class="fas fa-check"></i> Approve',
             input: true,
-            inputLabel: 'Admin Notes',
-            inputPlaceholder: 'Optional notes...'
+            inputLabel: 'Admin Note (optional)',
+            inputPlaceholder: 'Add note...'
         }
     );
     
     if (!result || !result.confirmed) return;
     
     try {
-        var data = await apiCall('/verify-withdrawal', { 
-            method: 'POST', 
+        var data = await withdrawalApiCall('/withdrawal/approve', {
+            method: 'POST',
             body: JSON.stringify({ 
-                transactionId: id, 
-                action: action, 
-                adminNotes: result.value || '' 
-            }) 
+                withdrawalId: id, 
+                adminNote: result.value || 'Approved by admin'
+            })
         });
-        showToast(data.message || 'Withdrawal ' + action + 'd', 'success');
+        showToast(data.message || 'Withdrawal approved', 'success');
         loadWithdrawals();
     } catch (e) { 
-        showToast('Backend endpoint missing: ' + e.message, 'error');
+        showToast(e.message, 'error'); 
+    }
+}
+
+async function rejectWithdrawal(id) {
+    var result = await showConfirm(
+        'Reject Withdrawal',
+        'Are you sure you want to <strong>reject</strong> this withdrawal?<br>The amount will be <strong>refunded</strong> to the user.',
+        {
+            icon: 'fa-times-circle',
+            iconColor: 'var(--danger)',
+            danger: true,
+            okText: '<i class="fas fa-times"></i> Reject & Refund',
+            input: true,
+            inputLabel: 'Rejection Reason',
+            inputPlaceholder: 'Why reject this withdrawal?'
+        }
+    );
+    
+    if (!result || !result.confirmed) return;
+    
+    if (!result.value || !result.value.trim()) {
+        showToast('Reason required for rejection', 'warning');
+        return;
+    }
+    
+    try {
+        var data = await withdrawalApiCall('/withdrawal/reject', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                withdrawalId: id, 
+                adminNote: result.value
+            })
+        });
+        showToast(data.message || 'Withdrawal rejected and refunded', 'success');
+        loadWithdrawals();
+    } catch (e) { 
+        showToast(e.message, 'error'); 
     }
 }
 
 async function viewWithdrawalDetails(id) {
     try {
-        var data = await apiCall('/transactions?limit=200');
-        var tx = (data.transactions || []).find(function(t){ return t._id === id; });
-        if (!tx) { showToast('Not found', 'error'); return; }
-        var u = tx.user_id || tx.sender_id || {};
+        var data = await withdrawalApiCall('/withdrawal/' + id);
+        if (!data.success) { showToast('Failed to load', 'error'); return; }
+        var w = data.withdrawal;
+        var u = w.userId || {};
         
         var html = '';
-        html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (tx.tx_id || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (w.transactionId || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">User</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + (u.mobile || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value">' + (u.walletId || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (tx.amount || 0).toFixed(2) + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (tx.status || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Type</span><span class="info-value">' + (tx.type || '-') + '</span></div>';
-        if (tx.remark) html += '<div class="info-row"><span class="info-label">Remark</span><span class="info-value">' + tx.remark + '</span></div>';
-        if (tx.description) html += '<div class="info-row"><span class="info-label">Description</span><span class="info-value">' + tx.description + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(tx.createdAt).toLocaleString('en-IN') + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (w.amount || 0).toFixed(2) + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Method</span><span class="info-value">' + (w.method ? w.method.toUpperCase() : '-') + '</span></div>';
+        if (w.upiId) html += '<div class="info-row"><span class="info-label">UPI ID</span><span class="info-value">' + w.upiId + '</span></div>';
+        if (w.bankName) html += '<div class="info-row"><span class="info-label">Bank</span><span class="info-value">' + w.bankName + '</span></div>';
+        if (w.accountNumber) html += '<div class="info-row"><span class="info-label">Account</span><span class="info-value">' + w.accountNumber + '</span></div>';
+        if (w.ifscCode) html += '<div class="info-row"><span class="info-label">IFSC</span><span class="info-value">' + w.ifscCode + '</span></div>';
+        if (w.accountHolder) html += '<div class="info-row"><span class="info-label">Account Holder</span><span class="info-value">' + w.accountHolder + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (w.status || '-') + '</span></div>';
+        if (w.adminNote) html += '<div class="info-row"><span class="info-label">Admin Note</span><span class="info-value">' + w.adminNote + '</span></div>';
+        if (w.processedBy) html += '<div class="info-row"><span class="info-label">Processed By</span><span class="info-value">' + w.processedBy + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(w.createdAt).toLocaleString('en-IN') + '</span></div>';
+        if (w.processedAt) html += '<div class="info-row"><span class="info-label">Processed</span><span class="info-value">' + new Date(w.processedAt).toLocaleString('en-IN') + '</span></div>';
         
         document.getElementById('modalTitle').textContent = 'Withdrawal Details';
         document.getElementById('modalBody').innerHTML = html;
@@ -2023,7 +2096,7 @@ async function viewUserDetails(id) {
 }
 
 function openEditUserModal(id) {
-    fetch('/api/admin/user/' + id, { headers: { 'Authorization': 'Bearer ' + adminToken } })
+    fetch(ADMIN_API + '/user/' + id, { headers: { 'Authorization': 'Bearer ' + adminToken } })
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (!data.success) { showToast('Failed to load user', 'error'); return; }
@@ -2208,7 +2281,7 @@ async function createGift() {
     if (!result || !result.confirmed) return;
     
     try {
-        var r = await fetch('/api/gift-mgmt/create', { 
+        var r = await fetch(GIFT_API + '/create', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, 
             body: JSON.stringify({ amount: amount, note: note, quantity: quantity }) 
@@ -2316,7 +2389,7 @@ async function loadInvoices() {
     var container = document.getElementById('invoiceList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
-        var r = await fetch('/api/admin-invoice/invoices?limit=30', { 
+        var r = await fetch(INVOICE_API + '/invoices?limit=30', { 
             headers: { 'Authorization': 'Bearer ' + adminToken } 
         });
         var data = await r.json();
@@ -2468,7 +2541,7 @@ function renderReferrals() {
                 '</div>' +
             '</div>' +
             '<div class="list-actions">' +
-                '<button class="btn-view" onclick="openEditReferralModal(\'' + r._id + '\', \'' + status + '\', \'' + (r.notes || '').replace(/'/g, '') + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn-view" onclick="editReferral(\'' + r._id + '\', \'' + status + '\')"><i class="fas fa-edit"></i> Edit</button>' +
                 '<button class="btn-approve" onclick="forceCompleteReferral(\'' + r._id + '\')"><i class="fas fa-bolt"></i> Force</button>' +
                 '<button class="btn-delete" onclick="deleteReferral(\'' + r._id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
             '</div>' +
@@ -2477,41 +2550,34 @@ function renderReferrals() {
     container.innerHTML = html;
 }
 
-function openEditReferralModal(id, status, notes) {
-    // Simple edit — inline replacement with confirm flow
-    editReferralFlow(id, status, notes);
-}
-
-async function editReferralFlow(id, currentStatus, currentNotes) {
+async function editReferral(id, currentStatus) {
     var result = await showConfirm(
-        'Edit Referral',
+        'Edit Referral Status',
         'Current status: <strong>' + currentStatus + '</strong><br><br>' +
-        'Change status to:<br>' +
-        '<span style="color:var(--accent);font-size:12px;">Type "pending", "completed", or "failed" in the notes below</span><br>' +
-        '<span style="font-size:11px;">Leave blank to keep current status</span>',
+        'Choose new status from the notes field below:<br>' +
+        '<span style="color:var(--accent);font-weight:700;">pending / completed / failed / expired</span>',
         {
             icon: 'fa-edit',
             iconColor: 'var(--accent)',
             okText: '<i class="fas fa-save"></i> Save',
             input: true,
-            inputLabel: 'New Status / Notes',
-            inputPlaceholder: 'pending | completed | failed',
-            inputValue: currentNotes || ''
+            inputLabel: 'New Status',
+            inputPlaceholder: 'pending | completed | failed | expired',
+            inputValue: currentStatus
         }
     );
     if (!result || !result.confirmed) return;
     
-    var newStatus = currentStatus;
-    var newNotes = result.value || '';
-    if (['pending', 'completed', 'failed'].indexOf(newNotes.toLowerCase()) > -1) {
-        newStatus = newNotes.toLowerCase();
-        newNotes = '';
+    var newStatus = (result.value || '').toLowerCase().trim();
+    if (['pending', 'completed', 'failed', 'expired'].indexOf(newStatus) === -1) {
+        showToast('Invalid status', 'error');
+        return;
     }
     
     try {
         var data = await apiCall('/update-referral/' + id, { 
             method: 'PUT', 
-            body: JSON.stringify({ status: newStatus, notes: newNotes }) 
+            body: JSON.stringify({ status: newStatus }) 
         });
         if (data.success) { showToast('Referral updated', 'success'); loadReferrals(); }
         else showToast(data.message, 'error');
