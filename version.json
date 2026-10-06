@@ -2,8 +2,14 @@
   "latest_version_code": 2,
   "latest_version_name": "1.0.1",
   "min_required_version_code": 1,
-  "force_update": false,
-  "update_url": "https://universe-wallet.vercel.app/download/universe-wallet-v1.0.1.apk",
-  "release_notes": "• Bug fixes\n• Improved performance\n• New security features",
+  "force_update": true,
+  "update_url": "https://universe-wallet.vercel.app/download/Universe-Wallet-v1.0.1.apk",
+  "description": "A new version of Universe Wallet is available with improved performance and security.",
+  "release_notes": [
+    "Faster transaction processing",
+    "Enhanced security features",
+    "Bug fixes and stability improvements",
+    "New dark mode optimizations"
+  ],
   "release_date": "2026-10-06"
 }
