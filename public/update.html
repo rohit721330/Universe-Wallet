@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Universe Wallet — Update</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+<style>
+:root{
+    --bg:#0d1526;
+    --card:#111c32;
+    --primary:#1264ff;
+    --primary2:#00c2ff;
+    --text:#ffffff;
+    --muted:#9db1d5;
+    --border:rgba(255,255,255,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif;-webkit-tap-highlight-color:transparent;}
+body{
+    min-height:100vh;background:var(--bg);overflow-x:hidden;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;padding:20px;
+}
+.bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.glow{position:absolute;border-radius:50%;filter:blur(100px);animation:float 12s ease-in-out infinite;}
+.glow1{width:320px;height:320px;background:#1264ff;top:-100px;left:-100px;}
+.glow2{width:280px;height:280px;background:#00d4ff;right:-80px;top:120px;animation-delay:2s;}
+.glow3{width:260px;height:260px;background:#7c3aed;bottom:-100px;right:-50px;animation-delay:4s;}
+@keyframes float{0%,100%{transform:translateY(0) translateX(0);}50%{transform:translateY(30px) translateX(20px);}}
+.particle{position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.7);animation:particles linear infinite;}
+.particle:nth-child(1){left:10%;animation-duration:8s;}
+.particle:nth-child(2){left:25%;animation-duration:10s;}
+.particle:nth-child(3){left:40%;animation-duration:7s;}
+.particle:nth-child(4){left:55%;animation-duration:11s;}
+.particle:nth-child(5){left:70%;animation-duration:9s;}
+.particle:nth-child(6){left:85%;animation-duration:12s;}
+@keyframes particles{from{transform:translateY(100vh);opacity:0;}20%{opacity:1;}to{transform:translateY(-100px);opacity:0;}}
+
+.wrapper{width:100%;max-width:430px;z-index:2;position:relative;}
+.card{
+    position:relative;
+    background:rgba(17,28,50,.78);
+    backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+    border:1px solid var(--border);border-radius:32px;
+    overflow:hidden;
+    box-shadow:0 25px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.top-bar{
+    height:6px;
+    background:linear-gradient(90deg,#1264ff,#00c2ff,#1264ff);
+    background-size:300% 100%;
+    animation:gradientMove 4s linear infinite;
+}
+@keyframes gradientMove{from{background-position:0% 0%;}to{background-position:300% 0%;}}
+.content{padding:32px 24px;}
+
+.logo-wrap{display:flex;justify-content:center;}
+.logo{
+    width:92px;height:92px;border-radius:28px;
+    background:linear-gradient(135deg,#1264ff,#00c2ff);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;box-shadow:0 15px 40px rgba(18,100,255,.4);
+}
+.logo::before{
+    content:"";position:absolute;inset:-10px;
+    border-radius:36px;border:2px solid rgba(0,194,255,.25);
+    animation:spin 10s linear infinite;
+}
+.logo i{color:#fff;font-size:42px;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* 🔹 DYNAMIC VERSION BADGE */
+.version{
+    width:max-content;margin:20px auto 0;
+    padding:10px 16px;border-radius:999px;
+    background:rgba(18,100,255,.15);
+    border:1px solid rgba(18,100,255,.25);
+    color:#6ec7ff;font-size:12px;font-weight:700;letter-spacing:.8px;
+    text-transform:uppercase;
+    display:none; /* JS দিয়ে show করব */
+}
+.version.show{display:block;}
+
+.title{text-align:center;color:#fff;margin-top:18px;font-size:28px;font-weight:900;line-height:1.2;}
+.desc{text-align:center;color:var(--muted);line-height:1.8;font-size:14px;margin-top:12px;}
+
+.features{margin-top:28px;display:flex;flex-direction:column;gap:14px;}
+.feature{
+    display:flex;gap:14px;align-items:center;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:18px;padding:14px;transition:.25s;
+}
+.feature:hover{transform:translateY(-2px);border-color:rgba(0,194,255,.25);}
+.feature-icon{
+    width:52px;height:52px;min-width:52px;
+    border-radius:16px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#1264ff,#00c2ff);
+    box-shadow:0 10px 20px rgba(18,100,255,.25);
+}
+.feature-icon i{color:#fff;font-size:20px;}
+.feature h3{color:#fff;font-size:15px;margin-bottom:4px;}
+.feature p{color:var(--muted);font-size:13px;line-height:1.5;}
+
+/* 🔹 DYNAMIC RELEASE NOTES */
+.release-notes{
+    display:none;
+    margin-top:20px;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(18,100,255,.08);
+    border:1px solid rgba(18,100,255,.2);
+}
+.release-notes.show{display:block;}
+.release-notes h4{
+    color:#6ec7ff;font-size:13px;font-weight:800;
+    margin-bottom:12px;letter-spacing:.5px;
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+}
+.release-notes ul{
+    list-style:none;padding:0;
+    display:flex;flex-direction:column;gap:8px;
+}
+.release-notes li{
+    color:#b8c9e8;font-size:13px;line-height:1.5;
+    padding-left:20px;position:relative;
+}
+.release-notes li::before{
+    content:"•";position:absolute;left:6px;top:0;
+    color:#6ec7ff;font-weight:900;
+}
+
+.warning{
+    margin-top:20px;display:flex;gap:12px;align-items:flex-start;
+    padding:14px;border-radius:18px;
+    background:rgba(255,75,75,.08);
+    border:1px solid rgba(255,75,75,.18);
+}
+.warning i{color:#ff7f7f;margin-top:2px;}
+.warning span{color:#ffb2b2;font-size:13px;line-height:1.7;}
+
+.update-btn{
+    width:100%;border:none;margin-top:22px;cursor:pointer;
+    border-radius:18px;padding:18px;font-size:16px;font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg,#1264ff,#00c2ff);
+    background-size:200% 200%;
+    animation:btnGradient 4s linear infinite;
+    box-shadow:0 15px 35px rgba(18,100,255,.45);
+    transition:.25s;font-family:inherit;
+    letter-spacing:.5px;
+}
+.update-btn:hover{transform:translateY(-3px);}
+.update-btn:active{transform:scale(.98);}
+.update-btn:disabled{opacity:.7;cursor:not-allowed;transform:none;}
+.update-btn i{margin-right:10px;}
+@keyframes btnGradient{0%{background-position:0% 50%;}100%{background-position:100% 50%;}}
+
+.footer{margin-top:16px;text-align:center;color:#7182a4;font-size:12px;}
+
+.live-status{
+    margin-top:18px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    color:#58ff9d;font-size:13px;font-weight:600;
+}
+.dot{width:10px;height:10px;border-radius:50%;background:#58ff9d;animation:pulse 1.5s infinite;}
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(88,255,157,.5);}
+    70%{box-shadow:0 0 0 12px rgba(88,255,157,0);}
+    100%{box-shadow:0 0 0 0 rgba(88,255,157,0);}
+}
+
+.progress-wrap{
+    display:none;
+    margin-top:18px;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(18,100,255,.08);
+    border:1px solid rgba(18,100,255,.2);
+}
+.progress-wrap.active{display:block;}
+.progress-label{
+    display:flex;justify-content:space-between;
+    color:#6ec7ff;font-size:12px;font-weight:700;
+    margin-bottom:10px;letter-spacing:.5px;
+}
+.progress-bar{
+    width:100%;height:8px;border-radius:99px;
+    background:rgba(255,255,255,.08);
+    overflow:hidden;position:relative;
+}
+.progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,#1264ff,#00c2ff);
+    border-radius:99px;
+    width:0%;
+    transition:width .3s ease;
+    box-shadow:0 0 15px rgba(0,194,255,.6);
+}
+
+.install-guide{
+    display:none;
+    margin-top:18px;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(88,255,157,.06);
+    border:1px solid rgba(88,255,157,.2);
+}
+.install-guide.active{display:block;}
+.install-guide h4{
+    color:#58ff9d;font-size:14px;font-weight:800;
+    margin-bottom:12px;letter-spacing:.5px;
+    display:flex;align-items:center;gap:8px;
+}
+.install-guide ol{
+    list-style:none;padding:0;
+    display:flex;flex-direction:column;gap:8px;
+    counter-reset:item;
+}
+.install-guide li{
+    color:#9db1d5;font-size:12.5px;line-height:1.5;
+    padding-left:26px;position:relative;
+}
+.install-guide li::before{
+    content:counter(item);
+    counter-increment:item;
+    position:absolute;left:0;top:0;
+    width:18px;height:18px;border-radius:50%;
+    background:rgba(88,255,157,.15);
+    color:#58ff9d;font-size:10px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+}
+
+.retry-btn{
+    display:none;
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border-radius:14px;
+    background:rgba(255,75,75,.1);
+    color:#ff7f7f;
+    border:1px solid rgba(255,75,75,.3);
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+    font-family:inherit;
+    letter-spacing:.5px;
+}
+.retry-btn.active{display:block;}
+.retry-btn i{margin-right:8px;}
+
+/* Loading skeleton */
+.skeleton{
+    display:none;
+    padding:20px;
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+}
+.skeleton.show{display:block;}
+.skeleton i{
+    color:#6ec7ff;
+    font-size:32px;
+    margin-bottom:12px;
+    display:block;
+    animation:spin 1.5s linear infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+    <div class="glow glow1"></div>
+    <div class="glow glow2"></div>
+    <div class="glow glow3"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
+
+<div class="wrapper">
+    <div class="card">
+        <div class="top-bar"></div>
+        <div class="content">
+
+            <!-- 🔹 LOADING SKELETON -->
+            <div class="skeleton" id="skeleton">
+                <i class="fas fa-circle-notch"></i>
+                <div>Checking for updates...</div>
+            </div>
+
+            <!-- 🔹 MAIN CONTENT (hidden until data loaded) -->
+            <div id="mainContent" style="display:none;">
+
+                <div class="logo-wrap">
+                    <div class="logo">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
+
+                <!-- 🔹 DYNAMIC VERSION BADGE (JS will fill) -->
+                <div class="version" id="versionBadge"></div>
+
+                <!-- 🔹 DYNAMIC TITLE (JS will fill) -->
+                <h1 class="title" id="titleText"></h1>
+
+                <!-- 🔹 DYNAMIC DESCRIPTION (JS will fill) -->
+                <p class="desc" id="descText"></p>
+
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3>Faster Transfers</h3>
+                            <p>Optimized payment processing and response times.</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3>Improved Security</h3>
+                            <p>Advanced protection and security enhancements.</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div>
+                            <h3>Better Performance</h3>
+                            <p>Smoother UI with reduced loading times.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🔹 DYNAMIC RELEASE NOTES (JS will fill) -->
+                <div class="release-notes" id="releaseNotes">
+                    <h4><i class="fas fa-list-check"></i> What's New</h4>
+                    <ul id="releaseList"></ul>
+                </div>
+
+                <!-- 🔹 DYNAMIC WARNING BOX (JS will fill) -->
+                <div class="warning" id="warningBox">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <span id="warningText"></span>
+                </div>
+
+                <div class="live-status" id="liveStatus">
+                    <div class="dot"></div>
+                    <span>Update Server Online</span>
+                </div>
+
+                <button class="update-btn" id="updateBtn">
+                    <i class="fas fa-download"></i>
+                    <span id="btnText">Update Now</span>
+                </button>
+
+                <div class="progress-wrap" id="progressWrap">
+                    <div class="progress-label">
+                        <span id="progressLabel">Downloading...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="install-guide" id="installGuide">
+                    <h4><i class="fas fa-circle-check"></i> Download Complete!</h4>
+                    <ol>
+                        <li>Open your notification panel or file manager</li>
+                        <li>Tap on the downloaded "Universe Wallet" APK</li>
+                        <li>Allow "Install from unknown sources" if asked</li>
+                        <li>Tap "Install" and wait for completion</li>
+                        <li>Open the app — you're now on the latest version!</li>
+                    </ol>
+                </div>
+
+                <button class="retry-btn" id="retryBtn">
+                    <i class="fas fa-rotate-right"></i> Retry Download
+                </button>
+
+                <div class="footer" id="footerText">
+                    Universe Wallet • Secure Digital Payments
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   UNIVERSE WALLET — UPDATE PAGE (100% DYNAMIC)
+   ============================================================ */
+
+var VERSION_JSON_URL = '/version.json';
+var UPDATE_DATA = null;
+var CURRENT_VERSION_CODE = null;
+
+// ============================================================
+// Get current version code from URL
+// ============================================================
+(function getCurrentVersion() {
+    var params = new URLSearchParams(window.location.search);
+    var v = params.get('v');
+    CURRENT_VERSION_CODE = v ? parseInt(v, 10) : null;
+
+    // If no version in URL, assume it's 0 (always show update)
+    if (!CURRENT_VERSION_CODE || isNaN(CURRENT_VERSION_CODE)) {
+        CURRENT_VERSION_CODE = 0;
+    }
+})();
+
+// ============================================================
+// Show / hide elements
+// ============================================================
+function showMainContent() {
+    document.getElementById('skeleton').classList.remove('show');
+    document.getElementById('mainContent').style.display = 'block';
+}
+
+function showError(message) {
+    var skeleton = document.getElementById('skeleton');
+    skeleton.classList.remove('show');
+    skeleton.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ff7f7f;"></i><div>' + message + '</div>';
+    skeleton.classList.add('show');
+}
+
+// ============================================================
+// Fetch version.json
+// ============================================================
+async function fetchVersionInfo() {
+    try {
+        var res = await fetch(VERSION_JSON_URL + '?t=' + Date.now(), {
+            cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('Version fetch failed: ' + res.status);
+        return await res.json();
+    } catch (err) {
+        console.error('❌ Version fetch error:', err);
+        return null;
+    }
+}
+
+// ============================================================
+// Apply version data to UI
+// ============================================================
+function applyVersionData(data) {
+    if (!data) return;
+
+    // 🔹 Version badge
+    var badge = document.getElementById('versionBadge');
+    if (data.latest_version_name) {
+        badge.textContent = 'Version ' + data.latest_version_name + ' Available';
+        badge.classList.add('show');
+    }
+
+    // 🔹 Title
+    var title = document.getElementById('titleText');
+    title.textContent = data.force_update ? 'Update Required' : 'Update Available';
+
+    // 🔹 Description
+    var desc = document.getElementById('descText');
+    if (data.description) {
+        desc.textContent = data.description;
+    } else {
+        desc.textContent = 'A newer version of Universe Wallet is available with improvements and bug fixes. Update now to continue using the application.';
+    }
+
+    // 🔹 Release notes (list)
+    var releaseNotes = document.getElementById('releaseNotes');
+    var releaseList = document.getElementById('releaseList');
+    if (data.release_notes && data.release_notes.length > 0) {
+        releaseList.innerHTML = '';
+        var notes = Array.isArray(data.release_notes)
+            ? data.release_notes
+            : String(data.release_notes).split('\n').filter(Boolean);
+
+        notes.forEach(function(note) {
+            var li = document.createElement('li');
+            li.textContent = String(note).replace(/^[•\-]\s*/, '');
+            releaseList.appendChild(li);
+        });
+        releaseNotes.classList.add('show');
+    }
+
+    // 🔹 Warning box (only if force_update)
+    var warningBox = document.getElementById('warningBox');
+    var warningText = document.getElementById('warningText');
+    if (data.force_update) {
+        warningBox.style.display = 'flex';
+        warningText.textContent = 'This version is no longer supported. Updating is required before you can continue.';
+    } else {
+        warningBox.style.display = 'none';
+    }
+
+    // 🔹 Button text
+    var btnText = document.getElementById('btnText');
+    if (data.force_update) {
+        btnText.textContent = 'Update Now';
+    } else {
+        btnText.textContent = 'Update Now';
+    }
+
+    // 🔹 Footer
+    var footer = document.getElementById('footerText');
+    if (footer) {
+        footer.textContent = 'Universe Wallet • Version ' + (data.latest_version_name || 'latest');
+    }
+}
+
+// ============================================================
+// Download APK with progress
+// ============================================================
+async function downloadAPK() {
+    if (!UPDATE_DATA || !UPDATE_DATA.update_url) {
+        alert('Update URL not found. Please try again.');
+        return;
+    }
+
+    var btn = document.getElementById('updateBtn');
+    var progressWrap = document.getElementById('progressWrap');
+    var progressFill = document.getElementById('progressFill');
+    var progressPercent = document.getElementById('progressPercent');
+    var progressLabel = document.getElementById('progressLabel');
+    var installGuide = document.getElementById('installGuide');
+    var retryBtn = document.getElementById('retryBtn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+    installGuide.classList.remove('active');
+    retryBtn.classList.remove('active');
+
+    try {
+        progressWrap.classList.add('active');
+        progressLabel.textContent = 'Connecting...';
+
+        var response = await fetch(UPDATE_DATA.update_url, {
+            method: 'GET',
+            cache: 'no-store'
+        });
+
+        if (!response.ok) throw new Error('Download failed: ' + response.status);
+
+        var contentLength = response.headers.get('content-length');
+        var total = contentLength ? parseInt(contentLength, 10) : 0;
+        var loaded = 0;
+
+        var reader = response.body.getReader();
+        var chunks = [];
+
+        progressLabel.textContent = 'Downloading...';
+
+        while (true) {
+            var result = await reader.read();
+            if (result.done) break;
+
+            chunks.push(result.value);
+            loaded += result.value.length;
+
+            if (total > 0) {
+                var percent = Math.round((loaded / total) * 100);
+                progressFill.style.width = percent + '%';
+                progressPercent.textContent = percent + '%';
+            } else {
+                progressPercent.textContent = (loaded / 1024 / 1024).toFixed(1) + ' MB';
+                progressFill.style.width = '70%';
+            }
+        }
+
+        progressFill.style.width = '100%';
+        progressPercent.textContent = '100%';
+        progressLabel.textContent = 'Complete!';
+
+        var blob = new Blob(chunks, { type: 'application/vnd.android.package-archive' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'Universe-Wallet-v' + (UPDATE_DATA.latest_version_name || 'latest') + '.apk';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+
+        setTimeout(function() {
+            progressWrap.classList.remove('active');
+            installGuide.classList.add('active');
+            btn.innerHTML = '<i class="fas fa-circle-check"></i> Downloaded';
+            btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        }, 800);
+
+    } catch (err) {
+        console.error('❌ Download error:', err);
+        progressWrap.classList.remove('active');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download"></i> <span id="btnText">Update Now</span>';
+        retryBtn.classList.add('active');
+        alert('Download failed. Please check your internet connection and try again.');
+    }
+}
+
+// ============================================================
+// Init
+// ============================================================
+(async function init() {
+    document.getElementById('skeleton').classList.add('show');
+
+    var data = await fetchVersionInfo();
+
+    if (!data) {
+        showError('Unable to reach update server. Please check your internet connection.');
+        return;
+    }
+
+    UPDATE_DATA = data;
+
+    // Check if user already has the latest version
+    if (data.latest_version_code && CURRENT_VERSION_CODE >= data.latest_version_code) {
+        showMainContent();
+        document.getElementById('titleText').textContent = 'You Are Up To Date';
+        document.getElementById('descText').textContent = 'You are already using the latest version of Universe Wallet.';
+        document.getElementById('warningBox').style.display = 'none';
+        document.getElementById('updateBtn').style.display = 'none';
+        document.getElementById('versionBadge').classList.add('show');
+        document.getElementById('versionBadge').textContent = 'Version ' + (data.latest_version_name || '') + ' (Latest)';
+
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 2500);
+        return;
+    }
+
+    // Show main content
+    applyVersionData(data);
+    showMainContent();
+
+    // Bind buttons
+    document.getElementById('updateBtn').addEventListener('click', downloadAPK);
+    document.getElementById('retryBtn').addEventListener('click', function() {
+        this.classList.remove('active');
+        downloadAPK();
+    });
+})();
+
+// ============================================================
+// Prevent back button (if force update)
+// ============================================================
+if (UPDATE_DATA && UPDATE_DATA.force_update) {
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', function() {
+        history.pushState(null, '', location.href);
+    });
+}
+</script>
+
+</body>
+</html>
