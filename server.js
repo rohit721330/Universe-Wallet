@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ PORT
-const PORT = process.env.PORT;
+const PORT = process.env.PORT; "3000",
 
 // ✅ ADMIN_WALLET_ID
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
