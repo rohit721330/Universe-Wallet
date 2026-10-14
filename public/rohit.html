@@ -103,7 +103,6 @@ body { padding-bottom: 100px; }
 
 /* STATS */
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-.stats-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .stats-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; text-align: center; box-shadow: var(--shadow); }
 .stat-number { font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
@@ -126,7 +125,6 @@ body { padding-bottom: 100px; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; background: var(--bg-soft); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); outline: none; font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; }
 .form-group textarea { resize: vertical; min-height: 70px; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(80, 70, 223, 0.08); }
-.form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-muted); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* BUTTONS */
@@ -134,10 +132,9 @@ body { padding-bottom: 100px; }
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary { background: var(--accent-grad); color: #fff; box-shadow: 0 4px 14px rgba(80, 70, 223, 0.3); }
-.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); }
-.btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
 .btn-secondary { background: var(--bg-soft); color: var(--text-sec); border: 1.5px solid var(--border); }
-.btn-sm { padding: 8px 14px; font-size: 11px; }
 .btn-block { width: 100%; }
 .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -150,7 +147,6 @@ body { padding-bottom: 100px; }
 
 /* LIST ITEMS */
 .list-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); transition: all 0.15s; }
-.list-item:hover { border-color: #c7d2fe; }
 .list-item.clickable { cursor: pointer; }
 .list-item.clickable:hover { transform: translateY(-1px); border-color: #c7d2fe; }
 .list-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -165,7 +161,6 @@ body { padding-bottom: 100px; }
 .badge-manual { color: var(--purple); background: #f5f0ff; border: 1px solid #e0d4ff; }
 .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; display: inline-flex; align-items: center; gap: 4px; }
 .status-badge.pending { background: #fef3c7; color: var(--warning); }
-.status-badge.pending_approval { background: #ede9fe; color: #7c3aed; }
 .status-badge.processing { background: #dbeafe; color: #2563eb; }
 .status-badge.approved, .status-badge.completed, .status-badge.paid, .status-badge.success { background: #dcfce7; color: var(--success); }
 .status-badge.rejected, .status-badge.failed { background: #fee2e2; color: var(--danger); }
@@ -179,7 +174,7 @@ body { padding-bottom: 100px; }
 .btn-delete { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
 .btn-adjust { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
 
-/* LEADERBOARD (Top Referrers) */
+/* LEADERBOARD */
 .leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 8px; box-shadow: var(--shadow); transition: all 0.15s; }
 .leaderboard-item:hover { border-color: #c7d2fe; transform: translateY(-1px); }
 .leaderboard-rank { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0; }
@@ -195,8 +190,7 @@ body { padding-bottom: 100px; }
 .leaderboard-earned { font-size: 10.5px; font-weight: 700; color: var(--success); margin-top: 2px; }
 
 /* ADMIN LIST */
-.admin-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 10px; box-shadow: var(--shadow); transition: all 0.15s; }
-.admin-item:hover { border-color: #c7d2fe; }
+.admin-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 10px; box-shadow: var(--shadow); }
 .admin-item.blocked { opacity: 0.55; border-style: dashed; }
 .admin-avatar-sm { width: 46px; height: 46px; border-radius: 50%; background: var(--accent-grad); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(80, 70, 223, 0.25); }
 .admin-info { flex: 1; min-width: 0; }
@@ -437,68 +431,32 @@ body { padding-bottom: 100px; }
                 </select>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label><i class="fas fa-arrow-down"></i> Min Amount (₹)</label>
-                    <input type="number" id="wsMin" placeholder="1" min="0" value="1">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-arrow-up"></i> Max Amount (₹)</label>
-                    <input type="number" id="wsMax" placeholder="5000" min="0" value="5000">
+                <div class="form-group"><label><i class="fas fa-arrow-down"></i> Min Amount (₹)</label><input type="number" id="wsMin" value="1" min="0"></div>
+                <div class="form-group"><label><i class="fas fa-arrow-up"></i> Max Amount (₹)</label><input type="number" id="wsMax" value="5000" min="0"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label><i class="fas fa-percent"></i> Fee</label><input type="number" id="wsFee" value="0" min="0" step="0.01"></div>
+                <div class="form-group"><label><i class="fas fa-tag"></i> Fee Type</label>
+                    <select id="wsFeeType"><option value="percentage">Percentage (%)</option><option value="fixed">Fixed (₹)</option></select>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label><i class="fas fa-percent"></i> Fee</label>
-                    <input type="number" id="wsFee" placeholder="0" min="0" step="0.01" value="0">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-tag"></i> Fee Type</label>
-                    <select id="wsFeeType">
-                        <option value="percentage">Percentage (%)</option>
-                        <option value="fixed">Fixed (₹)</option>
-                    </select>
-                </div>
+                <div class="form-group"><label><i class="fas fa-calendar-day"></i> Max Daily</label><input type="number" id="wsMaxDaily" value="10" min="0"></div>
+                <div class="form-group"><label><i class="fas fa-calendar-alt"></i> Max Monthly</label><input type="number" id="wsMaxMonthly" value="50" min="0"></div>
             </div>
+            <div class="form-group"><label><i class="fas fa-check-circle"></i> Approval Required</label>
+                <select id="wsApprovalRequired"><option value="true">Yes</option><option value="false">No (Auto-approve)</option></select>
+            </div>
+            <div class="form-group"><label><i class="fas fa-bolt"></i> Auto Approve Below (₹)</label><input type="number" id="wsAutoApprove" value="0" min="0" step="0.01"></div>
             <div class="form-row">
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-day"></i> Max Daily</label>
-                    <input type="number" id="wsMaxDaily" placeholder="10" min="0" value="10">
+                <div class="form-group"><label><i class="fas fa-university"></i> Require Bank</label>
+                    <select id="wsRequireBank"><option value="true">Yes</option><option value="false">No</option></select>
                 </div>
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-alt"></i> Max Monthly</label>
-                    <input type="number" id="wsMaxMonthly" placeholder="50" min="0" value="50">
+                <div class="form-group"><label><i class="fas fa-mobile-alt"></i> Require UPI</label>
+                    <select id="wsRequireUpi"><option value="true">Yes</option><option value="false">No</option></select>
                 </div>
             </div>
-            <div class="form-group">
-                <label><i class="fas fa-check-circle"></i> Approval Required</label>
-                <select id="wsApprovalRequired">
-                    <option value="true">Yes</option>
-                    <option value="false">No (Auto-approve)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-bolt"></i> Auto Approve Below (₹)</label>
-                <input type="number" id="wsAutoApprove" placeholder="0" min="0" step="0.01" value="0">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label><i class="fas fa-university"></i> Require Bank</label>
-                    <select id="wsRequireBank">
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-mobile-alt"></i> Require UPI</label>
-                    <select id="wsRequireUpi">
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn btn-primary btn-block" onclick="saveWithdrawalSettings()">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
+            <button class="btn btn-primary btn-block" onclick="saveWithdrawalSettings()"><i class="fas fa-save"></i> Save Settings</button>
         </div>
 
         <div class="card-title" style="margin-top:20px;"><i class="fas fa-list"></i> All Withdrawals</div>
@@ -602,28 +560,13 @@ body { padding-bottom: 100px; }
 
         <div class="card">
             <div class="card-title"><i class="fas fa-cog"></i> Referral Settings</div>
-            <div class="form-group">
-                <label><i class="fas fa-rupee-sign"></i> Referral Bonus (₹)</label>
-                <input type="number" id="refBonusAmount" placeholder="10" min="1" value="10">
+            <div class="form-group"><label><i class="fas fa-rupee-sign"></i> Referral Bonus (₹)</label><input type="number" id="refBonusAmount" value="10" min="1"></div>
+            <div class="form-group"><label><i class="fas fa-hand-holding-usd"></i> Minimum Total Deposit (₹)</label><input type="number" id="refMinDeposit" value="50" min="1"></div>
+            <div class="form-group"><label><i class="fas fa-hashtag"></i> Max Referrals Per User</label><input type="number" id="refMaxReferrals" value="100" min="1"></div>
+            <div class="form-group"><label><i class="fas fa-toggle-on"></i> Program Status</label>
+                <select id="refEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select>
             </div>
-            <div class="form-group">
-                <label><i class="fas fa-hand-holding-usd"></i> Minimum Total Deposit (₹)</label>
-                <input type="number" id="refMinDeposit" placeholder="50" min="1" value="50">
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-hashtag"></i> Max Referrals Per User</label>
-                <input type="number" id="refMaxReferrals" placeholder="100" min="1" value="100">
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-toggle-on"></i> Program Status</label>
-                <select id="refEnabled">
-                    <option value="true">Enabled</option>
-                    <option value="false">Disabled</option>
-                </select>
-            </div>
-            <button class="btn btn-primary btn-block" onclick="saveReferralSettings()">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
+            <button class="btn btn-primary btn-block" onclick="saveReferralSettings()"><i class="fas fa-save"></i> Save Settings</button>
         </div>
 
         <div class="card">
@@ -799,14 +742,9 @@ var canvas, ctx;
 var currentMousePos = null;
 
 var state = {
-    deposits: [], 
-    users: [], 
-    withdrawals: [],
-    gifts: [], 
-    lifafas: [], 
-    invoices: [], 
-    transactions: [], 
-    referrals: [],
+    deposits: [], users: [], withdrawals: [],
+    gifts: [], lifafas: [], invoices: [],
+    transactions: [], referrals: [],
     adjSelectedUserId: null
 };
 
@@ -823,7 +761,7 @@ function showToast(msg, type) {
 }
 
 // ============================================
-// API CALL HELPERS
+// API HELPERS
 // ============================================
 async function apiCall(endpoint, options) {
     options = options || {};
@@ -834,9 +772,9 @@ async function apiCall(endpoint, options) {
         headers: headers,
         body: options.body || null
     });
-    if (r.status === 401 || r.status === 403) { 
-        handleSessionExpired(); 
-        throw new Error('Session expired'); 
+    if (r.status === 401 || r.status === 403) {
+        handleSessionExpired();
+        throw new Error('Session expired');
     }
     var data = await r.json();
     if (!r.ok) throw new Error(data.message || 'API error');
@@ -852,9 +790,9 @@ async function withdrawalApiCall(endpoint, options) {
         headers: headers,
         body: options.body || null
     });
-    if (r.status === 401 || r.status === 403) { 
-        handleSessionExpired(); 
-        throw new Error('Session expired'); 
+    if (r.status === 401 || r.status === 403) {
+        handleSessionExpired();
+        throw new Error('Session expired');
     }
     var data = await r.json();
     if (!r.ok) throw new Error(data.message || 'API error');
@@ -885,16 +823,9 @@ function showConfirm(title, message, options) {
         else bigIcon.className += ' icon-accent';
 
         var okBtn = document.getElementById('confirmOkBtn');
-        if (options.danger) {
-            okBtn.className = 'btn-danger';
-            okBtn.style.background = 'var(--danger)';
-        } else if (options.success) {
-            okBtn.className = 'btn-confirm';
-            okBtn.style.background = 'var(--success)';
-        } else {
-            okBtn.className = 'btn-confirm';
-            okBtn.style.background = '';
-        }
+        if (options.danger) { okBtn.className = 'btn-danger'; okBtn.style.background = 'var(--danger)'; }
+        else if (options.success) { okBtn.className = 'btn-confirm'; okBtn.style.background = 'var(--success)'; }
+        else { okBtn.className = 'btn-confirm'; okBtn.style.background = ''; }
         okBtn.innerHTML = options.okText || 'Confirm';
 
         var extra = document.getElementById('confirmExtra');
@@ -916,10 +847,7 @@ function showConfirm(title, message, options) {
 
 function closeConfirmModal() {
     document.getElementById('confirmModal').classList.remove('active');
-    if (_confirmResolver) {
-        _confirmResolver(false);
-        _confirmResolver = null;
-    }
+    if (_confirmResolver) { _confirmResolver(false); _confirmResolver = null; }
 }
 
 function confirmOk() {
@@ -927,15 +855,12 @@ function confirmOk() {
     var extra = document.getElementById('confirmExtra');
     var val = (extra.style.display !== 'none') ? input.value : null;
     document.getElementById('confirmModal').classList.remove('active');
-    if (_confirmResolver) {
-        _confirmResolver({ confirmed: true, value: val });
-        _confirmResolver = null;
-    }
+    if (_confirmResolver) { _confirmResolver({ confirmed: true, value: val }); _confirmResolver = null; }
 }
 
-function closeModal(id) { 
+function closeModal(id) {
     var el = document.getElementById(id);
-    if (el) el.classList.remove('active'); 
+    if (el) el.classList.remove('active');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -943,7 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (okBtn) okBtn.onclick = confirmOk;
 
     document.querySelectorAll('.modal-overlay').forEach(function(m) {
-        m.addEventListener('click', function(e) { 
+        m.addEventListener('click', function(e) {
             if (e.target === this) {
                 if (this.id === 'confirmModal') closeConfirmModal();
                 else this.classList.remove('active');
@@ -955,11 +880,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 // PATTERN CANVAS
 // ============================================
-function initCanvas() { 
-    canvas = document.getElementById('patternCanvas'); 
-    if (!canvas) return; 
-    ctx = canvas.getContext('2d'); 
-    resizeCanvas(); 
+function initCanvas() {
+    canvas = document.getElementById('patternCanvas');
+    if (!canvas) return;
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
 }
 
 function resizeCanvas() {
@@ -969,12 +894,12 @@ function resizeCanvas() {
     var rect = wrapper.getBoundingClientRect();
     if (rect.width === 0) return;
     var dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr; 
+    canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px'; 
+    canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    computeDotPositions(); 
+    computeDotPositions();
     redrawPattern();
 }
 
@@ -986,9 +911,9 @@ function computeDotPositions() {
     var wRect = wrapper.getBoundingClientRect();
     dots.forEach(function(dot) {
         var r = dot.getBoundingClientRect();
-        dotPositions.push({ 
-            x: r.left - wRect.left + r.width / 2, 
-            y: r.top - wRect.top + r.height / 2 
+        dotPositions.push({
+            x: r.left - wRect.left + r.width / 2,
+            y: r.top - wRect.top + r.height / 2
         });
     });
 }
@@ -1040,20 +965,20 @@ function getDotAtPosition(pos) {
 
 function handleStart(e) {
     e.preventDefault();
-    var pos = getPointerPos(e); 
+    var pos = getPointerPos(e);
     var idx = getDotAtPosition(pos);
-    if (idx >= 0) { 
-        isDrawing = true; 
-        selectedPattern = []; 
-        document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('selected', 'wrong'); }); 
-        addDotToPattern(idx); 
+    if (idx >= 0) {
+        isDrawing = true;
+        selectedPattern = [];
+        document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('selected', 'wrong'); });
+        addDotToPattern(idx);
     }
 }
 
 function handleMove(e) {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!isDrawing) return;
-    var pos = getPointerPos(e); 
+    var pos = getPointerPos(e);
     currentMousePos = pos;
     var idx = getDotAtPosition(pos);
     if (idx >= 0 && selectedPattern.indexOf(idx) === -1) addDotToPattern(idx);
@@ -1062,7 +987,7 @@ function handleMove(e) {
 
 function handleEnd() {
     if (!isDrawing) return;
-    isDrawing = false; 
+    isDrawing = false;
     currentMousePos = null;
     var btn = document.getElementById('patternLoginBtn');
     if (btn) btn.disabled = selectedPattern.length < MIN_PATTERN_LENGTH;
@@ -1091,7 +1016,7 @@ function addDotToPattern(idx) {
 
 function redrawPattern() {
     if (!ctx || !canvas) return;
-    var wrapper = document.getElementById('patternWrapper'); 
+    var wrapper = document.getElementById('patternWrapper');
     if (!wrapper) return;
     var rect = wrapper.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
@@ -1099,34 +1024,34 @@ function redrawPattern() {
     var wrong = document.querySelector('.pattern-dot.wrong');
     var color = wrong ? '#dc2626' : '#5046df';
     var glow = wrong ? 'rgba(220,38,38,0.5)' : 'rgba(80,70,223,0.5)';
-    ctx.lineWidth = 4; 
-    ctx.lineCap = 'round'; 
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = color; 
-    ctx.shadowColor = glow; 
+    ctx.strokeStyle = color;
+    ctx.shadowColor = glow;
     ctx.shadowBlur = 12;
     ctx.beginPath();
     for (var i = 0; i < selectedPattern.length; i++) {
-        var p = dotPositions[selectedPattern[i]]; 
+        var p = dotPositions[selectedPattern[i]];
         if (!p) continue;
-        if (i === 0) ctx.moveTo(p.x, p.y); 
+        if (i === 0) ctx.moveTo(p.x, p.y);
         else ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
     if (isDrawing && currentMousePos && selectedPattern.length > 0) {
         var lastDot = dotPositions[selectedPattern[selectedPattern.length - 1]];
-        if (lastDot) { 
-            ctx.beginPath(); 
-            ctx.moveTo(lastDot.x, lastDot.y); 
-            ctx.lineTo(currentMousePos.x, currentMousePos.y); 
-            ctx.stroke(); 
+        if (lastDot) {
+            ctx.beginPath();
+            ctx.moveTo(lastDot.x, lastDot.y);
+            ctx.lineTo(currentMousePos.x, currentMousePos.y);
+            ctx.stroke();
         }
     }
 }
 
 function clearPattern() {
-    selectedPattern = []; 
-    isDrawing = false; 
+    selectedPattern = [];
+    isDrawing = false;
     currentMousePos = null;
     document.querySelectorAll('.pattern-dot').forEach(function(d){ d.classList.remove('selected', 'wrong'); });
     var status = document.getElementById('patternStatus');
@@ -1137,9 +1062,9 @@ function clearPattern() {
     if (errEl) errEl.innerHTML = '';
     if (ctx && canvas) {
         var wrapper = document.getElementById('patternWrapper');
-        if (wrapper) { 
-            var rect = wrapper.getBoundingClientRect(); 
-            ctx.clearRect(0, 0, rect.width, rect.height); 
+        if (wrapper) {
+            var rect = wrapper.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
         }
     }
 }
@@ -1152,17 +1077,17 @@ async function verifyPattern() {
     var error = document.getElementById('loginError');
     if (selectedPattern.length < MIN_PATTERN_LENGTH) {
         status.textContent = MIN_PATTERN_LENGTH + ' dots required';
-        status.className = 'pattern-status error'; 
+        status.className = 'pattern-status error';
         return;
     }
     var patternString = selectedPattern.map(function(i){ return i + 1; }).join('');
-    status.textContent = 'Verifying...'; 
+    status.textContent = 'Verifying...';
     status.className = 'pattern-status';
     try {
-        var r = await fetch(ADMIN_API + '/login-step1', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ pattern: patternString }) 
+        var r = await fetch(ADMIN_API + '/login-step1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pattern: patternString })
         });
         var data = await r.json();
         if (data.success) {
@@ -1175,7 +1100,7 @@ async function verifyPattern() {
                 setTimeout(function(){ document.getElementById('loginIdentifier').focus(); }, 200);
             }, 400);
         } else {
-            status.textContent = data.message; 
+            status.textContent = data.message;
             status.className = 'pattern-status error';
             error.innerHTML = data.message;
             document.querySelectorAll('.pattern-dot.selected').forEach(function(d){ d.classList.add('wrong'); });
@@ -1183,10 +1108,10 @@ async function verifyPattern() {
             if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
             setTimeout(clearPattern, 1200);
         }
-    } catch (e) { 
-        status.textContent = 'Network error'; 
-        status.className = 'pattern-status error'; 
-        setTimeout(clearPattern, 1200); 
+    } catch (e) {
+        status.textContent = 'Network error';
+        status.className = 'pattern-status error';
+        setTimeout(clearPattern, 1200);
     }
 }
 
@@ -1308,12 +1233,12 @@ function updateAdminUI(admin) {
 }
 
 function handleSessionExpired() {
-    localStorage.removeItem('adminToken'); 
+    localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
-    adminToken = null; 
-    currentAdmin = null; 
+    adminToken = null;
+    currentAdmin = null;
     patternTempToken = null;
-    showLogin(); 
+    showLogin();
     showToast('Session expired', 'error');
 }
 
@@ -1343,33 +1268,29 @@ function showLogin() {
     document.getElementById('loginError2').innerHTML = '';
     patternTempToken = null;
     clearPattern();
-    setTimeout(function() { 
-        createPatternGrid(); 
-        initCanvas(); 
-        resizeCanvas(); 
+    setTimeout(function() {
+        createPatternGrid();
+        initCanvas();
+        resizeCanvas();
     }, 100);
 }
 
 async function handleLogout() {
-    var result = await showConfirm(
-        'Logout',
-        'Are you sure you want to logout from admin panel?',
-        {
-            icon: 'fa-right-from-bracket',
-            iconColor: 'var(--warning)',
-            warning: true,
-            okText: '<i class="fas fa-right-from-bracket"></i> Logout'
-        }
-    );
+    var result = await showConfirm('Logout', 'Are you sure you want to logout from admin panel?', {
+        icon: 'fa-right-from-bracket',
+        iconColor: 'var(--warning)',
+        warning: true,
+        okText: '<i class="fas fa-right-from-bracket"></i> Logout'
+    });
     if (!result || !result.confirmed) return;
 
-    localStorage.removeItem('adminToken'); 
+    localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
-    adminToken = null; 
-    currentAdmin = null; 
+    adminToken = null;
+    currentAdmin = null;
     patternTempToken = null;
-    closeSidebar(); 
-    showLogin(); 
+    closeSidebar();
+    showLogin();
     showToast('Logged out', 'info');
 }
 
@@ -1399,18 +1320,10 @@ function showSection(name) {
     if (menuItem) menuItem.classList.add('active');
 
     var titles = {
-        dashboard: 'Panel',
-        deposits: 'Deposits',
-        withdrawals: 'Withdrawals',
-        users: 'Users',
-        adjust: 'Adjust',
-        gift: 'Gifts',
-        lifafa: 'Lifafa',
-        invoices: 'Invoices',
-        transactions: 'Transactions',
-        referrals: 'Referrals',
-        profile: 'Profile',
-        admins: 'Admins'
+        dashboard: 'Panel', deposits: 'Deposits', withdrawals: 'Withdrawals',
+        users: 'Users', adjust: 'Adjust', gift: 'Gifts', lifafa: 'Lifafa',
+        invoices: 'Invoices', transactions: 'Transactions', referrals: 'Referrals',
+        profile: 'Profile', admins: 'Admins'
     };
     document.getElementById('headerSection').textContent = titles[name] || 'Panel';
     closeSidebar();
@@ -1463,9 +1376,9 @@ async function loadReferralQuickStats() {
 
 function renderRecentTx(txs) {
     var container = document.getElementById('dashRecentTx');
-    if (!txs || txs.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No recent transactions</p></div>'; 
-        return; 
+    if (!txs || txs.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No recent transactions</p></div>';
+        return;
     }
     var html = '';
     txs.forEach(function(tx) {
@@ -1474,17 +1387,10 @@ function renderRecentTx(txs) {
         var uName = (tx.user_id && tx.user_id.fullName) || (tx.sender_id && tx.sender_id.fullName) || 'N/A';
         html += '<div class="list-item clickable" onclick="viewTransactionDetails(\'' + tx._id + '\')">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user">' + uName + '</div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
-                        '<span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span>' +
-                '</div>' +
+                '<div><div class="list-user">' + uName + '</div>' +
+                '<div class="list-details"><span><i class="fas fa-clock"></i> ' + time + '</span><span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span></div></div>' +
+                '<div class="list-right"><div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div>' +
             '</div>' +
         '</div>';
     });
@@ -1501,57 +1407,79 @@ async function loadDeposits() {
         var data = await apiCall('/deposits?limit=50');
         state.deposits = data.deposits || [];
         renderDeposits();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>';
     }
 }
 
 function renderDeposits() {
     var container = document.getElementById('depositList');
-    if (!state.deposits || state.deposits.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>No deposits found</p></div>'; 
-        return; 
+    if (!state.deposits || state.deposits.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>No deposits found</p></div>';
+        return;
     }
+
+    // Split: pending up, others down
+    var pendingList = state.deposits.filter(function(d) { return d.status === 'pending'; });
+    var othersList = state.deposits.filter(function(d) { return d.status !== 'pending'; });
+
     var html = '';
-    state.deposits.forEach(function(d) {
-        var u = d.userId || {};
-        var isAuto = d.depositId && d.depositId.startsWith('PAY_');
-        var typeLabel = isAuto ? 'Auto' : 'Manual';
-        var typeClass = isAuto ? 'badge-auto' : 'badge-manual';
-        var typeIcon = isAuto ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-pen"></i>';
-        var status = d.status || 'pending';
-        var canAct = status === 'pending_approval';
 
-        html += '<div class="list-item clickable" onclick="viewDepositDetails(\'' + d._id + '\')">' +
-            '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge ' + typeClass + '">' + typeIcon + ' ' + typeLabel + '</span></div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                        '<span><i class="fas fa-hashtag"></i> ' + (d.depositId || 'N/A') + '</span>' +
-                        (d.transactionRef ? '<span><i class="fas fa-receipt"></i> UTR: ' + d.transactionRef + '</span>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount">₹' + (d.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span>' +
-                '</div>' +
-            '</div>';
+    if (pendingList.length > 0) {
+        html += '<div style="padding:10px 14px;background:#fef3c7;border-radius:10px;margin-bottom:10px;font-size:12px;font-weight:800;color:#d97706;">' +
+            '<i class="fas fa-clock"></i> ' + pendingList.length + ' Awaiting Approval' +
+        '</div>';
+        pendingList.forEach(function(d) { html += renderDepositItem(d, true); });
+    }
 
-        if (canAct) {
-            html += '<div class="list-actions" onclick="event.stopPropagation();">' +
-                '<button class="btn-approve" onclick="verifyDeposit(\'' + d._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button>' +
-                '<button class="btn-reject" onclick="verifyDeposit(\'' + d._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button>' +
-                '<button class="btn-delete" onclick="openCancelDepositModal(\'' + d._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', ' + (d.amount || 0) + ', \'' + (d.depositId || 'N/A') + '\')"><i class="fas fa-ban"></i> Cancel</button>' +
-            '</div>';
-        } else {
-            html += '<div class="list-actions" onclick="event.stopPropagation();">' +
-                '<button class="btn-view" onclick="viewDepositDetails(\'' + d._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
-            '</div>';
-        }
-        html += '</div>';
-    });
+    if (othersList.length > 0) {
+        html += '<div style="padding:10px 14px;background:var(--bg-soft);border-radius:10px;margin:14px 0 10px;font-size:12px;font-weight:800;color:var(--text-sec);">' +
+            '<i class="fas fa-history"></i> History (' + othersList.length + ')' +
+        '</div>';
+        othersList.forEach(function(d) { html += renderDepositItem(d, false); });
+    }
+
     container.innerHTML = html;
+}
+
+function renderDepositItem(d, canAct) {
+    var u = d.userId || {};
+    var isAuto = d.depositId && d.depositId.startsWith('PAY_');
+    var typeLabel = isAuto ? 'Auto' : 'Manual';
+    var typeClass = isAuto ? 'badge-auto' : 'badge-manual';
+    var typeIcon = isAuto ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-pen"></i>';
+    var status = d.status || 'pending';
+
+    var html = '<div class="list-item clickable" onclick="viewDepositDetails(\'' + d._id + '\')">' +
+        '<div class="list-header">' +
+            '<div>' +
+                '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge ' + typeClass + '">' + typeIcon + ' ' + typeLabel + '</span></div>' +
+                '<div class="list-details">' +
+                    '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
+                    '<span><i class="fas fa-hashtag"></i> ' + (d.depositId || 'N/A') + '</span>' +
+                    (d.transactionRef ? '<span><i class="fas fa-receipt"></i> UTR: ' + d.transactionRef + '</span>' : '') +
+                '</div>' +
+            '</div>' +
+            '<div class="list-right">' +
+                '<div class="list-amount">₹' + (d.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span>' +
+            '</div>' +
+        '</div>';
+
+    if (canAct) {
+        html += '<div class="list-actions" onclick="event.stopPropagation();">' +
+            '<button class="btn-approve" onclick="verifyDeposit(\'' + d._id + '\', \'approve\')"><i class="fas fa-check"></i> Approve</button>' +
+            '<button class="btn-reject" onclick="verifyDeposit(\'' + d._id + '\', \'reject\')"><i class="fas fa-times"></i> Reject</button>' +
+            '<button class="btn-delete" onclick="openCancelDepositModal(\'' + d._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', ' + (d.amount || 0) + ', \'' + (d.depositId || 'N/A') + '\')"><i class="fas fa-ban"></i> Cancel</button>' +
+        '</div>';
+    } else {
+        html += '<div class="list-actions" onclick="event.stopPropagation();">' +
+            '<button class="btn-view" onclick="viewDepositDetails(\'' + d._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
+        '</div>';
+    }
+
+    html += '</div>';
+    return html;
 }
 
 async function viewDepositDetails(id) {
@@ -1560,12 +1488,8 @@ async function viewDepositDetails(id) {
         try {
             var data = await apiCall('/deposit/' + id);
             if (data && data.success && data.deposit) d = data.deposit;
-        } catch (err) {
-            // fallback to local state
-        }
-        if (!d) {
-            d = state.deposits.find(function(x){ return x._id === id; });
-        }
+        } catch (err) {}
+        if (!d) d = state.deposits.find(function(x){ return x._id === id; });
         if (!d) { showToast('Deposit not found', 'error'); return; }
 
         var u = d.userId || {};
@@ -1573,41 +1497,49 @@ async function viewDepositDetails(id) {
         var isAuto = d.depositId && d.depositId.startsWith('PAY_');
         var typeLabel = isAuto ? 'Auto' : 'Manual';
         var typeIcon = isAuto ? 'fa-robot' : 'fa-pen';
-        var isPositive = status === 'approved' || status === 'completed';
+        var isPositive = status === 'approved';
+        var isPending = status === 'pending';
+
+        var bgColor = isPositive ? '#dcfce7' : (isPending ? '#fef3c7' : '#fee2e2');
+        var fgColor = isPositive ? 'var(--success)' : (isPending ? 'var(--warning)' : 'var(--danger)');
 
         var html = '';
 
-        html += '<div style="text-align:center;padding:16px;background:' + (isPositive ? '#dcfce7' : '#fef3c7') + ';border-radius:14px;margin-bottom:16px;">';
-        html += '<i class="fas fa-arrow-down" style="font-size:32px;color:' + (isPositive ? 'var(--success)' : 'var(--warning)') + ';margin-bottom:8px;display:block;"></i>';
-        html += '<div style="font-size:28px;font-weight:900;color:' + (isPositive ? 'var(--success)' : 'var(--warning)') + ';letter-spacing:-1px;">+₹' + (d.amount || 0).toFixed(2) + '</div>';
-        html += '<div style="font-size:11px;font-weight:800;color:' + (isPositive ? 'var(--success)' : 'var(--warning)') + ';text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Deposit • ' + typeLabel + '</div>';
+        html += '<div style="text-align:center;padding:16px;background:' + bgColor + ';border-radius:14px;margin-bottom:16px;">';
+        html += '<i class="fas fa-arrow-down" style="font-size:32px;color:' + fgColor + ';margin-bottom:8px;display:block;"></i>';
+        html += '<div style="font-size:28px;font-weight:900;color:' + fgColor + ';letter-spacing:-1px;">₹' + (d.amount || 0).toFixed(2) + '</div>';
+        html += '<div style="font-size:11px;font-weight:800;color:' + fgColor + ';text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Deposit • ' + typeLabel + '</div>';
         html += '</div>';
 
         html += '<div class="card-title" style="margin-top:8px;"><i class="fas fa-receipt"></i> Deposit Info</div>';
         html += '<div class="info-row"><span class="info-label">Deposit ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (d.depositId || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Method</span><span class="info-value"><i class="fas ' + typeIcon + '"></i> ' + typeLabel + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (d.amount || 0).toFixed(2) + '</span></div>';
-        if (d.transactionRef) html += '<div class="info-row"><span class="info-label">UTR / Ref</span><span class="info-value" style="font-family:monospace;">' + d.transactionRef + '</span></div>';
-        if (d.paymentMethod) html += '<div class="info-row"><span class="info-label">Payment Mode</span><span class="info-value">' + d.paymentMethod + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span></span></div>';
-        if (d.adminNotes) html += '<div class="info-row"><span class="info-label">Admin Notes</span><span class="info-value">' + d.adminNotes + '</span></div>';
-        if (d.processedBy) html += '<div class="info-row"><span class="info-label">Processed By</span><span class="info-value">' + d.processedBy + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(d.createdAt).toLocaleString('en-IN') + '</span></div>';
-        if (d.updatedAt && d.updatedAt !== d.createdAt) {
-            html += '<div class="info-row"><span class="info-label">Updated</span><span class="info-value">' + new Date(d.updatedAt).toLocaleString('en-IN') + '</span></div>';
+
+        if (d.taxAmount > 0) {
+            html += '<div class="info-row"><span class="info-label">Tax (' + (d.taxPercent || 0) + '%)</span><span class="info-value" style="color:var(--danger);">-₹' + d.taxAmount.toFixed(2) + '</span></div>';
+            html += '<div class="info-row"><span class="info-label">Credited</span><span class="info-value" style="color:var(--success);">₹' + (d.creditAmount || d.amount).toFixed(2) + '</span></div>';
         }
+        if (d.transactionRef) html += '<div class="info-row"><span class="info-label">UTR / Ref</span><span class="info-value" style="font-family:monospace;">' + d.transactionRef + '</span></div>';
+        if (d.upiId) html += '<div class="info-row"><span class="info-label">UPI ID</span><span class="info-value" style="font-family:monospace;">' + d.upiId + '</span></div>';
+        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge ' + status + '">' + status.replace('_', ' ') + '</span></span></div>';
+        if (d.adminNote) html += '<div class="info-row"><span class="info-label">Admin Note</span><span class="info-value">' + d.adminNote + '</span></div>';
+        if (d.approvedBy) html += '<div class="info-row"><span class="info-label">Approved By</span><span class="info-value">' + d.approvedBy + '</span></div>';
+        if (d.rejectedBy) html += '<div class="info-row"><span class="info-label">Rejected By</span><span class="info-value">' + d.rejectedBy + '</span></div>';
+        if (d.cancelledBy) html += '<div class="info-row"><span class="info-label">Cancelled By</span><span class="info-value">' + d.cancelledBy + '</span></div>';
+
+        html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(d.createdAt).toLocaleString('en-IN') + '</span></div>';
+        if (d.verifiedAt) html += '<div class="info-row"><span class="info-label">UTR Submitted</span><span class="info-value">' + new Date(d.verifiedAt).toLocaleString('en-IN') + '</span></div>';
+        if (d.approvedAt) html += '<div class="info-row"><span class="info-label">Approved</span><span class="info-value">' + new Date(d.approvedAt).toLocaleString('en-IN') + '</span></div>';
+        if (d.rejectedAt) html += '<div class="info-row"><span class="info-label">Rejected</span><span class="info-value">' + new Date(d.rejectedAt).toLocaleString('en-IN') + '</span></div>';
+        if (d.cancelledAt) html += '<div class="info-row"><span class="info-label">Cancelled</span><span class="info-value">' + new Date(d.cancelledAt).toLocaleString('en-IN') + '</span></div>';
 
         if (u.fullName || u.mobile) {
             html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-user"></i> User Info</div>';
             html += '<div class="info-row"><span class="info-label">Name</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
             if (u.mobile) html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + u.mobile + '</span></div>';
             if (u.walletId) html += '<div class="info-row"><span class="info-label">Wallet</span><span class="info-value" style="font-family:monospace;">' + u.walletId + '</span></div>';
-            if (u.balance !== undefined) html += '<div class="info-row"><span class="info-label">Balance</span><span class="info-value balance">₹' + (u.balance || 0).toFixed(2) + '</span></div>';
-        }
-
-        if (d.screenshot) {
-            html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-image"></i> Screenshot</div>';
-            html += '<div style="text-align:center;padding:8px;"><img src="' + d.screenshot + '" style="max-width:100%;border-radius:10px;border:1px solid var(--border);" onclick="window.open(this.src, \'_blank\')"></div>';
+            if (u.balance !== undefined) html += '<div class="info-row"><span class="info-label">Current Balance</span><span class="info-value balance">₹' + (u.balance || 0).toFixed(2) + '</span></div>';
         }
 
         document.getElementById('modalTitle').textContent = 'Deposit Details';
@@ -1622,8 +1554,8 @@ async function verifyDeposit(id, action) {
     var isApprove = action === 'approve';
     var result = await showConfirm(
         isApprove ? 'Approve Deposit' : 'Reject Deposit',
-        isApprove 
-            ? 'Are you sure you want to <strong>approve</strong> this deposit? The amount will be credited to the user\'s wallet.' 
+        isApprove
+            ? 'Are you sure you want to <strong>approve</strong> this deposit? The amount will be credited to the user\'s wallet.'
             : 'Are you sure you want to <strong>reject</strong> this deposit?',
         {
             icon: isApprove ? 'fa-check-circle' : 'fa-times-circle',
@@ -1640,18 +1572,14 @@ async function verifyDeposit(id, action) {
     if (!result || !result.confirmed) return;
 
     try {
-        var data = await apiCall('/verify-deposit', { 
-            method: 'POST', 
-            body: JSON.stringify({ 
-                depositId: id, 
-                action: action, 
-                adminNotes: result.value || '' 
-            }) 
+        var data = await apiCall('/verify-deposit', {
+            method: 'POST',
+            body: JSON.stringify({ depositId: id, action: action, adminNotes: result.value || '' })
         });
         showToast(data.message, 'success');
         loadDeposits();
-    } catch (e) { 
-        showToast(e.message, 'error'); 
+    } catch (e) {
+        showToast(e.message, 'error');
     }
 }
 
@@ -1668,15 +1596,15 @@ async function confirmCancelDeposit() {
     var id = document.getElementById('cdId').value;
     var reason = document.getElementById('cdReason').value.trim() || 'Cancelled by admin';
     try {
-        var data = await apiCall('/cancel-deposit', { 
-            method: 'POST', 
-            body: JSON.stringify({ depositId: id, reason: reason }) 
+        var data = await apiCall('/cancel-deposit', {
+            method: 'POST',
+            body: JSON.stringify({ depositId: id, reason: reason })
         });
         showToast(data.message, 'success');
         closeModal('cancelDepositModal');
         loadDeposits();
-    } catch (e) { 
-        showToast(e.message, 'error'); 
+    } catch (e) {
+        showToast(e.message, 'error');
     }
 }
 
@@ -1706,17 +1634,9 @@ async function saveDepositSettings() {
     if (!payload.maxDeposit || payload.maxDeposit < payload.minDeposit) { showToast('Invalid max', 'error'); return; }
     if (payload.taxPercent < 0 || payload.taxPercent > 100) { showToast('Tax 0-100', 'error'); return; }
 
-    var result = await showConfirm(
-        'Save Deposit Settings',
-        'Min: <strong>₹' + payload.minDeposit + '</strong><br>' +
-        'Max: <strong>₹' + payload.maxDeposit + '</strong><br>' +
-        'Tax: <strong>' + payload.taxPercent + '%</strong> (' + (payload.taxEnabled ? 'ON' : 'OFF') + ')',
-        {
-            icon: 'fa-save',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
-        }
-    );
+    var result = await showConfirm('Save Deposit Settings',
+        'Min: <strong>₹' + payload.minDeposit + '</strong><br>Max: <strong>₹' + payload.maxDeposit + '</strong><br>Tax: <strong>' + payload.taxPercent + '%</strong> (' + (payload.taxEnabled ? 'ON' : 'OFF') + ')',
+        { icon: 'fa-save', iconColor: 'var(--accent)', okText: '<i class="fas fa-save"></i> Save' });
     if (!result || !result.confirmed) return;
 
     try {
@@ -1746,9 +1666,7 @@ async function loadWithdrawalSettings() {
             document.getElementById('wsRequireBank').value = s.requireBankDetails !== false ? 'true' : 'false';
             document.getElementById('wsRequireUpi').value = s.requireUpiDetails !== false ? 'true' : 'false';
         }
-    } catch (e) { 
-        console.log('Withdrawal settings error:', e.message);
-    }
+    } catch (e) { console.log('Withdrawal settings error:', e.message); }
 }
 
 async function saveWithdrawalSettings() {
@@ -1769,34 +1687,21 @@ async function saveWithdrawalSettings() {
     if (isNaN(payload.minAmount) || payload.minAmount < 0) { showToast('Invalid min', 'error'); return; }
     if (isNaN(payload.maxAmount) || payload.maxAmount < 0) { showToast('Invalid max', 'error'); return; }
     if (payload.minAmount > payload.maxAmount) { showToast('Min cannot exceed max', 'error'); return; }
-    if (isNaN(payload.fee) || payload.fee < 0) { showToast('Invalid fee', 'error'); return; }
 
-    var result = await showConfirm(
-        'Save Withdrawal Settings',
-        'Enabled: <strong>' + (payload.enabled ? 'YES' : 'NO') + '</strong><br>' +
-        'Min: <strong>₹' + payload.minAmount + '</strong><br>' +
-        'Max: <strong>₹' + payload.maxAmount + '</strong><br>' +
-        'Fee: <strong>' + payload.fee + (payload.feeType === 'percentage' ? '%' : '₹') + '</strong><br>' +
-        'Approval: <strong>' + (payload.approvalRequired ? 'Required' : 'Auto') + '</strong>',
-        {
-            icon: 'fa-save',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
-        }
-    );
+    var result = await showConfirm('Save Withdrawal Settings',
+        'Enabled: <strong>' + (payload.enabled ? 'YES' : 'NO') + '</strong><br>Min: <strong>₹' + payload.minAmount + '</strong><br>Max: <strong>₹' + payload.maxAmount + '</strong><br>Fee: <strong>' + payload.fee + (payload.feeType === 'percentage' ? '%' : '₹') + '</strong><br>Approval: <strong>' + (payload.approvalRequired ? 'Required' : 'Auto') + '</strong>',
+        { icon: 'fa-save', iconColor: 'var(--accent)', okText: '<i class="fas fa-save"></i> Save' });
     if (!result || !result.confirmed) return;
 
     try {
         var data = await withdrawalApiCall('/', { method: 'PUT', body: JSON.stringify(payload) });
-        if (data.success) {
-            showToast('Settings saved', 'success');
-            loadWithdrawalSettings();
-        } else showToast(data.message, 'error');
+        if (data.success) { showToast('Settings saved', 'success'); loadWithdrawalSettings(); }
+        else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
 
 // ============================================
-// WITHDRAWALS LIST + APPROVE/REJECT
+// WITHDRAWALS
 // ============================================
 async function loadWithdrawals() {
     var container = document.getElementById('withdrawList');
@@ -1805,46 +1710,37 @@ async function loadWithdrawals() {
         var data = await withdrawalApiCall('/withdrawals?limit=50&_t=' + Date.now());
         state.withdrawals = data.withdrawals || [];
         renderWithdrawals();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
 function renderWithdrawals() {
     var container = document.getElementById('withdrawList');
-    if (!state.withdrawals || state.withdrawals.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-arrow-up"></i><p>No withdrawals</p></div>'; 
-        return; 
+    if (!state.withdrawals || state.withdrawals.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-arrow-up"></i><p>No withdrawals</p></div>';
+        return;
     }
     var html = '';
     state.withdrawals.forEach(function(w) {
         var u = w.userId || {};
         var status = w.status || 'pending';
         var canAct = (status === 'pending' || status === 'processing');
-
-        var descText = 'Withdraw';
-        var descIcon = 'fa-arrow-up';
+        var descText = 'Withdraw', descIcon = 'fa-arrow-up';
         if (w.method === 'upi') { descText = 'UPI Withdraw'; descIcon = 'fa-mobile-alt'; }
         else if (w.method === 'bank') { descText = 'Bank Withdraw'; descIcon = 'fa-university'; }
-
-        var time = new Date(w.createdAt).toLocaleString('en-IN', { 
-            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
-        });
+        var time = new Date(w.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 
         html += '<div class="list-item">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user">' + (u.fullName || 'Unknown') + '</div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas ' + descIcon + '"></i> ' + descText + '</span>' +
-                        '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount" style="color:var(--danger);">-₹' + (w.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + status + '">' + status + '</span>' +
-                '</div>' +
+                '<div><div class="list-user">' + (u.fullName || 'Unknown') + '</div>' +
+                '<div class="list-details">' +
+                    '<span><i class="fas ' + descIcon + '"></i> ' + descText + '</span>' +
+                    '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
+                    '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
+                '</div></div>' +
+                '<div class="list-right"><div class="list-amount" style="color:var(--danger);">-₹' + (w.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + status + '">' + status + '</span></div>' +
             '</div>';
 
         if (canAct) {
@@ -1858,105 +1754,62 @@ function renderWithdrawals() {
                 '<button class="btn-view" onclick="viewWithdrawalDetails(\'' + w._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
             '</div>';
         }
-
         html += '</div>';
     });
     container.innerHTML = html;
 }
 
 async function approveWithdrawal(id) {
-    var result = await showConfirm(
-        'Approve Withdrawal',
-        'Are you sure you want to <strong>approve</strong> this withdrawal?<br>The amount will be marked as sent.',
-        {
-            icon: 'fa-check-circle',
-            iconColor: 'var(--success)',
-            success: true,
-            okText: '<i class="fas fa-check"></i> Approve',
-            input: true,
-            inputLabel: 'Admin Note (optional)',
-            inputPlaceholder: 'Add note...'
-        }
-    );
-
+    var result = await showConfirm('Approve Withdrawal', 'Are you sure you want to <strong>approve</strong> this withdrawal?', {
+        icon: 'fa-check-circle', iconColor: 'var(--success)', success: true,
+        okText: '<i class="fas fa-check"></i> Approve',
+        input: true, inputLabel: 'Admin Note (optional)', inputPlaceholder: 'Add note...'
+    });
     if (!result || !result.confirmed) return;
 
     try {
         var data = await withdrawalApiCall('/withdrawal/approve', {
             method: 'POST',
-            body: JSON.stringify({ 
-                withdrawalId: id, 
-                adminNote: 'Approved by admin'
-            })
+            body: JSON.stringify({ withdrawalId: id, adminNote: 'Approved by admin' })
         });
-
         if (data.success) {
             var idx = state.withdrawals.findIndex(function(w) { return w._id === id; });
             if (idx !== -1) {
                 state.withdrawals[idx].status = 'completed';
                 state.withdrawals[idx].processedAt = new Date();
-                state.withdrawals[idx].processedBy = currentAdmin ? currentAdmin.fullName : 'Admin';
-                state.withdrawals[idx].adminNote = 'Approved by admin';
             }
             renderWithdrawals();
             showToast(data.message || 'Withdrawal approved', 'success');
             setTimeout(function() { loadWithdrawals(); }, 800);
-        } else {
-            showToast(data.message || 'Failed', 'error');
-        }
-    } catch (e) { 
-        showToast(e.message, 'error'); 
-    }
+        } else showToast(data.message || 'Failed', 'error');
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 async function rejectWithdrawal(id) {
-    var result = await showConfirm(
-        'Reject Withdrawal',
-        'Are you sure you want to <strong>reject</strong> this withdrawal?<br>The amount will be <strong>refunded</strong> to the user.',
-        {
-            icon: 'fa-times-circle',
-            iconColor: 'var(--danger)',
-            danger: true,
-            okText: '<i class="fas fa-times"></i> Reject & Refund',
-            input: true,
-            inputLabel: 'Rejection Reason',
-            inputPlaceholder: 'Why reject this withdrawal?'
-        }
-    );
-
+    var result = await showConfirm('Reject Withdrawal', 'Are you sure you want to <strong>reject</strong> this withdrawal? Amount will be refunded.', {
+        icon: 'fa-times-circle', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-times"></i> Reject & Refund',
+        input: true, inputLabel: 'Rejection Reason', inputPlaceholder: 'Why reject this withdrawal?'
+    });
     if (!result || !result.confirmed) return;
-
-    if (!result.value || !result.value.trim()) {
-        showToast('Reason required for rejection', 'warning');
-        return;
-    }
+    if (!result.value || !result.value.trim()) { showToast('Reason required', 'warning'); return; }
 
     try {
         var data = await withdrawalApiCall('/withdrawal/reject', {
             method: 'POST',
-            body: JSON.stringify({ 
-                withdrawalId: id, 
-                adminNote: result.value
-            })
+            body: JSON.stringify({ withdrawalId: id, adminNote: result.value })
         });
-
         if (data.success) {
             var idx = state.withdrawals.findIndex(function(w) { return w._id === id; });
             if (idx !== -1) {
                 state.withdrawals[idx].status = 'failed';
-                state.withdrawals[idx].processedAt = new Date();
-                state.withdrawals[idx].processedBy = currentAdmin ? currentAdmin.fullName : 'Admin';
                 state.withdrawals[idx].adminNote = result.value;
             }
             renderWithdrawals();
             showToast(data.message || 'Withdrawal rejected', 'success');
             setTimeout(function() { loadWithdrawals(); }, 800);
-        } else {
-            showToast(data.message || 'Failed', 'error');
-        }
-    } catch (e) { 
-        showToast(e.message, 'error'); 
-    }
+        } else showToast(data.message || 'Failed', 'error');
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 async function viewWithdrawalDetails(id) {
@@ -1966,13 +1819,11 @@ async function viewWithdrawalDetails(id) {
         var w = data.withdrawal;
         var u = w.userId || {};
 
-        var descText = 'Withdraw';
-        var descIcon = 'fa-arrow-up';
+        var descText = 'Withdraw', descIcon = 'fa-arrow-up';
         if (w.method === 'upi') { descText = 'UPI Withdraw'; descIcon = 'fa-mobile-alt'; }
         else if (w.method === 'bank') { descText = 'Bank Withdraw'; descIcon = 'fa-university'; }
 
         var html = '';
-
         html += '<div style="text-align:center;padding:16px;background:#fee2e2;border-radius:14px;margin-bottom:16px;">';
         html += '<i class="fas ' + descIcon + '" style="font-size:32px;color:var(--danger);margin-bottom:8px;display:block;"></i>';
         html += '<div style="font-size:28px;font-weight:900;color:var(--danger);letter-spacing:-1px;">-₹' + (w.amount || 0).toFixed(2) + '</div>';
@@ -1992,25 +1843,18 @@ async function viewWithdrawalDetails(id) {
             if (w.bankName) html += '<div class="info-row"><span class="info-label">Bank</span><span class="info-value">' + w.bankName + '</span></div>';
             if (w.accountNumber) html += '<div class="info-row"><span class="info-label">Account</span><span class="info-value" style="font-family:monospace;">' + w.accountNumber + '</span></div>';
             if (w.ifscCode) html += '<div class="info-row"><span class="info-label">IFSC</span><span class="info-value" style="font-family:monospace;">' + w.ifscCode + '</span></div>';
-            if (w.accountHolder) html += '<div class="info-row"><span class="info-label">Holder</span><span class="info-value">' + w.accountHolder + '</span></div>';
         }
 
         html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-receipt"></i> Transaction Info</div>';
-        if (w.transactionId) {
-            html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + w.transactionId + '</span></div>';
-        }
         html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge ' + (w.status || 'pending') + '">' + (w.status || 'pending') + '</span></span></div>';
         if (w.adminNote) html += '<div class="info-row"><span class="info-label">Note</span><span class="info-value">' + w.adminNote + '</span></div>';
-        if (w.processedBy) html += '<div class="info-row"><span class="info-label">Processed By</span><span class="info-value">' + w.processedBy + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Requested</span><span class="info-value">' + new Date(w.createdAt).toLocaleString('en-IN') + '</span></div>';
         if (w.processedAt) html += '<div class="info-row"><span class="info-label">Processed</span><span class="info-value">' + new Date(w.processedAt).toLocaleString('en-IN') + '</span></div>';
 
         document.getElementById('modalTitle').textContent = 'Withdrawal Details';
         document.getElementById('modalBody').innerHTML = html;
         document.getElementById('detailsModal').classList.add('active');
-    } catch (e) { 
-        showToast(e.message, 'error'); 
-    }
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 // ============================================
@@ -2026,8 +1870,8 @@ async function loadUsers() {
         var data = await apiCall(url);
         state.users = data.users || [];
         renderUsers();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
@@ -2039,9 +1883,9 @@ function searchUsersList() {
 
 function renderUsers() {
     var container = document.getElementById('usersList');
-    if (!state.users || state.users.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No users</p></div>'; 
-        return; 
+    if (!state.users || state.users.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No users</p></div>';
+        return;
     }
     var html = '';
     state.users.forEach(function(u) {
@@ -2051,17 +1895,13 @@ function renderUsers() {
 
         html += '<div class="list-item">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto" style="background:' + statusColor + '20;color:' + statusColor + ';border-color:' + statusColor + '40;">' + status + '</span></div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                        '<span><i class="fas fa-wallet"></i> ' + (u.walletId || 'N/A') + '</span>' +
-                        (u.referralCode ? '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount">₹' + (u.balance || 0).toFixed(2) + '</div>' +
-                '</div>' +
+                '<div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto" style="background:' + statusColor + '20;color:' + statusColor + ';border-color:' + statusColor + '40;">' + status + '</span></div>' +
+                '<div class="list-details">' +
+                    '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
+                    '<span><i class="fas fa-wallet"></i> ' + (u.walletId || 'N/A') + '</span>' +
+                    (u.referralCode ? '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>' : '') +
+                '</div></div>' +
+                '<div class="list-right"><div class="list-amount">₹' + (u.balance || 0).toFixed(2) + '</div></div>' +
             '</div>' +
             '<div class="list-actions">' +
                 '<button class="btn-view" onclick="viewUserDetails(\'' + u._id + '\')"><i class="fas fa-eye"></i> View</button>' +
@@ -2082,83 +1922,57 @@ function renderUsers() {
 function goToAdjustBalance(userId, name, mobile, walletId, balance) {
     state.adjSelectedUserId = userId;
     showSection('adjust');
-
     document.getElementById('adjUserName').textContent = name;
     document.getElementById('adjUserMobile').textContent = mobile || '-';
     document.getElementById('adjUserWallet').textContent = walletId || '-';
     document.getElementById('adjUserBalance').textContent = '₹' + parseFloat(balance || 0).toFixed(2);
     document.getElementById('adjUserInfo').style.display = 'block';
     document.getElementById('adjUserPlaceholder').style.display = 'none';
-
     document.getElementById('adjAmount').value = '';
     document.getElementById('adjReason').value = '';
-
     setTimeout(function(){ document.getElementById('adjAmount').focus(); }, 300);
 }
 
 async function toggleBlockUser(id, name) {
-    var result = await showConfirm(
-        'Toggle Block Status',
-        'Change block status for <strong>' + name + '</strong>?',
-        {
-            icon: 'fa-user-lock',
-            iconColor: 'var(--warning)',
-            warning: true,
-            okText: '<i class="fas fa-shield-alt"></i> Confirm'
-        }
-    );
+    var result = await showConfirm('Toggle Block Status', 'Change block status for <strong>' + name + '</strong>?', {
+        icon: 'fa-user-lock', iconColor: 'var(--warning)', warning: true,
+        okText: '<i class="fas fa-shield-alt"></i> Confirm'
+    });
     if (!result || !result.confirmed) return;
-
-    try { 
-        var data = await apiCall('/toggle-block', { method: 'POST', body: JSON.stringify({ userId: id }) }); 
-        showToast(data.message, 'success'); 
-        loadUsers(); 
+    try {
+        var data = await apiCall('/toggle-block', { method: 'POST', body: JSON.stringify({ userId: id }) });
+        showToast(data.message, 'success');
+        loadUsers();
     } catch (e) { showToast(e.message, 'error'); }
 }
 
 async function deleteUser(id, name) {
-    var result = await showConfirm(
-        'Delete User',
-        'Are you sure you want to delete <strong>' + name + '</strong>?',
-        {
-            icon: 'fa-trash',
-            iconColor: 'var(--danger)',
-            danger: true,
-            okText: '<i class="fas fa-trash"></i> Delete',
-            input: true,
-            inputLabel: 'Reason',
-            inputPlaceholder: 'Why delete this user?'
-        }
-    );
+    var result = await showConfirm('Delete User', 'Are you sure you want to delete <strong>' + name + '</strong>?', {
+        icon: 'fa-trash', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-trash"></i> Delete',
+        input: true, inputLabel: 'Reason', inputPlaceholder: 'Why delete this user?'
+    });
     if (!result || !result.confirmed) return;
-
-    try { 
-        var data = await apiCall('/delete-user/' + id, { 
+    try {
+        var data = await apiCall('/delete-user/' + id, {
             method: 'DELETE',
             body: JSON.stringify({ reason: result.value || '' })
-        }); 
-        showToast(data.message, 'success'); 
-        loadUsers(); 
+        });
+        showToast(data.message, 'success');
+        loadUsers();
     } catch (e) { showToast(e.message, 'error'); }
 }
 
 async function restoreUser(id) {
-    var result = await showConfirm(
-        'Restore User',
-        'Restore this user account?',
-        {
-            icon: 'fa-undo',
-            iconColor: 'var(--success)',
-            success: true,
-            okText: '<i class="fas fa-undo"></i> Restore'
-        }
-    );
+    var result = await showConfirm('Restore User', 'Restore this user account?', {
+        icon: 'fa-undo', iconColor: 'var(--success)', success: true,
+        okText: '<i class="fas fa-undo"></i> Restore'
+    });
     if (!result || !result.confirmed) return;
-
-    try { 
-        var data = await apiCall('/restore-user/' + id, { method: 'POST' }); 
-        showToast(data.message, 'success'); 
-        loadUsers(); 
+    try {
+        var data = await apiCall('/restore-user/' + id, { method: 'POST' });
+        showToast(data.message, 'success');
+        loadUsers();
     } catch (e) { showToast(e.message, 'error'); }
 }
 
@@ -2243,15 +2057,10 @@ async function saveUserEdit() {
         payload.pin = pin;
     }
 
-    var result = await showConfirm(
-        'Save User Changes',
-        'Save all changes for this user?',
-        {
-            icon: 'fa-save',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
-        }
-    );
+    var result = await showConfirm('Save User Changes', 'Save all changes for this user?', {
+        icon: 'fa-save', iconColor: 'var(--accent)',
+        okText: '<i class="fas fa-save"></i> Save'
+    });
     if (!result || !result.confirmed) return;
 
     try {
@@ -2279,31 +2088,21 @@ async function adjustBalance(type) {
     var isAdd = type === 'add';
     var result = await showConfirm(
         isAdd ? 'Add Balance' : 'Deduct Balance',
-        (isAdd ? 'Add' : 'Deduct') + ' <strong>₹' + amount.toFixed(2) + '</strong> ' + 
-        (isAdd ? 'to' : 'from') + ' this user\'s account?',
+        (isAdd ? 'Add' : 'Deduct') + ' <strong>₹' + amount.toFixed(2) + '</strong> ' + (isAdd ? 'to' : 'from') + ' this user\'s account?',
         {
             icon: isAdd ? 'fa-plus-circle' : 'fa-minus-circle',
             iconColor: isAdd ? 'var(--success)' : 'var(--danger)',
-            danger: !isAdd,
-            success: isAdd,
+            danger: !isAdd, success: isAdd,
             okText: isAdd ? '<i class="fas fa-plus"></i> Add' : '<i class="fas fa-minus"></i> Deduct',
-            input: true,
-            inputLabel: 'Reason',
-            inputPlaceholder: 'Reason for adjustment',
-            inputValue: reason
+            input: true, inputLabel: 'Reason', inputPlaceholder: 'Reason for adjustment', inputValue: reason
         }
     );
     if (!result || !result.confirmed) return;
 
     try {
-        var data = await apiCall('/adjust-balance', { 
-            method: 'POST', 
-            body: JSON.stringify({ 
-                userId: state.adjSelectedUserId, 
-                amount: amount, 
-                type: type, 
-                reason: result.value || reason 
-            }) 
+        var data = await apiCall('/adjust-balance', {
+            method: 'POST',
+            body: JSON.stringify({ userId: state.adjSelectedUserId, amount: amount, type: type, reason: result.value || reason })
         });
         showToast(data.message, 'success');
         document.getElementById('adjUserBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
@@ -2322,16 +2121,16 @@ async function loadGifts() {
         var data = await apiCall('/gifts?limit=50');
         state.gifts = data.gifts || [];
         renderGifts();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
 function renderGifts() {
     var container = document.getElementById('giftList');
-    if (!state.gifts || state.gifts.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>No gifts</p></div>'; 
-        return; 
+    if (!state.gifts || state.gifts.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><p>No gifts</p></div>';
+        return;
     }
     var html = '';
     state.gifts.forEach(function(g) {
@@ -2341,24 +2140,18 @@ function renderGifts() {
 
         html += '<div class="list-item">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user" style="font-family:monospace;color:var(--accent);font-size:16px;">' + (g.code || 'N/A') + '</div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
-                        (g.note ? '<span><i class="fas fa-sticky-note"></i> ' + g.note + '</span>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount">₹' + (g.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + statusCls + '">' + status + '</span>' +
-                '</div>' +
+                '<div><div class="list-user" style="font-family:monospace;color:var(--accent);font-size:16px;">' + (g.code || 'N/A') + '</div>' +
+                '<div class="list-details"><span><i class="fas fa-clock"></i> ' + time + '</span>' +
+                (g.note ? '<span><i class="fas fa-sticky-note"></i> ' + g.note + '</span>' : '') + '</div></div>' +
+                '<div class="list-right"><div class="list-amount">₹' + (g.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + statusCls + '">' + status + '</span></div>' +
             '</div>';
 
-        if (!g.isUsed) { 
+        if (!g.isUsed) {
             html += '<div class="list-actions">' +
                 '<button class="btn-view" onclick="copyGiftCode(\'' + g.code + '\')"><i class="fas fa-copy"></i> Copy</button>' +
                 '<button class="btn-delete" onclick="deleteGift(\'' + g._id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
-            '</div>'; 
+            '</div>';
         }
         html += '</div>';
     });
@@ -2372,48 +2165,34 @@ async function createGift() {
     if (!amount || amount <= 0) { showToast('Enter valid amount', 'error'); return; }
     if (quantity < 1 || quantity > 100) { showToast('Quantity 1-100', 'error'); return; }
 
-    var result = await showConfirm(
-        'Create Gift Codes',
+    var result = await showConfirm('Create Gift Codes',
         'Create <strong>' + quantity + '</strong> gift code(s) of <strong>₹' + amount + '</strong>?',
-        {
-            icon: 'fa-gift',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-gift"></i> Create'
-        }
-    );
+        { icon: 'fa-gift', iconColor: 'var(--accent)', okText: '<i class="fas fa-gift"></i> Create' });
     if (!result || !result.confirmed) return;
 
     try {
-        var r = await fetch(GIFT_API + '/create', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, 
-            body: JSON.stringify({ amount: amount, note: note, quantity: quantity }) 
+        var r = await fetch(GIFT_API + '/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+            body: JSON.stringify({ amount: amount, note: note, quantity: quantity })
         });
         var data = await r.json();
-        if (data.success) { 
-            showToast((data.giftsCreated || quantity) + ' gift(s) created', 'success'); 
-            document.getElementById('giftAmount').value = ''; 
-            document.getElementById('giftNote').value = ''; 
-            document.getElementById('giftQty').value = '1'; 
-            loadGifts(); 
-        }
-        else showToast(data.message, 'error');
+        if (data.success) {
+            showToast((data.giftsCreated || quantity) + ' gift(s) created', 'success');
+            document.getElementById('giftAmount').value = '';
+            document.getElementById('giftNote').value = '';
+            document.getElementById('giftQty').value = '1';
+            loadGifts();
+        } else showToast(data.message, 'error');
     } catch (e) { showToast('Failed: ' + e.message, 'error'); }
 }
 
 async function deleteGift(id) {
-    var result = await showConfirm(
-        'Delete Gift',
-        'Delete this gift code? It will no longer be usable.',
-        {
-            icon: 'fa-gift',
-            iconColor: 'var(--danger)',
-            danger: true,
-            okText: '<i class="fas fa-trash"></i> Delete'
-        }
-    );
+    var result = await showConfirm('Delete Gift', 'Delete this gift code?', {
+        icon: 'fa-gift', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-trash"></i> Delete'
+    });
     if (!result || !result.confirmed) return;
-
     try {
         var data = await apiCall('/delete-gift/' + id, { method: 'DELETE' });
         if (data.success) { showToast('Deleted', 'success'); loadGifts(); }
@@ -2434,25 +2213,21 @@ async function loadLifafas() {
     try {
         var data = await apiCall('/lifafas?limit=30');
         state.lifafas = data.lifafas || [];
-        if (state.lifafas.length === 0) { 
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-envelope"></i><p>No lifafas</p></div>'; 
-            return; 
+        if (state.lifafas.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-envelope"></i><p>No lifafas</p></div>';
+            return;
         }
         var html = '';
         state.lifafas.forEach(function(lf) {
             var u = lf.userId || {};
             html += '<div class="list-item">' +
                 '<div class="list-header">' +
-                    '<div>' +
-                        '<div class="list-user">' + (lf.title || 'Lifafa') + '</div>' +
-                        '<div class="list-details">' +
-                            '<span><i class="fas fa-user"></i> ' + (u.fullName || 'Unknown') + '</span>' +
-                            '<span><i class="fas fa-rupee-sign"></i> ₹' + (lf.amount || 0).toFixed(2) + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="list-right">' +
-                        '<span class="status-badge ' + (lf.status || 'pending') + '">' + (lf.status || 'active') + '</span>' +
-                    '</div>' +
+                    '<div><div class="list-user">' + (lf.title || 'Lifafa') + '</div>' +
+                    '<div class="list-details">' +
+                        '<span><i class="fas fa-user"></i> ' + (u.fullName || 'Unknown') + '</span>' +
+                        '<span><i class="fas fa-rupee-sign"></i> ₹' + (lf.amount || 0).toFixed(2) + '</span>' +
+                    '</div></div>' +
+                    '<div class="list-right"><span class="status-badge ' + (lf.status || 'pending') + '">' + (lf.status || 'active') + '</span></div>' +
                 '</div>' +
                 '<div class="list-actions">' +
                     '<button class="btn-delete" onclick="deleteLifafa(\'' + lf._id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
@@ -2460,28 +2235,21 @@ async function loadLifafas() {
             '</div>';
         });
         container.innerHTML = html;
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
 async function deleteLifafa(id) {
-    var result = await showConfirm(
-        'Delete Lifafa',
-        'Delete this lifafa? This cannot be undone.',
-        {
-            icon: 'fa-envelope',
-            iconColor: 'var(--danger)',
-            danger: true,
-            okText: '<i class="fas fa-trash"></i> Delete'
-        }
-    );
+    var result = await showConfirm('Delete Lifafa', 'Delete this lifafa?', {
+        icon: 'fa-envelope', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-trash"></i> Delete'
+    });
     if (!result || !result.confirmed) return;
-
-    try { 
-        var data = await apiCall('/delete-lifafa/' + id, { method: 'DELETE' }); 
-        showToast(data.message, 'success'); 
-        loadLifafas(); 
+    try {
+        var data = await apiCall('/delete-lifafa/' + id, { method: 'DELETE' });
+        showToast(data.message, 'success');
+        loadLifafas();
     } catch (e) { showToast(e.message, 'error'); }
 }
 
@@ -2492,22 +2260,20 @@ async function loadInvoices() {
     var container = document.getElementById('invoiceList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
-        var r = await fetch(INVOICE_API + '/invoices?limit=30', { 
-            headers: { 'Authorization': 'Bearer ' + adminToken } 
-        });
+        var r = await fetch(INVOICE_API + '/invoices?limit=30', { headers: { 'Authorization': 'Bearer ' + adminToken } });
         var data = await r.json();
         state.invoices = data.invoices || [];
         renderInvoices();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices: ' + e.message + '</p></div>';
     }
 }
 
 function renderInvoices() {
     var container = document.getElementById('invoiceList');
-    if (!state.invoices || state.invoices.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices</p></div>'; 
-        return; 
+    if (!state.invoices || state.invoices.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><p>No invoices</p></div>';
+        return;
     }
     var html = '';
     state.invoices.forEach(function(inv) {
@@ -2515,14 +2281,10 @@ function renderInvoices() {
         var receiver = inv.userId || {};
         html += '<div class="list-item">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user" style="font-size:12px;">' + (sender.fullName || 'Sender') + ' <i class="fas fa-arrow-right" style="font-size:10px;"></i> ' + (receiver.fullName || 'Receiver') + '</div>' +
-                    '<div class="list-details"><span><i class="fas fa-hashtag"></i> ' + (inv.invoiceId || 'N/A') + '</span></div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount">₹' + (inv.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + (inv.status || 'pending') + '">' + (inv.status || 'pending') + '</span>' +
-                '</div>' +
+                '<div><div class="list-user" style="font-size:12px;">' + (sender.fullName || 'Sender') + ' <i class="fas fa-arrow-right" style="font-size:10px;"></i> ' + (receiver.fullName || 'Receiver') + '</div>' +
+                '<div class="list-details"><span><i class="fas fa-hashtag"></i> ' + (inv.invoiceId || 'N/A') + '</span></div></div>' +
+                '<div class="list-right"><div class="list-amount">₹' + (inv.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + (inv.status || 'pending') + '">' + (inv.status || 'pending') + '</span></div>' +
             '</div>' +
         '</div>';
     });
@@ -2542,8 +2304,8 @@ async function loadTransactions() {
         var data = await apiCall(url);
         state.transactions = data.transactions || [];
         renderTransactions();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
@@ -2555,9 +2317,9 @@ function searchTransactions() {
 
 function renderTransactions() {
     var container = document.getElementById('transactionsList');
-    if (!state.transactions || state.transactions.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>No transactions</p></div>'; 
-        return; 
+    if (!state.transactions || state.transactions.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>No transactions</p></div>';
+        return;
     }
     var html = '';
     state.transactions.forEach(function(tx) {
@@ -2567,18 +2329,14 @@ function renderTransactions() {
 
         html += '<div class="list-item clickable" onclick="viewTransactionDetails(\'' + tx._id + '\')">' +
             '<div class="list-header">' +
-                '<div>' +
-                    '<div class="list-user">' + (u.fullName || 'N/A') + '</div>' +
-                    '<div class="list-details">' +
-                        '<span><i class="fas fa-hashtag"></i> ' + (tx.tx_id || 'N/A') + '</span>' +
-                        '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
-                        '<span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="list-right">' +
-                    '<div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
-                    '<span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span>' +
-                '</div>' +
+                '<div><div class="list-user">' + (u.fullName || 'N/A') + '</div>' +
+                '<div class="list-details">' +
+                    '<span><i class="fas fa-hashtag"></i> ' + (tx.tx_id || 'N/A') + '</span>' +
+                    '<span><i class="fas fa-clock"></i> ' + time + '</span>' +
+                    '<span><i class="fas fa-tag"></i> ' + (tx.type || 'N/A') + '</span>' +
+                '</div></div>' +
+                '<div class="list-right"><div class="list-amount" style="color:' + (isNeg ? 'var(--danger)' : 'var(--success)') + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
+                '<span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></div>' +
             '</div>' +
             '<div class="list-actions" onclick="event.stopPropagation();">' +
                 '<button class="btn-view" onclick="viewTransactionDetails(\'' + tx._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
@@ -2588,30 +2346,22 @@ function renderTransactions() {
     container.innerHTML = html;
 }
 
-// ============================================
-// VIEW TRANSACTION DETAILS
-// ============================================
 async function viewTransactionDetails(txId) {
     try {
         var tx = state.transactions.find(function(t){ return t._id === txId; });
-
         if (!tx) {
             showToast('Loading details...', 'info');
             var data = await apiCall('/transactions?limit=200');
             var all = data.transactions || [];
             tx = all.find(function(t){ return t._id === txId; });
-            if (!tx) {
-                showToast('Transaction not found', 'error');
-                return;
-            }
+            if (!tx) { showToast('Transaction not found', 'error'); return; }
         }
 
         var user = tx.user_id || {};
         var sender = tx.sender_id || {};
         var receiver = tx.receiver_id || {};
 
-        var typeIcon = 'fa-exchange-alt';
-        var typeColor = 'var(--accent)';
+        var typeIcon = 'fa-exchange-alt', typeColor = 'var(--accent)';
         if (tx.type === 'deposit') { typeIcon = 'fa-arrow-down'; typeColor = 'var(--success)'; }
         else if (tx.type === 'withdrawal' || tx.type === 'withdraw') { typeIcon = 'fa-arrow-up'; typeColor = 'var(--danger)'; }
         else if (tx.type === 'transfer') { typeIcon = 'fa-exchange-alt'; typeColor = 'var(--purple)'; }
@@ -2620,7 +2370,6 @@ async function viewTransactionDetails(txId) {
         else if (tx.type === 'gift') { typeIcon = 'fa-gift'; typeColor = 'var(--accent)'; }
 
         var isNeg = ['withdrawal', 'withdraw', 'admin_deduct', 'transfer'].indexOf(tx.type) > -1;
-
         var html = '';
 
         html += '<div style="text-align:center;padding:16px;background:' + (isNeg ? '#fee2e2' : '#dcfce7') + ';border-radius:14px;margin-bottom:16px;">';
@@ -2633,7 +2382,6 @@ async function viewTransactionDetails(txId) {
         html += '<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (tx.tx_id || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Type</span><span class="info-value">' + (tx.type || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (tx.amount || 0).toFixed(2) + '</span></div>';
-        if (tx.fee) html += '<div class="info-row"><span class="info-label">Fee</span><span class="info-value">₹' + (tx.fee || 0).toFixed(2) + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge ' + (tx.status || 'pending') + '">' + (tx.status || 'pending') + '</span></span></div>';
         if (tx.remark) html += '<div class="info-row"><span class="info-label">Remark</span><span class="info-value">' + tx.remark + '</span></div>';
         if (tx.description) html += '<div class="info-row"><span class="info-label">Description</span><span class="info-value">' + tx.description + '</span></div>';
@@ -2666,7 +2414,6 @@ async function viewTransactionDetails(txId) {
         document.getElementById('modalTitle').textContent = 'Transaction Details';
         document.getElementById('modalBody').innerHTML = html;
         document.getElementById('detailsModal').classList.add('active');
-
     } catch (e) {
         showToast('Failed: ' + e.message, 'error');
     }
@@ -2685,8 +2432,8 @@ async function loadReferrals() {
         var data = await apiCall(url);
         state.referrals = data.referrals || [];
         renderReferrals();
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
@@ -2698,9 +2445,9 @@ function searchReferrals() {
 
 function renderReferrals() {
     var container = document.getElementById('referralsList');
-    if (!state.referrals || state.referrals.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i><p>No referrals found</p></div>'; 
-        return; 
+    if (!state.referrals || state.referrals.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i><p>No referrals found</p></div>';
+        return;
     }
     var html = '';
     state.referrals.forEach(function(r) {
@@ -2715,7 +2462,7 @@ function renderReferrals() {
             var percent = Math.min(100, Math.round((paid / req) * 100));
             progressHtml = '<div style="margin-top:8px;padding:8px 10px;background:var(--bg-soft);border-radius:8px;font-size:10px;font-weight:700;color:var(--text-sec);">' +
                 '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span><i class="fas fa-chart-line"></i> Progress</span><span>₹' + paid + ' / ₹' + req + '</span></div>' +
-                '<div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + percent + '%;background:var(--accent-grad);border-radius:3px;transition:width .3s;"></div></div>' +
+                '<div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + percent + '%;background:var(--accent-grad);border-radius:3px;"></div></div>' +
             '</div>';
         }
         html += '<div class="list-item">' +
@@ -2725,8 +2472,7 @@ function renderReferrals() {
                     '<div class="list-details" style="margin-top:6px;">' +
                         '<span><i class="fas fa-arrow-right"></i> Invited: ' + (referred.fullName || 'User') + '</span>' +
                         '<span><i class="fas fa-phone"></i> ' + (referred.mobile || 'N/A') + '</span>' +
-                    '</div>' +
-                    progressHtml +
+                    '</div>' + progressHtml +
                 '</div>' +
                 '<div class="list-right">' +
                     '<div class="list-amount">₹' + (r.bonusAmount || 0) + '</div>' +
@@ -2745,21 +2491,10 @@ function renderReferrals() {
 }
 
 async function editReferral(id, currentStatus) {
-    var result = await showConfirm(
-        'Edit Referral Status',
-        'Current status: <strong>' + currentStatus + '</strong><br><br>' +
-        'Type the new status below:<br>' +
-        '<span style="color:var(--accent);font-weight:700;">pending / completed / failed / expired</span>',
-        {
-            icon: 'fa-edit',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save',
-            input: true,
-            inputLabel: 'New Status',
-            inputPlaceholder: 'pending | completed | failed | expired',
-            inputValue: currentStatus
-        }
-    );
+    var result = await showConfirm('Edit Referral Status',
+        'Current status: <strong>' + currentStatus + '</strong><br><br>Type the new status below:<br><span style="color:var(--accent);font-weight:700;">pending / completed / failed / expired</span>',
+        { icon: 'fa-edit', iconColor: 'var(--accent)', okText: '<i class="fas fa-save"></i> Save',
+        input: true, inputLabel: 'New Status', inputPlaceholder: 'pending | completed | failed | expired', inputValue: currentStatus });
     if (!result || !result.confirmed) return;
 
     var newStatus = (result.value || '').toLowerCase().trim();
@@ -2767,30 +2502,19 @@ async function editReferral(id, currentStatus) {
         showToast('Invalid status', 'error');
         return;
     }
-
     try {
-        var data = await apiCall('/update-referral/' + id, { 
-            method: 'PUT', 
-            body: JSON.stringify({ status: newStatus }) 
-        });
+        var data = await apiCall('/update-referral/' + id, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
         if (data.success) { showToast('Referral updated', 'success'); loadReferrals(); }
         else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
 
 async function forceCompleteReferral(id) {
-    var result = await showConfirm(
-        'Force Complete Referral',
-        'This will <strong>credit the bonus</strong> to the referrer immediately.<br><br>Continue?',
-        {
-            icon: 'fa-bolt',
-            iconColor: 'var(--warning)',
-            warning: true,
-            okText: '<i class="fas fa-bolt"></i> Force Complete'
-        }
-    );
+    var result = await showConfirm('Force Complete Referral', 'This will <strong>credit the bonus</strong> to the referrer immediately.', {
+        icon: 'fa-bolt', iconColor: 'var(--warning)', warning: true,
+        okText: '<i class="fas fa-bolt"></i> Force Complete'
+    });
     if (!result || !result.confirmed) return;
-
     try {
         var data = await apiCall('/force-complete-referral/' + id, { method: 'POST', body: JSON.stringify({}) });
         if (data.success) { showToast(data.message, 'success'); loadReferrals(); loadTopReferrers(); }
@@ -2799,18 +2523,11 @@ async function forceCompleteReferral(id) {
 }
 
 async function deleteReferral(id) {
-    var result = await showConfirm(
-        'Delete Referral',
-        'Delete this referral record permanently?',
-        {
-            icon: 'fa-user-minus',
-            iconColor: 'var(--danger)',
-            danger: true,
-            okText: '<i class="fas fa-trash"></i> Delete'
-        }
-    );
+    var result = await showConfirm('Delete Referral', 'Delete this referral record permanently?', {
+        icon: 'fa-user-minus', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-trash"></i> Delete'
+    });
     if (!result || !result.confirmed) return;
-
     try {
         var data = await apiCall('/delete-referral/' + id, { method: 'DELETE' });
         if (data.success) { showToast('Deleted', 'success'); loadReferrals(); }
@@ -2818,9 +2535,6 @@ async function deleteReferral(id) {
     } catch (e) { showToast(e.message, 'error'); }
 }
 
-// ============================================
-// TOP REFERRERS
-// ============================================
 async function loadTopReferrers() {
     var container = document.getElementById('topReferrersList');
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
@@ -2852,14 +2566,11 @@ async function loadTopReferrers() {
             '</div>';
         });
         container.innerHTML = html;
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
-// ============================================
-// REFERRAL SETTINGS
-// ============================================
 async function loadReferralSettings() {
     try {
         var data = await apiCall('/referral-settings');
@@ -2869,9 +2580,7 @@ async function loadReferralSettings() {
         document.getElementById('refMinDeposit').value = s.minDepositAmount || 50;
         document.getElementById('refMaxReferrals').value = s.maxReferralsPerUser || 100;
         document.getElementById('refEnabled').value = s.enabled !== false ? 'true' : 'false';
-    } catch (e) { 
-        console.log('Referral settings error:', e.message); 
-    }
+    } catch (e) { console.log('Referral settings error:', e.message); }
 }
 
 async function saveReferralSettings() {
@@ -2883,29 +2592,15 @@ async function saveReferralSettings() {
     if (!minDepositAmount || minDepositAmount < 1) { showToast('Min deposit must be at least ₹1', 'error'); return; }
     if (!maxReferralsPerUser || maxReferralsPerUser < 1) { showToast('Max referrals must be at least 1', 'error'); return; }
 
-    var result = await showConfirm(
-        'Save Referral Settings',
-        'Program: <strong>' + (enabled ? 'ENABLED' : 'DISABLED') + '</strong><br>' +
-        'Bonus: <strong>₹' + bonusAmount + '</strong><br>' +
-        'Min Deposit: <strong>₹' + minDepositAmount + '</strong><br>' +
-        'Max Refs/User: <strong>' + maxReferralsPerUser + '</strong>',
-        {
-            icon: 'fa-save',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
-        }
-    );
+    var result = await showConfirm('Save Referral Settings',
+        'Program: <strong>' + (enabled ? 'ENABLED' : 'DISABLED') + '</strong><br>Bonus: <strong>₹' + bonusAmount + '</strong><br>Min Deposit: <strong>₹' + minDepositAmount + '</strong><br>Max Refs/User: <strong>' + maxReferralsPerUser + '</strong>',
+        { icon: 'fa-save', iconColor: 'var(--accent)', okText: '<i class="fas fa-save"></i> Save' });
     if (!result || !result.confirmed) return;
 
     try {
-        var data = await apiCall('/referral-settings', { 
-            method: 'PUT', 
-            body: JSON.stringify({ 
-                enabled: enabled,
-                bonusAmount: bonusAmount, 
-                minDepositAmount: minDepositAmount,
-                maxReferralsPerUser: maxReferralsPerUser
-            }) 
+        var data = await apiCall('/referral-settings', {
+            method: 'PUT',
+            body: JSON.stringify({ enabled, bonusAmount, minDepositAmount, maxReferralsPerUser })
         });
         if (data.success) { showToast('Settings saved', 'success'); loadReferralSettings(); }
         else showToast(data.message, 'error');
@@ -2941,26 +2636,20 @@ async function saveProfile() {
     };
     if (!payload.fullName || !payload.mobile) { showToast('Name and Mobile required', 'error'); return; }
 
-    var result = await showConfirm(
-        'Save Profile',
-        'Save changes to your admin profile?',
-        {
-            icon: 'fa-user-edit',
-            iconColor: 'var(--accent)',
-            okText: '<i class="fas fa-save"></i> Save'
-        }
-    );
+    var result = await showConfirm('Save Profile', 'Save changes to your admin profile?', {
+        icon: 'fa-user-edit', iconColor: 'var(--accent)',
+        okText: '<i class="fas fa-save"></i> Save'
+    });
     if (!result || !result.confirmed) return;
 
     try {
         var data = await apiCall('/update-my-profile', { method: 'PUT', body: JSON.stringify(payload) });
-        if (data.success) { 
-            showToast('Profile updated', 'success'); 
-            currentAdmin = Object.assign({}, currentAdmin, payload); 
-            localStorage.setItem('adminData', JSON.stringify(currentAdmin)); 
-            updateAdminUI(currentAdmin); 
-        }
-        else showToast(data.message, 'error');
+        if (data.success) {
+            showToast('Profile updated', 'success');
+            currentAdmin = Object.assign({}, currentAdmin, payload);
+            localStorage.setItem('adminData', JSON.stringify(currentAdmin));
+            updateAdminUI(currentAdmin);
+        } else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
 
@@ -2972,30 +2661,23 @@ async function changePassword() {
     if (newPw.length < 6) { showToast('Min 6 chars', 'error'); return; }
     if (newPw !== confirm) { showToast('Passwords do not match', 'error'); return; }
 
-    var result = await showConfirm(
-        'Change Password',
-        'Are you sure you want to change your password?',
-        {
-            icon: 'fa-key',
-            iconColor: 'var(--warning)',
-            warning: true,
-            okText: '<i class="fas fa-shield-alt"></i> Change'
-        }
-    );
+    var result = await showConfirm('Change Password', 'Are you sure you want to change your password?', {
+        icon: 'fa-key', iconColor: 'var(--warning)', warning: true,
+        okText: '<i class="fas fa-shield-alt"></i> Change'
+    });
     if (!result || !result.confirmed) return;
 
     try {
-        var data = await apiCall('/change-my-password', { 
-            method: 'PUT', 
-            body: JSON.stringify({ currentPassword: current, newPassword: newPw }) 
+        var data = await apiCall('/change-my-password', {
+            method: 'PUT',
+            body: JSON.stringify({ currentPassword: current, newPassword: newPw })
         });
-        if (data.success) { 
-            showToast('Password changed', 'success'); 
-            document.getElementById('cpCurrent').value = ''; 
-            document.getElementById('cpNew').value = ''; 
-            document.getElementById('cpConfirm').value = ''; 
-        }
-        else showToast(data.message, 'error');
+        if (data.success) {
+            showToast('Password changed', 'success');
+            document.getElementById('cpCurrent').value = '';
+            document.getElementById('cpNew').value = '';
+            document.getElementById('cpConfirm').value = '';
+        } else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
 
@@ -3007,14 +2689,14 @@ async function loadAdmins() {
     container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
     try {
         var data = await apiCall('/admins-list');
-        if (!data.success) { 
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>' + data.message + '</p></div>'; 
-            return; 
+        if (!data.success) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>' + data.message + '</p></div>';
+            return;
         }
         var admins = data.admins || [];
-        if (admins.length === 0) { 
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-user-shield"></i><p>No admins</p></div>'; 
-            return; 
+        if (admins.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-user-shield"></i><p>No admins</p></div>';
+            return;
         }
         var html = '';
         admins.forEach(function(a) {
@@ -3032,17 +2714,16 @@ async function loadAdmins() {
             '</div>';
         });
         container.innerHTML = html;
-    } catch (e) { 
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>'; 
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed: ' + e.message + '</p></div>';
     }
 }
 
 // ============================================
-// ENTER KEY HANDLING
+// ENTER KEY
 // ============================================
 document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
-
     var overlay = document.getElementById('loginOverlay');
     if (overlay.classList.contains('show')) {
         var step1 = document.getElementById('loginStep1');
@@ -3054,12 +2735,8 @@ document.addEventListener('keydown', function(e) {
         }
         return;
     }
-
     var confirmModal = document.getElementById('confirmModal');
-    if (confirmModal && confirmModal.classList.contains('active')) {
-        confirmOk();
-        return;
-    }
+    if (confirmModal && confirmModal.classList.contains('active')) { confirmOk(); return; }
 });
 
 // ============================================
