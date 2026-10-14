@@ -101,14 +101,14 @@ router.get('/profile/me', auth, async (req, res) => {
 // ============================================
 // 2. CREATE DEPOSIT INVOICE
 // ✅ NO DB entry — only returns invoice to user
-// User pays via UPI, then submits UTR
 // ============================================
 router.post('/create', auth, async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.user.id;
 
-        if (!amount || amount < 1 || amount > 5000) {
+        const amountNum = parseFloat(amount);
+        if (!amountNum || isNaN(amountNum) || amountNum < 1 || amountNum > 5000) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid Amount. Min ₹1, Max ₹5,000'
@@ -135,16 +135,16 @@ router.post('/create', auth, async (req, res) => {
 
         // ✅ Generate invoice WITHOUT creating DB entry
         const depositId = generateDepositId();
-        const qrCode = generateQRCode(amount);
+        const qrCode = generateQRCode(amountNum);
 
-        console.log(`[DEPOSIT] Invoice generated (not saved to DB): ${depositId} | Amount: Rs ${amount} | User: ${userId}`);
+        console.log(`[DEPOSIT] Invoice generated (not saved to DB): ${depositId} | Amount: Rs ${amountNum} | User: ${userId}`);
 
         res.json({
             success: true,
             message: 'Deposit Invoice Created. Please pay and submit UTR.',
             deposit: {
                 depositId: depositId,
-                amount: amount,
+                amount: amountNum,
                 qrCode: qrCode,
                 upiId: ADMIN_UPI,
                 expiresIn: '365 days',
@@ -160,6 +160,7 @@ router.post('/create', auth, async (req, res) => {
 // ============================================
 // 3. SUBMIT UTR
 // ✅ THIS is where deposit enters DB with status='pending'
+// ✅ amount optional — fallback to invoice amount if missing
 // ============================================
 router.post('/submit-utr', auth, async (req, res) => {
     try {
@@ -170,17 +171,18 @@ router.post('/submit-utr', auth, async (req, res) => {
         if (!depositId) {
             return res.status(400).json({ success: false, message: 'Deposit Id Is Required' });
         }
-        if (!transactionRef || transactionRef.length < 12) {
+        if (!transactionRef || String(transactionRef).trim().length < 12) {
             return res.status(400).json({
                 success: false,
                 message: 'Valid UTR (Min 12 Characters) Is Required'
             });
         }
-        if (!amount || amount < 1 || amount > 5000) {
-            return res.status(400).json({
-                success: false,
-                message: 'Valid amount (₹1 - ₹5,000) required'
-            });
+
+        // ✅ Amount handle — accept string/number, fallback gracefully
+        let depositAmount = parseFloat(amount);
+        if (!depositAmount || isNaN(depositAmount) || depositAmount < 1 || depositAmount > 5000) {
+            console.warn(`[DEPOSIT] Invalid/missing amount from frontend: "${amount}" for ${depositId}`);
+            depositAmount = null; // Admin will adjust manually
         }
 
         // ✅ Block if user already has a pending deposit
@@ -198,7 +200,7 @@ router.post('/submit-utr', auth, async (req, res) => {
 
         // ✅ Check UTR not used before
         const existingUtr = await Deposit.findOne({
-            transactionRef: transactionRef,
+            transactionRef: String(transactionRef).trim(),
             status: { $in: ['pending', 'approved'] }
         });
 
@@ -209,10 +211,10 @@ router.post('/submit-utr', auth, async (req, res) => {
         // ✅ CREATE deposit in DB — NOW it becomes pending
         const deposit = new Deposit({
             userId: userId,
-            amount: amount,
+            amount: depositAmount || 0,   // 0 = pending amount check by admin
             upiId: ADMIN_UPI,
             depositId: depositId,
-            transactionRef: transactionRef,
+            transactionRef: String(transactionRef).trim(),
             status: 'pending',
             verifiedAt: new Date(),
             expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
@@ -220,17 +222,18 @@ router.post('/submit-utr', auth, async (req, res) => {
 
         await deposit.save();
 
-        console.log(`[DEPOSIT] Pending deposit created: ${deposit.depositId} | UTR: ${transactionRef} | Rs ${amount}`);
+        console.log(`[DEPOSIT] Pending deposit created: ${deposit.depositId} | UTR: ${transactionRef} | Rs ${depositAmount || 'N/A'}`);
 
         const user = await User.findById(userId);
 
         // Notify admin
+        const amountText = depositAmount ? `₹${depositAmount.toFixed(2)}` : '⚠️ Not provided (check app)';
         await notifyAdmin(
 `📥 <b>New Deposit — Pending Approval</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Name:</b> ${user.fullName || 'N/A'}\n` +
 `🆔 <b>Wallet ID:</b> ${user.walletId || 'N/A'}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
+`💰 <b>Amount:</b> ${amountText}\n` +
 `📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
 `🔖 <b>UTR:</b> ${transactionRef}\n\n` +
 `⏳ Action required: Approve or Reject`
@@ -242,7 +245,7 @@ router.post('/submit-utr', auth, async (req, res) => {
 `📥 <b>Deposit Submitted For Approval</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Dear:</b> ${user.fullName}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
+`💰 <b>Amount:</b> ${amountText}\n` +
 `📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
 `🔖 <b>UTR:</b> ${transactionRef}\n\n` +
 `⏳ Please wait for admin approval.`
@@ -254,7 +257,7 @@ router.post('/submit-utr', auth, async (req, res) => {
             message: 'UTR Submitted Successfully. Waiting For Admin Approval.',
             status: 'pending',
             depositId: deposit.depositId,
-            amount: deposit.amount,
+            amount: depositAmount,
             transactionRef: transactionRef,
             submittedAt: dateTime
         });
