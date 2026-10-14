@@ -575,8 +575,7 @@ var isReferred = false;
 var referralCompleted = false;
 var bonusAmount = 10;
 
-// ✅ লোডিং সময় (milliseconds)
-var MIN_LOADER_TIME = 2500; // 2.5 সেকেন্ড
+var MIN_LOADER_TIME = 2500;
 
 var _alertHideTimer = null;
 function showAlert(message, type) {
@@ -650,7 +649,7 @@ function hideAllFieldTooltips() {
 }
 
 /* ============================================
-   ✅ PAGE LOADER — শুধু একবারই দেখাবে (প্রথম লোডে), ২.৫ সেকেন্ড
+   PAGE LOADER
    ============================================ */
 var loaderStartTime = 0;
 
@@ -930,13 +929,11 @@ async function callGateVerifyPin(pin) {
     }
 }
 async function initPinGate() {
-    // ✅ PIN verified থাকলে — লোডার তখনও active, onPageReady কল করব
     if (sessionStorage.getItem('pin_verified') === 'true') {
         hidePinGate();
         onPageReady();
         return;
     }
-    // ✅ PIN verify করা নেই — লোডার হাইড করে PIN গেট দেখান
     forceHideLoader();
     showPinGate();
     pinGateDisableKeypad(true);
@@ -957,20 +954,18 @@ async function onPageReady() {
     var isUserValid = await verifyUserState();
     if (!isUserValid) { forceHideLoader(); return; }
     try { var cachedUser = JSON.parse(localStorage.getItem('user') || '{}'); setHeaderAvatar(cachedUser); updateSidebarUser(cachedUser); } catch(e){}
-    
-    // ✅ সব ডেটা parallel লোড করুন
+
     await Promise.all([
         fetchConfig(),
         loadBalance(),
         loadReferralRequirement(),
         loadPendingDeposits()
     ]);
-    
-    // ✅ লোডার হাইড — শুধু প্রথমবার পেজ লোডের সময় (২.৫ সেকেন্ড)
+
     if (loaderStartTime > 0) {
         hideLoader();
     }
-    
+
     setInterval(loadPendingDeposits, 30000);
     setInterval(loadReferralRequirement, 60000);
 }
@@ -1081,7 +1076,10 @@ async function proceedToPay() {
         return;
     }
 
+    // ✅ Save amount in multiple places for safety
     paymentAmount = amount;
+    sessionStorage.setItem('pendingDepositAmount', String(amount));
+
     var btn = document.getElementById('proceedBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
@@ -1097,6 +1095,9 @@ async function proceedToPay() {
         }
 
         currentDepositId = data.deposit.depositId;
+        // ✅ Store depositId with amount for later use
+        sessionStorage.setItem('currentDepositId', currentDepositId);
+
         if (data.deposit.qrCode) document.getElementById('qrImage').src = data.deposit.qrCode;
         else generateQR(amount);
         document.getElementById('qrAmount').textContent = amount;
@@ -1133,19 +1134,39 @@ async function submitDeposit() {
     if (!currentDepositId) { showAlert('No Active Deposit', 'error'); return; }
     if (isSubmitting) return;
 
+    // ✅ Recover amount from multiple sources
+    var amount = parseFloat(document.getElementById('amount').value) || paymentAmount || parseFloat(sessionStorage.getItem('pendingDepositAmount'));
+
+    // ✅ Validate amount
+    if (!amount || isNaN(amount) || amount < 1 || amount > 5000) {
+        showAlert('Invalid Amount. Please go back and try again.', 'error');
+        return;
+    }
+
     isSubmitting = true;
     var btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
     try {
-        var response = await fetch('/api/deposit/submit-utr', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ depositId: currentDepositId, transactionRef: utr }) });
+        var response = await fetch('/api/deposit/submit-utr', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, 
+            body: JSON.stringify({ 
+                depositId: currentDepositId, 
+                transactionRef: utr,
+                amount: amount   // ✅ এটা বাধ্যতামূলক
+            }) 
+        });
         var data = await response.json();
 
         if (data.success) {
             showAlert('UTR Submitted! Waiting For Approval', 'success');
             document.getElementById('utr').value = '';
             currentDepositId = null;
+            // ✅ Clear sessionStorage
+            sessionStorage.removeItem('pendingDepositAmount');
+            sessionStorage.removeItem('currentDepositId');
             loadPendingDeposits();
             loadReferralRequirement();
             setTimeout(function(){ goToStep(1); loadBalance(); }, 1500);
@@ -1209,7 +1230,7 @@ async function loadPendingDeposits() {
 
             var actionsHtml = '<div class="pending-actions"><button class="disabled-btn" disabled><i class="fas fa-clock"></i> Waiting Approval</button></div>';
 
-            html += '<div class="pending-item"><div class="pending-row"><div><div class="pending-amount">₹' + deposit.amount.toFixed(2) + '</div><div class="pending-id">' + deposit.depositId + '</div>' + (deposit.transactionRef ? '<div class="pending-id" style="margin-top:2px;">UTR: ' + deposit.transactionRef + '</div>' : '') + '</div><div style="text-align:right;">' + submittedTime + statusBadge + '</div></div>' + actionsHtml + '</div>';
+            html += '<div class="pending-item"><div class="pending-row"><div><div class="pending-amount">₹' + (deposit.amount || 0).toFixed(2) + '</div><div class="pending-id">' + deposit.depositId + '</div>' + (deposit.transactionRef ? '<div class="pending-id" style="margin-top:2px;">UTR: ' + deposit.transactionRef + '</div>' : '') + '</div><div style="text-align:right;">' + submittedTime + statusBadge + '</div></div>' + actionsHtml + '</div>';
         });
 
         container.innerHTML = html;
@@ -1228,26 +1249,16 @@ async function loadPendingDeposits() {
     if (active) active.classList.add('active');
 })();
 
-/* ============================================
-   ✅ INIT — লোডার শুধু একবারই দেখাবে
-   ============================================ */
+/* INIT */
 document.addEventListener('DOMContentLoaded', async function() {
-    // STEP 1: Theme apply
     initTheme();
-
     if (!token) return;
-
-    // STEP 2: সবার আগে লোডার দেখান (২.৫ সেকেন্ড)
     showLoader();
-
-    // STEP 3: User state verify (blocked/deleted check)
     var isUserValid = await verifyUserState();
     if (!isUserValid) {
         forceHideLoader();
         return;
     }
-
-    // STEP 4: PIN gate চেক
     await initPinGate();
 });
 
