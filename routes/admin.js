@@ -41,9 +41,7 @@ function logSuccess(tag, message, data) {
 
 function logError(tag, message, error) {
     console.error(`[${new Date().toISOString()}] [${tag}] ERROR: ${message}`);
-    if (error) {
-        console.error(`[${tag}] Stack:`, error.stack || error.message || error);
-    }
+    if (error) console.error(`[${tag}] Stack:`, error.stack || error.message || error);
 }
 
 function logWarn(tag, message, data) {
@@ -101,11 +99,8 @@ async function notifyAdmin(message) {
             return;
         }
         const result = await sendTelegramMessage(ADMIN_TG_ID, message);
-        if (result.success) {
-            logInfo('NOTIFY', 'Admin notification sent');
-        } else {
-            logWarn('NOTIFY', 'Admin notification failed');
-        }
+        if (result.success) logInfo('NOTIFY', 'Admin notification sent');
+        else logWarn('NOTIFY', 'Admin notification failed');
     } catch (error) {
         logError('NOTIFY', 'Admin notification error', error);
     }
@@ -208,7 +203,7 @@ router.post('/login-step1', async (req, res) => {
 });
 
 // ============================================
-// SHARED: Admin credential verification + token issue
+// SHARED: Admin credential verification
 // ============================================
 async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLabel) {
     logRequest(req, tag);
@@ -220,7 +215,6 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             return res.status(400).json({ success: false, message: 'Required fields missing.' });
         }
 
-        // 1. Verify Step-1 temp token
         let decoded;
         try {
             decoded = jwt.verify(tempToken, JWT_SECRET);
@@ -233,7 +227,6 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             return res.status(401).json({ success: false, message: 'Invalid session.' });
         }
 
-        // 2. Find admin by the specific identifier
         if (!lookupQuery || Object.keys(lookupQuery).length === 0) {
             logWarn(tag, 'Missing identifier in request body');
             return res.status(400).json({ success: false, message: `${lookupLabel} required.` });
@@ -261,7 +254,6 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             return res.status(403).json({ success: false, message: 'Account inactive.' });
         }
 
-        // 3. Compare password
         const isMatch = await admin.comparePassword(password);
         if (!isMatch) {
             logWarn(tag, 'Wrong password', { walletId: admin.walletId, via: lookupLabel });
@@ -276,7 +268,6 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             return res.status(401).json({ success: false, message: 'Invalid credentials.' });
         }
 
-        // 4. Update login meta + issue JWT
         admin.lastLoginAt = new Date();
         admin.lastLoginIP = req.ip;
         admin.lastLoginMethod = lookupLabel;
@@ -339,11 +330,7 @@ router.post('/login-step2', async (req, res) => {
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
         return res.status(400).json({ success: false, message: 'Valid 10-digit mobile required.' });
     }
-    return _processAdminCredentialLogin(
-        req, res, 'LOGIN_STEP2_MOBILE',
-        { mobile: mobile.trim() },
-        'Mobile'
-    );
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP2_MOBILE', { mobile: mobile.trim() }, 'Mobile');
 });
 
 // ============================================
@@ -354,11 +341,7 @@ router.post('/login-step3', async (req, res) => {
     if (!telegramId || String(telegramId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Telegram ID required.' });
     }
-    return _processAdminCredentialLogin(
-        req, res, 'LOGIN_STEP3_TELEGRAM',
-        { telegramId: String(telegramId).trim() },
-        'Telegram ID'
-    );
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP3_TELEGRAM', { telegramId: String(telegramId).trim() }, 'Telegram ID');
 });
 
 // ============================================
@@ -369,11 +352,7 @@ router.post('/login-step4', async (req, res) => {
     if (!walletId || String(walletId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Wallet ID required.' });
     }
-    return _processAdminCredentialLogin(
-        req, res, 'LOGIN_STEP4_WALLET',
-        { walletId: String(walletId).trim().toUpperCase() },
-        'Wallet ID'
-    );
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP4_WALLET', { walletId: String(walletId).trim().toUpperCase() }, 'Wallet ID');
 });
 
 // ============================================
@@ -519,11 +498,7 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
         }
 
         const normalizedWalletId = String(walletId).trim().toUpperCase();
-
-        const orConditions = [
-            { walletId: normalizedWalletId },
-            { mobile }
-        ];
+        const orConditions = [{ walletId: normalizedWalletId }, { mobile }];
         if (telegramId && String(telegramId).trim()) {
             orConditions.push({ telegramId: String(telegramId).trim() });
         }
@@ -1046,14 +1021,7 @@ router.post('/force-complete-referral/:id', verifyAdminToken, async (req, res) =
 
         await User.updateOne(
             { _id: referrer._id },
-            {
-                $inc: {
-                    balance: bonusAmount,
-                    referralCount: 1,
-                    referralPendingCount: -1,
-                    referralEarnings: bonusAmount
-                }
-            }
+            { $inc: { balance: bonusAmount, referralCount: 1, referralPendingCount: -1, referralEarnings: bonusAmount } }
         );
 
         const txnId = 'FORCE_REF_' + Date.now().toString(36).toUpperCase();
@@ -1150,13 +1118,7 @@ router.post('/reverse-referral/:id', verifyAdminToken, async (req, res) => {
 
         await User.updateOne(
             { _id: referrer._id },
-            {
-                $inc: {
-                    balance: -bonusAmount,
-                    referralCount: -1,
-                    referralEarnings: -bonusAmount
-                }
-            }
+            { $inc: { balance: -bonusAmount, referralCount: -1, referralEarnings: -bonusAmount } }
         );
 
         const txnId = 'REV_REF_' + Date.now().toString(36).toUpperCase();
@@ -1274,7 +1236,8 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
         const deletedUsers = await User.countDocuments({ isDeleted: true });
 
         const approvedDeposits = await Deposit.countDocuments({ status: 'approved' });
-        const pendingDeposits = await Deposit.countDocuments({ status: 'pending_approval' });
+        // ✅ FIXED: pending_approval → pending
+        const pendingDeposits = await Deposit.countDocuments({ status: 'pending' });
         const rejectedDeposits = await Deposit.countDocuments({ status: 'rejected' });
 
         const allDeposits = await Deposit.find({ status: 'approved' });
@@ -1502,7 +1465,7 @@ router.post('/restore-user/:userId', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// UPDATE USER FULL DETAILS
+// UPDATE USER
 // ============================================
 router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_USER';
@@ -1682,7 +1645,7 @@ router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DEPOSITS
+// DEPOSITS LIST
 // ============================================
 router.get('/deposits', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSITS_LIST';
@@ -1711,7 +1674,38 @@ router.get('/deposits', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// VERIFY DEPOSIT
+// GET SINGLE DEPOSIT DETAILS
+// ============================================
+router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
+    const tag = 'DEPOSIT_DETAIL';
+    logRequest(req, tag);
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid deposit ID.' });
+        }
+
+        const deposit = await Deposit.findById(id)
+            .populate('userId', 'fullName mobile walletId balance email')
+            .lean();
+
+        if (!deposit) {
+            logWarn(tag, 'Deposit not found', { id });
+            return res.status(404).json({ success: false, message: 'Deposit not found.' });
+        }
+
+        logSuccess(tag, 'Deposit fetched', { depositId: deposit.depositId });
+        res.json({ success: true, deposit });
+    } catch (error) {
+        logError(tag, 'Failed', error);
+        res.status(500).json({ success: false, message: 'Failed.' });
+    }
+});
+
+// ============================================
+// VERIFY DEPOSIT (Approve/Reject)
+// ✅ Only 'pending' status can be acted on
 // ============================================
 router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'VERIFY_DEPOSIT';
@@ -1739,9 +1733,10 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 
         logInfo(tag, 'Deposit found', { status: deposit.status, amount: deposit.amount });
 
-        if (deposit.status !== 'pending_approval') {
+        // ✅ FIXED: only 'pending' can be acted on
+        if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for action', { currentStatus: deposit.status });
-            return res.status(400).json({ success: false, message: `Status is "${deposit.status}".` });
+            return res.status(400).json({ success: false, message: `Status is "${deposit.status}". Only pending deposits can be verified.` });
         }
 
         if (action === 'approve') {
@@ -1916,6 +1911,7 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 
 // ============================================
 // ADMIN CANCEL DEPOSIT
+// ✅ Only 'pending' can be cancelled
 // ============================================
 router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'CANCEL_DEPOSIT';
@@ -1934,7 +1930,8 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Deposit not found.' });
         }
 
-        if (deposit.status !== 'pending_approval' && deposit.status !== 'pending') {
+        // ✅ FIXED: only 'pending' can be cancelled
+        if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for cancel', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Cannot cancel deposit with status "${deposit.status}".` });
         }
@@ -1981,7 +1978,6 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
             message: 'Deposit cancelled successfully.',
             depositId: deposit.depositId
         });
-
     } catch (error) {
         logError(tag, 'Failed', error);
         return res.status(500).json({ success: false, message: 'Failed: ' + error.message });
@@ -2066,14 +2062,7 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 
             await User.updateOne(
                 { _id: referrer._id },
-                {
-                    $inc: {
-                        balance: bonusAmount,
-                        referralCount: 1,
-                        referralPendingCount: -1,
-                        referralEarnings: bonusAmount
-                    }
-                }
+                { $inc: { balance: bonusAmount, referralCount: 1, referralPendingCount: -1, referralEarnings: bonusAmount } }
             );
 
             const txnId = 'REF' + Math.random().toString(36).substring(2, 10).toUpperCase();
