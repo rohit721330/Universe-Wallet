@@ -174,6 +174,45 @@ body { padding-bottom: 100px; }
 .btn-delete { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
 .btn-adjust { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
 
+/* USER DETAILS (Tabbed Panel) */
+.user-header-card { background: linear-gradient(135deg, #5046df, #0088ff); border-radius: 16px; padding: 20px; margin-bottom: 14px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(80, 70, 223, 0.25); }
+.user-header-card::after { content: ''; position: absolute; width: 200px; height: 200px; right: -80px; top: -80px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+.user-header-top { display: flex; align-items: center; gap: 14px; position: relative; z-index: 2; }
+.user-header-avatar { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; flex-shrink: 0; }
+.user-header-info { flex: 1; min-width: 0; }
+.user-header-name { font-size: 17px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-header-meta { font-size: 11px; opacity: 0.9; font-weight: 600; font-family: monospace; }
+.user-header-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.user-header-badges span { font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); }
+.user-header-badges span.green { background: rgba(22, 163, 74, 0.85); border-color: #16a34a; }
+.user-header-badges span.red { background: rgba(220, 38, 38, 0.85); border-color: #dc2626; }
+.user-header-badges span.amber { background: rgba(217, 119, 6, 0.85); border-color: #d97706; }
+.user-header-balance { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
+.user-header-balance-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+.user-header-balance-value { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+
+/* Tabs */
+.user-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; -ms-overflow-style: none; }
+.user-tabs::-webkit-scrollbar { display: none; }
+.user-tab { flex-shrink: 0; padding: 10px 16px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text-sec); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 6px; transition: all 0.2s; white-space: nowrap; }
+.user-tab i { font-size: 12px; }
+.user-tab:hover { border-color: #c7d2fe; color: var(--accent); }
+.user-tab.active { background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(80, 70, 223, 0.3); }
+.user-tab.active i { color: #fff; }
+.user-tab-content { animation: fadeIn 0.25s ease; }
+.user-tab-content .card { margin-bottom: 0; }
+
+/* Overview row */
+.ov-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-soft); gap: 12px; }
+.ov-row:last-child { border-bottom: none; }
+.ov-row-label { font-size: 11px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+.ov-row-label i { color: var(--accent); font-size: 12px; width: 14px; text-align: center; }
+.ov-row-value { font-size: 13px; font-weight: 800; color: var(--text); text-align: right; word-break: break-word; }
+.ov-row-value.mono { font-family: monospace; font-size: 12px; }
+.ov-row-value.balance { color: var(--accent); font-size: 16px; font-weight: 900; }
+.ov-row-value.copyable { cursor: pointer; user-select: text; }
+.ov-row-value.copyable:active { opacity: 0.6; }
+
 /* LEADERBOARD */
 .leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 8px; box-shadow: var(--shadow); transition: all 0.15s; }
 .leaderboard-item:hover { border-color: #c7d2fe; transform: translateY(-1px); }
@@ -425,10 +464,7 @@ body { padding-bottom: 100px; }
             <div class="card-title"><i class="fas fa-cog"></i> Withdrawal Settings</div>
             <div class="form-group">
                 <label><i class="fas fa-toggle-on"></i> Withdrawals Enabled</label>
-                <select id="wsEnabled">
-                    <option value="true">ON</option>
-                    <option value="false">OFF</option>
-                </select>
+                <select id="wsEnabled"><option value="true">ON</option><option value="false">OFF</option></select>
             </div>
             <div class="form-row">
                 <div class="form-group"><label><i class="fas fa-arrow-down"></i> Min Amount (₹)</label><input type="number" id="wsMin" value="1" min="0"></div>
@@ -466,7 +502,7 @@ body { padding-bottom: 100px; }
     <!-- USERS -->
     <div class="section" id="section-users">
         <div class="page-title">Users</div>
-        <div class="page-subtitle">Search, manage, and adjust balances</div>
+        <div class="page-subtitle">Tap a user to view details</div>
         <div class="card">
             <div class="form-group" style="margin-bottom:0;">
                 <input type="text" id="userSearchInput" placeholder="Search name, mobile, or wallet ID..." onkeyup="searchUsersList(event)">
@@ -475,38 +511,53 @@ body { padding-bottom: 100px; }
         <div id="usersList"><div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
     </div>
 
-    <!-- ADJUST BALANCE -->
-    <div class="section" id="section-adjust">
-        <div class="page-title">Adjust Balance</div>
-        <div class="page-subtitle">Add or deduct user balance</div>
-        <div class="card">
-            <button class="btn btn-secondary btn-block" onclick="showSection('users')" style="margin-bottom:14px;">
-                <i class="fas fa-arrow-left"></i> Back to Users
-            </button>
-            <div class="card-title"><i class="fas fa-sliders-h"></i> Adjust User Balance</div>
-            <div id="adjUserInfo" style="display:none;">
-                <div style="background:linear-gradient(135deg, #f0f4ff, #eef7ff);border:1.5px solid #d0d8ff;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
-                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="adjUserName">-</span></div>
-                    <div class="info-row"><span class="info-label">Mobile</span><span class="info-value" id="adjUserMobile">-</span></div>
-                    <div class="info-row"><span class="info-label">Wallet</span><span class="info-value" id="adjUserWallet">-</span></div>
-                    <div class="info-row"><span class="info-label">Balance</span><span class="info-value balance" id="adjUserBalance">₹0.00</span></div>
+    <!-- USER DETAILS (Tabbed Panel) -->
+    <div class="section" id="section-user-details">
+        <button class="btn btn-secondary btn-block" onclick="showSection('users')" style="margin-bottom:14px;">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </button>
+
+        <!-- User Header Card -->
+        <div class="user-header-card" id="userDetailHeader">
+            <div class="user-header-top">
+                <div class="user-header-avatar" id="userDetailAvatar">U</div>
+                <div class="user-header-info">
+                    <div class="user-header-name" id="userDetailName">Loading...</div>
+                    <div class="user-header-meta" id="userDetailMeta">-</div>
+                    <div class="user-header-badges" id="userDetailBadges"></div>
                 </div>
             </div>
-            <div id="adjUserPlaceholder" style="padding:14px;text-align:center;background:var(--bg-soft);border-radius:10px;border:1px dashed var(--border);color:var(--text-muted);font-size:12px;font-weight:600;">
-                Select a user from Users page to adjust balance
+            <div class="user-header-balance">
+                <span class="user-header-balance-label">Current Balance</span>
+                <span class="user-header-balance-value">₹<span id="userDetailBalance">0.00</span></span>
             </div>
-            <div class="form-group" style="margin-top:14px;">
-                <label><i class="fas fa-rupee-sign"></i> Amount (₹)</label>
-                <input type="number" id="adjAmount" placeholder="Enter amount" min="1">
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-sticky-note"></i> Reason</label>
-                <input type="text" id="adjReason" placeholder="Reason (optional)">
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-success" onclick="adjustBalance('add')"><i class="fas fa-plus-circle"></i> Add</button>
-                <button class="btn btn-danger" onclick="adjustBalance('deduct')"><i class="fas fa-minus-circle"></i> Deduct</button>
-            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="user-tabs" id="userDetailTabs">
+            <button class="user-tab active" data-tab="overview" onclick="switchUserTab('overview')">
+                <i class="fas fa-id-card"></i> Overview
+            </button>
+            <button class="user-tab" data-tab="transactions" onclick="switchUserTab('transactions')">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </button>
+            <button class="user-tab" data-tab="referrals" onclick="switchUserTab('referrals')">
+                <i class="fas fa-user-plus"></i> Referrals
+            </button>
+            <button class="user-tab" data-tab="adjust" onclick="switchUserTab('adjust')">
+                <i class="fas fa-sliders-h"></i> Balance
+            </button>
+            <button class="user-tab" data-tab="edit" onclick="switchUserTab('edit')">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="user-tab" data-tab="actions" onclick="switchUserTab('actions')">
+                <i class="fas fa-cog"></i> Actions
+            </button>
+        </div>
+
+        <!-- Tab Content Wrapper -->
+        <div class="user-tab-content" id="userDetailContent">
+            <div class="loading-state"><i class="fas fa-spinner"></i><p>Loading...</p></div>
         </div>
     </div>
 
@@ -683,39 +734,6 @@ body { padding-bottom: 100px; }
     </div>
 </div>
 
-<!-- EDIT USER MODAL -->
-<div class="modal-overlay" id="editUserModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3><i class="fas fa-user-edit"></i> Edit User</h3>
-            <button class="modal-close" onclick="closeModal('editUserModal')"><i class="fas fa-times"></i></button>
-        </div>
-        <input type="hidden" id="euId">
-        <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="euFullName"></div>
-        <div class="form-group"><label><i class="fas fa-phone"></i> Mobile</label><input type="text" id="euMobile" maxlength="10"></div>
-        <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="euEmail"></div>
-        <div class="form-group"><label><i class="fas fa-wallet"></i> Wallet ID</label><input type="text" id="euWalletId"></div>
-        <div class="form-group"><label><i class="fab fa-telegram"></i> Telegram ID</label><input type="text" id="euTelegram"></div>
-        <div class="form-row">
-            <div class="form-group"><label><i class="fas fa-lock"></i> New Password</label><input type="text" id="euPassword" placeholder="Blank = keep"></div>
-            <div class="form-group"><label><i class="fas fa-key"></i> New PIN</label><input type="text" id="euPin" placeholder="Blank = keep" maxlength="6"></div>
-        </div>
-        <div class="form-group"><label><i class="fas fa-rupee-sign"></i> Balance (₹)</label><input type="number" id="euBalance" step="0.01" min="0"></div>
-        <div class="form-row">
-            <div class="form-group"><label><i class="fas fa-ban"></i> Blocked</label>
-                <select id="euBlocked"><option value="false">No</option><option value="true">Yes</option></select>
-            </div>
-            <div class="form-group"><label><i class="fas fa-toggle-on"></i> Active</label>
-                <select id="euActive"><option value="true">Yes</option><option value="false">No</option></select>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button>
-            <button class="btn-confirm" onclick="saveUserEdit()"><i class="fas fa-save"></i> Save</button>
-        </div>
-    </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -744,8 +762,16 @@ var currentMousePos = null;
 var state = {
     deposits: [], users: [], withdrawals: [],
     gifts: [], lifafas: [], invoices: [],
-    transactions: [], referrals: [],
-    adjSelectedUserId: null
+    transactions: [], referrals: []
+};
+
+// User Details Panel State
+var state_userDetail = {
+    currentUserId: null,
+    currentUser: null,
+    currentTab: 'overview',
+    transactions: [],
+    referrals: { asReferrer: [], asReferred: null }
 };
 
 // ============================================
@@ -760,8 +786,32 @@ function showToast(msg, type) {
     t._timeout = setTimeout(function(){ t.className = 'toast'; }, 3000);
 }
 
+function copyToClipboard(text, successMsg) {
+    if (!text) return;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast(successMsg || 'Copied', 'success');
+        }).catch(function() {
+            showToast('Copy failed', 'error');
+        });
+    } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast(successMsg || 'Copied', 'success'); }
+        catch(e) { showToast('Copy failed', 'error'); }
+        document.body.removeChild(ta);
+    }
+}
+
+function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ============================================
-// API HELPERS
+// API CALL HELPERS
 // ============================================
 async function apiCall(endpoint, options) {
     options = options || {};
@@ -1321,7 +1371,7 @@ function showSection(name) {
 
     var titles = {
         dashboard: 'Panel', deposits: 'Deposits', withdrawals: 'Withdrawals',
-        users: 'Users', adjust: 'Adjust', gift: 'Gifts', lifafa: 'Lifafa',
+        users: 'Users', 'user-details': 'User Details', gift: 'Gifts', lifafa: 'Lifafa',
         invoices: 'Invoices', transactions: 'Transactions', referrals: 'Referrals',
         profile: 'Profile', admins: 'Admins'
     };
@@ -1339,6 +1389,7 @@ function showSection(name) {
     else if (name === 'referrals') { loadReferrals(); loadReferralSettings(); loadTopReferrers(); }
     else if (name === 'profile') loadProfile();
     else if (name === 'admins') loadAdmins();
+    // user-details — handled by openUserDetails
 }
 
 // ============================================
@@ -1418,27 +1469,21 @@ function renderDeposits() {
         container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>No deposits found</p></div>';
         return;
     }
-
-    // Split: pending up, others down
     var pendingList = state.deposits.filter(function(d) { return d.status === 'pending'; });
     var othersList = state.deposits.filter(function(d) { return d.status !== 'pending'; });
-
     var html = '';
-
     if (pendingList.length > 0) {
         html += '<div style="padding:10px 14px;background:#fef3c7;border-radius:10px;margin-bottom:10px;font-size:12px;font-weight:800;color:#d97706;">' +
             '<i class="fas fa-clock"></i> ' + pendingList.length + ' Awaiting Approval' +
         '</div>';
         pendingList.forEach(function(d) { html += renderDepositItem(d, true); });
     }
-
     if (othersList.length > 0) {
         html += '<div style="padding:10px 14px;background:var(--bg-soft);border-radius:10px;margin:14px 0 10px;font-size:12px;font-weight:800;color:var(--text-sec);">' +
             '<i class="fas fa-history"></i> History (' + othersList.length + ')' +
         '</div>';
         othersList.forEach(function(d) { html += renderDepositItem(d, false); });
     }
-
     container.innerHTML = html;
 }
 
@@ -1477,7 +1522,6 @@ function renderDepositItem(d, canAct) {
             '<button class="btn-view" onclick="viewDepositDetails(\'' + d._id + '\')"><i class="fas fa-eye"></i> View Details</button>' +
         '</div>';
     }
-
     html += '</div>';
     return html;
 }
@@ -1504,7 +1548,6 @@ async function viewDepositDetails(id) {
         var fgColor = isPositive ? 'var(--success)' : (isPending ? 'var(--warning)' : 'var(--danger)');
 
         var html = '';
-
         html += '<div style="text-align:center;padding:16px;background:' + bgColor + ';border-radius:14px;margin-bottom:16px;">';
         html += '<i class="fas fa-arrow-down" style="font-size:32px;color:' + fgColor + ';margin-bottom:8px;display:block;"></i>';
         html += '<div style="font-size:28px;font-weight:900;color:' + fgColor + ';letter-spacing:-1px;">₹' + (d.amount || 0).toFixed(2) + '</div>';
@@ -1515,7 +1558,6 @@ async function viewDepositDetails(id) {
         html += '<div class="info-row"><span class="info-label">Deposit ID</span><span class="info-value" style="font-family:monospace;font-size:11px;">' + (d.depositId || '-') + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Method</span><span class="info-value"><i class="fas ' + typeIcon + '"></i> ' + typeLabel + '</span></div>';
         html += '<div class="info-row"><span class="info-label">Amount</span><span class="info-value balance">₹' + (d.amount || 0).toFixed(2) + '</span></div>';
-
         if (d.taxAmount > 0) {
             html += '<div class="info-row"><span class="info-label">Tax (' + (d.taxPercent || 0) + '%)</span><span class="info-value" style="color:var(--danger);">-₹' + d.taxAmount.toFixed(2) + '</span></div>';
             html += '<div class="info-row"><span class="info-label">Credited</span><span class="info-value" style="color:var(--success);">₹' + (d.creditAmount || d.amount).toFixed(2) + '</span></div>';
@@ -1527,7 +1569,6 @@ async function viewDepositDetails(id) {
         if (d.approvedBy) html += '<div class="info-row"><span class="info-label">Approved By</span><span class="info-value">' + d.approvedBy + '</span></div>';
         if (d.rejectedBy) html += '<div class="info-row"><span class="info-label">Rejected By</span><span class="info-value">' + d.rejectedBy + '</span></div>';
         if (d.cancelledBy) html += '<div class="info-row"><span class="info-label">Cancelled By</span><span class="info-value">' + d.cancelledBy + '</span></div>';
-
         html += '<div class="info-row"><span class="info-label">Created</span><span class="info-value">' + new Date(d.createdAt).toLocaleString('en-IN') + '</span></div>';
         if (d.verifiedAt) html += '<div class="info-row"><span class="info-label">UTR Submitted</span><span class="info-value">' + new Date(d.verifiedAt).toLocaleString('en-IN') + '</span></div>';
         if (d.approvedAt) html += '<div class="info-row"><span class="info-label">Approved</span><span class="info-value">' + new Date(d.approvedAt).toLocaleString('en-IN') + '</span></div>';
@@ -1568,7 +1609,6 @@ async function verifyDeposit(id, action) {
             inputPlaceholder: 'Optional notes...'
         }
     );
-
     if (!result || !result.confirmed) return;
 
     try {
@@ -1683,7 +1723,6 @@ async function saveWithdrawalSettings() {
         requireBankDetails: document.getElementById('wsRequireBank').value === 'true',
         requireUpiDetails: document.getElementById('wsRequireUpi').value === 'true'
     };
-
     if (isNaN(payload.minAmount) || payload.minAmount < 0) { showToast('Invalid min', 'error'); return; }
     if (isNaN(payload.maxAmount) || payload.maxAmount < 0) { showToast('Invalid max', 'error'); return; }
     if (payload.minAmount > payload.maxAmount) { showToast('Min cannot exceed max', 'error'); return; }
@@ -1893,165 +1932,303 @@ function renderUsers() {
         var status = isDeleted ? 'Deleted' : (isBlocked ? 'Blocked' : 'Active');
         var statusColor = isDeleted ? 'var(--text-muted)' : (isBlocked ? 'var(--danger)' : 'var(--success)');
 
-        html += '<div class="list-item">' +
+        html += '<div class="list-item clickable" onclick="openUserDetails(\'' + u._id + '\')">' +
             '<div class="list-header">' +
-                '<div><div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto" style="background:' + statusColor + '20;color:' + statusColor + ';border-color:' + statusColor + '40;">' + status + '</span></div>' +
-                '<div class="list-details">' +
-                    '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
-                    '<span><i class="fas fa-wallet"></i> ' + (u.walletId || 'N/A') + '</span>' +
-                    (u.referralCode ? '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>' : '') +
-                '</div></div>' +
-                '<div class="list-right"><div class="list-amount">₹' + (u.balance || 0).toFixed(2) + '</div></div>' +
+                '<div>' +
+                    '<div class="list-user">' + (u.fullName || 'Unknown') + ' <span class="list-badge badge-auto" style="background:' + statusColor + '20;color:' + statusColor + ';border-color:' + statusColor + '40;">' + status + '</span></div>' +
+                    '<div class="list-details">' +
+                        '<span><i class="fas fa-phone"></i> ' + (u.mobile || 'N/A') + '</span>' +
+                        '<span><i class="fas fa-wallet"></i> ' + (u.walletId || 'N/A') + '</span>' +
+                        (u.referralCode ? '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>' : '') +
+                    '</div>' +
+                '</div>' +
+                '<div class="list-right">' +
+                    '<div class="list-amount">₹' + (u.balance || 0).toFixed(2) + '</div>' +
+                    '<i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:12px;margin-top:4px;"></i>' +
+                '</div>' +
             '</div>' +
-            '<div class="list-actions">' +
-                '<button class="btn-view" onclick="viewUserDetails(\'' + u._id + '\')"><i class="fas fa-eye"></i> View</button>' +
-                '<button class="btn-view" style="background:#ede9fe;color:#7c3aed;border-color:#ddd6fe;" onclick="openEditUserModal(\'' + u._id + '\')"><i class="fas fa-edit"></i> Edit</button>' +
-                '<button class="btn-adjust" onclick="goToAdjustBalance(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\', \'' + (u.mobile || '') + '\', \'' + (u.walletId || '') + '\', ' + (u.balance || 0) + ')"><i class="fas fa-sliders-h"></i> Adjust</button>';
-
-        if (!isDeleted) {
-            html += '<button class="' + (isBlocked ? 'btn-approve' : 'btn-reject') + '" onclick="toggleBlockUser(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\')"><i class="fas fa-' + (isBlocked ? 'unlock' : 'ban') + '"></i> ' + (isBlocked ? 'Unblock' : 'Block') + '</button>';
-            html += '<button class="btn-delete" onclick="deleteUser(\'' + u._id + '\', \'' + (u.fullName || 'User').replace(/'/g, '') + '\')"><i class="fas fa-trash"></i> Delete</button>';
-        } else {
-            html += '<button class="btn-approve" onclick="restoreUser(\'' + u._id + '\')"><i class="fas fa-undo"></i> Restore</button>';
-        }
-        html += '</div></div>';
+        '</div>';
     });
     container.innerHTML = html;
 }
 
-function goToAdjustBalance(userId, name, mobile, walletId, balance) {
-    state.adjSelectedUserId = userId;
-    showSection('adjust');
-    document.getElementById('adjUserName').textContent = name;
-    document.getElementById('adjUserMobile').textContent = mobile || '-';
-    document.getElementById('adjUserWallet').textContent = walletId || '-';
-    document.getElementById('adjUserBalance').textContent = '₹' + parseFloat(balance || 0).toFixed(2);
-    document.getElementById('adjUserInfo').style.display = 'block';
-    document.getElementById('adjUserPlaceholder').style.display = 'none';
-    document.getElementById('adjAmount').value = '';
-    document.getElementById('adjReason').value = '';
-    setTimeout(function(){ document.getElementById('adjAmount').focus(); }, 300);
-}
+// ============================================
+// USER DETAILS PANEL (Tabbed)
+// ============================================
+async function openUserDetails(userId) {
+    state_userDetail.currentUserId = userId;
+    state_userDetail.currentTab = 'overview';
+    state_userDetail.transactions = [];
+    state_userDetail.referrals = { asReferrer: [], asReferred: null };
 
-async function toggleBlockUser(id, name) {
-    var result = await showConfirm('Toggle Block Status', 'Change block status for <strong>' + name + '</strong>?', {
-        icon: 'fa-user-lock', iconColor: 'var(--warning)', warning: true,
-        okText: '<i class="fas fa-shield-alt"></i> Confirm'
-    });
-    if (!result || !result.confirmed) return;
-    try {
-        var data = await apiCall('/toggle-block', { method: 'POST', body: JSON.stringify({ userId: id }) });
-        showToast(data.message, 'success');
-        loadUsers();
-    } catch (e) { showToast(e.message, 'error'); }
-}
+    showSection('user-details');
+    document.getElementById('userDetailContent').innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><p>Loading user...</p></div>';
+    document.getElementById('userDetailName').textContent = 'Loading...';
+    document.getElementById('userDetailMeta').textContent = '-';
+    document.getElementById('userDetailBalance').textContent = '0.00';
+    document.getElementById('userDetailAvatar').textContent = 'U';
+    document.getElementById('userDetailBadges').innerHTML = '';
+    switchUserTabUI('overview');
 
-async function deleteUser(id, name) {
-    var result = await showConfirm('Delete User', 'Are you sure you want to delete <strong>' + name + '</strong>?', {
-        icon: 'fa-trash', iconColor: 'var(--danger)', danger: true,
-        okText: '<i class="fas fa-trash"></i> Delete',
-        input: true, inputLabel: 'Reason', inputPlaceholder: 'Why delete this user?'
-    });
-    if (!result || !result.confirmed) return;
     try {
-        var data = await apiCall('/delete-user/' + id, {
-            method: 'DELETE',
-            body: JSON.stringify({ reason: result.value || '' })
-        });
-        showToast(data.message, 'success');
-        loadUsers();
-    } catch (e) { showToast(e.message, 'error'); }
-}
-
-async function restoreUser(id) {
-    var result = await showConfirm('Restore User', 'Restore this user account?', {
-        icon: 'fa-undo', iconColor: 'var(--success)', success: true,
-        okText: '<i class="fas fa-undo"></i> Restore'
-    });
-    if (!result || !result.confirmed) return;
-    try {
-        var data = await apiCall('/restore-user/' + id, { method: 'POST' });
-        showToast(data.message, 'success');
-        loadUsers();
-    } catch (e) { showToast(e.message, 'error'); }
-}
-
-async function viewUserDetails(id) {
-    try {
-        var data = await apiCall('/user/' + id);
-        if (!data.success) return;
-        var u = data.user;
-        var html = '';
-        html += '<div class="info-row"><span class="info-label">Name</span><span class="info-value">' + (u.fullName || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Mobile</span><span class="info-value">' + (u.mobile || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Wallet ID</span><span class="info-value">' + (u.walletId || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Email</span><span class="info-value">' + (u.email || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Telegram</span><span class="info-value">' + (u.telegramId || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Balance</span><span class="info-value balance">₹' + (u.balance || 0).toFixed(2) + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Referral Code</span><span class="info-value" style="color:var(--accent);font-family:monospace;">' + (u.referralCode || '-') + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Status</span><span class="info-value">' + (u.isDeleted ? 'Deleted' : (u.isBlocked ? 'Blocked' : 'Active')) + '</span></div>';
-        html += '<div class="info-row"><span class="info-label">Joined</span><span class="info-value">' + new Date(u.createdAt).toLocaleDateString('en-IN') + '</span></div>';
+        var data = await apiCall('/user/' + userId);
+        if (!data.success) { showToast('Failed to load user', 'error'); return; }
+        state_userDetail.currentUser = data.user;
+        state_userDetail.transactions = data.transactions || [];
 
         try {
-            var refData = await apiCall('/user-referrals/' + id);
+            var refData = await apiCall('/user-referrals/' + userId);
             if (refData.success) {
-                html += '<div class="card-title" style="margin-top:16px;"><i class="fas fa-user-plus"></i> Referral Info</div>';
-                html += '<div class="info-row"><span class="info-label">Total Refs</span><span class="info-value">' + (refData.asReferrer ? refData.asReferrer.length : 0) + '</span></div>';
-                if (refData.asReferred) {
-                    var rU = refData.asReferred.referrerId || {};
-                    html += '<div class="info-row"><span class="info-label">Referred By</span><span class="info-value">' + (rU.fullName || 'Unknown') + ' (' + (rU.referralCode || '-') + ')</span></div>';
-                } else {
-                    html += '<div class="info-row"><span class="info-label">Referred By</span><span class="info-value">Direct Signup</span></div>';
-                }
+                state_userDetail.referrals.asReferrer = refData.asReferrer || [];
+                state_userDetail.referrals.asReferred = refData.asReferred || null;
             }
         } catch (e) {}
 
-        document.getElementById('modalTitle').textContent = 'User Details';
-        document.getElementById('modalBody').innerHTML = html;
-        document.getElementById('detailsModal').classList.add('active');
-    } catch (e) { showToast(e.message, 'error'); }
+        renderUserHeader(data.user);
+        renderUserTabContent('overview');
+    } catch (e) {
+        showToast('Failed: ' + e.message, 'error');
+        document.getElementById('userDetailContent').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>';
+    }
 }
 
-function openEditUserModal(id) {
-    fetch(ADMIN_API + '/user/' + id, { headers: { 'Authorization': 'Bearer ' + adminToken } })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (!data.success) { showToast('Failed to load user', 'error'); return; }
-        var u = data.user;
-        document.getElementById('euId').value = u._id;
-        document.getElementById('euFullName').value = u.fullName || '';
-        document.getElementById('euMobile').value = u.mobile || '';
-        document.getElementById('euEmail').value = u.email || '';
-        document.getElementById('euWalletId').value = u.walletId || '';
-        document.getElementById('euTelegram').value = u.telegramId || '';
-        document.getElementById('euPassword').value = '';
-        document.getElementById('euPin').value = '';
-        document.getElementById('euBalance').value = u.balance || 0;
-        document.getElementById('euBlocked').value = u.isBlocked ? 'true' : 'false';
-        document.getElementById('euActive').value = u.isActive !== false ? 'true' : 'false';
-        document.getElementById('editUserModal').classList.add('active');
-    })
-    .catch(function() { showToast('Network error', 'error'); });
+function renderUserHeader(u) {
+    var name = u.fullName || 'Unknown';
+    document.getElementById('userDetailAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('userDetailName').textContent = name;
+    document.getElementById('userDetailMeta').textContent = (u.walletId || 'N/A') + ' • ' + (u.mobile || 'N/A');
+    document.getElementById('userDetailBalance').textContent = parseFloat(u.balance || 0).toFixed(2);
+
+    var badges = '';
+    if (u.isDeleted) badges += '<span class="red"><i class="fas fa-trash"></i> Deleted</span>';
+    else if (u.isBlocked) badges += '<span class="red"><i class="fas fa-ban"></i> Blocked</span>';
+    else badges += '<span class="green"><i class="fas fa-check"></i> Active</span>';
+    if (u.isActive === false) badges += '<span class="amber"><i class="fas fa-pause"></i> Inactive</span>';
+    if (u.referralCode) badges += '<span><i class="fas fa-gift"></i> ' + u.referralCode + '</span>';
+
+    document.getElementById('userDetailBadges').innerHTML = badges;
 }
 
-async function saveUserEdit() {
-    var id = document.getElementById('euId').value;
+function switchUserTabUI(tab) {
+    document.querySelectorAll('.user-tab').forEach(function(t) {
+        t.classList.remove('active');
+        if (t.getAttribute('data-tab') === tab) t.classList.add('active');
+    });
+}
+
+function switchUserTab(tab) {
+    state_userDetail.currentTab = tab;
+    switchUserTabUI(tab);
+    renderUserTabContent(tab);
+}
+
+function renderUserTabContent(tab) {
+    var u = state_userDetail.currentUser;
+    if (!u) return;
+    var container = document.getElementById('userDetailContent');
+
+    if (tab === 'overview') container.innerHTML = renderOverviewTab(u);
+    else if (tab === 'transactions') container.innerHTML = renderTransactionsTab();
+    else if (tab === 'referrals') container.innerHTML = renderReferralsTab();
+    else if (tab === 'adjust') container.innerHTML = renderAdjustTab(u);
+    else if (tab === 'edit') container.innerHTML = renderEditTab(u);
+    else if (tab === 'actions') container.innerHTML = renderActionsTab(u);
+}
+
+// -------- TAB: OVERVIEW --------
+function renderOverviewTab(u) {
+    function row(icon, label, value, cls) {
+        return '<div class="ov-row">' +
+            '<span class="ov-row-label"><i class="fas ' + icon + '"></i> ' + label + '</span>' +
+            '<span class="ov-row-value ' + (cls || '') + '">' + (value || '-') + '</span>' +
+        '</div>';
+    }
+    var html = '<div class="card">';
+    html += '<div class="card-title"><i class="fas fa-id-card"></i> Account Overview</div>';
+    html += row('fa-user', 'Full Name', escapeHtml(u.fullName));
+    html += row('fa-phone', 'Mobile', u.mobile ? '<span class="copyable" onclick="copyToClipboard(\'' + u.mobile + '\',\'Mobile copied\')">' + u.mobile + ' <i class=\'fas fa-copy\' style=\'font-size:10px;opacity:0.5;\'></i></span>' : '-');
+    html += row('fa-wallet', 'Wallet ID', u.walletId ? '<span class="copyable mono" onclick="copyToClipboard(\'' + u.walletId + '\',\'Wallet ID copied\')">' + u.walletId + ' <i class=\'fas fa-copy\' style=\'font-size:10px;opacity:0.5;\'></i></span>' : '-', 'mono');
+    html += row('fa-envelope', 'Email', escapeHtml(u.email));
+    html += row('fab fa-telegram', 'Telegram', escapeHtml(u.telegramId));
+    html += row('fa-rupee-sign', 'Balance', '₹' + (u.balance || 0).toFixed(2), 'balance');
+    html += row('fa-gift', 'Referral Code', u.referralCode ? '<span style="color:var(--accent);font-family:monospace;">' + u.referralCode + '</span>' : '-');
+    html += row('fa-users', 'Referral Count', (u.referralCount || 0));
+    html += row('fa-trophy', 'Referral Earnings', '₹' + (u.referralEarnings || 0).toFixed(2));
+
+    var status = u.isDeleted ? 'Deleted' : (u.isBlocked ? 'Blocked' : 'Active');
+    var statusColor = u.isDeleted ? 'var(--text-muted)' : (u.isBlocked ? 'var(--danger)' : 'var(--success)');
+    html += row('fa-shield-alt', 'Status', '<span style="color:' + statusColor + ';font-weight:800;">' + status + '</span>');
+    html += row('fa-calendar', 'Joined', u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-');
+    if (u.lastLogin) html += row('fa-clock', 'Last Login', new Date(u.lastLogin).toLocaleString('en-IN'));
+    html += '</div>';
+    return html;
+}
+
+// -------- TAB: TRANSACTIONS --------
+function renderTransactionsTab() {
+    var txs = state_userDetail.transactions || [];
+    if (txs.length === 0) {
+        return '<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>No transactions yet</p></div>';
+    }
+    var html = '<div class="card" style="padding:14px;">';
+    html += '<div class="card-title" style="margin-bottom:10px;"><i class="fas fa-exchange-alt"></i> All Transactions (' + txs.length + ')</div>';
+
+    txs.forEach(function(tx) {
+        var isNeg = ['withdrawal', 'withdraw', 'admin_deduct', 'transfer', 'transfer_send'].indexOf(tx.type) > -1;
+        var time = new Date(tx.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+        var typeIcon = 'fa-exchange-alt';
+        if (tx.type === 'deposit') typeIcon = 'fa-arrow-down';
+        else if (tx.type === 'withdraw' || tx.type === 'withdrawal') typeIcon = 'fa-arrow-up';
+        else if (tx.type === 'admin_add') typeIcon = 'fa-plus-circle';
+        else if (tx.type === 'admin_deduct') typeIcon = 'fa-minus-circle';
+        else if (tx.type === 'gift') typeIcon = 'fa-gift';
+        else if (tx.type === 'transfer' || tx.type === 'transfer_send' || tx.type === 'transfer_receive') typeIcon = 'fa-paper-plane';
+        else if (tx.type === 'lifafa_creation' || tx.type === 'lifafa_claim') typeIcon = 'fa-envelope';
+
+        var color = isNeg ? 'var(--danger)' : 'var(--success)';
+
+        html += '<div style="padding:12px;border-bottom:1px solid var(--border-soft);">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                        '<i class="fas ' + typeIcon + '" style="color:' + color + ';font-size:12px;"></i>' +
+                        '<span style="font-size:12px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:0.3px;">' + (tx.type || 'N/A').replace(/_/g, ' ') + '</span>' +
+                    '</div>' +
+                    '<div style="font-size:10px;color:var(--text-sec);font-weight:600;font-family:monospace;margin-bottom:2px;">' + (tx.tx_id || '-') + '</div>' +
+                    '<div style="font-size:10px;color:var(--text-muted);font-weight:600;"><i class="fas fa-clock"></i> ' + time + '</div>' +
+                    (tx.remark ? '<div style="font-size:10px;color:var(--text-sec);margin-top:4px;font-style:italic;">' + tx.remark + '</div>' : '') +
+                '</div>' +
+                '<div style="text-align:right;flex-shrink:0;">' +
+                    '<div style="font-size:14px;font-weight:900;color:' + color + ';">' + (isNeg ? '-' : '+') + '₹' + (tx.amount || 0).toFixed(2) + '</div>' +
+                    '<span class="status-badge ' + (tx.status || 'pending') + '" style="margin-top:4px;">' + (tx.status || 'pending') + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+    return html;
+}
+
+// -------- TAB: REFERRALS --------
+function renderReferralsTab() {
+    var refs = state_userDetail.referrals || {};
+    var asReferrer = refs.asReferrer || [];
+    var asReferred = refs.asReferred;
+
+    var html = '';
+
+    html += '<div class="card">';
+    html += '<div class="card-title"><i class="fas fa-user-friends"></i> Referred By</div>';
+    if (asReferred) {
+        var rU = asReferred.referrerId || {};
+        html += '<div class="ov-row"><span class="ov-row-label"><i class="fas fa-user"></i> Name</span><span class="ov-row-value">' + (rU.fullName || '-') + '</span></div>';
+        html += '<div class="ov-row"><span class="ov-row-label"><i class="fas fa-phone"></i> Mobile</span><span class="ov-row-value">' + (rU.mobile || '-') + '</span></div>';
+        html += '<div class="ov-row"><span class="ov-row-label"><i class="fas fa-gift"></i> Code</span><span class="ov-row-value mono">' + (rU.referralCode || '-') + '</span></div>';
+        html += '<div class="ov-row"><span class="ov-row-label"><i class="fas fa-info-circle"></i> Status</span><span class="ov-row-value"><span class="status-badge ' + (asReferred.status || 'pending') + '">' + (asReferred.status || 'pending') + '</span></span></div>';
+    } else {
+        html += '<div class="empty-state" style="padding:20px;"><i class="fas fa-user-check"></i><p style="font-size:11px;">Direct Signup (not referred)</p></div>';
+    }
+    html += '</div>';
+
+    html += '<div class="card" style="margin-top:14px;">';
+    html += '<div class="card-title"><i class="fas fa-user-plus"></i> Users Invited (' + asReferrer.length + ')</div>';
+    if (asReferrer.length === 0) {
+        html += '<div class="empty-state" style="padding:20px;"><i class="fas fa-user-plus"></i><p style="font-size:11px;">No referrals yet</p></div>';
+    } else {
+        asReferrer.forEach(function(r) {
+            var u = r.referredUserId || {};
+            html += '<div style="padding:10px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:12px;font-weight:800;">' + (u.fullName || 'Unknown') + '</div>' +
+                    '<div style="font-size:10px;color:var(--text-sec);font-weight:600;">' + (u.mobile || 'N/A') + '</div>' +
+                '</div>' +
+                '<div style="text-align:right;">' +
+                    '<div style="font-size:12px;font-weight:800;color:var(--accent);">₹' + (r.bonusAmount || 0) + '</div>' +
+                    '<span class="status-badge ' + (r.status || 'pending') + '" style="margin-top:2px;">' + (r.status || 'pending') + '</span>' +
+                '</div>' +
+            '</div>';
+        });
+    }
+    html += '</div>';
+
+    return html;
+}
+
+// -------- TAB: ADJUST BALANCE --------
+function renderAdjustTab(u) {
+    var html = '<div class="card">';
+    html += '<div class="card-title"><i class="fas fa-sliders-h"></i> Adjust Balance</div>';
+    html += '<div style="padding:12px 14px;background:var(--bg-soft);border-radius:10px;margin-bottom:14px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-size:11px;font-weight:800;color:var(--text-sec);text-transform:uppercase;">Current Balance</span>' +
+            '<span style="font-size:20px;font-weight:900;color:var(--accent);">₹' + (u.balance || 0).toFixed(2) + '</span>' +
+        '</div>' +
+    '</div>';
+
+    html += '<div class="form-group">' +
+        '<label><i class="fas fa-rupee-sign"></i> Amount (₹)</label>' +
+        '<input type="number" id="adjAmountTab" placeholder="Enter amount" min="1">' +
+    '</div>';
+
+    html += '<div class="form-group">' +
+        '<label><i class="fas fa-sticky-note"></i> Reason</label>' +
+        '<input type="text" id="adjReasonTab" placeholder="Reason (optional)">' +
+    '</div>';
+
+    html += '<div class="btn-group">' +
+        '<button class="btn btn-success" onclick="adjustBalanceTab(\'add\')"><i class="fas fa-plus-circle"></i> Add</button>' +
+        '<button class="btn btn-danger" onclick="adjustBalanceTab(\'deduct\')"><i class="fas fa-minus-circle"></i> Deduct</button>' +
+    '</div>';
+
+    html += '<div style="margin-top:12px;padding:10px 12px;background:#ede9fe;border-radius:8px;font-size:10px;color:#7c3aed;font-weight:700;line-height:1.5;">' +
+        '<i class="fas fa-info-circle"></i> A transaction record will be created with type <code>admin_add</code> or <code>admin_deduct</code>.' +
+    '</div>';
+
+    html += '</div>';
+    return html;
+}
+
+// -------- TAB: EDIT USER --------
+function renderEditTab(u) {
+    var html = '<div class="card">';
+    html += '<div class="card-title"><i class="fas fa-edit"></i> Edit User</div>';
+
+    html += '<div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="euFullNameTab" value="' + escapeHtml(u.fullName || '') + '"></div>';
+    html += '<div class="form-group"><label><i class="fas fa-phone"></i> Mobile</label><input type="text" id="euMobileTab" maxlength="10" value="' + escapeHtml(u.mobile || '') + '"></div>';
+    html += '<div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="euEmailTab" value="' + escapeHtml(u.email || '') + '"></div>';
+    html += '<div class="form-group"><label><i class="fas fa-wallet"></i> Wallet ID</label><input type="text" id="euWalletIdTab" value="' + escapeHtml(u.walletId || '') + '"></div>';
+    html += '<div class="form-group"><label><i class="fab fa-telegram"></i> Telegram ID</label><input type="text" id="euTelegramTab" value="' + escapeHtml(u.telegramId || '') + '"></div>';
+
+    html += '<div class="form-row">' +
+        '<div class="form-group"><label><i class="fas fa-lock"></i> New Password</label><input type="text" id="euPasswordTab" placeholder="Blank = keep"></div>' +
+        '<div class="form-group"><label><i class="fas fa-key"></i> New PIN</label><input type="text" id="euPinTab" placeholder="Blank = keep" maxlength="6"></div>' +
+    '</div>';
+
+    html += '<div style="margin-top:8px;padding:12px;background:#fef3c7;border-radius:10px;font-size:10px;color:#92400e;font-weight:700;line-height:1.5;">' +
+        '<i class="fas fa-exclamation-triangle"></i> To change balance, use the <strong>Balance</strong> tab instead. This ensures proper transaction logging.' +
+    '</div>';
+
+    html += '<button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="saveUserEditTab()"><i class="fas fa-save"></i> Save Changes</button>';
+    html += '</div>';
+    return html;
+}
+
+async function saveUserEditTab() {
+    var id = state_userDetail.currentUserId;
     var payload = {
-        fullName: document.getElementById('euFullName').value.trim(),
-        mobile: document.getElementById('euMobile').value.trim(),
-        email: document.getElementById('euEmail').value.trim(),
-        walletId: document.getElementById('euWalletId').value.trim(),
-        telegramId: document.getElementById('euTelegram').value.trim(),
-        balance: parseFloat(document.getElementById('euBalance').value) || 0,
-        isBlocked: document.getElementById('euBlocked').value === 'true',
-        isActive: document.getElementById('euActive').value === 'true'
+        fullName: document.getElementById('euFullNameTab').value.trim(),
+        mobile: document.getElementById('euMobileTab').value.trim(),
+        email: document.getElementById('euEmailTab').value.trim(),
+        walletId: document.getElementById('euWalletIdTab').value.trim(),
+        telegramId: document.getElementById('euTelegramTab').value.trim()
     };
-    var pw = document.getElementById('euPassword').value;
+    var pw = document.getElementById('euPasswordTab').value;
     if (pw) {
         if (pw.length < 6) { showToast('Password min 6', 'error'); return; }
         payload.password = pw;
     }
-    var pin = document.getElementById('euPin').value;
+    var pin = document.getElementById('euPinTab').value;
     if (pin) {
         if (!/^[0-9]{4,6}$/.test(pin)) { showToast('PIN must be 4-6 digits', 'error'); return; }
         payload.pin = pin;
@@ -2067,34 +2244,118 @@ async function saveUserEdit() {
         var data = await apiCall('/update-user/' + id, { method: 'PUT', body: JSON.stringify(payload) });
         if (data.success) {
             showToast(data.message, 'success');
-            closeModal('editUserModal');
-            loadUsers();
+            openUserDetails(id);
         } else showToast(data.message, 'error');
     } catch (e) { showToast(e.message, 'error'); }
 }
 
+// -------- TAB: ACTIONS --------
+function renderActionsTab(u) {
+    var html = '<div class="card">';
+    html += '<div class="card-title"><i class="fas fa-cog"></i> Quick Actions</div>';
+
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:10px;">';
+
+    if (!u.isDeleted) {
+        if (u.isBlocked) {
+            html += '<button class="btn btn-success" onclick="toggleBlockUserTab()"><i class="fas fa-unlock"></i> Unblock User</button>';
+        } else {
+            html += '<button class="btn btn-danger" onclick="toggleBlockUserTab()"><i class="fas fa-ban"></i> Block User</button>';
+        }
+        html += '<button class="btn btn-danger" onclick="deleteUserTab()"><i class="fas fa-trash"></i> Delete User</button>';
+    } else {
+        html += '<button class="btn btn-success" onclick="restoreUserTab()"><i class="fas fa-undo"></i> Restore User</button>';
+    }
+
+    html += '</div>';
+
+    html += '<div style="margin-top:14px;padding:12px;background:var(--bg-soft);border-radius:10px;font-size:10px;color:var(--text-sec);font-weight:700;line-height:1.6;">' +
+        '<i class="fas fa-info-circle" style="color:var(--accent);"></i> <strong>Block:</strong> User cannot access the app.<br>' +
+        '<i class="fas fa-info-circle" style="color:var(--accent);"></i> <strong>Delete:</strong> Soft delete — data preserved.' +
+    '</div>';
+
+    html += '</div>';
+    return html;
+}
+
+async function toggleBlockUserTab() {
+    var u = state_userDetail.currentUser;
+    var result = await showConfirm('Toggle Block Status', 'Change block status for <strong>' + (u.fullName || 'User') + '</strong>?', {
+        icon: 'fa-user-lock', iconColor: 'var(--warning)', warning: true,
+        okText: '<i class="fas fa-shield-alt"></i> Confirm'
+    });
+    if (!result || !result.confirmed) return;
+    try {
+        var data = await apiCall('/toggle-block', { method: 'POST', body: JSON.stringify({ userId: u._id }) });
+        showToast(data.message, 'success');
+        openUserDetails(u._id);
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteUserTab() {
+    var u = state_userDetail.currentUser;
+    var result = await showConfirm('Delete User', 'Are you sure you want to delete <strong>' + (u.fullName || 'User') + '</strong>?', {
+        icon: 'fa-trash', iconColor: 'var(--danger)', danger: true,
+        okText: '<i class="fas fa-trash"></i> Delete',
+        input: true, inputLabel: 'Reason', inputPlaceholder: 'Why delete this user?'
+    });
+    if (!result || !result.confirmed) return;
+    try {
+        var data = await apiCall('/delete-user/' + u._id, {
+            method: 'DELETE',
+            body: JSON.stringify({ reason: result.value || '' })
+        });
+        showToast(data.message, 'success');
+        showSection('users');
+        loadUsers();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function restoreUserTab() {
+    var u = state_userDetail.currentUser;
+    var result = await showConfirm('Restore User', 'Restore this user account?', {
+        icon: 'fa-undo', iconColor: 'var(--success)', success: true,
+        okText: '<i class="fas fa-undo"></i> Restore'
+    });
+    if (!result || !result.confirmed) return;
+    try {
+        var data = await apiCall('/restore-user/' + u._id, { method: 'POST' });
+        showToast(data.message, 'success');
+        openUserDetails(u._id);
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
 // ============================================
-// ADJUST BALANCE
+// ADJUST BALANCE (In Tab)
 // ============================================
-async function adjustBalance(type) {
-    if (!state.adjSelectedUserId) { showToast('Select user first', 'error'); return; }
-    var amount = parseFloat(document.getElementById('adjAmount').value);
-    var reason = document.getElementById('adjReason').value.trim() || 'Admin action';
+async function adjustBalanceTab(type) {
+    var u = state_userDetail.currentUser;
+    if (!u) { showToast('No user selected', 'error'); return; }
+
+    var amount = parseFloat(document.getElementById('adjAmountTab').value);
+    var reason = document.getElementById('adjReasonTab').value.trim() || 'Admin action';
     if (!amount || amount <= 0) { showToast('Enter valid amount', 'error'); return; }
 
-    var currentBalance = parseFloat(document.getElementById('adjUserBalance').textContent.replace('₹', '').replace(/,/g, ''));
-    if (type === 'deduct' && amount > currentBalance) { showToast('Insufficient balance', 'error'); return; }
+    if (type === 'deduct' && amount > u.balance) {
+        showToast('Insufficient balance. Current: ₹' + (u.balance || 0).toFixed(2), 'error');
+        return;
+    }
 
     var isAdd = type === 'add';
     var result = await showConfirm(
         isAdd ? 'Add Balance' : 'Deduct Balance',
-        (isAdd ? 'Add' : 'Deduct') + ' <strong>₹' + amount.toFixed(2) + '</strong> ' + (isAdd ? 'to' : 'from') + ' this user\'s account?',
+        (isAdd ? 'Add' : 'Deduct') + ' <strong>₹' + amount.toFixed(2) + '</strong> ' +
+        (isAdd ? 'to' : 'from') + ' this user\'s account?<br><br>' +
+        '<span style="font-size:11px;color:var(--accent);font-weight:800;">Transaction type: <code>' + (isAdd ? 'admin_add' : 'admin_deduct') + '</code></span>',
         {
             icon: isAdd ? 'fa-plus-circle' : 'fa-minus-circle',
             iconColor: isAdd ? 'var(--success)' : 'var(--danger)',
             danger: !isAdd, success: isAdd,
             okText: isAdd ? '<i class="fas fa-plus"></i> Add' : '<i class="fas fa-minus"></i> Deduct',
-            input: true, inputLabel: 'Reason', inputPlaceholder: 'Reason for adjustment', inputValue: reason
+            input: true,
+            inputLabel: 'Reason',
+            inputPlaceholder: 'Reason for adjustment',
+            inputValue: reason
         }
     );
     if (!result || !result.confirmed) return;
@@ -2102,12 +2363,15 @@ async function adjustBalance(type) {
     try {
         var data = await apiCall('/adjust-balance', {
             method: 'POST',
-            body: JSON.stringify({ userId: state.adjSelectedUserId, amount: amount, type: type, reason: result.value || reason })
+            body: JSON.stringify({
+                userId: u._id,
+                amount: amount,
+                type: type,
+                reason: result.value || reason
+            })
         });
         showToast(data.message, 'success');
-        document.getElementById('adjUserBalance').textContent = '₹' + (data.newBalance || 0).toFixed(2);
-        document.getElementById('adjAmount').value = '';
-        document.getElementById('adjReason').value = '';
+        openUserDetails(u._id);
     } catch (e) { showToast(e.message, 'error'); }
 }
 
@@ -2201,7 +2465,7 @@ async function deleteGift(id) {
 }
 
 function copyGiftCode(code) {
-    navigator.clipboard.writeText(code).then(function() { showToast('Copied', 'success'); }).catch(function() { showToast('Copy failed', 'error'); });
+    copyToClipboard(code, 'Gift code copied');
 }
 
 // ============================================
