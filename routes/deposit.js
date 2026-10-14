@@ -13,13 +13,8 @@ const ADMIN_TELEGRAM_ID = process.env.ADMIN_TG_ID;
 const ADMIN_UPI = process.env.ADMIN_UPI_ID || 'admin@upi';
 
 // ===== HELPERS =====
-
 function generateDepositId() {
     return 'DEP_' + Date.now().toString(36).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
-}
-
-function generateDepositTxnId() {
-    return 'TXN_DEPOSIT_' + Date.now() + Math.floor(Math.random() * 99999);
 }
 
 function getCurrentDateTime() {
@@ -43,20 +38,11 @@ async function sendTelegramMessage(chatId, message) {
             resolve({ success: false, error: 'BOT_TOKEN not configured' });
             return;
         }
-
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-        const data = JSON.stringify({
-            chat_id: chatId,
-            text: message,
-            parse_mode: 'HTML'
-        });
-
+        const data = JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' });
         const request = https.request(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
-            }
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
         }, (res) => {
             let responseData = '';
             res.on('data', (chunk) => responseData += chunk);
@@ -69,11 +55,7 @@ async function sendTelegramMessage(chatId, message) {
                 }
             });
         });
-
-        request.on('error', (error) => {
-            resolve({ success: false, error: error.message });
-        });
-
+        request.on('error', (error) => resolve({ success: false, error: error.message }));
         request.write(data);
         request.end();
     });
@@ -81,50 +63,35 @@ async function sendTelegramMessage(chatId, message) {
 
 async function notifyAdmin(message) {
     if (!ADMIN_TELEGRAM_ID) return;
-    try {
-        await sendTelegramMessage(ADMIN_TELEGRAM_ID, message);
-    } catch (error) {
-        console.error('Admin Notification Failed:', error.message);
-    }
+    try { await sendTelegramMessage(ADMIN_TELEGRAM_ID, message); }
+    catch (error) { console.error('Admin Notification Failed:', error.message); }
 }
 
 async function notifyUser(chatId, message) {
     if (!chatId) return;
-    try {
-        await sendTelegramMessage(chatId, message);
-    } catch (error) {
-        console.error('User Notification Failed:', error.message);
-    }
+    try { await sendTelegramMessage(chatId, message); }
+    catch (error) { console.error('User Notification Failed:', error.message); }
 }
 
 // ============================================
-// 0. GET PUBLIC CONFIG (UPI ID) - NO AUTH
+// 0. GET PUBLIC CONFIG
 // ============================================
 router.get('/config', (req, res) => {
     try {
-        res.json({
-            success: true,
-            upiId: ADMIN_UPI,
-            minAmount: 1,
-            maxAmount: 5000
-        });
+        res.json({ success: true, upiId: ADMIN_UPI, minAmount: 1, maxAmount: 5000 });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Config error' });
     }
 });
 
 // ============================================
-// 1. GET USER PROFILE (BALANCE)
+// 1. GET USER PROFILE
 // ============================================
 router.get('/profile/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.userId).select('-password -pin -__v');
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User Not Found' });
-        }
-
-        res.json({ success: true, user: user });
+        if (!user) return res.status(404).json({ success: false, message: 'User Not Found' });
+        res.json({ success: true, user });
     } catch (error) {
         console.error('Profile Fetch Error:', error.message);
         res.status(500).json({ success: false, message: 'Internal Server Error: ' + error.message });
@@ -132,7 +99,9 @@ router.get('/profile/me', auth, async (req, res) => {
 });
 
 // ============================================
-// 2. CREATE DEPOSIT (Temporary Invoice — NOT pending yet)
+// 2. CREATE DEPOSIT INVOICE
+// ✅ NO DB entry — only returns invoice to user
+// User pays via UPI, then submits UTR
 // ============================================
 router.post('/create', auth, async (req, res) => {
     try {
@@ -146,52 +115,42 @@ router.post('/create', auth, async (req, res) => {
             });
         }
 
-        // Check if user has any deposit awaiting approval (UTR submitted)
-        const pendingApproval = await Deposit.findOne({
+        // Check if user has any pending deposit (UTR submitted but not yet acted on)
+        const pendingDeposit = await Deposit.findOne({
             userId,
-            status: 'pending_approval'
+            status: 'pending'
         });
 
-        if (pendingApproval) {
+        if (pendingDeposit) {
             return res.status(400).json({
                 success: false,
-                message: 'You Have A Deposit Awaiting Approval',
+                message: 'You have a deposit awaiting approval. Please wait or cancel it first.',
                 pendingDeposit: {
-                    depositId: pendingApproval.depositId,
-                    amount: pendingApproval.amount,
-                    transactionRef: pendingApproval.transactionRef
+                    depositId: pendingDeposit.depositId,
+                    amount: pendingDeposit.amount,
+                    transactionRef: pendingDeposit.transactionRef
                 }
             });
         }
 
+        // ✅ Generate invoice WITHOUT creating DB entry
         const depositId = generateDepositId();
-
-        const deposit = new Deposit({
-            userId: userId,
-            amount: amount,
-            upiId: ADMIN_UPI,
-            status: 'pending',
-            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-            depositId: depositId
-        });
-
-        await deposit.save();
-
         const qrCode = generateQRCode(amount);
-        deposit.qrData = qrCode;
-        await deposit.save();
+
+        console.log(`[DEPOSIT] Invoice generated (not saved to DB): ${depositId} | Amount: Rs ${amount} | User: ${userId}`);
 
         res.json({
             success: true,
-            message: 'Deposit Invoice Created Successfully',
+            message: 'Deposit Invoice Created. Please pay and submit UTR.',
             deposit: {
-                depositId: deposit.depositId,
-                amount: deposit.amount,
+                depositId: depositId,
+                amount: amount,
                 qrCode: qrCode,
-                upiId: ADMIN_UPI
+                upiId: ADMIN_UPI,
+                expiresIn: '365 days',
+                note: 'Pay via UPI then submit UTR to complete'
             }
         });
-
     } catch (error) {
         console.error('Create Deposit Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -199,63 +158,75 @@ router.post('/create', auth, async (req, res) => {
 });
 
 // ============================================
-// 3. SUBMIT UTR FOR MANUAL APPROVAL
-// (This is where deposit becomes pending)
+// 3. SUBMIT UTR
+// ✅ THIS is where deposit enters DB with status='pending'
 // ============================================
 router.post('/submit-utr', auth, async (req, res) => {
     try {
-        const { depositId, transactionRef } = req.body;
+        const { depositId, transactionRef, amount } = req.body;
         const userId = req.user.id;
         const dateTime = getCurrentDateTime();
 
         if (!depositId) {
             return res.status(400).json({ success: false, message: 'Deposit Id Is Required' });
         }
-
         if (!transactionRef || transactionRef.length < 12) {
             return res.status(400).json({
                 success: false,
                 message: 'Valid UTR (Min 12 Characters) Is Required'
             });
         }
+        if (!amount || amount < 1 || amount > 5000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Valid amount (₹1 - ₹5,000) required'
+            });
+        }
 
-        // Check if user already has a deposit awaiting approval
+        // ✅ Block if user already has a pending deposit
         const alreadyPending = await Deposit.findOne({
             userId,
-            status: 'pending_approval'
+            status: 'pending'
         });
 
         if (alreadyPending) {
             return res.status(400).json({
                 success: false,
-                message: 'You Already Have A Deposit Awaiting Approval'
+                message: 'You already have a deposit awaiting approval'
             });
         }
 
-        const deposit = await Deposit.findOne({ depositId, userId, status: 'pending' });
-
-        if (!deposit) {
-            return res.status(404).json({ success: false, message: 'Deposit Not Found' });
-        }
-
+        // ✅ Check UTR not used before
         const existingUtr = await Deposit.findOne({
             transactionRef: transactionRef,
-            status: { $in: ['pending_approval', 'approved'] }
+            status: { $in: ['pending', 'approved'] }
         });
 
         if (existingUtr) {
             return res.status(400).json({ success: false, message: 'This UTR Has Already Been Used' });
         }
 
-        deposit.transactionRef = transactionRef;
-        deposit.status = 'pending_approval';
-        deposit.verifiedAt = new Date();
+        // ✅ CREATE deposit in DB — NOW it becomes pending
+        const deposit = new Deposit({
+            userId: userId,
+            amount: amount,
+            upiId: ADMIN_UPI,
+            depositId: depositId,
+            transactionRef: transactionRef,
+            status: 'pending',
+            verifiedAt: new Date(),
+            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+        });
+
         await deposit.save();
+
+        console.log(`[DEPOSIT] Pending deposit created: ${deposit.depositId} | UTR: ${transactionRef} | Rs ${amount}`);
 
         const user = await User.findById(userId);
 
+        // Notify admin
         await notifyAdmin(
-`📥 <b>UTR Submitted — Pending Approval</b>\n\n` +
+`📥 <b>New Deposit — Pending Approval</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Name:</b> ${user.fullName || 'N/A'}\n` +
 `🆔 <b>Wallet ID:</b> ${user.walletId || 'N/A'}\n` +
@@ -265,9 +236,10 @@ router.post('/submit-utr', auth, async (req, res) => {
 `⏳ Action required: Approve or Reject`
         );
 
+        // Notify user
         if (user.telegramId) {
             await notifyUser(user.telegramId,
-`📥 <b>UTR Submitted For Approval</b>\n\n` +
+`📥 <b>Deposit Submitted For Approval</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Dear:</b> ${user.fullName}\n` +
 `💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
@@ -280,13 +252,12 @@ router.post('/submit-utr', auth, async (req, res) => {
         res.json({
             success: true,
             message: 'UTR Submitted Successfully. Waiting For Admin Approval.',
-            status: 'pending_approval',
+            status: 'pending',
             depositId: deposit.depositId,
             amount: deposit.amount,
             transactionRef: transactionRef,
             submittedAt: dateTime
         });
-
     } catch (error) {
         console.error('UTR Submission Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -294,7 +265,7 @@ router.post('/submit-utr', auth, async (req, res) => {
 });
 
 // ============================================
-// 3b. ALIAS: manual-confirm → submit-utr
+// 3b. ALIAS: manual-confirm
 // ============================================
 router.post('/manual-confirm', (req, res, next) => {
     req.url = '/submit-utr';
@@ -303,7 +274,6 @@ router.post('/manual-confirm', (req, res, next) => {
 
 // ============================================
 // 4. GET PENDING DEPOSITS (User)
-// Only deposits with UTR submitted are pending
 // ============================================
 router.get('/pending', auth, async (req, res) => {
     try {
@@ -311,7 +281,7 @@ router.get('/pending', auth, async (req, res) => {
 
         const pendingDeposits = await Deposit.find({
             userId: userId,
-            status: 'pending_approval'
+            status: 'pending'
         }).sort({ createdAt: -1 });
 
         const depositsWithQR = pendingDeposits.map(deposit => ({
@@ -326,7 +296,6 @@ router.get('/pending', auth, async (req, res) => {
         }));
 
         res.json({ success: true, deposits: depositsWithQR });
-
     } catch (error) {
         console.error('Get Pending Deposits Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -334,8 +303,7 @@ router.get('/pending', auth, async (req, res) => {
 });
 
 // ============================================
-// 5. CANCEL PENDING DEPOSIT
-// (Only allowed if UTR not submitted yet)
+// 5. CANCEL PENDING DEPOSIT (User)
 // ============================================
 router.post('/cancel/:depositId', auth, async (req, res) => {
     try {
@@ -349,14 +317,16 @@ router.post('/cancel/:depositId', auth, async (req, res) => {
         });
 
         if (!deposit) {
-            return res.status(404).json({ success: false, message: 'Deposit Not Found Or Already Submitted' });
+            return res.status(404).json({ success: false, message: 'Deposit Not Found' });
         }
 
         deposit.status = 'cancelled';
+        deposit.cancelledBy = 'user';
+        deposit.cancelledAt = new Date();
+        deposit.adminNote = 'Cancelled by user';
         await deposit.save();
 
         res.json({ success: true, message: 'Deposit Cancelled Successfully' });
-
     } catch (error) {
         console.error('Cancel Deposit Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -364,171 +334,7 @@ router.post('/cancel/:depositId', auth, async (req, res) => {
 });
 
 // ============================================
-// 6. ADMIN APPROVE DEPOSIT
-// ============================================
-router.post('/admin/approve/:depositId', auth, async (req, res) => {
-    try {
-        const { depositId } = req.params;
-        const adminId = req.user.id;
-        const dateTime = getCurrentDateTime();
-
-        const admin = await User.findById(adminId);
-        if (!admin || !admin.isAdmin) {
-            return res.status(403).json({ success: false, message: 'Admin Access Required' });
-        }
-
-        const deposit = await Deposit.findOne({
-            depositId: depositId,
-            status: 'pending_approval'
-        });
-
-        if (!deposit) {
-            return res.status(404).json({ success: false, message: 'Deposit Not Found Or Not Pending Approval' });
-        }
-
-        deposit.status = 'approved';
-        deposit.approvedBy = adminId;
-        deposit.approvedAt = new Date();
-        await deposit.save();
-
-        const user = await User.findById(deposit.userId);
-        user.balance += deposit.amount;
-        await user.save();
-
-        const balanceAfter = user.balance;
-        const txnId = generateDepositTxnId();
-
-        const transaction = new Transaction({
-            tx_id: txnId,
-            user_id: deposit.userId,
-            sender_id: deposit.userId,
-            receiver_id: deposit.userId,
-            amount: deposit.amount,
-            type: 'deposit',
-            status: 'success',
-            remark: 'Manual deposit approved by admin',
-            description: 'Manual deposit approved by admin',
-            tx_time: new Date(),
-            metadata: {
-                depositId: deposit.depositId,
-                transactionRef: deposit.transactionRef,
-                type: 'admin_approved',
-                transactionType: 'payment_received',
-                method: 'Deposit',
-                category: 'Deposit',
-                balanceAfter: balanceAfter
-            }
-        });
-        await transaction.save();
-
-        await notifyAdmin(
-`✅ <b>Deposit Approved</b>\n\n` +
-`⏰ <b>Time:</b> ${dateTime}\n` +
-`👤 <b>Name:</b> ${user.fullName || 'N/A'}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
-`📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
-`🆔 <b>Transaction ID:</b> ${txnId}\n` +
-`🔖 <b>UTR:</b> ${deposit.transactionRef}\n` +
-`💵 <b>New Balance:</b> ₹${user.balance.toFixed(2)}\n\n` +
-`🎉 Deposit credited to user wallet!`
-        );
-
-        if (user.telegramId) {
-            await notifyUser(user.telegramId,
-`🎉 <b>Deposit Approved!</b>\n\n` +
-`⏰ <b>Time:</b> ${dateTime}\n` +
-`👤 <b>Dear:</b> ${user.fullName}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
-`📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
-`🆔 <b>Transaction ID:</b> ${txnId}\n` +
-`💵 <b>New Balance:</b> ₹${user.balance.toFixed(2)}\n\n` +
-`✅ Amount credited to your wallet.`
-            );
-        }
-
-        res.json({
-            success: true,
-            message: 'Deposit Approved Successfully',
-            amount: deposit.amount,
-            transactionId: txnId,
-            newBalance: user.balance
-        });
-
-    } catch (error) {
-        console.error('Approve Deposit Error:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'Server Error' });
-    }
-});
-
-// ============================================
-// 7. ADMIN REJECT DEPOSIT
-// ============================================
-router.post('/admin/reject/:depositId', auth, async (req, res) => {
-    try {
-        const { depositId } = req.params;
-        const adminId = req.user.id;
-        const { reason } = req.body;
-        const dateTime = getCurrentDateTime();
-
-        const admin = await User.findById(adminId);
-        if (!admin || !admin.isAdmin) {
-            return res.status(403).json({ success: false, message: 'Admin Access Required' });
-        }
-
-        const deposit = await Deposit.findOne({
-            depositId: depositId,
-            status: 'pending_approval'
-        });
-
-        if (!deposit) {
-            return res.status(404).json({ success: false, message: 'Deposit Not Found Or Not Pending Approval' });
-        }
-
-        deposit.status = 'rejected';
-        deposit.rejectedBy = adminId;
-        deposit.rejectedAt = new Date();
-        deposit.adminNote = reason || 'No reason provided';
-        await deposit.save();
-
-        const user = await User.findById(deposit.userId);
-
-        await notifyAdmin(
-`❌ <b>Deposit Rejected</b>\n\n` +
-`⏰ <b>Time:</b> ${dateTime}\n` +
-`👤 <b>Name:</b> ${user?.fullName || 'N/A'}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
-`📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
-`🔖 <b>UTR:</b> ${deposit.transactionRef}\n` +
-`📝 <b>Reason:</b> ${deposit.adminNote}\n\n` +
-`⚠️ Deposit has been rejected.`
-        );
-
-        if (user?.telegramId) {
-            await notifyUser(user.telegramId,
-`❌ <b>Deposit Rejected</b>\n\n` +
-`⏰ <b>Time:</b> ${dateTime}\n` +
-`👤 <b>Dear:</b> ${user.fullName}\n` +
-`💰 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
-`📄 <b>Deposit ID:</b> ${deposit.depositId}\n` +
-`📝 <b>Reason:</b> ${deposit.adminNote}\n\n` +
-`💬 Please contact support for more information.`
-            );
-        }
-
-        res.json({
-            success: true,
-            message: 'Deposit Rejected Successfully',
-            reason: deposit.adminNote
-        });
-
-    } catch (error) {
-        console.error('Reject Deposit Error:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'Server Error' });
-    }
-});
-
-// ============================================
-// 8. GET MY DEPOSITS HISTORY
+// 6. GET MY DEPOSITS HISTORY
 // ============================================
 router.get('/my-deposits', auth, async (req, res) => {
     try {
@@ -571,7 +377,6 @@ router.get('/my-deposits', auth, async (req, res) => {
                 pages: Math.ceil(total / parseInt(limit))
             }
         });
-
     } catch (error) {
         console.error('Get Deposits Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -579,7 +384,7 @@ router.get('/my-deposits', auth, async (req, res) => {
 });
 
 // ============================================
-// 9. GET SINGLE DEPOSIT BY ID
+// 7. GET SINGLE DEPOSIT
 // ============================================
 router.get('/:depositId', auth, async (req, res) => {
     try {
@@ -608,57 +413,8 @@ router.get('/:depositId', auth, async (req, res) => {
                 adminNote: deposit.adminNote || null
             }
         });
-
     } catch (error) {
         console.error('Get Deposit Error:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'Server Error' });
-    }
-});
-
-// ============================================
-// 10. CLEANUP EXPIRED DEPOSITS (Admin only)
-// ============================================
-router.post('/cleanup-expired', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user.isAdmin) {
-            return res.status(403).json({ success: false, message: 'Admin Access Required' });
-        }
-
-        const result = await Deposit.cleanupExpired();
-
-        res.json({
-            success: true,
-            message: `Cleaned up ${result.modifiedCount} expired deposits`
-        });
-
-    } catch (error) {
-        console.error('Cleanup Error:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'Server Error' });
-    }
-});
-
-// ============================================
-// 11. FORCE EXPIRE OLD PENDING DEPOSITS (B1)
-// ============================================
-router.post('/force-expire-old-pending', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user.isAdmin) {
-            return res.status(403).json({ success: false, message: 'Admin Access Required' });
-        }
-
-        const result = await Deposit.forceExpireOldPending();
-
-        res.json({
-            success: true,
-            message: 'Old Pending Deposits Cleaned Up',
-            cancelled: result.cancelled,
-            updated: result.updated
-        });
-
-    } catch (error) {
-        console.error('Force Expire Error:', error.message);
         res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 });
