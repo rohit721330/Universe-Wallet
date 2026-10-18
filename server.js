@@ -1,111 +1,160 @@
-// FILE: server.js
+// ============================================================
+// FILE: server.js — SECURED VERSION
+// ============================================================
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const crypto = require('crypto');
-require('dotenv').config();
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// Render/Proxy এর পিছনে সঠিক IP পাওয়ার জন্য জরুরি
 app.set('trust proxy', 1);
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+// ============================================================
+// ENV VARIABLES (verify করুন Render-এ সেট আছে)
+// ============================================================
 const PORT = process.env.PORT || 3000;
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
 const SETUP_SECRET = process.env.SETUP_SECRET;
+const MONGO_URI = process.env.MONGODB_URI;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-// Global OTP & TG ID Stores
+// CORS allowlist — comma-separated env
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+// ============================================================
+// GLOBAL STORES (বড় হলে Redis-এ migrate করুন)
+// ============================================================
 global.loginOtpStore = new Map();
 global.regOtpStore = new Map();
 global.resetOtpStore = new Map();
 global.tgIdStore = new Map();
 global.emailOtpStore = new Map();
 
-const MONGO_URI = process.env.MONGODB_URI;
-
-// =========================================================
-// Mask an admin ID for display
-// =========================================================
+// ============================================================
+// HELPERS
+// ============================================================
 function maskAdminId(adminId) {
     if (!adminId || typeof adminId !== 'string') return 'unknown';
     const id = adminId.trim();
-    if (id.length <= 4) {
-        return '*'.repeat(id.length || 4);
-    }
-    const firstTwo = id.slice(0, 2);
-    const lastTwo = id.slice(-2);
-    const maskLength = Math.max(id.length - 4, 3);
-    return firstTwo + '*'.repeat(maskLength) + lastTwo;
+    if (id.length <= 4) return '*'.repeat(id.length || 4);
+    return id.slice(0, 2) + '*'.repeat(Math.max(id.length - 4, 3)) + id.slice(-2);
 }
 
-// =========================================================
-// Timing-safe secret comparison
-// =========================================================
 function safeCompareSecret(provided, expected) {
     if (typeof provided !== 'string' || typeof expected !== 'string') return false;
     const a = Buffer.from(provided);
     const b = Buffer.from(expected);
     if (a.length !== b.length) {
-        crypto.timingSafeEqual(b, b);
+        try { crypto.timingSafeEqual(b, b); } catch { /* ignore */ }
         return false;
     }
-    try {
-        return crypto.timingSafeEqual(a, b);
-    } catch {
-        return false;
-    }
+    try { return crypto.timingSafeEqual(a, b); } catch { return false; }
 }
 
-// =========================================================
-// Extract setup secret WITHOUT ever logging it
-// =========================================================
+// শুধু header এবং POST body থেকে secret নিন (query বাদ)
 function extractSetupSecret(req) {
-    const headerSecret = req.headers['x-setup-secret'];
-    if (typeof headerSecret === 'string' && headerSecret.length > 0) {
-        return headerSecret;
-    }
-    if (req.body && typeof req.body.secret === 'string' && req.body.secret.length > 0) {
+    const h = req.headers['x-setup-secret'];
+    if (typeof h === 'string' && h.length > 0) return h;
+    if (req.method === 'POST' && req.body && typeof req.body.secret === 'string' && req.body.secret.length > 0) {
         return req.body.secret;
-    }
-    if (req.query && typeof req.query.secret === 'string' && req.query.secret.length > 0) {
-        return req.query.secret;
     }
     return null;
 }
 
-// =========================================================
-// Safe logging — never prints the secret
-// =========================================================
 function logSetupAttempt(tag, req, success, reason) {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
     const source = req.headers['x-setup-secret']
         ? 'header'
-        : (req.body && req.body.secret)
-            ? 'body'
-            : req.query && req.query.secret
-                ? 'query'
-                : 'none';
-    const status = success ? '✅' : '❌';
-    console.log(`[${new Date().toISOString()}] [${tag}] ${status} IP: ${ip} | Source: ${source} | ${reason}`);
+        : (req.method === 'POST' && req.body?.secret ? 'body' : 'none');
+    console.log(`[${new Date().toISOString()}] [${tag}] ${success ? '✅' : '❌'} IP: ${ip} | Source: ${source} | ${reason}`);
 }
 
-// =========================================================
-// MongoDB Connection with Global Cache
-// =========================================================
+// ============================================================
+// SECURITY MIDDLEWARE
+// ============================================================
+
+// 1. Security headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false, // আপনার frontend inline script থাকলে বন্ধ রাখুন; পরে proper CSP দিন
+    referrerPolicy: { policy: 'no-referrer' },
+}));
+
+// 2. CORS
+app.use(cors({
+    origin: (origin, cb) => {
+        // same-origin/no-origin request allow
+        if (!origin) return cb(null, true);
+        if (ALLOWED_ORIGINS.length === 0) {
+            // production-এ allowlist ছাড়া CORS fail-safe: শুধু same-origin ধরে নিন
+            if (IS_PROD) return cb(new Error('CORS: origin not allowed'));
+            return cb(null, true);
+        }
+        return ALLOWED_ORIGINS.includes(origin)
+            ? cb(null, true)
+            : cb(new Error('CORS: origin not allowed'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token', 'X-Setup-Secret'],
+    maxAge: 86400,
+}));
+
+// 3. Body size limits (DoS prevention)
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// 4. Global API rate limiter
+app.use('/api', rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many requests. Please try again later.' },
+}));
+
+// 5. Setup route limiter (brute-force প্রতিরোধ)
+const setupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many setup attempts. Try again in 1 hour.' },
+});
+
+// 6. Referral-specific CORS (secure)
+const referralCorsMiddleware = (req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Vary', 'Origin');
+        res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, X-Setup-Secret');
+    res.header('Access-Control-Expose-Headers', 'Authorization, X-Auth-Token');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+};
+
+// ============================================================
+// MONGODB CONNECTION (cached)
+// ============================================================
 let cached = global.mongoose;
-
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
+if (!cached) cached = global.mongoose = { conn: null, promise: null };
 
 async function connectDB() {
-    if (cached.conn && mongoose.connection.readyState === 1) {
-        return cached.conn;
-    }
+    if (cached.conn && mongoose.connection.readyState === 1) return cached.conn;
 
     if (!cached.promise) {
         const opts = {
@@ -117,17 +166,12 @@ async function connectDB() {
             maxPoolSize: 10,
             minPoolSize: 1,
             retryWrites: true,
-            retryReads: true
+            retryReads: true,
         };
-
         console.log('🔌 Connecting to MongoDB...');
-
         cached.promise = mongoose.connect(MONGO_URI, opts)
-            .then((mongooseInstance) => {
-                console.log('✅ MongoDB Connected');
-                return mongooseInstance;
-            })
-            .catch((err) => {
+            .then(inst => { console.log('✅ MongoDB Connected'); return inst; })
+            .catch(err => {
                 console.error('❌ MongoDB Connection Error:', err.message);
                 cached.promise = null;
                 cached.conn = null;
@@ -135,47 +179,20 @@ async function connectDB() {
             });
     }
 
-    try {
-        cached.conn = await cached.promise;
-    } catch (err) {
-        cached.promise = null;
-        cached.conn = null;
-        throw err;
-    }
-
+    try { cached.conn = await cached.promise; }
+    catch (err) { cached.promise = null; cached.conn = null; throw err; }
     return cached.conn;
 }
 
-// =========================================================
-// DB Connection Middleware
-// =========================================================
 const dbConnectMiddleware = async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (error) {
+    try { await connectDB(); next(); }
+    catch (error) {
         console.error('❌ DB Middleware Error:', error.message);
-        return res.status(200).json({
+        return res.status(503).json({
             success: false,
-            message: 'Database connection failed. Please try again in a moment.'
+            message: 'Database connection failed. Please try again in a moment.',
         });
     }
-};
-
-// =========================================================
-// Referral CORS Middleware
-// =========================================================
-const referralCorsMiddleware = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, X-Setup-Secret, X-HTTP-Method-Override');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Expose-Headers', 'Authorization, X-Auth-Token');
-
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    next();
 };
 
 app.use('/referral', referralCorsMiddleware);
@@ -183,47 +200,35 @@ app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
-// POST /setup-admin — Create FIRST admin using SECRET KEY
+// SETUP ADMIN HANDLER
 // ============================================================
 const setupAdminHandler = async (req, res) => {
     try {
         await connectDB();
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
         if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({
-                success: false,
-                message: 'MongoDB not connected yet. Try again in 5 seconds.',
-                readyState: mongoose.connection.readyState
-            });
+            return res.status(503).json({ success: false, message: 'MongoDB not connected yet. Try again in 5 seconds.' });
         }
 
-        // Secret check
         if (!SETUP_SECRET) {
             console.error('❌ [SETUP-ADMIN] SETUP_SECRET not configured.');
-            return res.status(500).json({
-                success: false,
-                message: 'Setup secret is not configured on the server.',
-                hint: 'Add SETUP_SECRET=your_secret_value to your environment variables and redeploy.'
-            });
+            return res.status(500).json({ success: false, message: 'Setup secret is not configured on the server.' });
         }
 
         const providedSecret = extractSetupSecret(req);
-
         if (!providedSecret) {
             logSetupAttempt('SETUP-ADMIN', req, false, 'No secret provided');
             return res.status(403).json({
                 success: false,
                 message: '❌ Secret key required.',
-                hint: 'Send X-Setup-Secret header (preferred) OR ?secret= query param.'
+                hint: 'Send X-Setup-Secret header (preferred).',
             });
         }
 
         if (!safeCompareSecret(providedSecret, SETUP_SECRET)) {
             logSetupAttempt('SETUP-ADMIN', req, false, 'Invalid secret');
-            return res.status(403).json({
-                success: false,
-                message: '❌ Invalid secret key.'
-            });
+            return res.status(403).json({ success: false, message: '❌ Invalid secret key.' });
         }
 
         logSetupAttempt('SETUP-ADMIN', req, true, 'Secret verified');
@@ -233,108 +238,78 @@ const setupAdminHandler = async (req, res) => {
 
         const existingAdminCount = await Admin.countDocuments({});
         if (existingAdminCount > 0) {
-            const existingAdmin = await Admin.findOne({})
-                .select('adminId fullName role mobile createdAt')
-                .lean();
-
+            const existingAdmin = await Admin.findOne({}).select('adminId role createdAt').lean();
             console.warn(`[SETUP-ADMIN] Blocked — admin exists: ${maskAdminId(existingAdmin?.adminId)}`);
-
             return res.status(403).json({
                 success: false,
                 locked: true,
                 message: '🔒 Admin setup is locked. An admin already exists in the system.',
-                hint: 'To reset, use /reset-admin first. Then call /setup-admin again.',
                 existingAdmin: {
                     adminId: maskAdminId(existingAdmin?.adminId),
                     role: existingAdmin?.role || 'unknown',
-                    createdAt: existingAdmin?.createdAt || null
-                }
+                    createdAt: existingAdmin?.createdAt || null,
+                },
             });
         }
 
-        const targetMobileRaw =
-            (req.body && req.body.mobile) ||
-            (req.query && req.query.mobile) ||
-            null;
+        const targetMobileRaw = (req.body && req.body.mobile) || null;
         const targetMobile = targetMobileRaw ? String(targetMobileRaw).trim() : null;
 
         let currentUser = null;
-
         if (targetMobile) {
             if (!/^[0-9]{10}$/.test(targetMobile)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid mobile — must be 10 digits.'
-                });
+                return res.status(400).json({ success: false, message: 'Invalid mobile — must be 10 digits.' });
             }
             currentUser = await User.findOne({ mobile: targetMobile, isDeleted: false }).select('+password');
             if (!currentUser) {
-                return res.status(404).json({
-                    success: false,
-                    message: `No active user found with mobile ${targetMobile}.`
-                });
+                return res.status(404).json({ success: false, message: 'No active user found with that mobile.' });
             }
         } else {
-            currentUser = await User.findOne({
-                isDeleted: false,
-                isBlocked: false
-            })
-            .sort({ createdAt: 1 })
-            .select('+password');
-
+            currentUser = await User.findOne({ isDeleted: false, isBlocked: false })
+                .sort({ createdAt: 1 })
+                .select('+password');
             if (!currentUser) {
                 return res.status(404).json({
                     success: false,
                     message: 'No active user found in the database.',
-                    hint: 'Register a user first, OR provide mobile to specify which user becomes admin.'
+                    hint: 'Register a user first, OR provide mobile.',
                 });
             }
         }
 
-        if (currentUser.isDeleted) {
-            return res.status(403).json({ success: false, message: 'This user account has been deleted.' });
-        }
-        if (currentUser.isBlocked) {
-            return res.status(403).json({ success: false, message: 'This user account is blocked.' });
-        }
+        if (currentUser.isDeleted) return res.status(403).json({ success: false, message: 'This user account has been deleted.' });
+        if (currentUser.isBlocked) return res.status(403).json({ success: false, message: 'This user account is blocked.' });
 
         if (!currentUser.walletId || String(currentUser.walletId).trim() === '') {
-            return res.status(400).json({
-                success: false,
-                message: 'Selected user has no Wallet ID. Cannot create admin without it.'
-            });
+            return res.status(400).json({ success: false, message: 'Selected user has no Wallet ID.' });
         }
 
         const rawWalletId = String(currentUser.walletId).trim();
         const adminId = rawWalletId.toLowerCase();
         const adminWalletId = rawWalletId.toUpperCase();
 
-        const plainPassword = currentUser.password;
-        if (!plainPassword) {
-            return res.status(400).json({
-                success: false,
-                message: 'Selected user has no password set. Please set one first.'
-            });
+        // ⚠️ CRITICAL: currentUser.password এখানে plain text হতে পারে
+        // User model-এ select('+password') থেকে যেটা আসে সেটা hash (bcrypt) হওয়া উচিত।
+        // যদি plain text হয়, তবে Admin model-এর pre('save') hook-এ আবার hash হবে।
+        // নিশ্চিত করুন Admin model-এ pre('save') bcrypt hook আছে।
+        const passwordForAdmin = currentUser.password;
+        if (!passwordForAdmin) {
+            return res.status(400).json({ success: false, message: 'Selected user has no password set.' });
         }
 
-        const raceCheck = await Admin.findOne({
-            $or: [{ adminId }, { mobile: currentUser.mobile }]
-        });
+        const raceCheck = await Admin.findOne({ $or: [{ adminId }, { mobile: currentUser.mobile }] });
         if (raceCheck) {
             return res.status(409).json({
                 success: false,
-                message: 'An admin with this ID / mobile already exists. /setup-admin is locked.',
-                existingAdmin: {
-                    adminId: maskAdminId(raceCheck.adminId),
-                    role: raceCheck.role
-                }
+                message: 'An admin with this ID / mobile already exists.',
+                existingAdmin: { adminId: maskAdminId(raceCheck.adminId), role: raceCheck.role },
             });
         }
 
         const admin = new Admin({
-            adminId: adminId,
+            adminId,
             walletId: adminWalletId,
-            password: plainPassword,
+            password: passwordForAdmin, // Admin model-এ pre('save') hash করবে
             fullName: currentUser.fullName,
             mobile: currentUser.mobile,
             telegramId: currentUser.telegramId || undefined,
@@ -342,7 +317,7 @@ const setupAdminHandler = async (req, res) => {
             role: 'super_admin',
             isActive: true,
             isBlocked: false,
-            createdBy: 'setup-admin-route'
+            createdBy: 'setup-admin-route',
         });
 
         await admin.save();
@@ -354,139 +329,80 @@ const setupAdminHandler = async (req, res) => {
 
         console.log(`✅ [SETUP-ADMIN] super_admin created: ${maskAdminId(admin.adminId)}`);
 
+        // Response-এ sensitive data বাদ (masked only)
         return res.json({
             success: true,
             message: '✅ First admin (super_admin) created successfully.',
-            sourceUser: {
-                fullName: currentUser.fullName,
-                mobile: currentUser.mobile,
-                email: currentUser.email,
-                walletId: currentUser.walletId
-            },
             admin: {
-                adminId: admin.adminId,
+                adminId: maskAdminId(admin.adminId),
                 fullName: admin.fullName,
-                mobile: admin.mobile,
-                telegramId: admin.telegramId,
-                walletId: admin.walletId,
-                email: admin.email,
+                mobile: admin.mobile ? `******${String(admin.mobile).slice(-4)}` : null,
                 role: admin.role,
-                createdAt: admin.createdAt
-            },
-            credentials: {
-                adminId: admin.adminId,
-                mobile: admin.mobile,
-                telegramId: admin.telegramId || 'not set',
-                walletId: admin.walletId,
-                password: '(same as the selected user\'s password)'
+                createdAt: admin.createdAt,
             },
             nextSteps: [
-                '1. Go to /admin or /rohit (admin panel)',
-                '2. Enter your pattern (ADMIN_PATTERN env)',
-                `3. Login via Mobile: ${admin.mobile}`,
-                `   OR Telegram ID: ${admin.telegramId || 'not set'}`,
-                `   OR Wallet ID: ${admin.walletId}`,
-                '4. Password: the selected user\'s existing password',
-                '5. ⚠️ Change the password from admin settings after first login.'
+                '1. Go to /admin to log in.',
+                '2. Use your mobile / telegram / wallet ID.',
+                '3. ⚠️ Change password immediately after first login.',
             ],
-            securityNote: '🔐 Keep your SETUP_SECRET safe.'
         });
-
     } catch (err) {
         console.error('❌ /setup-admin error:', err.message);
-
         if (err.code === 11000) {
-            return res.status(409).json({
-                success: false,
-                message: 'An admin with this ID / mobile / telegram / wallet already exists. /setup-admin is now locked.'
-            });
+            return res.status(409).json({ success: false, message: 'Duplicate admin data.' });
         }
-
         return res.status(500).json({
             success: false,
-            message: err.message
+            message: IS_PROD ? 'Setup failed. Please try again.' : err.message,
         });
     }
 };
 
-app.post('/setup-admin', setupAdminHandler);
-app.get('/setup-admin', setupAdminHandler);
-
 // ============================================================
-// POST /reset-admin — Wipe ALL admins (no new admin created)
+// RESET ADMIN HANDLER
 // ============================================================
 const resetAdminHandler = async (req, res) => {
     try {
         await connectDB();
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
         if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({
-                success: false,
-                message: 'MongoDB not connected yet. Try again in 5 seconds.',
-                readyState: mongoose.connection.readyState
-            });
+            return res.status(503).json({ success: false, message: 'MongoDB not connected yet.' });
         }
 
         if (!SETUP_SECRET) {
             console.error('❌ [RESET-ADMIN] SETUP_SECRET not configured.');
-            return res.status(500).json({
-                success: false,
-                message: 'Setup secret is not configured on the server.',
-                hint: 'Add SETUP_SECRET=your_secret_value to your environment variables and redeploy.'
-            });
+            return res.status(500).json({ success: false, message: 'Setup secret is not configured.' });
         }
 
-        const providedSecret = extractSetupSecret(req);
-
-        if (!providedSecret) {
-            logSetupAttempt('RESET-ADMIN', req, false, 'No secret provided');
-            return res.status(403).json({
-                success: false,
-                message: '❌ Secret key required.',
-                hint: 'Send X-Setup-Secret header (preferred) OR ?secret= query param.'
-            });
-        }
-
-        if (!safeCompareSecret(providedSecret, SETUP_SECRET)) {
-            logSetupAttempt('RESET-ADMIN', req, false, 'Invalid secret');
-            return res.status(403).json({
-                success: false,
-                message: '❌ Invalid secret key.'
-            });
-        }
-
-        const confirmRaw =
-            (req.body && req.body.confirm) ||
-            (req.query && req.query.confirm) ||
-            '';
-        const confirm = String(confirmRaw).toUpperCase();
-
+        // confirm চেক প্রথমে — info leak কমাতে
+        const confirm = String((req.body && req.body.confirm) || '').toUpperCase();
         if (confirm !== 'YES') {
             logSetupAttempt('RESET-ADMIN', req, false, 'Missing confirm=YES');
             return res.status(400).json({
                 success: false,
                 message: '⚠️ Confirmation required. This will DELETE all admins.',
-                hint: 'Send confirm=YES (body or query) to proceed.'
+                hint: 'Send confirm=YES in body.',
             });
+        }
+
+        const providedSecret = extractSetupSecret(req);
+        if (!providedSecret) {
+            logSetupAttempt('RESET-ADMIN', req, false, 'No secret provided');
+            return res.status(403).json({ success: false, message: '❌ Secret key required.' });
+        }
+        if (!safeCompareSecret(providedSecret, SETUP_SECRET)) {
+            logSetupAttempt('RESET-ADMIN', req, false, 'Invalid secret');
+            return res.status(403).json({ success: false, message: '❌ Invalid secret key.' });
         }
 
         logSetupAttempt('RESET-ADMIN', req, true, 'Secret + confirm verified');
 
         const Admin = require('./models/Admin');
-
-        const existingAdmins = await Admin.find({})
-            .select('adminId fullName role mobile telegramId walletId createdAt')
-            .lean();
-
-        const maskedExisting = existingAdmins.map(a => ({
-            adminId: maskAdminId(a.adminId),
-            role: a.role || 'unknown',
-            createdAt: a.createdAt || null
-        }));
-
+        const existingAdmins = await Admin.find({}).select('adminId role createdAt').lean();
         const deletedCount = existingAdmins.length;
-
         let deleted = 0;
+
         if (deletedCount > 0) {
             const delResult = await Admin.deleteMany({});
             deleted = delResult.deletedCount || 0;
@@ -496,116 +412,37 @@ const resetAdminHandler = async (req, res) => {
         return res.json({
             success: true,
             message: deleted > 0
-                ? `✅ Reset successful. Deleted ${deleted} admin(s). Call /setup-admin to create a fresh admin.`
-                : 'ℹ️ Reset complete. No admins existed to delete. Call /setup-admin to create a fresh admin.',
+                ? `✅ Deleted ${deleted} admin(s). Call /setup-admin to create a fresh admin.`
+                : 'ℹ️ No admins existed to delete.',
             deletedAdminsCount: deleted,
-            deletedAdmins: maskedExisting,
-            nextSteps: [
-                '1. All admin accounts have been removed.',
-                '2. Now call POST /setup-admin with X-Setup-Secret header to create a new super_admin.',
-                '3. Example: { "mobile": "9477379243" }',
-                '4. Then login to /admin with that user\'s credentials.'
-            ],
-            securityNote: '🔐 /reset-admin does NOT create any admin.'
+            deletedAdmins: existingAdmins.map(a => ({
+                adminId: maskAdminId(a.adminId),
+                role: a.role || 'unknown',
+                createdAt: a.createdAt || null,
+            })),
         });
-
     } catch (err) {
         console.error('❌ /reset-admin error:', err.message);
-
         return res.status(500).json({
             success: false,
-            message: err.message
+            message: IS_PROD ? 'Reset failed. Please try again.' : err.message,
         });
     }
 };
 
-app.post('/reset-admin', resetAdminHandler);
-app.get('/reset-admin', resetAdminHandler);
+// ============================================================
+// SETUP / RESET ROUTES — শুধু POST + rate limit
+// ============================================================
+app.post('/setup-admin', setupLimiter, setupAdminHandler);
+app.post('/reset-admin', setupLimiter, resetAdminHandler);
+// ⛔ GET route বাদ দেওয়া হয়েছে (secret URL/log-এ leak হয়)
 
-// ⚠️ TEMPORARY — Delete after use
-app.get('/migrate-referral-codes-v2', async (req, res) => {
-    try {
-        await connectDB();
-        const User = require('./models/User');
+// ⛔ /migrate-referral-codes-v2 — সম্পূর্ণ ডিলিট
+// ⛔ /referral-test — সম্পূর্ণ ডিলিট
 
-        console.log('🔵 [migrate-v2] Starting migration...');
-
-        const allUsers = await User.find({ isDeleted: false });
-
-        const results = [];
-        const skipped = [];
-
-        for (const user of allUsers) {
-            const hasValidCode = user.referralCode &&
-                                  typeof user.referralCode === 'string' &&
-                                  user.referralCode.length >= 6;
-
-            if (hasValidCode) {
-                skipped.push({
-                    mobile: user.mobile,
-                    existingCode: user.referralCode,
-                    reason: 'Already has code'
-                });
-                continue;
-            }
-
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let newCode = '';
-            let attempts = 0;
-            let isUnique = false;
-
-            while (!isUnique && attempts < 20) {
-                newCode = '';
-                while (newCode.length < 10) {
-                    const byte = crypto.randomBytes(1)[0];
-                    if (byte < 252) newCode += chars[byte % chars.length];
-                }
-                const exists = await User.findOne({ referralCode: newCode });
-                isUnique = !exists;
-                attempts++;
-            }
-
-            if (!isUnique) {
-                results.push({
-                    mobile: user.mobile,
-                    error: 'Failed to generate unique code'
-                });
-                continue;
-            }
-
-            await User.updateOne(
-                { _id: user._id },
-                { $set: { referralCode: newCode } }
-            );
-
-            results.push({
-                mobile: user.mobile,
-                fullName: user.fullName,
-                newCode: newCode,
-                status: 'updated'
-            });
-        }
-
-        res.json({
-            success: true,
-            totalUsers: allUsers.length,
-            updated: results.length,
-            skipped: skipped.length,
-            results,
-            skippedUsers: skipped
-        });
-    } catch (error) {
-        console.error('❌ [migrate-v2] Error:', error.message);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ⚠️ TEMPORARY DEBUG ROUTE — Delete after use
-app.get('/referral-test', (req, res) => {
-    res.json({ success: true, message: 'Referral route is reachable' });
-});
-
-// ==================== ALL API ROUTES ====================
+// ============================================================
+// ALL API ROUTES
+// ============================================================
 app.use('/api/auth', require('./routes/auth'));
 app.use('/referral', require('./routes/referral'));
 app.use('/api/check-status', require('./routes/check-status'));
@@ -631,76 +468,48 @@ app.use('/ai', require('./routes/ai'));
 
 console.log('✅ All API Routes Loaded');
 
-// ==================== STATIC FILES ====================
+// ============================================================
+// STATIC FILES
+// ============================================================
 app.use(express.static(path.join(__dirname, 'public'), {
     extensions: ['html'],
-    index: false
+    index: false,
+    dotfiles: 'deny',
+    maxAge: IS_PROD ? '1h' : 0,
 }));
 
-// ==================== ROOT & INDEX ====================
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// ============================================================
+// HTML ROUTES
+// ============================================================
+const htmlPages = [
+    'refer', 'ai', 'download', 'refund', 'privacy', 'terms', 'pin',
+    'dashboard', 'profile', 'transfer', 'bulk', 'deposit', 'withdraw',
+    'transactions', 'recent-transactions', 'lifafa', 'my-lifafa',
+    'invoice', 'invoice-pay', 'gift', 'forgot-password', 'game',
+    'game-settings', 'more', 'tg', 'api', 'txn', 'qr',
+    'admin-settings', 'admin-users', 'admin-gift', 'admin-lifafa',
+    'admin-adjust', 'admin-withdraw', 'admin-deposit',
+    'admin-transactions', 'admin-invoice',
+    'normal', 'dice', 'toss', 'scratch',
+];
 
-app.get('/index', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/index', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.get('/index.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ==================== HTML ROUTES ====================
-app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
-app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
-app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
-app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', 'download.html')));
-app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
-app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
-app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
-app.get('/pin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pin.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
-app.get('/transfer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transfer.html')));
-app.get('/bulk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'bulk.html')));
-app.get('/deposit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'deposit.html')));
-app.get('/withdraw', (req, res) => res.sendFile(path.join(__dirname, 'public', 'withdraw.html')));
-app.get('/transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'transactions.html')));
-app.get('/recent-transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'recent-transactions.html')));
-app.get('/lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lifafa.html')));
-app.get('/my-lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'my-lifafa.html')));
-app.get('/invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice.html')));
-app.get('/invoice-pay', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invoice-pay.html')));
-app.get('/gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'gift.html')));
-app.get('/forgot-password', (req, res) => res.sendFile(path.join(__dirname, 'public', 'forgot-password.html')));
-app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game.html')));
-app.get('/game-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'game-settings.html')));
-app.get('/more', (req, res) => res.sendFile(path.join(__dirname, 'public', 'more.html')));
-app.get('/tg', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tg.html')));
-app.get('/api', (req, res) => res.sendFile(path.join(__dirname, 'public', 'api.html')));
-app.get('/txn', (req, res) => res.sendFile(path.join(__dirname, 'public', 'txn.html')));
-app.get('/qr', (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
-
-// Admin Pages
 app.get('/rohit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
-app.get('/admin-settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-settings.html')));
-app.get('/admin-users', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-users.html')));
-app.get('/admin-gift', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-gift.html')));
-app.get('/admin-lifafa', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-lifafa.html')));
-app.get('/admin-adjust', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-adjust.html')));
-app.get('/admin-withdraw', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-withdraw.html')));
-app.get('/admin-deposit', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-deposit.html')));
-app.get('/admin-transactions', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-transactions.html')));
-app.get('/admin-invoice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-invoice.html')));
+app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 
-// Games Pages
-app.get('/normal', (req, res) => res.sendFile(path.join(__dirname, 'public', 'normal.html')));
-app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice.html')));
-app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
-app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
+htmlPages.forEach(page => {
+    app.get(`/${page}`, (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', `${page}.html`));
+    });
+});
 
-// ==================== FALLBACK ROUTE (SPA) ====================
+// ============================================================
+// FALLBACK ROUTE
+// ============================================================
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
@@ -708,74 +517,69 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ==================== ERROR HANDLER ====================
+// ============================================================
+// GLOBAL ERROR HANDLER (proper status codes)
+// ============================================================
 app.use((err, req, res, next) => {
-    console.error('❌ Unhandled Error:', err.message);
-    res.status(200).json({ success: false, message: 'Something went wrong. Please try again.' });
+    const status = err.status || err.statusCode || 500;
+    console.error(`❌ [${status}] ${err.message}`);
+    if (IS_PROD) console.error(err.stack);
+
+    // CORS error হলে 403
+    if (err.message && err.message.includes('CORS')) {
+        return res.status(403).json({ success: false, message: 'CORS not allowed.' });
+    }
+
+    res.status(status).json({
+        success: false,
+        message: IS_PROD ? 'Something went wrong. Please try again.' : err.message,
+    });
 });
 
-// ==================== CLEANUP CRON JOBS ====================
+// ============================================================
+// CLEANUP CRON JOBS
+// ============================================================
 const Invoice = require('./models/Invoice');
 
 setInterval(async () => {
     try {
         const result = await Invoice.cleanupExpired();
-        if (result.modifiedCount > 0) {
-            console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
-        }
-    } catch (error) {
-        console.error('❌ Cleanup cron error:', error.message);
-    }
+        if (result.modifiedCount > 0) console.log(`🧹 Cleaned ${result.modifiedCount} expired invoices`);
+    } catch (e) { console.error('❌ Cleanup cron:', e.message); }
 }, 5 * 60 * 1000);
 
 setInterval(() => {
     try {
-        if (global.tgIdStore) {
-            const now = Date.now();
-            let deletedCount = 0;
-            for (const [key, value] of global.tgIdStore.entries()) {
-                if (value.expires && value.expires < now) {
-                    global.tgIdStore.delete(key);
-                    deletedCount++;
-                }
-            }
-            if (deletedCount > 0) {
-                console.log(`🧹 Cleaned up ${deletedCount} expired TG ID sessions`);
-            }
+        const now = Date.now();
+        let n = 0;
+        for (const [k, v] of (global.tgIdStore || new Map()).entries()) {
+            if (v.expires && v.expires < now) { global.tgIdStore.delete(k); n++; }
         }
-    } catch (error) {
-        console.error('❌ TG ID cleanup error:', error.message);
-    }
+        if (n > 0) console.log(`🧹 Cleaned ${n} expired TG sessions`);
+    } catch (e) { console.error('❌ TG cleanup:', e.message); }
 }, 2 * 60 * 1000);
 
 setInterval(() => {
     try {
-        if (global.emailOtpStore) {
-            const now = Date.now();
-            let deletedCount = 0;
-            for (const [key, value] of global.emailOtpStore.entries()) {
-                if (value.expires && value.expires < now) {
-                    global.emailOtpStore.delete(key);
-                    deletedCount++;
-                }
-            }
-            if (deletedCount > 0) {
-                console.log(`🧹 Cleaned up ${deletedCount} expired email OTP sessions`);
-            }
+        const now = Date.now();
+        let n = 0;
+        for (const [k, v] of (global.emailOtpStore || new Map()).entries()) {
+            if (v.expires && v.expires < now) { global.emailOtpStore.delete(k); n++; }
         }
-    } catch (error) {
-        console.error('❌ Email OTP cleanup error:', error.message);
-    }
+        if (n > 0) console.log(`🧹 Cleaned ${n} expired email OTPs`);
+    } catch (e) { console.error('❌ Email OTP cleanup:', e.message); }
 }, 5 * 60 * 1000);
 
-// ==================== START SERVER ====================
+// ============================================================
+// START SERVER
+// ============================================================
 if (!process.env.VERCEL) {
-    app.listen(PORT, "0.0.0.0", () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Server Running On Port ${PORT}`);
-        console.log(`📌 Admin Wallet ID: ${ADMIN_WALLET_ID}`);
-        console.log(`🔐 /setup-admin: ACTIVE`);
-        console.log(`⚠️  /reset-admin: ACTIVE`);
-        console.log(`⚠️  SETUP_SECRET: ${SETUP_SECRET ? 'YES ✅' : 'NO ❌'}`);
+        console.log(`📌 ADMIN_WALLET_ID: ${ADMIN_WALLET_ID ? '✅ set' : '❌ missing'}`);
+        console.log(`🔐 SETUP_SECRET: ${SETUP_SECRET ? '✅ set' : '❌ missing'}`);
+        console.log(`🌐 ALLOWED_ORIGINS: ${ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS.join(', ') : '⚠️ not set (CORS restricted)'}`);
+        console.log(`🔒 Environment: ${IS_PROD ? 'PRODUCTION' : 'development'}`);
     });
 }
 
