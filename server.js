@@ -1,5 +1,5 @@
 // ============================================================
-// FILE: server.js — সম্পূর্ণ (শুধু security যোগ)
+// FILE: server.js — সম্পূর্ণ (CORS ফিক্স সহ)
 // ============================================================
 const express = require('express');
 const mongoose = require('mongoose');
@@ -30,29 +30,36 @@ app.use(helmet({
 }));
 
 // ============================================================
-// 🔧 SECURITY: CORS — open cors() এর বদলে specific origin
+// 🔧 SECURITY: CORS — অ্যাপ (FreeWebToApk) ও ওয়েবসাইটের জন্য
 // ============================================================
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
     .split(',').map(s => s.trim()).filter(Boolean);
 
 app.use(cors({
-    origin: (origin, cb) => {
-        if (!origin) return cb(null, true);
-        if (ALLOWED_ORIGINS.length === 0) {
-            return cb(null, !IS_PROD);
-        }
-        return ALLOWED_ORIGINS.includes(origin)
-            ? cb(null, true)
-            : cb(new Error('CORS not allowed'));
+    origin: function (origin, callback) {
+        // ১. মোবাইল অ্যাপ (FreeWebToApk), Postman, বা সার্ভার-টু-সার্ভার
+        //    এদের Origin থাকে না, তাই allow
+        if (!origin) return callback(null, true);
+
+        // ২. আপনার নিজের Render ডোমেইন
+        if (origin.includes('onrender.com')) return callback(null, true);
+
+        // ৩. Render env-এ দেওয়া origins
+        if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes('*')) return callback(null, true);
+
+        // অন্যথায় ব্লক
+        console.log('❌ CORS Blocked Origin:', origin);
+        return callback(new Error('CORS not allowed'));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token', 'X-Setup-Secret'],
     maxAge: 86400,
 }));
 
 // ============================================================
-// 🔧 SECURITY: Body size limit (DoS প্রতিরোধ)
+// 🔧 SECURITY: Body size limit
 // ============================================================
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
@@ -74,7 +81,7 @@ app.use('/api', rateLimit({
 }));
 
 // ============================================================
-// ENV & GLOBALS (আপনার original)
+// ENV & GLOBALS
 // ============================================================
 const PORT = process.env.PORT || 3000;
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
@@ -89,7 +96,7 @@ global.emailOtpStore = new Map();
 const MONGO_URI = process.env.MONGODB_URI;
 
 // ============================================================
-// HELPERS (আপনার original)
+// HELPERS
 // ============================================================
 function maskAdminId(adminId) {
     if (!adminId || typeof adminId !== 'string') return 'unknown';
@@ -146,7 +153,7 @@ function logSetupAttempt(tag, req, success, reason) {
 }
 
 // ============================================================
-// MongoDB Connection (আপনার original)
+// MongoDB Connection
 // ============================================================
 let cached = global.mongoose;
 
@@ -212,15 +219,16 @@ const dbConnectMiddleware = async (req, res, next) => {
 };
 
 // ============================================================
-// 🔧 SECURITY: Referral CORS — '*' বাদ, allowlist ব্যবহার
+// 🔧 SECURITY: Referral CORS middleware (fixed)
 // ============================================================
 const referralCorsMiddleware = (req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.includes('onrender.com') || ALLOWED_ORIGINS.includes('*'))) {
         res.header('Access-Control-Allow-Origin', origin);
         res.header('Vary', 'Origin');
         res.header('Access-Control-Allow-Credentials', 'true');
-    } else if (ALLOWED_ORIGINS.length === 0 && !IS_PROD) {
+    } else if (!origin) {
+        // মোবাইল অ্যাপের জন্য
         res.header('Access-Control-Allow-Origin', '*');
     }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -238,7 +246,7 @@ app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
-// 🔧 SECURITY: Setup/Reset/Migrate এর জন্য কড়া rate limiter
+// 🔧 SECURITY: Setup/Reset/Migrate rate limiter
 // ============================================================
 const setupLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -249,7 +257,7 @@ const setupLimiter = rateLimit({
 });
 
 // ============================================================
-// POST /setup-admin (আপনার original logic অপরিবর্তিত)
+// POST /setup-admin
 // ============================================================
 const setupAdminHandler = async (req, res) => {
     try {
@@ -474,12 +482,12 @@ const setupAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 SECURITY: rate limiter যোগ (বাকি সব original)
+// 🔧 SECURITY: rate limiter যোগ
 app.post('/setup-admin', setupLimiter, setupAdminHandler);
 app.get('/setup-admin', setupLimiter, setupAdminHandler);
 
 // ============================================================
-// POST /reset-admin (আপনার original logic অপরিবর্তিত)
+// POST /reset-admin
 // ============================================================
 const resetAdminHandler = async (req, res) => {
     try {
@@ -585,11 +593,13 @@ const resetAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 SECURITY: rate limiter যোগ (বাকি সব original)
+// 🔧 SECURITY: rate limiter যোগ
 app.post('/reset-admin', setupLimiter, resetAdminHandler);
 app.get('/reset-admin', setupLimiter, resetAdminHandler);
 
-// ⚠️ TEMPORARY — Delete after use (আপনার original, অপরিবর্তিত)
+// ============================================================
+// migrate-referral-codes-v2 (আপনার original)
+// ============================================================
 app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
         await connectDB();
@@ -667,12 +677,14 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
     }
 });
 
-// ⚠️ TEMPORARY DEBUG ROUTE — Delete after use (আপনার original)
+// ============================================================
+// referral-test (আপনার original)
+// ============================================================
 app.get('/referral-test', (req, res) => {
     res.json({ success: true, message: 'Referral route is reachable' });
 });
 
-// ==================== ALL API ROUTES (আপনার original) ====================
+// ==================== ALL API ROUTES ====================
 app.use('/api/auth', require('./routes/auth'));
 app.use('/referral', require('./routes/referral'));
 app.use('/api/check-status', require('./routes/check-status'));
@@ -698,13 +710,13 @@ app.use('/ai', require('./routes/ai'));
 
 console.log('✅ All API Routes Loaded');
 
-// ==================== STATIC FILES (আপনার original) ====================
+// ==================== STATIC FILES ====================
 app.use(express.static(path.join(__dirname, 'public'), {
     extensions: ['html'],
     index: false
 }));
 
-// ==================== ROOT & INDEX (আপনার original) ====================
+// ==================== ROOT & INDEX ====================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -717,7 +729,7 @@ app.get('/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ==================== HTML ROUTES (আপনার original) ====================
+// ==================== HTML ROUTES ====================
 app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refer.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
@@ -767,7 +779,7 @@ app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice
 app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
 app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
 
-// ==================== FALLBACK ROUTE (আপনার original) ====================
+// ==================== FALLBACK ROUTE ====================
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
@@ -775,11 +787,10 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ==================== ERROR HANDLER (আপনার original) ====================
+// ==================== ERROR HANDLER ====================
 app.use((err, req, res, next) => {
     console.error('❌ Unhandled Error:', err.message);
     
-    // 🔧 SECURITY: CORS error আলাদা handle
     if (err.message && err.message.includes('CORS')) {
         return res.status(403).json({ success: false, message: 'CORS not allowed.' });
     }
@@ -787,7 +798,7 @@ app.use((err, req, res, next) => {
     res.status(200).json({ success: false, message: 'Something went wrong. Please try again.' });
 });
 
-// ==================== CLEANUP CRON JOBS (আপনার original) ====================
+// ==================== CLEANUP CRON JOBS ====================
 const Invoice = require('./models/Invoice');
 
 setInterval(async () => {
@@ -841,7 +852,7 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000);
 
-// ==================== START SERVER (আপনার original) ====================
+// ==================== START SERVER ====================
 if (!process.env.VERCEL) {
     app.listen(PORT, "0.0.0.0", () => {
         console.log(`🚀 Server Running On Port ${PORT}`);
