@@ -1,4 +1,6 @@
-// FILE: routes/admin.js
+// ============================================================
+// FILE: routes/admin.js — সম্পূর্ণ (শুধু security যোগ)
+// ============================================================
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -14,8 +16,11 @@ const Admin = require('../models/Admin');
 const Referral = require('../models/Referral');
 require('dotenv').config();
 
+// 🔧 SECURITY: rate limiter যোগ
+const rateLimit = require('express-rate-limit');
+
 // ============================================
-// ENVIRONMENT VARIABLES
+// ENVIRONMENT VARIABLES (আপনার original)
 // ============================================
 const ADMIN_PATTERN = process.env.ADMIN_PATTERN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -28,7 +33,26 @@ if (!JWT_SECRET) {
 }
 
 // ============================================
-// LOGGER HELPERS
+// 🔧 SECURITY: Admin login rate limiters
+// ============================================
+const adminPatternLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many attempts. Please try again later.' }
+});
+
+const adminLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many login attempts. Please try again later.' }
+});
+
+// ============================================
+// LOGGER HELPERS (আপনার original)
 // ============================================
 function logRequest(req, tag) {
     var adminInfo = req.user ? (req.user.walletId || req.user.adminDbId || 'unknown') : 'unauth';
@@ -53,7 +77,7 @@ function logInfo(tag, message, data) {
 }
 
 // ============================================
-// HELPERS
+// HELPERS (আপনার original)
 // ============================================
 function getCurrentDateTime() {
     const now = new Date();
@@ -108,6 +132,7 @@ async function notifyAdmin(message) {
 
 // ============================================
 // VERIFY ADMIN TOKEN MIDDLEWARE
+// 🔧 SECURITY: DB check যোগ (blocked/deleted admin আটকাতে)
 // ============================================
 async function verifyAdminToken(req, res, next) {
     const tag = 'AUTH';
@@ -130,15 +155,32 @@ async function verifyAdminToken(req, res, next) {
                 return res.status(403).json({ success: false, message: 'Access Denied.' });
             }
 
+            // 🔧 SECURITY: DB-তে admin verify করুন
+            const admin = await Admin.findById(decoded.adminDbId)
+                .select('_id walletId fullName role isActive isBlocked');
+
+            if (!admin) {
+                logWarn(tag, 'Admin no longer exists', { adminDbId: decoded.adminDbId });
+                return res.status(401).json({ success: false, message: 'Account no longer exists.' });
+            }
+            if (admin.isBlocked) {
+                logWarn(tag, 'Admin is blocked', { walletId: admin.walletId });
+                return res.status(403).json({ success: false, message: 'Account blocked.' });
+            }
+            if (!admin.isActive) {
+                logWarn(tag, 'Admin inactive', { walletId: admin.walletId });
+                return res.status(403).json({ success: false, message: 'Account inactive.' });
+            }
+
             req.user = {
                 isAdmin: true,
-                adminDbId: decoded.adminDbId,
-                walletId: decoded.walletId,
-                fullName: decoded.fullName,
-                role: decoded.role,
+                adminDbId: admin._id.toString(),
+                walletId: admin.walletId,
+                fullName: admin.fullName,
+                role: admin.role,
                 tokenType: 'admin_jwt'
             };
-            logSuccess(tag, 'Token verified', { walletId: decoded.walletId });
+            logSuccess(tag, 'Token verified', { walletId: admin.walletId });
             return next();
         } catch (jwtError) {
             if (jwtError.name === 'TokenExpiredError') {
@@ -156,8 +198,9 @@ async function verifyAdminToken(req, res, next) {
 
 // ============================================
 // ADMIN LOGIN - STEP 1: PATTERN
+// 🔧 SECURITY: adminPatternLimiter যোগ
 // ============================================
-router.post('/login-step1', async (req, res) => {
+router.post('/login-step1', adminPatternLimiter, async (req, res) => {
     const tag = 'LOGIN_STEP1';
     logRequest(req, tag);
 
@@ -203,7 +246,7 @@ router.post('/login-step1', async (req, res) => {
 });
 
 // ============================================
-// SHARED: Admin credential verification
+// SHARED: Admin credential verification (আপনার original)
 // ============================================
 async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLabel) {
     logRequest(req, tag);
@@ -323,9 +366,9 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
 }
 
 // ============================================
-// STEP 2 — MOBILE LOGIN
+// STEP 2 — MOBILE LOGIN (🔧 SECURITY: limiter যোগ)
 // ============================================
-router.post('/login-step2', async (req, res) => {
+router.post('/login-step2', adminLoginLimiter, async (req, res) => {
     const { mobile } = req.body || {};
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
         return res.status(400).json({ success: false, message: 'Valid 10-digit mobile required.' });
@@ -334,9 +377,9 @@ router.post('/login-step2', async (req, res) => {
 });
 
 // ============================================
-// STEP 3 — TELEGRAM LOGIN
+// STEP 3 — TELEGRAM LOGIN (🔧 SECURITY: limiter যোগ)
 // ============================================
-router.post('/login-step3', async (req, res) => {
+router.post('/login-step3', adminLoginLimiter, async (req, res) => {
     const { telegramId } = req.body || {};
     if (!telegramId || String(telegramId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Telegram ID required.' });
@@ -345,9 +388,9 @@ router.post('/login-step3', async (req, res) => {
 });
 
 // ============================================
-// STEP 4 — WALLET ID LOGIN
+// STEP 4 — WALLET ID LOGIN (🔧 SECURITY: limiter যোগ)
 // ============================================
-router.post('/login-step4', async (req, res) => {
+router.post('/login-step4', adminLoginLimiter, async (req, res) => {
     const { walletId } = req.body || {};
     if (!walletId || String(walletId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Wallet ID required.' });
@@ -356,7 +399,7 @@ router.post('/login-step4', async (req, res) => {
 });
 
 // ============================================
-// MY PROFILE
+// MY PROFILE (আপনার original)
 // ============================================
 router.get('/my-profile', verifyAdminToken, async (req, res) => {
     const tag = 'MY_PROFILE';
@@ -457,7 +500,7 @@ router.put('/change-my-password', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// ADMIN LIST
+// ADMIN LIST (আপনার original)
 // ============================================
 router.get('/admins-list', verifyAdminToken, async (req, res) => {
     const tag = 'ADMINS_LIST';
@@ -649,7 +692,7 @@ router.delete('/delete-admin/:adminDbId', verifyAdminToken, async (req, res) => 
 });
 
 // ============================================
-// DEPOSIT SETTINGS
+// DEPOSIT SETTINGS (আপনার original)
 // ============================================
 const DEFAULT_DEPOSIT_SETTINGS = {
     minDeposit: 10,
@@ -740,7 +783,7 @@ router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// REFERRAL SETTINGS
+// REFERRAL SETTINGS (আপনার original)
 // ============================================
 router.get('/referral-settings', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRAL_SETTINGS_GET';
@@ -818,7 +861,7 @@ router.put('/referral-settings', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// REFERRAL MANAGEMENT
+// REFERRAL MANAGEMENT (আপনার original)
 // ============================================
 router.get('/referrals', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRALS_LIST';
@@ -1224,7 +1267,7 @@ router.post('/bulk-approve-referrals', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DASHBOARD STATS
+// DASHBOARD STATS (আপনার original)
 // ============================================
 router.get('/stats', verifyAdminToken, async (req, res) => {
     const tag = 'DASHBOARD_STATS';
@@ -1236,7 +1279,6 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
         const deletedUsers = await User.countDocuments({ isDeleted: true });
 
         const approvedDeposits = await Deposit.countDocuments({ status: 'approved' });
-        // ✅ FIXED: pending_approval → pending
         const pendingDeposits = await Deposit.countDocuments({ status: 'pending' });
         const rejectedDeposits = await Deposit.countDocuments({ status: 'rejected' });
 
@@ -1277,7 +1319,7 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// TRANSACTIONS
+// TRANSACTIONS (আপনার original)
 // ============================================
 router.get('/transactions', verifyAdminToken, async (req, res) => {
     const tag = 'TRANSACTIONS_LIST';
@@ -1319,7 +1361,7 @@ router.get('/transactions', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// USERS
+// USERS (আপনার original)
 // ============================================
 router.get('/users', verifyAdminToken, async (req, res) => {
     const tag = 'USERS_LIST';
@@ -1465,7 +1507,7 @@ router.post('/restore-user/:userId', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// UPDATE USER
+// UPDATE USER (আপনার original)
 // ============================================
 router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_USER';
@@ -1587,7 +1629,7 @@ changes.map(c => `  • ${c}`).join('\n') + `\n\n` +
 });
 
 // ============================================
-// ADJUST BALANCE
+// ADJUST BALANCE (আপনার original)
 // ============================================
 router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
     const tag = 'ADJUST_BALANCE';
@@ -1645,7 +1687,7 @@ router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DEPOSITS LIST
+// DEPOSITS LIST (আপনার original)
 // ============================================
 router.get('/deposits', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSITS_LIST';
@@ -1674,7 +1716,7 @@ router.get('/deposits', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// GET SINGLE DEPOSIT DETAILS
+// GET SINGLE DEPOSIT DETAILS (আপনার original)
 // ============================================
 router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSIT_DETAIL';
@@ -1704,8 +1746,7 @@ router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// VERIFY DEPOSIT (Approve/Reject)
-// ✅ Only 'pending' status can be acted on
+// VERIFY DEPOSIT (আপনার original)
 // ============================================
 router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'VERIFY_DEPOSIT';
@@ -1733,7 +1774,6 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 
         logInfo(tag, 'Deposit found', { status: deposit.status, amount: deposit.amount });
 
-        // ✅ FIXED: only 'pending' can be acted on
         if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for action', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Status is "${deposit.status}". Only pending deposits can be verified.` });
@@ -1910,8 +1950,7 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// ADMIN CANCEL DEPOSIT
-// ✅ Only 'pending' can be cancelled
+// ADMIN CANCEL DEPOSIT (আপনার original)
 // ============================================
 router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'CANCEL_DEPOSIT';
@@ -1930,7 +1969,6 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Deposit not found.' });
         }
 
-        // ✅ FIXED: only 'pending' can be cancelled
         if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for cancel', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Cannot cancel deposit with status "${deposit.status}".` });
@@ -1985,7 +2023,7 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// SAFE REFERRAL PROCESSING
+// SAFE REFERRAL PROCESSING (আপনার original)
 // ============================================
 async function safeProcessReferral(user, depositAmount, dateTime) {
     const tag = 'SAFE_REFERRAL';
@@ -2139,7 +2177,7 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 }
 
 // ============================================
-// LIFAFA
+// LIFAFA (আপনার original)
 // ============================================
 router.get('/lifafas', verifyAdminToken, async (req, res) => {
     const tag = 'LIFAFAS_LIST';
@@ -2184,7 +2222,7 @@ router.delete('/delete-lifafa/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// GIFTS
+// GIFTS (আপনার original)
 // ============================================
 router.get('/gifts', verifyAdminToken, async (req, res) => {
     const tag = 'GIFTS_LIST';
