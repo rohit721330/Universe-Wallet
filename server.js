@@ -323,7 +323,7 @@ const setupAdminHandler = async (req, res) => {
         }
 
         const rawWalletId = String(currentUser.walletId).trim();
-        const adminId = rawWalletId.toLowerCase();
+        const adminId = rawWalletId.toUpperCase();
         const adminWalletId = rawWalletId.toUpperCase();
 
         const plainPassword = currentUser.password;
