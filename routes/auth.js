@@ -1,4 +1,6 @@
-// FILE: routes/auth.js
+// ============================================================
+// FILE: routes/auth.js — সম্পূর্ণ (শুধু rate limiter যোগ)
+// ============================================================
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -11,7 +13,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 // =========================================================
-// ✅ DB CONNECTION MIDDLEWARE (Vercel serverless-safe)
+// ✅ DB CONNECTION MIDDLEWARE (আপনার original)
 // =========================================================
 router.use(async (req, res, next) => {
     try {
@@ -34,7 +36,7 @@ router.use(async (req, res, next) => {
 });
 
 // =========================================================
-// RATE LIMITERS
+// RATE LIMITERS (আপনার original + ৩টি নতুন)
 // =========================================================
 const otpLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -48,8 +50,33 @@ const loginLimiter = rateLimit({
     message: { success: false, message: 'Too Many Login Attempts. Please Try Again Later.' }
 });
 
+// 🔧 SECURITY: নতুন limiter
+const registerLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many registrations. Please try later.' }
+});
+
+const resetLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many reset attempts. Try later.' }
+});
+
+const telegramLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many Telegram requests.' }
+});
+
 // =========================================================
-// ENV CONFIGURATION
+// ENV CONFIGURATION (আপনার original)
 // =========================================================
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TG_ID = process.env.ADMIN_TG_ID;
@@ -62,7 +89,7 @@ if (!ADMIN_TG_ID) console.error('❌ Admin TG Id Is Not Set In Environment Varia
 if (!JWT_SECRET) console.error('❌ JWT Secret Is Not Set In Environment Variables.');
 
 // =========================================================
-// VERIFY TOKEN
+// VERIFY TOKEN (আপনার original)
 // =========================================================
 const verifyToken = async (req, res, next) => {
     try {
@@ -102,7 +129,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 // =========================================================
-// HELPER: Send Telegram Message
+// HELPER: Send Telegram Message (আপনার original)
 // =========================================================
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) {
@@ -136,7 +163,7 @@ async function sendTelegramMessage(chatId, message) {
 }
 
 // =========================================================
-// HELPER: Send OTP via Email
+// HELPER: Send OTP via Email (আপনার original)
 // =========================================================
 async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
     try {
@@ -236,7 +263,7 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
 }
 
 // =========================================================
-// HELPERS: Generators & Utilities
+// HELPERS: Generators & Utilities (আপনার original)
 // =========================================================
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -265,7 +292,6 @@ function generateApiKey() {
     return key;
 }
 
-// ✅ Generate Referral Code (10-char crypto-secure)
 function generateReferralCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -304,7 +330,7 @@ function maskEmail(email) {
 }
 
 // =========================================================
-// MongoDB OTP Helpers
+// MongoDB OTP Helpers (আপনার original)
 // =========================================================
 async function saveOtp(identifier, type, otp) {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -330,7 +356,7 @@ async function deleteOtp(identifier, type) {
 }
 
 // =========================================================
-// USER RESPONSE SHAPE
+// USER RESPONSE SHAPE (আপনার original)
 // =========================================================
 function buildUserResponse(user) {
     return {
@@ -353,7 +379,7 @@ function buildUserResponse(user) {
 }
 
 // =========================================================
-// ✅ HELPER: Apply Referral
+// ✅ HELPER: Apply Referral (আপনার original)
 // =========================================================
 async function applyReferralIfProvided(newUser, referralCode) {
     if (!referralCode || typeof referralCode !== 'string') return null;
@@ -362,7 +388,6 @@ async function applyReferralIfProvided(newUser, referralCode) {
         const cleaned = referralCode.trim().toUpperCase();
         if (!cleaned) return null;
 
-        // ✅ Lookup in User collection (referralCode field)
         const referrer = await User.findOne({
             referralCode: cleaned,
             isDeleted: false
@@ -440,7 +465,7 @@ async function applyReferralIfProvided(newUser, referralCode) {
 }
 
 // =========================================================
-// LOGIN WITH PASSWORD
+// LOGIN WITH PASSWORD (আপনার original)
 // =========================================================
 router.post('/login', loginLimiter, async (req, res) => {
     try {
@@ -475,7 +500,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 
 // =========================================================
-// SEND LOGIN OTP
+// SEND LOGIN OTP (আপনার original)
 // =========================================================
 router.post('/send-login-otp', otpLimiter, async (req, res) => {
     try {
@@ -535,7 +560,7 @@ router.post('/send-login-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// LOGIN WITH OTP
+// LOGIN WITH OTP (আপনার original)
 // =========================================================
 router.post('/login-with-otp', loginLimiter, async (req, res) => {
     try {
@@ -607,7 +632,7 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
 });
 
 // =========================================================
-// SEND TELEGRAM OTP
+// SEND TELEGRAM OTP (আপনার original)
 // =========================================================
 router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
     try {
@@ -677,9 +702,9 @@ router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// VERIFY TELEGRAM OTP
+// VERIFY TELEGRAM OTP (আপনার original)
 // =========================================================
-router.post('/verify-telegram-otp', async (req, res) => {
+router.post('/verify-telegram-otp', otpLimiter, async (req, res) => {
     try {
         const { telegramId, otp } = req.body;
 
@@ -709,9 +734,9 @@ router.post('/verify-telegram-otp', async (req, res) => {
 });
 
 // =========================================================
-// ✅ REGISTER NEW USER
+// ✅ REGISTER NEW USER (আপনার original, শুধু registerLimiter যোগ)
 // =========================================================
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
     try {
         const { name, mobile, email, password, telegramId, tg_id, otp, referralCode } = req.body;
         const dateTime = getCurrentDateTime();
@@ -780,7 +805,6 @@ router.post('/register', async (req, res) => {
             return res.status(200).json({ success: false, message: 'Invalid Telegram OTP. Please Enter The Correct 6-Digit Code.' });
         }
 
-        // Generate unique walletId, apiKey, referralCode
         let walletId = generateWalletId();
         let walletAttempts = 0;
         while (await User.findOne({ walletId }) && walletAttempts < 15) {
@@ -825,7 +849,6 @@ router.post('/register', async (req, res) => {
 
         console.log('✅ User Created Successfully:', user._id);
 
-        // Apply referral if provided
         let referralResult = null;
         if (referralCode && typeof referralCode === 'string') {
             referralResult = await applyReferralIfProvided(user, referralCode);
@@ -900,7 +923,7 @@ router.post('/register', async (req, res) => {
 });
 
 // =========================================================
-// FORGOT PASSWORD - Send OTP
+// FORGOT PASSWORD - Send OTP (আপনার original)
 // =========================================================
 router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
     try {
@@ -990,8 +1013,9 @@ router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
 
 // =========================================================
 // FORGOT PASSWORD - Reset Password
+// 🔧 SECURITY: resetLimiter + password strength register-এর মতো
 // =========================================================
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetLimiter, async (req, res) => {
     try {
         const { mobile, telegramId, otp, password } = req.body;
         const dateTime = getCurrentDateTime();
@@ -1004,8 +1028,12 @@ router.post('/reset-password', async (req, res) => {
             return res.status(200).json({ success: false, message: 'OTP and password are required.' });
         }
 
-        if (password.length < 4) {
-            return res.status(200).json({ success: false, message: 'Password must be at least 4 characters long.' });
+        // 🔧 SECURITY: password strength register-এর মতোই
+        if (password.length < 8 || password.length > 15) {
+            return res.status(200).json({ success: false, message: 'Password must be 8-15 characters long.' });
+        }
+        if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+            return res.status(200).json({ success: false, message: 'Password must contain uppercase, lowercase, and number.' });
         }
 
         if (mobile) {
@@ -1061,7 +1089,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // =========================================================
-// GET CURRENT USER
+// GET CURRENT USER (আপনার original)
 // =========================================================
 router.get('/me', verifyToken, async (req, res) => {
     try {
@@ -1093,7 +1121,7 @@ router.get('/me', verifyToken, async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY API KEY
+// GET USER BY API KEY (আপনার original)
 // =========================================================
 router.get('/user-by-apikey/:apiKey', async (req, res) => {
     try {
@@ -1117,7 +1145,7 @@ router.get('/user-by-apikey/:apiKey', async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY TELEGRAM ID
+// GET USER BY TELEGRAM ID (আপনার original)
 // =========================================================
 router.get('/user-by-telegram/:tgid', async (req, res) => {
     try {
@@ -1141,7 +1169,7 @@ router.get('/user-by-telegram/:tgid', async (req, res) => {
 });
 
 // =========================================================
-// VERIFY TOKEN
+// VERIFY TOKEN (আপনার original)
 // =========================================================
 router.get('/verify', verifyToken, async (req, res) => {
     try {
@@ -1174,8 +1202,9 @@ router.get('/verify', verifyToken, async (req, res) => {
 
 // =========================================================
 // TELEGRAM AUTO LOGIN
+// 🔧 SECURITY: telegramLimiter যোগ
 // =========================================================
-router.post('/telegram-login', async (req, res) => {
+router.post('/telegram-login', telegramLimiter, async (req, res) => {
     try {
         const { telegramId } = req.body;
 
@@ -1200,7 +1229,7 @@ router.post('/telegram-login', async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY MOBILE
+// GET USER BY MOBILE (আপনার original)
 // =========================================================
 router.get('/user-by-mobile/:mobile', async (req, res) => {
     try {
