@@ -12,11 +12,10 @@ const Lifafa = require('../models/Lifafa');
 const Gift = require('../models/GiftCode');
 const Admin = require('../models/Admin');
 const Referral = require('../models/Referral');
-const rateLimit = require('express-rate-limit'); // 🔧 রেট লিমিট যোগ করা হলো
 require('dotenv').config();
 
 // ============================================
-// ENVIRONMENT VARIABLES (আপনার আগের কোড)
+// ENVIRONMENT VARIABLES
 // ============================================
 const ADMIN_PATTERN = process.env.ADMIN_PATTERN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -28,25 +27,8 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
-// 🔧 নতুন রেট লিমিটার যোগ করা হলো
-const adminPatternLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 20,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: 'Too many attempts. Try later.' }
-});
-
-const adminLoginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: 'Too many login attempts. Try later.' }
-});
-
 // ============================================
-// LOGGER HELPERS (আপনার আগের কোড)
+// LOGGER HELPERS
 // ============================================
 function logRequest(req, tag) {
     var adminInfo = req.user ? (req.user.walletId || req.user.adminDbId || 'unknown') : 'unauth';
@@ -71,7 +53,7 @@ function logInfo(tag, message, data) {
 }
 
 // ============================================
-// HELPERS (আপনার আগের কোড)
+// HELPERS
 // ============================================
 function getCurrentDateTime() {
     const now = new Date();
@@ -125,7 +107,7 @@ async function notifyAdmin(message) {
 }
 
 // ============================================
-// VERIFY ADMIN TOKEN MIDDLEWARE (আপনার আগের কোড)
+// VERIFY ADMIN TOKEN MIDDLEWARE
 // ============================================
 async function verifyAdminToken(req, res, next) {
     const tag = 'AUTH';
@@ -173,9 +155,9 @@ async function verifyAdminToken(req, res, next) {
 }
 
 // ============================================
-// ADMIN LOGIN - STEP 1: PATTERN (🔧 রেট লিমিট যোগ করা হলো)
+// ADMIN LOGIN - STEP 1: PATTERN
 // ============================================
-router.post('/login-step1', adminPatternLimiter, async (req, res) => {
+router.post('/login-step1', async (req, res) => {
     const tag = 'LOGIN_STEP1';
     logRequest(req, tag);
 
@@ -221,7 +203,7 @@ router.post('/login-step1', adminPatternLimiter, async (req, res) => {
 });
 
 // ============================================
-// SHARED: Admin credential verification (আপনার আগের কোড)
+// SHARED: Admin credential verification
 // ============================================
 async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLabel) {
     logRequest(req, tag);
@@ -341,9 +323,9 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
 }
 
 // ============================================
-// STEP 2 — MOBILE LOGIN (🔧 রেট লিমিট যোগ করা হলো)
+// STEP 2 — MOBILE LOGIN
 // ============================================
-router.post('/login-step2', adminLoginLimiter, async (req, res) => {
+router.post('/login-step2', async (req, res) => {
     const { mobile } = req.body || {};
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
         return res.status(400).json({ success: false, message: 'Valid 10-digit mobile required.' });
@@ -352,9 +334,9 @@ router.post('/login-step2', adminLoginLimiter, async (req, res) => {
 });
 
 // ============================================
-// STEP 3 — TELEGRAM LOGIN (🔧 রেট লিমিট যোগ করা হলো)
+// STEP 3 — TELEGRAM LOGIN
 // ============================================
-router.post('/login-step3', adminLoginLimiter, async (req, res) => {
+router.post('/login-step3', async (req, res) => {
     const { telegramId } = req.body || {};
     if (!telegramId || String(telegramId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Telegram ID required.' });
@@ -363,9 +345,9 @@ router.post('/login-step3', adminLoginLimiter, async (req, res) => {
 });
 
 // ============================================
-// STEP 4 — WALLET ID LOGIN (🔧 রেট লিমিট যোগ করা হলো)
+// STEP 4 — WALLET ID LOGIN
 // ============================================
-router.post('/login-step4', adminLoginLimiter, async (req, res) => {
+router.post('/login-step4', async (req, res) => {
     const { walletId } = req.body || {};
     if (!walletId || String(walletId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Wallet ID required.' });
@@ -374,7 +356,7 @@ router.post('/login-step4', adminLoginLimiter, async (req, res) => {
 });
 
 // ============================================
-// MY PROFILE (আপনার আগের কোড)
+// MY PROFILE
 // ============================================
 router.get('/my-profile', verifyAdminToken, async (req, res) => {
     const tag = 'MY_PROFILE';
@@ -475,7 +457,7 @@ router.put('/change-my-password', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// ADMIN LIST (আপনার আগের কোড)
+// ADMIN LIST
 // ============================================
 router.get('/admins-list', verifyAdminToken, async (req, res) => {
     const tag = 'ADMINS_LIST';
@@ -667,7 +649,7 @@ router.delete('/delete-admin/:adminDbId', verifyAdminToken, async (req, res) => 
 });
 
 // ============================================
-// DEPOSIT SETTINGS (আপনার আগের কোড)
+// DEPOSIT SETTINGS
 // ============================================
 const DEFAULT_DEPOSIT_SETTINGS = {
     minDeposit: 10,
@@ -758,7 +740,7 @@ router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// REFERRAL SETTINGS (আপনার আগের কোড)
+// REFERRAL SETTINGS
 // ============================================
 router.get('/referral-settings', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRAL_SETTINGS_GET';
@@ -836,7 +818,7 @@ router.put('/referral-settings', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// REFERRAL MANAGEMENT (আপনার আগের কোড)
+// REFERRAL MANAGEMENT
 // ============================================
 router.get('/referrals', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRALS_LIST';
@@ -1242,7 +1224,7 @@ router.post('/bulk-approve-referrals', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DASHBOARD STATS (আপনার আগের কোড)
+// DASHBOARD STATS
 // ============================================
 router.get('/stats', verifyAdminToken, async (req, res) => {
     const tag = 'DASHBOARD_STATS';
@@ -1294,7 +1276,7 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// TRANSACTIONS (আপনার আগের কোড)
+// TRANSACTIONS
 // ============================================
 router.get('/transactions', verifyAdminToken, async (req, res) => {
     const tag = 'TRANSACTIONS_LIST';
@@ -1336,7 +1318,7 @@ router.get('/transactions', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// USERS (আপনার আগের কোড)
+// USERS
 // ============================================
 router.get('/users', verifyAdminToken, async (req, res) => {
     const tag = 'USERS_LIST';
@@ -1482,7 +1464,7 @@ router.post('/restore-user/:userId', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// UPDATE USER (আপনার আগের কোড)
+// UPDATE USER
 // ============================================
 router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_USER';
@@ -1604,7 +1586,7 @@ changes.map(c => `  • ${c}`).join('\n') + `\n\n` +
 });
 
 // ============================================
-// ADJUST BALANCE (আপনার আগের কোড)
+// ADJUST BALANCE
 // ============================================
 router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
     const tag = 'ADJUST_BALANCE';
@@ -1662,7 +1644,7 @@ router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DEPOSITS LIST (আপনার আগের কোড)
+// DEPOSITS LIST
 // ============================================
 router.get('/deposits', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSITS_LIST';
@@ -1691,7 +1673,7 @@ router.get('/deposits', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// GET SINGLE DEPOSIT DETAILS (আপনার আগের কোড)
+// GET SINGLE DEPOSIT DETAILS
 // ============================================
 router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSIT_DETAIL';
@@ -1721,7 +1703,8 @@ router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// VERIFY DEPOSIT (আপনার আগের কোড)
+// VERIFY DEPOSIT (Approve/Reject)
+// ✅ Only 'pending' status can be acted on
 // ============================================
 router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'VERIFY_DEPOSIT';
@@ -1749,6 +1732,7 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 
         logInfo(tag, 'Deposit found', { status: deposit.status, amount: deposit.amount });
 
+        // ✅ FIXED: only 'pending' can be acted on
         if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for action', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Status is "${deposit.status}". Only pending deposits can be verified.` });
@@ -1925,7 +1909,8 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// ADMIN CANCEL DEPOSIT (আপনার আগের কোড)
+// ADMIN CANCEL DEPOSIT
+// ✅ Only 'pending' can be cancelled
 // ============================================
 router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'CANCEL_DEPOSIT';
@@ -1944,6 +1929,7 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Deposit not found.' });
         }
 
+        // ✅ FIXED: only 'pending' can be cancelled
         if (deposit.status !== 'pending') {
             logWarn(tag, 'Invalid status for cancel', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Cannot cancel deposit with status "${deposit.status}".` });
@@ -1998,7 +1984,7 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// SAFE REFERRAL PROCESSING (আপনার আগের কোড)
+// SAFE REFERRAL PROCESSING
 // ============================================
 async function safeProcessReferral(user, depositAmount, dateTime) {
     const tag = 'SAFE_REFERRAL';
@@ -2152,7 +2138,7 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 }
 
 // ============================================
-// LIFAFA (আপনার আগের কোড)
+// LIFAFA
 // ============================================
 router.get('/lifafas', verifyAdminToken, async (req, res) => {
     const tag = 'LIFAFAS_LIST';
@@ -2197,7 +2183,7 @@ router.delete('/delete-lifafa/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// GIFTS (আপনার আগের কোড)
+// GIFTS
 // ============================================
 router.get('/gifts', verifyAdminToken, async (req, res) => {
     const tag = 'GIFTS_LIST';
