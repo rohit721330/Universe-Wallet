@@ -172,9 +172,9 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
             return { success: false, error: 'Email service not configured' };
         }
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            port: 465,
-            secure: true,
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
             auth: {
                 user: EMAIL_USER,
                 pass: EMAIL_PASS
