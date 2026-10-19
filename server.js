@@ -1,91 +1,25 @@
-// ============================================================
-// FILE: server.js — সম্পূর্ণ (CORS ও Cron ফিক্স সহ)
-// ============================================================
+// FILE: server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit'); // 🔧 রেট লিমিটের জন্য যোগ করা হলো
 require('dotenv').config();
-
-// 🔧 SECURITY: নতুন require
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 app.set('trust proxy', 1);
 
-// ============================================================
-// 🔧 SECURITY: Environment flags
-// ============================================================
-const IS_PROD = process.env.NODE_ENV === 'production';
+// Middleware (আপনার আগের কোড)
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ============================================================
-// 🔧 SECURITY: Security headers
-// ============================================================
-app.use(helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    contentSecurityPolicy: false,
-}));
-
-// ============================================================
-// 🔧 SECURITY: CORS — অ্যাপ (FreeWebToApk) ও ওয়েবসাইটের জন্য
-// ============================================================
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
-    .split(',').map(s => s.trim()).filter(Boolean);
-
-app.use(cors({
-    origin: function (origin, callback) {
-        // ১. মোবাইল অ্যাপ (FreeWebToApk), Postman, বা সার্ভার-টু-সার্ভার
-        if (!origin) return callback(null, true);
-
-        // ২. আপনার নিজের Render ডোমেইন
-        if (origin.includes('onrender.com')) return callback(null, true);
-
-        // ৩. Render env-এ দেওয়া origins
-        if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-        if (ALLOWED_ORIGINS.includes('*')) return callback(null, true);
-
-        // অন্যথায় ব্লক
-        console.log('❌ CORS Blocked Origin:', origin);
-        return callback(new Error('CORS not allowed'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token', 'X-Setup-Secret'],
-    maxAge: 86400,
-}));
-
-// ============================================================
-// 🔧 SECURITY: Body size limit
-// ============================================================
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
-// ============================================================
-// 🔧 SECURITY: NoSQL injection sanitization
-// ============================================================
-app.use(mongoSanitize());
-
-// ============================================================
-// 🔧 SECURITY: Global API rate limit
-// ============================================================
-app.use('/api', rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 200,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: 'Too many requests. Please try again later.' },
-}));
-
-// ============================================================
-// ENV & GLOBALS
-// ============================================================
 const PORT = process.env.PORT || 3000;
 const ADMIN_WALLET_ID = process.env.ADMIN_WALLET_ID;
 const SETUP_SECRET = process.env.SETUP_SECRET;
 
+// Global OTP & TG ID Stores
 global.loginOtpStore = new Map();
 global.regOtpStore = new Map();
 global.resetOtpStore = new Map();
@@ -94,9 +28,20 @@ global.emailOtpStore = new Map();
 
 const MONGO_URI = process.env.MONGODB_URI;
 
-// ============================================================
-// HELPERS
-// ============================================================
+// =========================================================
+// 🔧 নতুন রেট লিমিটার (শুধু সেটআপ এবং মাইগ্রেশন রুটের জন্য)
+// =========================================================
+const setupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // ১ ঘণ্টা
+    max: 5, // প্রতি আইপিতে সর্বোচ্চ ৫ বার
+    message: { success: false, message: 'Too many setup attempts. Try again in 1 hour.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// =========================================================
+// Mask an admin ID for display (আপনার আগের কোড)
+// =========================================================
 function maskAdminId(adminId) {
     if (!adminId || typeof adminId !== 'string') return 'unknown';
     const id = adminId.trim();
@@ -109,6 +54,9 @@ function maskAdminId(adminId) {
     return firstTwo + '*'.repeat(maskLength) + lastTwo;
 }
 
+// =========================================================
+// Timing-safe secret comparison (আপনার আগের কোড)
+// =========================================================
 function safeCompareSecret(provided, expected) {
     if (typeof provided !== 'string' || typeof expected !== 'string') return false;
     const a = Buffer.from(provided);
@@ -124,6 +72,9 @@ function safeCompareSecret(provided, expected) {
     }
 }
 
+// =========================================================
+// Extract setup secret (আপনার আগের কোড)
+// =========================================================
 function extractSetupSecret(req) {
     const headerSecret = req.headers['x-setup-secret'];
     if (typeof headerSecret === 'string' && headerSecret.length > 0) {
@@ -138,6 +89,9 @@ function extractSetupSecret(req) {
     return null;
 }
 
+// =========================================================
+// Safe logging (আপনার আগের কোড)
+// =========================================================
 function logSetupAttempt(tag, req, success, reason) {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
     const source = req.headers['x-setup-secret']
@@ -151,9 +105,9 @@ function logSetupAttempt(tag, req, success, reason) {
     console.log(`[${new Date().toISOString()}] [${tag}] ${status} IP: ${ip} | Source: ${source} | ${reason}`);
 }
 
-// ============================================================
-// MongoDB Connection
-// ============================================================
+// =========================================================
+// MongoDB Connection (আপনার আগের কোড)
+// =========================================================
 let cached = global.mongoose;
 
 if (!cached) {
@@ -204,6 +158,9 @@ async function connectDB() {
     return cached.conn;
 }
 
+// =========================================================
+// DB Connection Middleware (আপনার আগের কোড)
+// =========================================================
 const dbConnectMiddleware = async (req, res, next) => {
     try {
         await connectDB();
@@ -217,24 +174,18 @@ const dbConnectMiddleware = async (req, res, next) => {
     }
 };
 
-// ============================================================
-// 🔧 SECURITY: Referral CORS middleware
-// ============================================================
+// =========================================================
+// Referral CORS Middleware (আপনার আগের কোড)
+// =========================================================
 const referralCorsMiddleware = (req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.includes('onrender.com') || ALLOWED_ORIGINS.includes('*'))) {
-        res.header('Access-Control-Allow-Origin', origin);
-        res.header('Vary', 'Origin');
-        res.header('Access-Control-Allow-Credentials', 'true');
-    } else if (!origin) {
-        res.header('Access-Control-Allow-Origin', '*');
-    }
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, X-Setup-Secret, X-HTTP-Method-Override');
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Expose-Headers', 'Authorization, X-Auth-Token');
 
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(204);
+        return res.sendStatus(200);
     }
     next();
 };
@@ -242,17 +193,6 @@ const referralCorsMiddleware = (req, res, next) => {
 app.use('/referral', referralCorsMiddleware);
 app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
-
-// ============================================================
-// 🔧 SECURITY: Setup/Reset/Migrate rate limiter
-// ============================================================
-const setupLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: 'Too many setup attempts. Try again in 1 hour.' },
-});
 
 // ============================================================
 // POST /setup-admin
@@ -480,6 +420,7 @@ const setupAdminHandler = async (req, res) => {
     }
 };
 
+// 🔧 রেট লিমিট যোগ করা হলো
 app.post('/setup-admin', setupLimiter, setupAdminHandler);
 app.get('/setup-admin', setupLimiter, setupAdminHandler);
 
@@ -590,12 +531,11 @@ const resetAdminHandler = async (req, res) => {
     }
 };
 
+// 🔧 রেট লিমিট যোগ করা হলো
 app.post('/reset-admin', setupLimiter, resetAdminHandler);
 app.get('/reset-admin', setupLimiter, resetAdminHandler);
 
-// ============================================================
-// migrate-referral-codes-v2
-// ============================================================
+// ⚠️ TEMPORARY — Delete after use
 app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
         await connectDB();
@@ -673,9 +613,7 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
     }
 });
 
-// ============================================================
-// referral-test
-// ============================================================
+// ⚠️ TEMPORARY DEBUG ROUTE — Delete after use
 app.get('/referral-test', (req, res) => {
     res.json({ success: true, message: 'Referral route is reachable' });
 });
@@ -775,7 +713,7 @@ app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dice
 app.get('/toss', (req, res) => res.sendFile(path.join(__dirname, 'public', 'toss.html')));
 app.get('/scratch', (req, res) => res.sendFile(path.join(__dirname, 'public', 'scratch.html')));
 
-// ==================== FALLBACK ROUTE ====================
+// ==================== FALLBACK ROUTE (SPA) ====================
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
@@ -786,11 +724,6 @@ app.get('*', (req, res) => {
 // ==================== ERROR HANDLER ====================
 app.use((err, req, res, next) => {
     console.error('❌ Unhandled Error:', err.message);
-    
-    if (err.message && err.message.includes('CORS')) {
-        return res.status(403).json({ success: false, message: 'CORS not allowed.' });
-    }
-    
     res.status(200).json({ success: false, message: 'Something went wrong. Please try again.' });
 });
 
@@ -799,10 +732,6 @@ const Invoice = require('./models/Invoice');
 
 setInterval(async () => {
     try {
-        // 🔧 FIX: ডাটাবেস কানেক্টেড না থাকলে এরর দেবে না
-        if (mongoose.connection.readyState !== 1) {
-            return;
-        }
         const result = await Invoice.cleanupExpired();
         if (result.modifiedCount > 0) {
             console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
