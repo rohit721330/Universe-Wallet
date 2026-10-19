@@ -1,5 +1,5 @@
 // ============================================================
-// FILE: server.js — সম্পূর্ণ (CORS ফিক্স সহ)
+// FILE: server.js — সম্পূর্ণ (CORS ও Cron ফিক্স সহ)
 // ============================================================
 const express = require('express');
 const mongoose = require('mongoose');
@@ -38,7 +38,6 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
 app.use(cors({
     origin: function (origin, callback) {
         // ১. মোবাইল অ্যাপ (FreeWebToApk), Postman, বা সার্ভার-টু-সার্ভার
-        //    এদের Origin থাকে না, তাই allow
         if (!origin) return callback(null, true);
 
         // ২. আপনার নিজের Render ডোমেইন
@@ -219,7 +218,7 @@ const dbConnectMiddleware = async (req, res, next) => {
 };
 
 // ============================================================
-// 🔧 SECURITY: Referral CORS middleware (fixed)
+// 🔧 SECURITY: Referral CORS middleware
 // ============================================================
 const referralCorsMiddleware = (req, res, next) => {
     const origin = req.headers.origin;
@@ -228,7 +227,6 @@ const referralCorsMiddleware = (req, res, next) => {
         res.header('Vary', 'Origin');
         res.header('Access-Control-Allow-Credentials', 'true');
     } else if (!origin) {
-        // মোবাইল অ্যাপের জন্য
         res.header('Access-Control-Allow-Origin', '*');
     }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -482,7 +480,6 @@ const setupAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 SECURITY: rate limiter যোগ
 app.post('/setup-admin', setupLimiter, setupAdminHandler);
 app.get('/setup-admin', setupLimiter, setupAdminHandler);
 
@@ -593,12 +590,11 @@ const resetAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 SECURITY: rate limiter যোগ
 app.post('/reset-admin', setupLimiter, resetAdminHandler);
 app.get('/reset-admin', setupLimiter, resetAdminHandler);
 
 // ============================================================
-// migrate-referral-codes-v2 (আপনার original)
+// migrate-referral-codes-v2
 // ============================================================
 app.get('/migrate-referral-codes-v2', async (req, res) => {
     try {
@@ -678,7 +674,7 @@ app.get('/migrate-referral-codes-v2', async (req, res) => {
 });
 
 // ============================================================
-// referral-test (আপনার original)
+// referral-test
 // ============================================================
 app.get('/referral-test', (req, res) => {
     res.json({ success: true, message: 'Referral route is reachable' });
@@ -803,6 +799,10 @@ const Invoice = require('./models/Invoice');
 
 setInterval(async () => {
     try {
+        // 🔧 FIX: ডাটাবেস কানেক্টেড না থাকলে এরর দেবে না
+        if (mongoose.connection.readyState !== 1) {
+            return;
+        }
         const result = await Invoice.cleanupExpired();
         if (result.modifiedCount > 0) {
             console.log(`🧹 Cleaned up ${result.modifiedCount} expired invoices`);
