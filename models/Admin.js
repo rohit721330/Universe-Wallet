@@ -1,13 +1,11 @@
-// FILE: models/Admin.js — SECURED VERSION
+// FILE: models/Admin.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 
 const adminSchema = new mongoose.Schema({
-    // 🔧 FIX: uppercase: true বাদ — route-এ decision নিন
-    adminId: { type: String, required: true, unique: true, trim: true },
+    adminId: { type: String, required: true, unique: true, trim: true, uppercase: true },
     walletId: { type: String, unique: true, sparse: true, trim: true, uppercase: true },
-    password: { type: String, required: true, select: false }, // 🔧 select: false
+    password: { type: String, required: true },
     fullName: { type: String, required: true, trim: true },
     mobile: { type: String, required: true, unique: true, trim: true },
     email: { type: String, trim: true, lowercase: true },
@@ -35,24 +33,19 @@ const adminSchema = new mongoose.Schema({
 // PRE-SAVE HOOKS
 // ============================================
 adminSchema.pre('save', async function(next) {
-    // 🔧 FIX: Password hash — already-hashed হলে আবার hash করবেন না
+    // Password hash
     if (this.isModified('password')) {
-        const isAlreadyHashed = typeof this.password === 'string' &&
-                                /^\$2[aby]\$\d{2}\$/.test(this.password);
-        if (!isAlreadyHashed) {
-            // 🔧 FIX: rounds 10 → 12
-            this.password = await bcrypt.hash(this.password, 12);
-        }
+        this.password = await bcrypt.hash(this.password, 10);
     }
 
-    // 🔧 FIX: WalletId generation — crypto ব্যবহার (Math.random নয়)
+    // Auto-generate Wallet ID for new admins
     if (!this.walletId && this.isNew) {
         let unique = false;
         let attempts = 0;
         while (!unique && attempts < 10) {
-            const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
-            const time = Date.now().toString(36).toUpperCase();
-            const candidate = 'ADM' + time + rand;
+            const candidate = 'ADM' +
+                Date.now().toString(36).toUpperCase() +
+                Math.random().toString(36).substring(2, 6).toUpperCase();
             const exists = await mongoose.model('Admin').findOne({ walletId: candidate });
             if (!exists) {
                 this.walletId = candidate;
@@ -60,11 +53,7 @@ adminSchema.pre('save', async function(next) {
             }
             attempts++;
         }
-        if (!unique) {
-            return next(new Error('Failed to generate unique walletId'));
-        }
     }
-
     next();
 });
 
@@ -73,21 +62,6 @@ adminSchema.pre('save', async function(next) {
 // ============================================
 adminSchema.methods.comparePassword = async function(candidate) {
     return await bcrypt.compare(candidate, this.password);
-};
-
-// 🔧 ADD: নিরাপদ public representation (password কখনো leak না হয়)
-adminSchema.methods.toSafeJSON = function() {
-    return {
-        id: this._id,
-        adminId: this.adminId,
-        fullName: this.fullName,
-        mobile: this.mobile,
-        email: this.email,
-        role: this.role,
-        isActive: this.isActive,
-        isBlocked: this.isBlocked,
-        createdAt: this.createdAt,
-    };
 };
 
 module.exports = mongoose.model('Admin', adminSchema);
