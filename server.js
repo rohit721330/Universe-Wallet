@@ -4,13 +4,12 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const crypto = require('crypto');
-const rateLimit = require('express-rate-limit'); // 🔧 রেট লিমিটের জন্য যোগ করা হলো
 require('dotenv').config();
 
 const app = express();
 app.set('trust proxy', 1);
 
-// Middleware (আপনার আগের কোড)
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,18 +28,7 @@ global.emailOtpStore = new Map();
 const MONGO_URI = process.env.MONGODB_URI;
 
 // =========================================================
-// 🔧 নতুন রেট লিমিটার (শুধু সেটআপ এবং মাইগ্রেশন রুটের জন্য)
-// =========================================================
-const setupLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // ১ ঘণ্টা
-    max: 5, // প্রতি আইপিতে সর্বোচ্চ ৫ বার
-    message: { success: false, message: 'Too many setup attempts. Try again in 1 hour.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-// =========================================================
-// Mask an admin ID for display (আপনার আগের কোড)
+// Mask an admin ID for display
 // =========================================================
 function maskAdminId(adminId) {
     if (!adminId || typeof adminId !== 'string') return 'unknown';
@@ -55,7 +43,7 @@ function maskAdminId(adminId) {
 }
 
 // =========================================================
-// Timing-safe secret comparison (আপনার আগের কোড)
+// Timing-safe secret comparison
 // =========================================================
 function safeCompareSecret(provided, expected) {
     if (typeof provided !== 'string' || typeof expected !== 'string') return false;
@@ -73,7 +61,7 @@ function safeCompareSecret(provided, expected) {
 }
 
 // =========================================================
-// Extract setup secret (আপনার আগের কোড)
+// Extract setup secret WITHOUT ever logging it
 // =========================================================
 function extractSetupSecret(req) {
     const headerSecret = req.headers['x-setup-secret'];
@@ -90,7 +78,7 @@ function extractSetupSecret(req) {
 }
 
 // =========================================================
-// Safe logging (আপনার আগের কোড)
+// Safe logging — never prints the secret
 // =========================================================
 function logSetupAttempt(tag, req, success, reason) {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
@@ -106,7 +94,7 @@ function logSetupAttempt(tag, req, success, reason) {
 }
 
 // =========================================================
-// MongoDB Connection (আপনার আগের কোড)
+// MongoDB Connection with Global Cache
 // =========================================================
 let cached = global.mongoose;
 
@@ -159,7 +147,7 @@ async function connectDB() {
 }
 
 // =========================================================
-// DB Connection Middleware (আপনার আগের কোড)
+// DB Connection Middleware
 // =========================================================
 const dbConnectMiddleware = async (req, res, next) => {
     try {
@@ -175,7 +163,7 @@ const dbConnectMiddleware = async (req, res, next) => {
 };
 
 // =========================================================
-// Referral CORS Middleware (আপনার আগের কোড)
+// Referral CORS Middleware
 // =========================================================
 const referralCorsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -195,7 +183,7 @@ app.use('/api', dbConnectMiddleware);
 app.use('/referral', dbConnectMiddleware);
 
 // ============================================================
-// POST /setup-admin
+// POST /setup-admin — Create FIRST admin using SECRET KEY
 // ============================================================
 const setupAdminHandler = async (req, res) => {
     try {
@@ -209,6 +197,7 @@ const setupAdminHandler = async (req, res) => {
             });
         }
 
+        // Secret check
         if (!SETUP_SECRET) {
             console.error('❌ [SETUP-ADMIN] SETUP_SECRET not configured.');
             return res.status(500).json({
@@ -420,12 +409,11 @@ const setupAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 রেট লিমিট যোগ করা হলো
-app.post('/setup-admin', setupLimiter, setupAdminHandler);
-app.get('/setup-admin', setupLimiter, setupAdminHandler);
+app.post('/setup-admin', setupAdminHandler);
+app.get('/setup-admin', setupAdminHandler);
 
 // ============================================================
-// POST /reset-admin
+// POST /reset-admin — Wipe ALL admins (no new admin created)
 // ============================================================
 const resetAdminHandler = async (req, res) => {
     try {
@@ -531,9 +519,8 @@ const resetAdminHandler = async (req, res) => {
     }
 };
 
-// 🔧 রেট লিমিট যোগ করা হলো
-app.post('/reset-admin', setupLimiter, resetAdminHandler);
-app.get('/reset-admin', setupLimiter, resetAdminHandler);
+app.post('/reset-admin', resetAdminHandler);
+app.get('/reset-admin', resetAdminHandler);
 
 // ⚠️ TEMPORARY — Delete after use
 app.get('/migrate-referral-codes-v2', async (req, res) => {
