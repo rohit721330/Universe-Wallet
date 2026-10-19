@@ -1,6 +1,4 @@
-// ============================================================
-// FILE: routes/auth.js — সম্পূর্ণ (শুধু rate limiter যোগ)
-// ============================================================
+// FILE: routes/auth.js
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -13,7 +11,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 // =========================================================
-// ✅ DB CONNECTION MIDDLEWARE (আপনার original)
+// ✅ DB CONNECTION MIDDLEWARE (আপনার আগের কোড)
 // =========================================================
 router.use(async (req, res, next) => {
     try {
@@ -36,7 +34,7 @@ router.use(async (req, res, next) => {
 });
 
 // =========================================================
-// RATE LIMITERS (আপনার original + ৩টি নতুন)
+// RATE LIMITERS
 // =========================================================
 const otpLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -76,7 +74,7 @@ const telegramLimiter = rateLimit({
 });
 
 // =========================================================
-// ENV CONFIGURATION (আপনার original)
+// ENV CONFIGURATION (আপনার আগের কোড)
 // =========================================================
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TG_ID = process.env.ADMIN_TG_ID;
@@ -89,7 +87,7 @@ if (!ADMIN_TG_ID) console.error('❌ Admin TG Id Is Not Set In Environment Varia
 if (!JWT_SECRET) console.error('❌ JWT Secret Is Not Set In Environment Variables.');
 
 // =========================================================
-// VERIFY TOKEN (আপনার original)
+// VERIFY TOKEN (আপনার আগের কোড)
 // =========================================================
 const verifyToken = async (req, res, next) => {
     try {
@@ -129,7 +127,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 // =========================================================
-// HELPER: Send Telegram Message (আপনার original)
+// HELPER: Send Telegram Message (আপনার আগের কোড)
 // =========================================================
 async function sendTelegramMessage(chatId, message) {
     if (!BOT_TOKEN) {
@@ -163,7 +161,7 @@ async function sendTelegramMessage(chatId, message) {
 }
 
 // =========================================================
-// HELPER: Send OTP via Email (আপনার original)
+// HELPER: Send OTP via Email (আপনার আগের কোড)
 // =========================================================
 async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
     try {
@@ -174,9 +172,9 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
             return { success: false, error: 'Email service not configured' };
         }
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: False,
+            service: 'gmail',
+            port: 465,
+            secure: true,
             auth: {
                 user: EMAIL_USER,
                 pass: EMAIL_PASS
@@ -263,7 +261,7 @@ async function sendOtpViaEmail(email, otp, name, purpose = 'Verification') {
 }
 
 // =========================================================
-// HELPERS: Generators & Utilities (আপনার original)
+// HELPERS: Generators & Utilities (আপনার আগের কোড)
 // =========================================================
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -330,7 +328,7 @@ function maskEmail(email) {
 }
 
 // =========================================================
-// MongoDB OTP Helpers (আপনার original)
+// MongoDB OTP Helpers (আপনার আগের কোড)
 // =========================================================
 async function saveOtp(identifier, type, otp) {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -356,7 +354,7 @@ async function deleteOtp(identifier, type) {
 }
 
 // =========================================================
-// USER RESPONSE SHAPE (আপনার original)
+// USER RESPONSE SHAPE (আপনার আগের কোড)
 // =========================================================
 function buildUserResponse(user) {
     return {
@@ -379,7 +377,7 @@ function buildUserResponse(user) {
 }
 
 // =========================================================
-// ✅ HELPER: Apply Referral (আপনার original)
+// ✅ HELPER: Apply Referral (আপনার আগের কোড)
 // =========================================================
 async function applyReferralIfProvided(newUser, referralCode) {
     if (!referralCode || typeof referralCode !== 'string') return null;
@@ -465,7 +463,7 @@ async function applyReferralIfProvided(newUser, referralCode) {
 }
 
 // =========================================================
-// LOGIN WITH PASSWORD (আপনার original)
+// LOGIN WITH PASSWORD (আপনার আগের কোড)
 // =========================================================
 router.post('/login', loginLimiter, async (req, res) => {
     try {
@@ -500,7 +498,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 
 // =========================================================
-// SEND LOGIN OTP (আপনার original)
+// SEND LOGIN OTP (আপনার আগের কোড)
 // =========================================================
 router.post('/send-login-otp', otpLimiter, async (req, res) => {
     try {
@@ -560,7 +558,7 @@ router.post('/send-login-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// LOGIN WITH OTP (আপনার original)
+// LOGIN WITH OTP (আপনার আগের কোড)
 // =========================================================
 router.post('/login-with-otp', loginLimiter, async (req, res) => {
     try {
@@ -632,7 +630,7 @@ router.post('/login-with-otp', loginLimiter, async (req, res) => {
 });
 
 // =========================================================
-// SEND TELEGRAM OTP (আপনার original)
+// SEND TELEGRAM OTP (আপনার আগের কোড)
 // =========================================================
 router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
     try {
@@ -702,7 +700,7 @@ router.post('/send-telegram-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// VERIFY TELEGRAM OTP (আপনার original)
+// VERIFY TELEGRAM OTP (আপনার আগের কোড)
 // =========================================================
 router.post('/verify-telegram-otp', otpLimiter, async (req, res) => {
     try {
@@ -734,7 +732,7 @@ router.post('/verify-telegram-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// ✅ REGISTER NEW USER (আপনার original, শুধু registerLimiter যোগ)
+// ✅ REGISTER NEW USER (🔧 রেট লিমিট যোগ করা হলো)
 // =========================================================
 router.post('/register', registerLimiter, async (req, res) => {
     try {
@@ -923,7 +921,7 @@ router.post('/register', registerLimiter, async (req, res) => {
 });
 
 // =========================================================
-// FORGOT PASSWORD - Send OTP (আপনার original)
+// FORGOT PASSWORD - Send OTP (আপনার আগের কোড)
 // =========================================================
 router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
     try {
@@ -1012,8 +1010,7 @@ router.post('/send-forgot-password-otp', otpLimiter, async (req, res) => {
 });
 
 // =========================================================
-// FORGOT PASSWORD - Reset Password
-// 🔧 SECURITY: resetLimiter + password strength register-এর মতো
+// FORGOT PASSWORD - Reset Password (🔧 রেট লিমিট যোগ করা হলো)
 // =========================================================
 router.post('/reset-password', resetLimiter, async (req, res) => {
     try {
@@ -1028,12 +1025,8 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
             return res.status(200).json({ success: false, message: 'OTP and password are required.' });
         }
 
-        // 🔧 SECURITY: password strength register-এর মতোই
-        if (password.length < 8 || password.length > 15) {
-            return res.status(200).json({ success: false, message: 'Password must be 8-15 characters long.' });
-        }
-        if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-            return res.status(200).json({ success: false, message: 'Password must contain uppercase, lowercase, and number.' });
+        if (password.length < 4) {
+            return res.status(200).json({ success: false, message: 'Password must be at least 4 characters long.' });
         }
 
         if (mobile) {
@@ -1089,7 +1082,7 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
 });
 
 // =========================================================
-// GET CURRENT USER (আপনার original)
+// GET CURRENT USER (আপনার আগের কোড)
 // =========================================================
 router.get('/me', verifyToken, async (req, res) => {
     try {
@@ -1121,7 +1114,7 @@ router.get('/me', verifyToken, async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY API KEY (আপনার original)
+// GET USER BY API KEY (আপনার আগের কোড)
 // =========================================================
 router.get('/user-by-apikey/:apiKey', async (req, res) => {
     try {
@@ -1145,7 +1138,7 @@ router.get('/user-by-apikey/:apiKey', async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY TELEGRAM ID (আপনার original)
+// GET USER BY TELEGRAM ID (আপনার আগের কোড)
 // =========================================================
 router.get('/user-by-telegram/:tgid', async (req, res) => {
     try {
@@ -1169,7 +1162,7 @@ router.get('/user-by-telegram/:tgid', async (req, res) => {
 });
 
 // =========================================================
-// VERIFY TOKEN (আপনার original)
+// VERIFY TOKEN (আপনার আগের কোড)
 // =========================================================
 router.get('/verify', verifyToken, async (req, res) => {
     try {
@@ -1201,8 +1194,7 @@ router.get('/verify', verifyToken, async (req, res) => {
 });
 
 // =========================================================
-// TELEGRAM AUTO LOGIN
-// 🔧 SECURITY: telegramLimiter যোগ
+// TELEGRAM AUTO LOGIN (🔧 রেট লিমিট যোগ করা হলো)
 // =========================================================
 router.post('/telegram-login', telegramLimiter, async (req, res) => {
     try {
@@ -1229,7 +1221,7 @@ router.post('/telegram-login', telegramLimiter, async (req, res) => {
 });
 
 // =========================================================
-// GET USER BY MOBILE (আপনার original)
+// GET USER BY MOBILE (আপনার আগের কোড)
 // =========================================================
 router.get('/user-by-mobile/:mobile', async (req, res) => {
     try {
