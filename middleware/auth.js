@@ -9,18 +9,18 @@ const auth = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorised Entry. Token Missing.' });
+      return res.status(401).json({ error: '𝐔ɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ. 𝐓ᴏᴋᴇɴ 𝐌ɪꜱꜱɪɴɢ' });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.userId).select('-password');
 
     if (!user) {
-      return res.status(401).json({ error: 'User Not Found.' });
+      return res.status(401).json({ error: '𝐔ꜱᴇʀ 𝐍ᴏᴛ 𝐅ᴏᴜɴᴅ' });
     }
 
     if (user.isBlocked) {
-      return res.status(403).json({ error: 'Your Account Is Blocked.' });
+      return res.status(403).json({ error: '𝐘ᴏᴜʀ 𝐀ᴄᴄᴏᴜɴᴛ ɪꜱ 𝐁ʟᴏᴄᴋᴇᴅ' });
     }
 
     req.user = user;
@@ -28,11 +28,11 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ error: 'Invalid Token.' });
+      return res.status(401).json({ error: '𝐈ɴᴠᴀʟɪᴅ 𝐓𝐨ᴋᴇɴ' });
     }
 
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token Expired.' });
+      return res.status(401).json({ error: '𝐓𝐨ᴋᴇɴ 𝐄xᴘɪʀᴇᴅ' });
     }
 
     res.status(500).json({ error: error.message });
