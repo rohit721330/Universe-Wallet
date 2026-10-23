@@ -28,17 +28,15 @@ if (!JWT_SECRET) {
 }
 
 // ============================================
-// LOGGER HELPERS
+// LOGGERS
 // ============================================
 function logRequest(req, tag) {
     var adminInfo = req.user ? (req.user.walletId || req.user.adminDbId || 'unknown') : 'unauth';
     console.log(`[${new Date().toISOString()}] [${tag}] ${req.method} ${req.originalUrl} | Admin: ${adminInfo} | IP: ${req.ip || 'N/A'}`);
 }
-
 function logSuccess(tag, message, data) {
     console.log(`[${new Date().toISOString()}] [${tag}] SUCCESS: ${message}`, data ? JSON.stringify(data) : '');
 }
-
 function logError(tag, message, error) {
     console.error(`[${new Date().toISOString()}] [${tag}] ERROR: ${message}`);
     if (error) {
@@ -51,14 +49,11 @@ function logError(tag, message, error) {
                 console.error(`[${tag}] Field "${k}":`, error.errors[k].message);
             });
         }
-        if (error.stack) console.error(`[${tag}] Stack:`, error.stack);
     }
 }
-
 function logWarn(tag, message, data) {
     console.warn(`[${new Date().toISOString()}] [${tag}] WARN: ${message}`, data ? JSON.stringify(data) : '');
 }
-
 function logInfo(tag, message, data) {
     console.log(`[${new Date().toISOString()}] [${tag}] INFO: ${message}`, data ? JSON.stringify(data) : '');
 }
@@ -84,6 +79,8 @@ async function sendTelegramMessage(chatId, message) {
             resolve({ success: false });
             return;
         }
+        if (!chatId) { resolve({ success: false }); return; }
+
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
         const data = JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' });
         const request = https.request(url, {
@@ -93,8 +90,11 @@ async function sendTelegramMessage(chatId, message) {
             let responseData = '';
             res.on('data', (chunk) => responseData += chunk);
             res.on('end', () => {
-                try { resolve({ success: JSON.parse(responseData).ok }); }
-                catch (e) { resolve({ success: false }); }
+                try {
+                    const parsed = JSON.parse(responseData);
+                    if (!parsed.ok) logWarn('TELEGRAM', 'Send failed', parsed.description);
+                    resolve({ success: parsed.ok });
+                } catch (e) { resolve({ success: false }); }
             });
         });
         request.on('error', () => resolve({ success: false }));
@@ -103,6 +103,10 @@ async function sendTelegramMessage(chatId, message) {
     });
 }
 
+// ============================================
+// NOTIFY: System-only (no actor context)
+// Used for: failed login, wrong pattern
+// ============================================
 async function notifyAdmin(message) {
     try {
         if (!ADMIN_TG_ID) {
@@ -118,29 +122,102 @@ async function notifyAdmin(message) {
 }
 
 // ============================================
-// VERIFY ADMIN TOKEN MIDDLEWARE
+// NOTIFY_ACTION: Sends to actor + all super_admins
+// ============================================
+async function notifyAction(actorAdmin, message, options) {
+    options = options || {};
+    try {
+        const recipients = new Set();
+
+        // 1) Actor's own telegramId
+        if (actorAdmin && actorAdmin.telegramId) {
+            const tid = String(actorAdmin.telegramId).trim();
+            if (tid) recipients.add(tid);
+        }
+
+        // 2) All active super_admins' telegramIds
+        const superAdmins = await Admin.find({
+            role: 'super_admin',
+            isActive: true,
+            isBlocked: false
+        }).select('telegramId').lean();
+
+        superAdmins.forEach(sa => {
+            if (sa.telegramId && String(sa.telegramId).trim()) {
+                recipients.add(String(sa.telegramId).trim());
+            }
+        });
+
+        // 3) Global fallback (ADMIN_TG_ID)
+        if (ADMIN_TG_ID) {
+            const gid = String(ADMIN_TG_ID).trim();
+            if (gid) recipients.add(gid);
+        }
+
+        // 4) Extra recipients (e.g., new admin being created)
+        if (options.extraRecipients && Array.isArray(options.extraRecipients)) {
+            options.extraRecipients.forEach(r => {
+                if (r && String(r).trim()) recipients.add(String(r).trim());
+            });
+        }
+
+        if (recipients.size === 0) {
+            logWarn('NOTIFY_ACTION', 'No recipients', { actor: actorAdmin ? actorAdmin.walletId : 'system' });
+            return { sent: 0, failed: 0, total: 0 };
+        }
+
+        let sent = 0, failed = 0;
+        const list = Array.from(recipients);
+
+        for (const chatId of list) {
+            try {
+                const res = await sendTelegramMessage(chatId, message);
+                if (res.success) sent++;
+                else failed++;
+            } catch (e) {
+                failed++;
+                logError('NOTIFY_ACTION', `Failed for ${chatId}`, e);
+            }
+        }
+
+        logInfo('NOTIFY_ACTION', `Sent ${sent}/${list.length}`, {
+            actor: actorAdmin ? actorAdmin.walletId : 'system',
+            sent, failed
+        });
+        return { sent, failed, total: list.length };
+    } catch (error) {
+        logError('NOTIFY_ACTION', 'Routing error', error);
+        return { sent: 0, failed: 0 };
+    }
+}
+
+// Helper: get actor admin (fresh from DB)
+async function getActorAdmin(req) {
+    if (!req.user || !req.user.adminDbId) return null;
+    try {
+        return await Admin.findById(req.user.adminDbId)
+            .select('telegramId fullName walletId role')
+            .lean();
+    } catch (e) { return null; }
+}
+
+// ============================================
+// AUTH MIDDLEWARE
 // ============================================
 async function verifyAdminToken(req, res, next) {
     const tag = 'AUTH';
     logRequest(req, tag);
     try {
         const authHeader = req.headers.authorization;
-
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            logWarn(tag, 'No token provided', { url: req.originalUrl });
             return res.status(401).json({ success: false, message: 'No Token Provided.' });
         }
-
         const token = authHeader.split(' ')[1];
-
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
-
             if (!decoded.isAdmin || decoded.tokenType !== 'admin_jwt') {
-                logWarn(tag, 'Access denied - not admin token', { walletId: decoded.walletId });
                 return res.status(403).json({ success: false, message: 'Access Denied.' });
             }
-
             req.user = {
                 isAdmin: true,
                 adminDbId: decoded.adminDbId,
@@ -149,14 +226,11 @@ async function verifyAdminToken(req, res, next) {
                 role: decoded.role,
                 tokenType: 'admin_jwt'
             };
-            logSuccess(tag, 'Token verified', { walletId: decoded.walletId });
             return next();
         } catch (jwtError) {
             if (jwtError.name === 'TokenExpiredError') {
-                logWarn(tag, 'Token expired', { error: jwtError.message });
                 return res.status(401).json({ success: false, message: 'Token Has Expired.' });
             }
-            logWarn(tag, 'Invalid token', { error: jwtError.message });
             return res.status(401).json({ success: false, message: 'Invalid Token.' });
         }
     } catch (error) {
@@ -166,30 +240,22 @@ async function verifyAdminToken(req, res, next) {
 }
 
 // ============================================
-// ADMIN LOGIN - STEP 1: PATTERN
+// LOGIN STEP 1: PATTERN
 // ============================================
 router.post('/login-step1', async (req, res) => {
     const tag = 'LOGIN_STEP1';
     logRequest(req, tag);
-
     try {
         const { pattern } = req.body;
-
-        if (!pattern) {
-            logWarn(tag, 'Pattern missing');
-            return res.status(400).json({ success: false, message: 'Pattern required.' });
-        }
+        if (!pattern) return res.status(400).json({ success: false, message: 'Pattern required.' });
         if (!/^[0-9]{2,9}$/.test(pattern)) {
-            logWarn(tag, 'Invalid pattern format', { pattern });
             return res.status(400).json({ success: false, message: 'Pattern must be 2-9 digits.' });
         }
         if (!ADMIN_PATTERN) {
-            logError(tag, 'ADMIN_PATTERN not configured');
             return res.status(500).json({ success: false, message: 'Server misconfiguration.' });
         }
-
         if (pattern !== ADMIN_PATTERN) {
-            logWarn(tag, 'Wrong pattern attempt', { ip: req.ip });
+            logWarn(tag, 'Wrong pattern', { ip: req.ip });
             await notifyAdmin(
 `⚠️ <b>Wrong Pattern Attempt</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
@@ -198,14 +264,11 @@ router.post('/login-step1', async (req, res) => {
             );
             return res.status(401).json({ success: false, message: 'Incorrect pattern.' });
         }
-
         const tempToken = jwt.sign(
             { step: 'credentials_pending', patternVerified: true },
             JWT_SECRET,
             { expiresIn: '5m' }
         );
-
-        logSuccess(tag, 'Pattern verified, temp token issued');
         res.json({ success: true, message: 'Pattern verified.', tempToken });
     } catch (error) {
         logError(tag, 'Login step1 error', error);
@@ -214,66 +277,55 @@ router.post('/login-step1', async (req, res) => {
 });
 
 // ============================================
-// SHARED: Admin credential verification
+// LOGIN: shared credential verification
 // ============================================
 async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLabel) {
     logRequest(req, tag);
     try {
         const { tempToken, password } = req.body;
-
         if (!tempToken || !password) {
-            logWarn(tag, 'Missing fields');
             return res.status(400).json({ success: false, message: 'Required fields missing.' });
         }
-
         let decoded;
-        try {
-            decoded = jwt.verify(tempToken, JWT_SECRET);
-        } catch (err) {
-            logWarn(tag, 'Temp token invalid', { error: err.message });
+        try { decoded = jwt.verify(tempToken, JWT_SECRET); }
+        catch (err) {
             return res.status(401).json({ success: false, message: 'Session expired.' });
         }
         if (decoded.step !== 'credentials_pending' || !decoded.patternVerified) {
-            logWarn(tag, 'Invalid session state');
             return res.status(401).json({ success: false, message: 'Invalid session.' });
         }
-
         if (!lookupQuery || Object.keys(lookupQuery).length === 0) {
-            logWarn(tag, 'Missing identifier in request body');
             return res.status(400).json({ success: false, message: `${lookupLabel} required.` });
         }
 
         const admin = await Admin.findOne(lookupQuery);
         if (!admin) {
-            logWarn(tag, `Admin not found by ${lookupLabel}`, lookupQuery);
             await notifyAdmin(
 `❌ <b>Admin Login Failed</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `📝 <b>Reason:</b> ${lookupLabel} not found\n` +
-`🆔 <b>${lookupLabel}:</b> ${JSON.stringify(lookupQuery)}\n\n` +
+`🆔 <b>${lookupLabel}:</b> ${JSON.stringify(lookupQuery)}\n` +
+`🌐 <b>IP:</b> ${req.ip}\n\n` +
 `🔒 Security Alert!`
             );
             return res.status(401).json({ success: false, message: 'Invalid credentials.' });
         }
-
         if (admin.isBlocked) {
-            logWarn(tag, 'Admin blocked', { walletId: admin.walletId });
             return res.status(403).json({ success: false, message: 'Account blocked.' });
         }
         if (!admin.isActive) {
-            logWarn(tag, 'Admin inactive', { walletId: admin.walletId });
             return res.status(403).json({ success: false, message: 'Account inactive.' });
         }
 
         const isMatch = await admin.comparePassword(password);
         if (!isMatch) {
-            logWarn(tag, 'Wrong password', { walletId: admin.walletId, via: lookupLabel });
             await notifyAdmin(
 `❌ <b>Admin Login Failed</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `📝 <b>Reason:</b> Wrong password\n` +
 `🎯 <b>Via:</b> ${lookupLabel}\n` +
-`💼 <b>Wallet ID:</b> ${admin.walletId}\n\n` +
+`💼 <b>Wallet ID:</b> ${admin.walletId}\n` +
+`🌐 <b>IP:</b> ${req.ip}\n\n` +
 `🔒 Security Alert!`
             );
             return res.status(401).json({ success: false, message: 'Invalid credentials.' });
@@ -297,16 +349,21 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
             { expiresIn: '7d' }
         );
 
-        logSuccess(tag, 'Admin logged in', { walletId: admin.walletId, via: lookupLabel });
-
-        await notifyAdmin(
+        // Notify actor + super_admins
+        const actorForNotify = {
+            telegramId: admin.telegramId,
+            fullName: admin.fullName,
+            walletId: admin.walletId
+        };
+        await notifyAction(actorForNotify,
 `✅ <b>Admin Login Successful</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Name:</b> ${admin.fullName}\n` +
 `💼 <b>Wallet ID:</b> ${admin.walletId}\n` +
 `📱 <b>Mobile:</b> ${admin.mobile}\n` +
 `🎯 <b>Via:</b> ${lookupLabel}\n` +
-`🎭 <b>Role:</b> ${admin.role}\n\n` +
+`🎭 <b>Role:</b> ${admin.role}\n` +
+`🌐 <b>IP:</b> ${req.ip}\n\n` +
 `🎉 Welcome back!`
         );
 
@@ -333,37 +390,28 @@ async function _processAdminCredentialLogin(req, res, tag, lookupQuery, lookupLa
     }
 }
 
-// ============================================
-// STEP 2 — MOBILE LOGIN
-// ============================================
 router.post('/login-step2', async (req, res) => {
     const { mobile } = req.body || {};
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
         return res.status(400).json({ success: false, message: 'Valid 10-digit mobile required.' });
     }
-    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP2_MOBILE', { mobile: mobile.trim() }, 'Mobile');
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP2', { mobile: mobile.trim() }, 'Mobile');
 });
 
-// ============================================
-// STEP 3 — TELEGRAM LOGIN
-// ============================================
 router.post('/login-step3', async (req, res) => {
     const { telegramId } = req.body || {};
     if (!telegramId || String(telegramId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Telegram ID required.' });
     }
-    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP3_TELEGRAM', { telegramId: String(telegramId).trim() }, 'Telegram ID');
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP3', { telegramId: String(telegramId).trim() }, 'Telegram ID');
 });
 
-// ============================================
-// STEP 4 — WALLET ID LOGIN
-// ============================================
 router.post('/login-step4', async (req, res) => {
     const { walletId } = req.body || {};
     if (!walletId || String(walletId).trim() === '') {
         return res.status(400).json({ success: false, message: 'Wallet ID required.' });
     }
-    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP4_WALLET', { walletId: String(walletId).trim().toUpperCase() }, 'Wallet ID');
+    return _processAdminCredentialLogin(req, res, 'LOGIN_STEP4', { walletId: String(walletId).trim().toUpperCase() }, 'Wallet ID');
 });
 
 // ============================================
@@ -371,14 +419,9 @@ router.post('/login-step4', async (req, res) => {
 // ============================================
 router.get('/my-profile', verifyAdminToken, async (req, res) => {
     const tag = 'MY_PROFILE';
-    logRequest(req, tag);
     try {
         const admin = await Admin.findById(req.user.adminDbId).select('-password');
-        if (!admin) {
-            logWarn(tag, 'Admin not found', { adminDbId: req.user.adminDbId });
-            return res.status(404).json({ success: false, message: 'Admin not found.' });
-        }
-        logSuccess(tag, 'Profile fetched', { walletId: admin.walletId });
+        if (!admin) return res.status(404).json({ success: false, message: 'Admin not found.' });
         res.json({ success: true, admin });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -388,40 +431,56 @@ router.get('/my-profile', verifyAdminToken, async (req, res) => {
 
 router.put('/update-my-profile', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_PROFILE';
-    logRequest(req, tag);
     try {
         const { fullName, mobile, email, telegramId } = req.body;
         const admin = await Admin.findById(req.user.adminDbId);
-        if (!admin) {
-            logWarn(tag, 'Admin not found');
-            return res.status(404).json({ success: false, message: 'Admin not found.' });
-        }
+        if (!admin) return res.status(404).json({ success: false, message: 'Admin not found.' });
 
-        if (fullName) admin.fullName = fullName;
-        if (mobile) {
+        const changes = [];
+        if (fullName && fullName !== admin.fullName) {
+            changes.push(`Name: ${admin.fullName} → ${fullName}`);
+            admin.fullName = fullName;
+        }
+        if (mobile && mobile !== admin.mobile) {
             if (!/^[0-9]{10}$/.test(mobile)) {
-                logWarn(tag, 'Invalid mobile', { mobile });
                 return res.status(400).json({ success: false, message: 'Mobile must be 10 digits.' });
             }
-            const exists = await Admin.findOne({ mobile, _id: { $ne: admin._id } });
-            if (exists) {
-                logWarn(tag, 'Mobile already in use', { mobile });
-                return res.status(400).json({ success: false, message: 'Mobile already in use.' });
-            }
+            const dup = await Admin.findOne({ mobile, _id: { $ne: admin._id } });
+            if (dup) return res.status(400).json({ success: false, message: 'Mobile already in use.' });
+            changes.push(`Mobile: ${admin.mobile} → ${mobile}`);
             admin.mobile = mobile;
         }
-        if (email) admin.email = email;
-        if (telegramId) {
-            const exists = await Admin.findOne({ telegramId, _id: { $ne: admin._id } });
-            if (exists) {
-                return res.status(400).json({ success: false, message: 'Telegram ID already in use.' });
+        if (email !== undefined && email !== admin.email) {
+            if (email) {
+                const dup = await Admin.findOne({ email, _id: { $ne: admin._id } });
+                if (dup) return res.status(400).json({ success: false, message: 'Email already in use.' });
             }
-            admin.telegramId = telegramId;
+            changes.push(`Email changed`);
+            admin.email = email || undefined;
         }
+        if (telegramId !== undefined && telegramId !== admin.telegramId) {
+            const tId = telegramId ? String(telegramId).trim() : undefined;
+            if (tId) {
+                const dup = await Admin.findOne({ telegramId: tId, _id: { $ne: admin._id } });
+                if (dup) return res.status(400).json({ success: false, message: 'Telegram ID already in use.' });
+            }
+            changes.push(`Telegram: ${admin.telegramId || 'none'} → ${tId || 'none'}`);
+            admin.telegramId = tId;
+        }
+        if (changes.length === 0) return res.json({ success: true, message: 'No changes.' });
+
         admin.updatedBy = admin.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Profile updated', { walletId: admin.walletId });
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`✏️ <b>Profile Updated</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>Admin:</b> ${admin.fullName} (${admin.walletId})\n\n` +
+`📋 <b>Changes:</b>\n` +
+changes.map(c => `  • ${c}`).join('\n')
+        );
+
         res.json({ success: true, message: 'Profile updated.', admin });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -431,35 +490,33 @@ router.put('/update-my-profile', verifyAdminToken, async (req, res) => {
 
 router.put('/change-my-password', verifyAdminToken, async (req, res) => {
     const tag = 'CHANGE_PASSWORD';
-    logRequest(req, tag);
     try {
         const { currentPassword, newPassword } = req.body;
         if (!currentPassword || !newPassword) {
-            logWarn(tag, 'Missing passwords');
             return res.status(400).json({ success: false, message: 'Both passwords required.' });
         }
         if (newPassword.length < 6) {
-            logWarn(tag, 'Password too short');
             return res.status(400).json({ success: false, message: 'Min 6 characters.' });
         }
-
         const admin = await Admin.findById(req.user.adminDbId);
-        if (!admin) {
-            logWarn(tag, 'Admin not found');
-            return res.status(404).json({ success: false, message: 'Admin not found.' });
-        }
+        if (!admin) return res.status(404).json({ success: false, message: 'Admin not found.' });
 
         const isMatch = await admin.comparePassword(currentPassword);
         if (!isMatch) {
-            logWarn(tag, 'Wrong current password', { walletId: admin.walletId });
             return res.status(401).json({ success: false, message: 'Current password incorrect.' });
         }
-
         admin.password = newPassword;
         admin.updatedBy = admin.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Password changed', { walletId: admin.walletId });
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🔑 <b>Password Changed</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>Admin:</b> ${admin.fullName} (${admin.walletId})\n\n` +
+`⚠️ If this wasn't you, contact super admin immediately!`
+        );
+
         res.json({ success: true, message: 'Password changed.' });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -472,14 +529,11 @@ router.put('/change-my-password', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/admins-list', verifyAdminToken, async (req, res) => {
     const tag = 'ADMINS_LIST';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied - not super admin', { role: req.user.role });
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
         const admins = await Admin.find().select('-password').sort({ createdAt: -1 });
-        logSuccess(tag, `Fetched ${admins.length} admins`);
         res.json({ success: true, admins });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -494,80 +548,59 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
     const tag = 'CREATE_ADMIN';
     logRequest(req, tag);
     try {
-        // Check role
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied - not super admin', { role: req.user.role });
             return res.status(403).json({ success: false, message: 'Only super admin can create admins.' });
         }
 
         const { walletId, password, fullName, mobile, email, telegramId, role } = req.body;
 
-        // Validate required
         if (!walletId || !password || !fullName || !mobile) {
-            logWarn(tag, 'Required fields missing', {
-                hasWallet: !!walletId, hasPassword: !!password,
-                hasFullName: !!fullName, hasMobile: !!mobile
-            });
             return res.status(400).json({
                 success: false,
                 message: 'Wallet ID, Password, Full Name and Mobile are required.'
             });
         }
-
         if (password.length < 6) {
-            logWarn(tag, 'Password too short');
             return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
         }
-
         if (!/^[0-9]{10}$/.test(String(mobile).trim())) {
-            logWarn(tag, 'Invalid mobile format', { mobile });
             return res.status(400).json({ success: false, message: 'Mobile must be 10 digits.' });
         }
 
-        if (!/^[A-Z0-9_]{2,}$/.test(String(walletId).trim().toUpperCase())) {
-            logWarn(tag, 'Invalid wallet ID format', { walletId });
-            return res.status(400).json({
-                success: false,
-                message: 'Wallet ID must be 2+ uppercase letters/numbers/underscores.'
-            });
+        const normalizedWalletId = String(walletId).trim().toUpperCase();
+        if (!/^[A-Z0-9_]{2,}$/.test(normalizedWalletId)) {
+            return res.status(400).json({ success: false, message: 'Invalid Wallet ID format.' });
         }
 
-        // Validate role
         const allowedRoles = ['admin', 'super_admin', 'moderator'];
         const finalRole = allowedRoles.indexOf(role) > -1 ? role : 'admin';
 
-        const normalizedWalletId = String(walletId).trim().toUpperCase();
         const normalizedMobile = String(mobile).trim();
         const normalizedTelegram = (telegramId && String(telegramId).trim()) ? String(telegramId).trim() : null;
 
-        // Duplicate check
         const orConditions = [
             { walletId: normalizedWalletId },
-            { mobile: normalizedMobile }
+            { mobile: normalizedMobile },
+            { adminId: normalizedWalletId }
         ];
         if (normalizedTelegram) orConditions.push({ telegramId: normalizedTelegram });
 
         const existing = await Admin.findOne({ $or: orConditions });
         if (existing) {
-            let conflictField = 'Wallet ID';
-            if (existing.mobile === normalizedMobile) conflictField = 'Mobile';
-            else if (normalizedTelegram && existing.telegramId === normalizedTelegram) conflictField = 'Telegram ID';
-
-            logWarn(tag, 'Duplicate field detected', { conflictField, existing: existing.walletId });
-            return res.status(400).json({
-                success: false,
-                message: `${conflictField} already exists.`
-            });
+            let field = 'Wallet ID';
+            if (existing.mobile === normalizedMobile) field = 'Mobile';
+            else if (normalizedTelegram && existing.telegramId === normalizedTelegram) field = 'Telegram ID';
+            return res.status(400).json({ success: false, message: `${field} already exists.` });
         }
 
-        // Build admin data — ONLY set optional fields if they have values
         const adminData = {
+            adminId: normalizedWalletId,      // ← auto-set
             walletId: normalizedWalletId,
             password: password,
             fullName: String(fullName).trim(),
             mobile: normalizedMobile,
             role: finalRole,
-            createdBy: req.user.walletId || req.user.fullName || 'system',
+            createdBy: req.user.walletId || 'system',
             isActive: true,
             isBlocked: false
         };
@@ -576,26 +609,21 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
             const normEmail = String(email).trim().toLowerCase();
             const emailExists = await Admin.findOne({ email: normEmail });
             if (emailExists) {
-                logWarn(tag, 'Email already exists', { email: normEmail });
                 return res.status(400).json({ success: false, message: 'Email already in use.' });
             }
             adminData.email = normEmail;
         }
 
-        if (normalizedTelegram) {
-            adminData.telegramId = normalizedTelegram;
-        }
-
-        logInfo(tag, 'Creating admin', { walletId: normalizedWalletId, role: finalRole });
+        if (normalizedTelegram) adminData.telegramId = normalizedTelegram;
 
         const newAdmin = new Admin(adminData);
         await newAdmin.save();
 
-        logSuccess(tag, 'Admin created', { walletId: newAdmin.walletId, _id: newAdmin._id });
+        logSuccess(tag, 'Admin created', { walletId: newAdmin.walletId, adminId: newAdmin.adminId });
 
-        // Notify
-        try {
-            await notifyAdmin(
+        // Notify: actor + all super_admins + new admin
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `🆕 <b>New Admin Created</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Name:</b> ${newAdmin.fullName}\n` +
@@ -604,17 +632,16 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
 `📨 <b>Telegram:</b> ${newAdmin.telegramId || 'N/A'}\n` +
 `🎭 <b>Role:</b> ${newAdmin.role}\n` +
 `✍️ <b>Created By:</b> ${req.user.fullName || 'Admin'}\n\n` +
-`🎉 Welcome to the team!`
-            );
-        } catch (notifyErr) {
-            logError(tag, 'Notification failed (non-critical)', notifyErr);
-        }
+`🎉 Welcome to the team!`,
+        { extraRecipients: [newAdmin.telegramId] }
+        );
 
-        return res.json({
+        res.json({
             success: true,
             message: 'Admin created successfully.',
             admin: {
                 _id: newAdmin._id,
+                adminId: newAdmin.adminId,
                 walletId: newAdmin.walletId,
                 fullName: newAdmin.fullName,
                 mobile: newAdmin.mobile,
@@ -626,42 +653,26 @@ router.post('/create-admin-account', verifyAdminToken, async (req, res) => {
                 createdAt: newAdmin.createdAt
             }
         });
-
     } catch (error) {
         logError(tag, 'CREATE FAILED', error);
-
-        // Mongoose validation error
         if (error.name === 'ValidationError' && error.errors) {
             const fieldErrors = Object.keys(error.errors).map(k => ({
-                field: k,
-                message: error.errors[k].message
+                field: k, message: error.errors[k].message
             }));
             return res.status(400).json({
                 success: false,
-                message: 'Validation failed: ' + fieldErrors.map(f => `${f.field} - ${f.message}`).join(', '),
+                message: 'Validation: ' + fieldErrors.map(f => `${f.field} - ${f.message}`).join(', '),
                 errors: fieldErrors
             });
         }
-
-        // Duplicate key error
         if (error.code === 11000) {
             const dupField = error.keyValue ? Object.keys(error.keyValue)[0] : 'field';
             return res.status(400).json({
                 success: false,
-                message: `Duplicate value for "${dupField}". Please use a different one.`,
+                message: `Duplicate value for "${dupField}".`,
                 duplicateField: dupField
             });
         }
-
-        // Cast error (invalid ObjectId etc)
-        if (error.name === 'CastError') {
-            return res.status(400).json({
-                success: false,
-                message: `Invalid ${error.path}: ${error.value}`
-            });
-        }
-
-        // Generic
         return res.status(500).json({
             success: false,
             message: 'Server error while creating admin.',
@@ -678,43 +689,31 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
     logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-
-        const { adminDbId } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(adminDbId)) {
+        if (!mongoose.Types.ObjectId.isValid(req.params.adminDbId)) {
             return res.status(400).json({ success: false, message: 'Invalid admin ID.' });
         }
 
-        const {
-            fullName, mobile, email, telegramId, walletId,
-            role, isActive, isBlocked, newPassword
-        } = req.body;
-
-        const admin = await Admin.findById(adminDbId);
-        if (!admin) {
-            logWarn(tag, 'Admin not found', { id: adminDbId });
-            return res.status(404).json({ success: false, message: 'Admin not found.' });
-        }
+        const { fullName, mobile, email, telegramId, walletId, role, isActive, isBlocked, newPassword } = req.body;
+        const admin = await Admin.findById(req.params.adminDbId);
+        if (!admin) return res.status(404).json({ success: false, message: 'Admin not found.' });
 
         const changes = [];
 
         if (fullName && fullName.trim() && fullName !== admin.fullName) {
             changes.push(`Name: ${admin.fullName} → ${fullName}`);
-            admin.fullName = String(fullName).trim();
+            admin.fullName = fullName.trim();
         }
-
         if (mobile && mobile !== admin.mobile) {
-            if (!/^[0-9]{10}$/.test(String(mobile).trim())) {
+            if (!/^[0-9]{10}$/.test(mobile)) {
                 return res.status(400).json({ success: false, message: 'Mobile must be 10 digits.' });
             }
-            const dup = await Admin.findOne({ mobile: String(mobile).trim(), _id: { $ne: admin._id } });
+            const dup = await Admin.findOne({ mobile, _id: { $ne: admin._id } });
             if (dup) return res.status(400).json({ success: false, message: 'Mobile already in use.' });
             changes.push(`Mobile: ${admin.mobile} → ${mobile}`);
-            admin.mobile = String(mobile).trim();
+            admin.mobile = mobile;
         }
-
         if (email !== undefined) {
             const newEmail = email ? String(email).trim().toLowerCase() : undefined;
             if (newEmail !== admin.email) {
@@ -726,7 +725,6 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
                 admin.email = newEmail;
             }
         }
-
         if (telegramId !== undefined) {
             const tId = telegramId ? String(telegramId).trim() : undefined;
             if (tId !== admin.telegramId) {
@@ -738,20 +736,22 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
                 admin.telegramId = tId;
             }
         }
-
         if (walletId !== undefined) {
             const wId = walletId ? String(walletId).trim().toUpperCase() : undefined;
             if (wId && wId !== admin.walletId) {
                 if (!/^[A-Z0-9_]{2,}$/.test(wId)) {
                     return res.status(400).json({ success: false, message: 'Invalid Wallet ID format.' });
                 }
-                const dup = await Admin.findOne({ walletId: wId, _id: { $ne: admin._id } });
+                const dup = await Admin.findOne({
+                    $or: [{ walletId: wId }, { adminId: wId }],
+                    _id: { $ne: admin._id }
+                });
                 if (dup) return res.status(400).json({ success: false, message: 'Wallet ID already in use.' });
                 changes.push(`Wallet: ${admin.walletId} → ${wId}`);
                 admin.walletId = wId;
+                admin.adminId = wId;
             }
         }
-
         if (role) {
             const allowedRoles = ['admin', 'super_admin', 'moderator'];
             if (allowedRoles.indexOf(role) === -1) {
@@ -762,17 +762,14 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
                 admin.role = role;
             }
         }
-
         if (typeof isActive === 'boolean' && isActive !== admin.isActive) {
             changes.push(`Active: ${admin.isActive} → ${isActive}`);
             admin.isActive = isActive;
         }
-
         if (typeof isBlocked === 'boolean' && isBlocked !== admin.isBlocked) {
             changes.push(`Blocked: ${admin.isBlocked} → ${isBlocked}`);
             admin.isBlocked = isBlocked;
         }
-
         if (newPassword) {
             if (newPassword.length < 6) {
                 return res.status(400).json({ success: false, message: 'Password min 6 chars.' });
@@ -782,13 +779,22 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
         }
 
         if (changes.length === 0) {
-            return res.json({ success: true, message: 'No changes made.' });
+            return res.json({ success: true, message: 'No changes.' });
         }
 
         admin.updatedBy = req.user.walletId;
         await admin.save();
 
-        logSuccess(tag, 'Admin updated', { walletId: admin.walletId, changesCount: changes.length });
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`✏️ <b>Admin Updated</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>Target:</b> ${admin.fullName} (${admin.walletId})\n` +
+`✍️ <b>By:</b> ${req.user.fullName}\n\n` +
+`📋 <b>Changes (${changes.length}):</b>\n` +
+changes.map(c => `  • ${c}`).join('\n'),
+        { extraRecipients: [admin.telegramId] }
+        );
 
         res.json({
             success: true,
@@ -797,20 +803,9 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
         });
     } catch (error) {
         logError(tag, 'Failed', error);
-
         if (error.code === 11000) {
             const dupField = error.keyValue ? Object.keys(error.keyValue)[0] : 'field';
-            return res.status(400).json({
-                success: false,
-                message: `Duplicate value for "${dupField}".`,
-                duplicateField: dupField
-            });
-        }
-        if (error.name === 'ValidationError' && error.errors) {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation failed: ' + Object.values(error.errors).map(e => e.message).join(', ')
-            });
+            return res.status(400).json({ success: false, message: `Duplicate value for "${dupField}".` });
         }
         return res.status(500).json({ success: false, message: 'Failed: ' + error.message });
     }
@@ -821,39 +816,27 @@ router.put('/update-admin/:adminDbId', verifyAdminToken, async (req, res) => {
 // ============================================
 router.delete('/delete-admin/:adminDbId', verifyAdminToken, async (req, res) => {
     const tag = 'DELETE_ADMIN';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-
-        const { adminDbId } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(adminDbId)) {
+        if (!mongoose.Types.ObjectId.isValid(req.params.adminDbId)) {
             return res.status(400).json({ success: false, message: 'Invalid admin ID.' });
         }
-
-        const admin = await Admin.findById(adminDbId);
-        if (!admin) {
-            logWarn(tag, 'Admin not found');
-            return res.status(404).json({ success: false, message: 'Admin not found.' });
-        }
+        const admin = await Admin.findById(req.params.adminDbId);
+        if (!admin) return res.status(404).json({ success: false, message: 'Admin not found.' });
 
         if (admin._id.toString() === req.user.adminDbId) {
-            logWarn(tag, 'Cannot delete self');
             return res.status(400).json({ success: false, message: 'Cannot delete yourself.' });
         }
-
-        // Prevent deleting the last super_admin
         if (admin.role === 'super_admin') {
-            const superAdminCount = await Admin.countDocuments({
+            const others = await Admin.countDocuments({
                 role: 'super_admin',
                 _id: { $ne: admin._id },
                 isActive: true,
                 isBlocked: false
             });
-            if (superAdminCount === 0) {
-                logWarn(tag, 'Cannot delete last active super admin');
+            if (others === 0) {
                 return res.status(400).json({
                     success: false,
                     message: 'Cannot delete the last active super admin.'
@@ -861,23 +844,25 @@ router.delete('/delete-admin/:adminDbId', verifyAdminToken, async (req, res) => 
             }
         }
 
-        await Admin.findByIdAndDelete(adminDbId);
+        const deletedInfo = {
+            fullName: admin.fullName,
+            walletId: admin.walletId,
+            mobile: admin.mobile,
+            role: admin.role
+        };
+        await Admin.findByIdAndDelete(req.params.adminDbId);
 
-        logSuccess(tag, 'Admin deleted', { walletId: admin.walletId });
-
-        try {
-            await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `🗑️ <b>Admin Deleted</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
-`👤 <b>Name:</b> ${admin.fullName}\n` +
-`💼 <b>Wallet ID:</b> ${admin.walletId}\n` +
-`📱 <b>Mobile:</b> ${admin.mobile}\n` +
+`👤 <b>Name:</b> ${deletedInfo.fullName}\n` +
+`💼 <b>Wallet ID:</b> ${deletedInfo.walletId}\n` +
+`📱 <b>Mobile:</b> ${deletedInfo.mobile}\n` +
+`🎭 <b>Role:</b> ${deletedInfo.role}\n` +
 `✍️ <b>Deleted By:</b> ${req.user.fullName}\n\n` +
 `⚠️ Account removed from system.`
-            );
-        } catch (notifyErr) {
-            logError(tag, 'Notification failed (non-critical)', notifyErr);
-        }
+        );
 
         res.json({ success: true, message: 'Admin deleted.' });
     } catch (error) {
@@ -898,19 +883,14 @@ const DEFAULT_DEPOSIT_SETTINGS = {
 
 router.get('/deposit-settings', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSIT_SETTINGS_GET';
-    logRequest(req, tag);
     try {
         const admin = await Admin.findOne({
-            role: 'super_admin',
-            isActive: true,
-            isBlocked: false
+            role: 'super_admin', isActive: true, isBlocked: false
         }).select('depositSettings').lean();
 
         const settings = (admin && admin.depositSettings)
             ? Object.assign({}, DEFAULT_DEPOSIT_SETTINGS, admin.depositSettings)
             : DEFAULT_DEPOSIT_SETTINGS;
-
-        logSuccess(tag, 'Deposit settings fetched', settings);
         res.json({ success: true, settings });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -920,13 +900,10 @@ router.get('/deposit-settings', verifyAdminToken, async (req, res) => {
 
 router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSIT_SETTINGS_UPDATE';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-
         const { minDeposit, maxDeposit, taxPercent, taxEnabled } = req.body;
 
         if (minDeposit !== undefined && (typeof minDeposit !== 'number' || minDeposit < 1)) {
@@ -947,20 +924,16 @@ router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
         if (typeof maxDeposit === 'number') update['depositSettings.maxDeposit'] = maxDeposit;
         if (typeof taxPercent === 'number') update['depositSettings.taxPercent'] = taxPercent;
         if (typeof taxEnabled === 'boolean') update['depositSettings.taxEnabled'] = taxEnabled;
-
         update['depositSettings.updatedAt'] = new Date();
         update['depositSettings.updatedBy'] = req.user.walletId;
 
         const superAdmin = await Admin.findOne({ role: 'super_admin' });
-        if (!superAdmin) {
-            logWarn(tag, 'Super admin not found');
-            return res.status(404).json({ success: false, message: 'Super admin not found.' });
-        }
+        if (!superAdmin) return res.status(404).json({ success: false, message: 'Super admin not found.' });
 
         await Admin.findByIdAndUpdate(superAdmin._id, { $set: update }, { new: true });
 
-        logSuccess(tag, 'Deposit settings updated', { minDeposit, maxDeposit, taxPercent, taxEnabled });
-        await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `⚙️ <b>Deposit Settings Updated</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `✍️ <b>By:</b> ${req.user.fullName}\n\n` +
@@ -982,26 +955,17 @@ router.put('/deposit-settings', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/referral-settings', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRAL_SETTINGS_GET';
-    logRequest(req, tag);
     try {
         const admin = await Admin.findOne({
-            role: 'super_admin',
-            isActive: true,
-            isBlocked: false
+            role: 'super_admin', isActive: true, isBlocked: false
         }).select('referralSettings').lean();
 
         const defaults = {
-            enabled: true,
-            bonusAmount: 10,
-            minDepositAmount: 50,
-            maxReferralsPerUser: 100
+            enabled: true, bonusAmount: 10, minDepositAmount: 50, maxReferralsPerUser: 100
         };
-
         const settings = (admin && admin.referralSettings)
             ? Object.assign({}, defaults, admin.referralSettings)
             : defaults;
-
-        logSuccess(tag, 'Settings fetched', settings);
         res.json({ success: true, settings });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1011,34 +975,25 @@ router.get('/referral-settings', verifyAdminToken, async (req, res) => {
 
 router.put('/referral-settings', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRAL_SETTINGS_UPDATE';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-
         const { enabled, bonusAmount, minDepositAmount, maxReferralsPerUser } = req.body;
         const update = {};
-
         if (typeof enabled === 'boolean') update['referralSettings.enabled'] = enabled;
         if (typeof bonusAmount === 'number' && bonusAmount > 0) update['referralSettings.bonusAmount'] = bonusAmount;
         if (typeof minDepositAmount === 'number' && minDepositAmount > 0) update['referralSettings.minDepositAmount'] = minDepositAmount;
         if (typeof maxReferralsPerUser === 'number' && maxReferralsPerUser > 0) update['referralSettings.maxReferralsPerUser'] = maxReferralsPerUser;
-
         update['referralSettings.updatedAt'] = new Date();
         update['referralSettings.updatedBy'] = req.user.walletId;
 
         const superAdmin = await Admin.findOne({ role: 'super_admin' });
-        if (!superAdmin) {
-            logWarn(tag, 'Super admin not found');
-            return res.status(404).json({ success: false, message: 'Super admin not found.' });
-        }
-
+        if (!superAdmin) return res.status(404).json({ success: false, message: 'Super admin not found.' });
         await Admin.findByIdAndUpdate(superAdmin._id, { $set: update }, { new: true });
 
-        logSuccess(tag, 'Settings updated', { enabled, bonusAmount, minDepositAmount, maxReferralsPerUser });
-        await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `⚙️ <b>Referral Settings Updated</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `✍️ <b>By:</b> ${req.user.fullName}\n\n` +
@@ -1056,16 +1011,14 @@ router.put('/referral-settings', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// REFERRAL MANAGEMENT
+// REFERRALS LIST
 // ============================================
 router.get('/referrals', verifyAdminToken, async (req, res) => {
     const tag = 'REFERRALS_LIST';
-    logRequest(req, tag);
     try {
         const { status, search, page = 1, limit = 20 } = req.query;
         let query = {};
         if (status && status !== 'all') query.status = status;
-
         if (search) {
             const users = await User.find({
                 $or: [
@@ -1081,41 +1034,30 @@ router.get('/referrals', verifyAdminToken, async (req, res) => {
                 { referralCode: { $regex: search, $options: 'i' } }
             ];
         }
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const referrals = await Referral.find(query)
             .populate('referrerId', 'fullName mobile walletId referralCode')
             .populate('referredUserId', 'fullName mobile walletId')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit))
-            .lean();
-
+            .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean();
         const total = await Referral.countDocuments(query);
-        const stats = await Referral.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    total: { $sum: 1 },
-                    completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
-                    pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
-                    failed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
-                    totalBonusPaid: {
-                        $sum: {
-                            $cond: [
-                                { $and: [{ $eq: ['$status', 'completed'] }, { $eq: ['$referrerBonusPaid', true] }] },
-                                '$bonusAmount', 0
-                            ]
-                        }
+        const stats = await Referral.aggregate([{
+            $group: {
+                _id: null, total: { $sum: 1 },
+                completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+                pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                failed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
+                totalBonusPaid: {
+                    $sum: {
+                        $cond: [
+                            { $and: [{ $eq: ['$status', 'completed'] }, { $eq: ['$referrerBonusPaid', true] }] },
+                            '$bonusAmount', 0
+                        ]
                     }
                 }
             }
-        ]);
-
-        logSuccess(tag, `Fetched ${referrals.length} referrals (total: ${total})`);
+        }]);
         res.json({
-            success: true,
-            referrals,
+            success: true, referrals,
             stats: stats[0] || { total: 0, completed: 0, pending: 0, failed: 0, totalBonusPaid: 0 },
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
         });
@@ -1127,7 +1069,6 @@ router.get('/referrals', verifyAdminToken, async (req, res) => {
 
 router.get('/top-referrers', verifyAdminToken, async (req, res) => {
     const tag = 'TOP_REFERRERS';
-    logRequest(req, tag);
     try {
         const top = await Referral.aggregate([
             { $match: { status: 'completed' } },
@@ -1137,18 +1078,14 @@ router.get('/top-referrers', verifyAdminToken, async (req, res) => {
             { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
             { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
         ]);
-
         const leaderboard = top.map(t => ({
             userId: t._id,
             name: t.user ? t.user.fullName : 'Unknown',
             mobile: t.user ? t.user.mobile : '',
             walletId: t.user ? t.user.walletId : '',
             referralCode: t.user ? t.user.referralCode : '',
-            count: t.count,
-            totalEarned: t.totalEarned
+            count: t.count, totalEarned: t.totalEarned
         }));
-
-        logSuccess(tag, `Fetched ${leaderboard.length} top referrers`);
         res.json({ success: true, leaderboard });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1158,20 +1095,25 @@ router.get('/top-referrers', verifyAdminToken, async (req, res) => {
 
 router.put('/update-referral/:id', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_REFERRAL';
-    logRequest(req, tag);
     try {
         const { status, notes } = req.body;
         const referral = await Referral.findById(req.params.id);
-        if (!referral) {
-            logWarn(tag, 'Referral not found', { id: req.params.id });
-            return res.status(404).json({ success: false, message: 'Not found.' });
-        }
+        if (!referral) return res.status(404).json({ success: false, message: 'Not found.' });
+
         if (status) referral.status = status;
         if (notes !== undefined) referral.notes = notes;
         if (status === 'completed' && !referral.completedAt) referral.completedAt = new Date();
         await referral.save();
 
-        logSuccess(tag, 'Referral updated', { id: req.params.id, status });
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`✏️ <b>Referral Updated</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`🆔 <b>Referral ID:</b> ${referral._id}\n` +
+`📊 <b>New Status:</b> ${status || 'unchanged'}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: 'Updated.', referral });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1181,18 +1123,21 @@ router.put('/update-referral/:id', verifyAdminToken, async (req, res) => {
 
 router.delete('/delete-referral/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DELETE_REFERRAL';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
         const referral = await Referral.findByIdAndDelete(req.params.id);
-        if (!referral) {
-            logWarn(tag, 'Referral not found');
-            return res.status(404).json({ success: false, message: 'Not found.' });
-        }
-        logSuccess(tag, 'Referral deleted', { id: req.params.id });
+        if (!referral) return res.status(404).json({ success: false, message: 'Not found.' });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🗑️ <b>Referral Deleted</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`🆔 <b>Referral ID:</b> ${req.params.id}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: 'Deleted.' });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1202,7 +1147,6 @@ router.delete('/delete-referral/:id', verifyAdminToken, async (req, res) => {
 
 router.get('/user-referrals/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'USER_REFERRALS';
-    logRequest(req, tag);
     try {
         const userId = req.params.userId;
         const asReferrer = await Referral.find({ referrerId: userId })
@@ -1210,8 +1154,6 @@ router.get('/user-referrals/:userId', verifyAdminToken, async (req, res) => {
             .sort({ createdAt: -1 }).lean();
         const asReferred = await Referral.findOne({ referredUserId: userId })
             .populate('referrerId', 'fullName mobile walletId referralCode').lean();
-
-        logSuccess(tag, 'User referrals fetched', { userId, asReferrerCount: asReferrer.length });
         res.json({ success: true, asReferrer, asReferred });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1221,28 +1163,17 @@ router.get('/user-referrals/:userId', verifyAdminToken, async (req, res) => {
 
 router.post('/force-complete-referral/:id', verifyAdminToken, async (req, res) => {
     const tag = 'FORCE_COMPLETE_REFERRAL';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
-
         const referral = await Referral.findById(req.params.id);
-        if (!referral) {
-            logWarn(tag, 'Referral not found');
-            return res.status(404).json({ success: false, message: 'Referral not found.' });
-        }
+        if (!referral) return res.status(404).json({ success: false, message: 'Referral not found.' });
         if (referral.status === 'completed') {
-            logWarn(tag, 'Already completed');
             return res.status(400).json({ success: false, message: 'Already completed.' });
         }
-
         const referrer = await User.findById(referral.referrerId);
-        if (!referrer) {
-            logWarn(tag, 'Referrer not found');
-            return res.status(404).json({ success: false, message: 'Referrer not found.' });
-        }
+        if (!referrer) return res.status(404).json({ success: false, message: 'Referrer not found.' });
 
         const bonusAmount = req.body.bonusAmount || referral.bonusAmount || 10;
         const now = new Date();
@@ -1264,21 +1195,16 @@ router.post('/force-complete-referral/:id', verifyAdminToken, async (req, res) =
 
         const txnId = 'FORCE_REF_' + Date.now().toString(36).toUpperCase();
         await Transaction.create({
-            user_id: referrer._id,
-            sender_id: referrer._id,
-            receiver_id: referrer._id,
-            amount: bonusAmount,
-            type: 'gift',
-            status: 'success',
+            user_id: referrer._id, sender_id: referrer._id, receiver_id: referrer._id,
+            amount: bonusAmount, type: 'gift', status: 'success',
             remark: 'Referral bonus (Force-completed by admin)',
             description: 'Admin released referral bonus manually',
-            tx_id: txnId,
-            tx_time: now,
+            tx_id: txnId, tx_time: now,
             metadata: { transactionType: 'referral_bonus_force', forceCompletedBy: req.user.fullName }
         });
 
-        logSuccess(tag, `Bonus Rs ${bonusAmount} credited to ${referrer.fullName}`);
-        await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `⚡ <b>Referral Force-Completed</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Referrer:</b> ${referrer.fullName}\n` +
@@ -1313,35 +1239,23 @@ router.post('/force-complete-referral/:id', verifyAdminToken, async (req, res) =
 
 router.post('/reverse-referral/:id', verifyAdminToken, async (req, res) => {
     const tag = 'REVERSE_REFERRAL';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
         const referral = await Referral.findById(req.params.id);
-        if (!referral) {
-            logWarn(tag, 'Referral not found');
-            return res.status(404).json({ success: false, message: 'Referral not found.' });
-        }
+        if (!referral) return res.status(404).json({ success: false, message: 'Referral not found.' });
         if (referral.status !== 'completed') {
-            logWarn(tag, 'Only completed can be reversed', { status: referral.status });
             return res.status(400).json({ success: false, message: 'Only completed can be reversed.' });
         }
         if (!referral.referrerBonusPaid) {
-            logWarn(tag, 'Bonus not paid');
             return res.status(400).json({ success: false, message: 'Bonus not paid.' });
         }
-
         const referrer = await User.findById(referral.referrerId);
-        if (!referrer) {
-            logWarn(tag, 'Referrer not found');
-            return res.status(404).json({ success: false, message: 'Referrer not found.' });
-        }
+        if (!referrer) return res.status(404).json({ success: false, message: 'Referrer not found.' });
 
         const bonusAmount = referral.bonusAmount || 10;
         if (referrer.balance < bonusAmount) {
-            logWarn(tag, 'Insufficient balance', { balance: referrer.balance, required: bonusAmount });
             return res.status(400).json({ success: false, message: `Insufficient balance.` });
         }
 
@@ -1361,21 +1275,16 @@ router.post('/reverse-referral/:id', verifyAdminToken, async (req, res) => {
 
         const txnId = 'REV_REF_' + Date.now().toString(36).toUpperCase();
         await Transaction.create({
-            user_id: referrer._id,
-            sender_id: referrer._id,
-            receiver_id: referrer._id,
-            amount: bonusAmount,
-            type: 'admin_deduct',
-            status: 'success',
+            user_id: referrer._id, sender_id: referrer._id, receiver_id: referrer._id,
+            amount: bonusAmount, type: 'admin_deduct', status: 'success',
             remark: 'Referral bonus reversed',
             description: `Reversed by admin: ${reason}`,
-            tx_id: txnId,
-            tx_time: now,
+            tx_id: txnId, tx_time: now,
             metadata: { transactionType: 'referral_bonus_reversed', reason }
         });
 
-        logSuccess(tag, `Rs ${bonusAmount} reversed from ${referrer.fullName}`);
-        await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `🔄 <b>Referral Reversed</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
 `👤 <b>Referrer:</b> ${referrer.fullName}\n` +
@@ -1398,19 +1307,14 @@ router.post('/reverse-referral/:id', verifyAdminToken, async (req, res) => {
 
 router.post('/bulk-approve-referrals', verifyAdminToken, async (req, res) => {
     const tag = 'BULK_APPROVE_REFERRALS';
-    logRequest(req, tag);
     try {
         if (req.user.role !== 'super_admin') {
-            logWarn(tag, 'Access denied');
             return res.status(403).json({ success: false, message: 'Only super admin.' });
         }
         const { ids } = req.body;
         if (!Array.isArray(ids) || ids.length === 0) {
-            logWarn(tag, 'No IDs provided');
             return res.status(400).json({ success: false, message: 'No referral IDs provided.' });
         }
-
-        logInfo(tag, `Processing ${ids.length} referrals`);
         let completed = 0, failed = 0;
         for (const id of ids) {
             try {
@@ -1420,40 +1324,37 @@ router.post('/bulk-approve-referrals', verifyAdminToken, async (req, res) => {
                 if (!referrer) { failed++; continue; }
                 const bonusAmount = referral.bonusAmount || 10;
                 const now = new Date();
-
                 referral.status = 'completed';
                 referral.completedAt = now;
                 referral.referrerBonusPaid = true;
                 referral.referrerBonusPaidAt = now;
                 referral.notes = (referral.notes || '') + ' [Bulk-approved by ' + req.user.fullName + ']';
                 await referral.save();
-
                 await User.updateOne(
                     { _id: referrer._id },
                     { $inc: { balance: bonusAmount, referralCount: 1, referralPendingCount: -1, referralEarnings: bonusAmount } }
                 );
-
                 const txnId = 'BULK_REF_' + Date.now().toString(36).toUpperCase() + '_' + completed;
                 await Transaction.create({
-                    user_id: referrer._id,
-                    sender_id: referrer._id,
-                    receiver_id: referrer._id,
-                    amount: bonusAmount,
-                    type: 'gift',
-                    status: 'success',
+                    user_id: referrer._id, sender_id: referrer._id, receiver_id: referrer._id,
+                    amount: bonusAmount, type: 'gift', status: 'success',
                     remark: 'Referral bonus (Bulk approved)',
-                    tx_id: txnId,
-                    tx_time: now,
+                    tx_id: txnId, tx_time: now,
                     metadata: { transactionType: 'referral_bonus_bulk' }
                 });
                 completed++;
-            } catch (err) {
-                failed++;
-                logError(tag, `Failed for ID ${id}`, err);
-            }
+            } catch (err) { failed++; logError(tag, `Failed for ${id}`, err); }
         }
 
-        logSuccess(tag, `Bulk complete: ${completed} success, ${failed} failed`);
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`📦 <b>Bulk Referral Approval</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`✅ <b>Completed:</b> ${completed}\n` +
+`❌ <b>Failed:</b> ${failed}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: `Completed: ${completed}, Failed: ${failed}`, completed, failed });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1466,37 +1367,29 @@ router.post('/bulk-approve-referrals', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/stats', verifyAdminToken, async (req, res) => {
     const tag = 'DASHBOARD_STATS';
-    logRequest(req, tag);
     try {
         const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
         const activeUsers = await User.countDocuments({ isBlocked: false, isDeleted: { $ne: true }, isActive: { $ne: false } });
         const blockedUsers = await User.countDocuments({ isBlocked: true, isDeleted: { $ne: true } });
         const deletedUsers = await User.countDocuments({ isDeleted: true });
-
         const approvedDeposits = await Deposit.countDocuments({ status: 'approved' });
         const pendingDeposits = await Deposit.countDocuments({ status: 'pending' });
         const rejectedDeposits = await Deposit.countDocuments({ status: 'rejected' });
-
         const allDeposits = await Deposit.find({ status: 'approved' });
         const totalVolume = allDeposits.reduce((sum, d) => sum + d.amount, 0);
-
         const totalWithdrawals = await Withdrawal.countDocuments();
         const pendingWithdrawals = await Withdrawal.countDocuments({ status: 'pending' });
         const completedWithdrawals = await Withdrawal.countDocuments({ status: 'completed' });
         const allWithdrawals = await Withdrawal.find({ status: 'completed' });
         const totalWithdrawn = allWithdrawals.reduce((sum, w) => sum + w.amount, 0);
-
         const totalLifafas = await Lifafa.countDocuments();
         const totalGifts = await Gift.countDocuments();
-
         const recentTransactions = await Transaction.find()
             .populate('sender_id', 'fullName mobile walletId')
             .populate('receiver_id', 'fullName mobile walletId')
             .populate('user_id', 'fullName mobile walletId')
-            .sort({ createdAt: -1 })
-            .limit(10);
+            .sort({ createdAt: -1 }).limit(10);
 
-        logSuccess(tag, 'Stats fetched', { totalUsers, pendingDeposits, pendingWithdrawals });
         res.json({
             success: true,
             stats: {
@@ -1518,7 +1411,6 @@ router.get('/stats', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/transactions', verifyAdminToken, async (req, res) => {
     const tag = 'TRANSACTIONS_LIST';
-    logRequest(req, tag);
     try {
         const { type, status, search, page = 1, limit = 20 } = req.query;
         let query = {};
@@ -1531,22 +1423,15 @@ router.get('/transactions', verifyAdminToken, async (req, res) => {
                 { remark: { $regex: search, $options: 'i' } }
             ];
         }
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const transactions = await Transaction.find(query)
             .populate('sender_id', 'fullName mobile walletId')
             .populate('receiver_id', 'fullName mobile walletId')
             .populate('user_id', 'fullName mobile walletId')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
+            .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
         const total = await Transaction.countDocuments(query);
-
-        logSuccess(tag, `Fetched ${transactions.length} transactions (total: ${total})`);
         res.json({
-            success: true,
-            transactions,
+            success: true, transactions,
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
         });
     } catch (error) {
@@ -1560,7 +1445,6 @@ router.get('/transactions', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/users', verifyAdminToken, async (req, res) => {
     const tag = 'USERS_LIST';
-    logRequest(req, tag);
     try {
         const { search, page = 1, limit = 20, status } = req.query;
         let query = {};
@@ -1578,17 +1462,12 @@ router.get('/users', verifyAdminToken, async (req, res) => {
                 { email: { $regex: search, $options: 'i' } }
             ];
         }
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const users = await User.find(query).select('-password -pin -__v')
             .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
-
         const total = await User.countDocuments(query);
-
-        logSuccess(tag, `Fetched ${users.length} users (total: ${total})`);
         res.json({
-            success: true,
-            users,
+            success: true, users,
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
         });
     } catch (error) {
@@ -1599,7 +1478,6 @@ router.get('/users', verifyAdminToken, async (req, res) => {
 
 router.get('/user/:identifier', verifyAdminToken, async (req, res) => {
     const tag = 'USER_DETAIL';
-    logRequest(req, tag);
     try {
         const { identifier } = req.params;
         let user = null;
@@ -1612,16 +1490,10 @@ router.get('/user/:identifier', verifyAdminToken, async (req, res) => {
         if (!user) {
             user = await User.findOne({ walletId: identifier.toUpperCase() }).select('-password -pin -__v');
         }
-        if (!user) {
-            logWarn(tag, 'User not found', { identifier });
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
-
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
         const transactions = await Transaction.find({
             $or: [{ sender_id: user._id }, { receiver_id: user._id }, { user_id: user._id }]
         }).sort({ createdAt: -1 }).limit(100);
-
-        logSuccess(tag, 'User details fetched', { userId: user._id });
         res.json({ success: true, user, transactions });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1631,23 +1503,24 @@ router.get('/user/:identifier', verifyAdminToken, async (req, res) => {
 
 router.post('/toggle-block', verifyAdminToken, async (req, res) => {
     const tag = 'TOGGLE_BLOCK';
-    logRequest(req, tag);
     try {
         const { userId, reason } = req.body;
         const user = await User.findById(userId);
-        if (!user) {
-            logWarn(tag, 'User not found', { userId });
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
-
-        if (user.isBlocked) {
-            await user.unblockAccount();
-        } else {
-            await user.blockAccount(reason || 'Blocked by admin');
-        }
-
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+        if (user.isBlocked) await user.unblockAccount();
+        else await user.blockAccount(reason || 'Blocked by admin');
         const status = user.isBlocked ? 'Blocked' : 'Unblocked';
-        logSuccess(tag, `User ${status}`, { userId, status });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🔒 <b>User ${status}</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>User:</b> ${user.fullName} (${user.mobile})\n` +
+`💰 <b>Balance:</b> ₹${(user.balance || 0).toFixed(2)}\n` +
+`📝 <b>Reason:</b> ${reason || 'N/A'}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: `User ${status}.`, isBlocked: user.isBlocked });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1657,20 +1530,25 @@ router.post('/toggle-block', verifyAdminToken, async (req, res) => {
 
 router.delete('/delete-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'DELETE_USER';
-    logRequest(req, tag);
     try {
         const userToDelete = await User.findById(req.params.userId);
-        if (!userToDelete) {
-            logWarn(tag, 'User not found', { userId: req.params.userId });
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
+        if (!userToDelete) return res.status(404).json({ success: false, message: 'User not found.' });
         if (userToDelete.isAdmin) {
-            logWarn(tag, 'Cannot delete admin');
             return res.status(400).json({ success: false, message: 'Cannot delete admin.' });
         }
-
+        const info = { fullName: userToDelete.fullName, mobile: userToDelete.mobile, balance: userToDelete.balance };
         await userToDelete.softDelete(req.user.fullName || 'Admin');
-        logSuccess(tag, 'User soft-deleted', { userId: req.params.userId, name: userToDelete.fullName });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🗑️ <b>User Deleted</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>Name:</b> ${info.fullName}\n` +
+`📱 <b>Mobile:</b> ${info.mobile}\n` +
+`💰 <b>Balance:</b> ₹${(info.balance || 0).toFixed(2)}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: `User "${userToDelete.fullName}" deleted.` });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1680,20 +1558,21 @@ router.delete('/delete-user/:userId', verifyAdminToken, async (req, res) => {
 
 router.post('/restore-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'RESTORE_USER';
-    logRequest(req, tag);
     try {
         const user = await User.findById(req.params.userId);
-        if (!user) {
-            logWarn(tag, 'User not found');
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
-        if (!user.isDeleted) {
-            logWarn(tag, 'User not deleted');
-            return res.status(400).json({ success: false, message: 'Not deleted.' });
-        }
-
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+        if (!user.isDeleted) return res.status(400).json({ success: false, message: 'Not deleted.' });
         await user.restore();
-        logSuccess(tag, 'User restored', { userId: req.params.userId });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`♻️ <b>User Restored</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>Name:</b> ${user.fullName}\n` +
+`📱 <b>Mobile:</b> ${user.mobile}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: `User "${user.fullName}" restored.` });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1706,83 +1585,59 @@ router.post('/restore-user/:userId', verifyAdminToken, async (req, res) => {
 // ============================================
 router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
     const tag = 'UPDATE_USER';
-    logRequest(req, tag);
     try {
         const { userId } = req.params;
-        const {
-            fullName, mobile, email, walletId,
-            password, pin, balance, telegramId,
-            isBlocked, isActive
-        } = req.body;
-
+        const { fullName, mobile, email, walletId, password, pin, balance, telegramId, isBlocked, isActive } = req.body;
         const user = await User.findById(userId);
-        if (!user) {
-            logWarn(tag, 'User not found', { userId });
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
         const changes = [];
-
         if (fullName && fullName.trim() && fullName !== user.fullName) {
-            changes.push(`Name: ${user.fullName} -> ${fullName}`);
+            changes.push(`Name: ${user.fullName} → ${fullName}`);
             user.fullName = fullName.trim();
         }
-
         if (mobile && mobile !== user.mobile) {
             if (!/^[0-9]{10}$/.test(mobile)) {
                 return res.status(400).json({ success: false, message: 'Mobile must be 10 digits.' });
             }
             const exists = await User.findOne({ mobile, _id: { $ne: user._id } });
-            if (exists) {
-                return res.status(400).json({ success: false, message: 'Mobile already in use.' });
-            }
-            changes.push(`Mobile: ${user.mobile} -> ${mobile}`);
+            if (exists) return res.status(400).json({ success: false, message: 'Mobile already in use.' });
+            changes.push(`Mobile: ${user.mobile} → ${mobile}`);
             user.mobile = mobile;
         }
-
         if (email !== undefined && email !== user.email) {
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 return res.status(400).json({ success: false, message: 'Invalid email.' });
             }
             if (email) {
                 const exists = await User.findOne({ email, _id: { $ne: user._id } });
-                if (exists) {
-                    return res.status(400).json({ success: false, message: 'Email already in use.' });
-                }
+                if (exists) return res.status(400).json({ success: false, message: 'Email already in use.' });
             }
-            changes.push(`Email: ${user.email || 'none'} -> ${email || 'none'}`);
+            changes.push(`Email changed`);
             user.email = email || undefined;
         }
-
         if (walletId && walletId !== user.walletId) {
             const exists = await User.findOne({ walletId, _id: { $ne: user._id } });
-            if (exists) {
-                return res.status(400).json({ success: false, message: 'Wallet ID already in use.' });
-            }
-            changes.push(`Wallet: ${user.walletId} -> ${walletId}`);
+            if (exists) return res.status(400).json({ success: false, message: 'Wallet ID already in use.' });
+            changes.push(`Wallet: ${user.walletId} → ${walletId}`);
             user.walletId = walletId;
         }
-
         if (telegramId !== undefined && telegramId !== user.telegramId) {
-            changes.push(`Telegram: ${user.telegramId || 'none'} -> ${telegramId || 'none'}`);
+            changes.push(`Telegram changed`);
             user.telegramId = telegramId || undefined;
         }
-
         if (password && password.length >= 6) {
             user.password = password;
             changes.push(`Password: CHANGED`);
         }
-
         if (pin !== undefined && pin !== null && String(pin).length >= 4) {
             user.pin = String(pin);
             changes.push(`PIN: CHANGED`);
         }
-
         if (balance !== undefined && typeof balance === 'number' && balance >= 0) {
-            changes.push(`Balance: Rs ${user.balance} -> Rs ${balance}`);
+            changes.push(`Balance: ₹${user.balance} → ₹${balance}`);
             user.balance = balance;
         }
-
         if (typeof isBlocked === 'boolean' && isBlocked !== user.isBlocked) {
             user.isBlocked = isBlocked;
             changes.push(`Blocked: ${isBlocked ? 'YES' : 'NO'}`);
@@ -1792,23 +1647,19 @@ router.put('/update-user/:userId', verifyAdminToken, async (req, res) => {
             changes.push(`Active: ${isActive ? 'YES' : 'NO'}`);
         }
 
-        if (changes.length === 0) {
-            return res.json({ success: true, message: 'No changes made.' });
-        }
+        if (changes.length === 0) return res.json({ success: true, message: 'No changes made.' });
 
         user.updatedBy = req.user.walletId;
         await user.save();
 
-        logSuccess(tag, 'User updated', { userId, changes: changes.length });
-        await notifyAdmin(
-`✏️ <b>User Updated by Admin</b>\n\n` +
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`✏️ <b>User Updated</b>\n\n` +
 `⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
-`👤 <b>User:</b> ${user.fullName}\n` +
-`📱 <b>Mobile:</b> ${user.mobile}\n` +
-`✍️ <b>Changed By:</b> ${req.user.fullName}\n\n` +
+`👤 <b>User:</b> ${user.fullName} (${user.mobile})\n` +
+`✍️ <b>By:</b> ${req.user.fullName}\n\n` +
 `📋 <b>Changes (${changes.length}):</b>\n` +
-changes.map(c => `  • ${c}`).join('\n') + `\n\n` +
-`✅ Update successful!`
+changes.map(c => `  • ${c}`).join('\n')
         );
 
         res.json({
@@ -1828,53 +1679,50 @@ changes.map(c => `  • ${c}`).join('\n') + `\n\n` +
 // ============================================
 router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
     const tag = 'ADJUST_BALANCE';
-    logRequest(req, tag);
     try {
         const { userId, amount, type, reason } = req.body;
         if (!userId || !amount || !type) {
-            logWarn(tag, 'Missing fields');
             return res.status(400).json({ success: false, message: 'Missing fields.' });
         }
         if (!['add', 'deduct'].includes(type)) {
-            logWarn(tag, 'Invalid type', { type });
             return res.status(400).json({ success: false, message: 'Invalid type.' });
         }
-
         const user = await User.findById(userId);
-        if (!user) {
-            logWarn(tag, 'User not found', { userId });
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
         const amountNum = parseFloat(amount);
         if (type === 'deduct' && user.balance < amountNum) {
-            logWarn(tag, 'Insufficient balance', { balance: user.balance, required: amountNum });
-            return res.status(400).json({ success: false, message: `Insufficient balance. Current: Rs ${user.balance}` });
+            return res.status(400).json({ success: false, message: `Insufficient balance. Current: ₹${user.balance}` });
         }
 
         const finalAmount = type === 'add' ? amountNum : -amountNum;
         user.balance += finalAmount;
         await user.save();
 
-        const timestamp = Date.now().toString(36).toUpperCase();
-        const random = Math.floor(Math.random() * 99999).toString().padStart(5, '0');
-        const tx_id = `TXN${timestamp}${random}`;
-
+        const tx_id = `TXN${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}`;
         await Transaction.create({
-            tx_id,
-            user_id: user._id,
+            tx_id, user_id: user._id,
             sender_id: type === 'add' ? null : user._id,
             receiver_id: type === 'add' ? user._id : null,
-            amount: amountNum,
-            fee: 0,
+            amount: amountNum, fee: 0,
             type: type === 'add' ? 'admin_add' : 'admin_deduct',
             status: 'success',
             remark: reason || 'No reason',
-            description: `Admin ${type === 'add' ? 'added' : 'deducted'} Rs ${amountNum}`
+            description: `Admin ${type === 'add' ? 'added' : 'deducted'} ₹${amountNum}`
         });
 
-        logSuccess(tag, `Rs ${amountNum} ${type} - New balance: Rs ${user.balance}`, { userId, type });
-        res.json({ success: true, message: `Balance ${type === 'add' ? 'added' : 'deducted'}. New: Rs ${user.balance}.`, newBalance: user.balance });
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`${type === 'add' ? '💰' : '💸'} <b>Balance ${type === 'add' ? 'Added' : 'Deducted'}</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`👤 <b>User:</b> ${user.fullName} (${user.mobile})\n` +
+`💵 <b>Amount:</b> ₹${amountNum.toFixed(2)}\n` +
+`💼 <b>New Balance:</b> ₹${user.balance.toFixed(2)}\n` +
+`📝 <b>Reason:</b> ${reason || 'No reason'}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
+        res.json({ success: true, message: `Balance ${type === 'add' ? 'added' : 'deducted'}. New: ₹${user.balance}.`, newBalance: user.balance });
     } catch (error) {
         logError(tag, 'Failed', error);
         res.status(500).json({ success: false, message: 'Failed.' });
@@ -1882,26 +1730,21 @@ router.post('/adjust-balance', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// DEPOSITS LIST
+// DEPOSITS
 // ============================================
 router.get('/deposits', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSITS_LIST';
-    logRequest(req, tag);
     try {
         const { status, page = 1, limit = 20 } = req.query;
         let query = {};
         if (status) query.status = status;
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const deposits = await Deposit.find(query)
             .populate('userId', 'fullName mobile walletId balance')
             .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
         const total = await Deposit.countDocuments(query);
-
-        logSuccess(tag, `Fetched ${deposits.length} deposits (total: ${total})`);
         res.json({
-            success: true,
-            deposits,
+            success: true, deposits,
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
         });
     } catch (error) {
@@ -1910,29 +1753,16 @@ router.get('/deposits', verifyAdminToken, async (req, res) => {
     }
 });
 
-// ============================================
-// GET SINGLE DEPOSIT DETAILS
-// ============================================
 router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DEPOSIT_DETAIL';
-    logRequest(req, tag);
     try {
         const { id } = req.params;
-
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: 'Invalid deposit ID.' });
         }
-
         const deposit = await Deposit.findById(id)
-            .populate('userId', 'fullName mobile walletId balance email')
-            .lean();
-
-        if (!deposit) {
-            logWarn(tag, 'Deposit not found', { id });
-            return res.status(404).json({ success: false, message: 'Deposit not found.' });
-        }
-
-        logSuccess(tag, 'Deposit fetched', { depositId: deposit.depositId });
+            .populate('userId', 'fullName mobile walletId balance email').lean();
+        if (!deposit) return res.status(404).json({ success: false, message: 'Deposit not found.' });
         res.json({ success: true, deposit });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -1941,61 +1771,41 @@ router.get('/deposit/:id', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// VERIFY DEPOSIT (Approve/Reject)
+// VERIFY DEPOSIT
 // ============================================
 router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'VERIFY_DEPOSIT';
-    logRequest(req, tag);
     try {
         const { depositId, action, adminNotes } = req.body;
         const dateTime = getCurrentDateTime();
 
-        logInfo(tag, 'Request received', { depositId, action });
-
-        if (!depositId) {
-            logWarn(tag, 'Deposit ID missing');
-            return res.status(400).json({ success: false, message: 'Deposit ID required.' });
-        }
+        if (!depositId) return res.status(400).json({ success: false, message: 'Deposit ID required.' });
         if (!action || !['approve', 'reject'].includes(action)) {
-            logWarn(tag, 'Invalid action', { action });
             return res.status(400).json({ success: false, message: 'Invalid action.' });
         }
 
         const deposit = await Deposit.findById(depositId).populate('userId');
-        if (!deposit) {
-            logWarn(tag, 'Deposit not found', { depositId });
-            return res.status(404).json({ success: false, message: 'Deposit not found.' });
-        }
-
-        logInfo(tag, 'Deposit found', { status: deposit.status, amount: deposit.amount });
-
+        if (!deposit) return res.status(404).json({ success: false, message: 'Deposit not found.' });
         if (deposit.status !== 'pending') {
-            logWarn(tag, 'Invalid status for action', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Status is "${deposit.status}". Only pending deposits can be verified.` });
         }
 
         if (action === 'approve') {
             const superAdmin = await Admin.findOne({
-                role: 'super_admin',
-                isActive: true,
-                isBlocked: false
+                role: 'super_admin', isActive: true, isBlocked: false
             }).select('depositSettings').lean();
-
             const depSettings = (superAdmin && superAdmin.depositSettings)
                 ? Object.assign({}, DEFAULT_DEPOSIT_SETTINGS, superAdmin.depositSettings)
                 : DEFAULT_DEPOSIT_SETTINGS;
 
             if (deposit.amount < depSettings.minDeposit) {
-                return res.status(400).json({ success: false, message: `Below minimum deposit (Rs ${depSettings.minDeposit}).` });
+                return res.status(400).json({ success: false, message: `Below minimum deposit (₹${depSettings.minDeposit}).` });
             }
             if (deposit.amount > depSettings.maxDeposit) {
-                return res.status(400).json({ success: false, message: `Exceeds maximum deposit (Rs ${depSettings.maxDeposit}).` });
+                return res.status(400).json({ success: false, message: `Exceeds maximum deposit (₹${depSettings.maxDeposit}).` });
             }
 
-            let taxAmount = 0;
-            let creditAmount = deposit.amount;
-            let taxPercent = 0;
-
+            let taxAmount = 0, creditAmount = deposit.amount, taxPercent = 0;
             if (depSettings.taxEnabled && depSettings.taxPercent > 0) {
                 taxPercent = depSettings.taxPercent;
                 taxAmount = parseFloat(((deposit.amount * taxPercent) / 100).toFixed(2));
@@ -2015,65 +1825,53 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
             user.balance += creditAmount;
             await user.save();
 
-            logInfo(tag, `Balance updated: Rs ${oldBalance} -> Rs ${user.balance}`);
-
-            const timestamp = Date.now().toString(36).toUpperCase();
-            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-            const tx_id = `TXN_DEPOSIT_${timestamp}_${random}`;
-
+            const tx_id = `TXN_DEPOSIT_${Date.now().toString(36).toUpperCase()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
             await Transaction.create({
-                tx_id,
-                user_id: deposit.userId._id,
-                sender_id: deposit.userId._id,
-                receiver_id: deposit.userId._id,
-                amount: creditAmount,
-                type: 'deposit',
-                status: 'success',
+                tx_id, user_id: deposit.userId._id,
+                sender_id: deposit.userId._id, receiver_id: deposit.userId._id,
+                amount: creditAmount, type: 'deposit', status: 'success',
                 remark: taxAmount > 0
-                    ? `Manual deposit approved (Tax ${taxPercent}%: Rs ${taxAmount})`
+                    ? `Manual deposit approved (Tax ${taxPercent}%: ₹${taxAmount})`
                     : 'Manual deposit approved by admin',
                 description: `Deposit ${deposit.depositId} approved`,
                 metadata: {
-                    depositId: deposit.depositId,
-                    originalAmount: deposit.amount,
-                    taxPercent,
-                    taxAmount,
-                    creditAmount,
+                    depositId: deposit.depositId, originalAmount: deposit.amount,
+                    taxPercent, taxAmount, creditAmount,
                     transactionRef: deposit.transactionRef,
                     approvedBy: req.user.fullName || 'Admin',
                     oldBalance, newBalance: user.balance
                 }
             });
 
-            logSuccess(tag, 'Transaction created', { tx_id });
-
             let referralResult = null;
             try {
-                logInfo(tag, 'Processing referral...');
                 referralResult = await safeProcessReferral(user, deposit.amount, dateTime);
-                logSuccess(tag, 'Referral result', referralResult);
             } catch (refErr) {
-                logError(tag, 'Referral processing error (continuing)', refErr);
+                logError(tag, 'Referral error', refErr);
             }
 
-            try {
-                let adminMsg = `✅ <b>Deposit Approved</b>\n\n`;
-                adminMsg += `⏰ <b>Time:</b> ${dateTime}\n`;
-                adminMsg += `👤 <b>Name:</b> ${user.fullName || 'N/A'}\n`;
-                adminMsg += `💵 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n`;
-                if (taxAmount > 0) {
-                    adminMsg += `✂️ <b>Tax (${taxPercent}%):</b> -₹${taxAmount.toFixed(2)}\n`;
-                    adminMsg += `✅ <b>Credited:</b> ₹${creditAmount.toFixed(2)}\n`;
-                }
-                adminMsg += `🆔 <b>Deposit ID:</b> ${deposit.depositId}\n`;
-                adminMsg += `💰 <b>New Balance:</b> ₹${user.balance.toFixed(2)}\n`;
-                if (referralResult && referralResult.completed) {
-                    adminMsg += `🎁 <b>Referral Bonus Paid:</b> ₹${referralResult.bonusAmount}\n`;
-                }
-                adminMsg += `\n🎉 Successfully approved!`;
-                await notifyAdmin(adminMsg);
+            // Notify: actor + super_admins
+            const actor = await getActorAdmin(req);
+            let adminMsg = `✅ <b>Deposit Approved</b>\n\n`;
+            adminMsg += `⏰ <b>Time:</b> ${dateTime}\n`;
+            adminMsg += `👤 <b>Name:</b> ${user.fullName || 'N/A'}\n`;
+            adminMsg += `💵 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n`;
+            if (taxAmount > 0) {
+                adminMsg += `✂️ <b>Tax (${taxPercent}%):</b> -₹${taxAmount.toFixed(2)}\n`;
+                adminMsg += `✅ <b>Credited:</b> ₹${creditAmount.toFixed(2)}\n`;
+            }
+            adminMsg += `🆔 <b>Deposit ID:</b> ${deposit.depositId}\n`;
+            adminMsg += `💰 <b>New Balance:</b> ₹${user.balance.toFixed(2)}\n`;
+            if (referralResult && referralResult.completed) {
+                adminMsg += `🎁 <b>Referral Bonus Paid:</b> ₹${referralResult.bonusAmount}\n`;
+            }
+            adminMsg += `\n✍️ <b>Approved By:</b> ${req.user.fullName}`;
+            adminMsg += `\n🎉 Successfully approved!`;
+            await notifyAction(actor, adminMsg);
 
-                if (user.telegramId && BOT_TOKEN) {
+            // User notification (personal)
+            if (user.telegramId && BOT_TOKEN) {
+                try {
                     let userMsg = `🎉 <b>Deposit Approved!</b>\n\n`;
                     userMsg += `⏰ <b>Time:</b> ${dateTime}\n`;
                     userMsg += `💵 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n`;
@@ -2088,23 +1886,15 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
                     }
                     userMsg += `\n💜 Thanks for using our wallet!`;
                     await sendTelegramMessage(user.telegramId, userMsg);
-                }
-            } catch (notifyErr) {
-                logError(tag, 'Notification error (continuing)', notifyErr);
+                } catch (e) {}
             }
 
             await deposit.save();
-
-            logSuccess(tag, 'Deposit approved successfully', { depositId: deposit.depositId });
-
             return res.json({
                 success: true,
                 message: 'Deposit approved successfully.',
-                amount: deposit.amount,
-                creditAmount,
-                taxAmount,
-                newBalance: user.balance,
-                referral: referralResult
+                amount: deposit.amount, creditAmount, taxAmount,
+                newBalance: user.balance, referral: referralResult
             });
         } else {
             deposit.status = 'rejected';
@@ -2112,16 +1902,19 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
             deposit.rejectedAt = new Date();
             deposit.adminNote = adminNotes || 'Rejected by admin';
 
-            try {
-                await notifyAdmin(
+            const actor = await getActorAdmin(req);
+            await notifyAction(actor,
 `❌ <b>Deposit Rejected</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Name:</b> ${deposit.userId.fullName}\n` +
 `💵 <b>Amount:</b> ₹${deposit.amount.toFixed(2)}\n` +
-`📝 <b>Reason:</b> ${deposit.adminNote}\n\n` +
+`📝 <b>Reason:</b> ${deposit.adminNote}\n` +
+`✍️ <b>Rejected By:</b> ${req.user.fullName}\n\n` +
 `⚠️ Deposit rejected by admin.`
-                );
-                if (deposit.userId.telegramId && BOT_TOKEN) {
+            );
+
+            if (deposit.userId.telegramId && BOT_TOKEN) {
+                try {
                     await sendTelegramMessage(deposit.userId.telegramId,
 `❌ <b>Deposit Rejected</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
@@ -2129,13 +1922,10 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 `📝 <b>Reason:</b> ${deposit.adminNote}\n\n` +
 `💬 Need help? Contact admin.`
                     );
-                }
-            } catch (notifyErr) {
-                logError(tag, 'Notification error (continuing)', notifyErr);
+                } catch (e) {}
             }
 
             await deposit.save();
-            logSuccess(tag, 'Deposit rejected', { depositId: deposit.depositId });
             return res.json({ success: true, message: 'Deposit rejected.', reason: deposit.adminNote });
         }
     } catch (error) {
@@ -2145,43 +1935,29 @@ router.post('/verify-deposit', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================
-// ADMIN CANCEL DEPOSIT
+// CANCEL DEPOSIT
 // ============================================
 router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
     const tag = 'CANCEL_DEPOSIT';
-    logRequest(req, tag);
     try {
         const { depositId, reason } = req.body;
-
-        if (!depositId) {
-            logWarn(tag, 'Deposit ID missing');
-            return res.status(400).json({ success: false, message: 'Deposit ID required.' });
-        }
-
+        if (!depositId) return res.status(400).json({ success: false, message: 'Deposit ID required.' });
         const deposit = await Deposit.findById(depositId).populate('userId');
-        if (!deposit) {
-            logWarn(tag, 'Deposit not found', { depositId });
-            return res.status(404).json({ success: false, message: 'Deposit not found.' });
-        }
-
+        if (!deposit) return res.status(404).json({ success: false, message: 'Deposit not found.' });
         if (deposit.status !== 'pending') {
-            logWarn(tag, 'Invalid status for cancel', { currentStatus: deposit.status });
             return res.status(400).json({ success: false, message: `Cannot cancel deposit with status "${deposit.status}".` });
         }
 
         const dateTime = getCurrentDateTime();
         const cancelReason = reason || 'Cancelled by admin';
-
         deposit.status = 'cancelled';
         deposit.adminNote = cancelReason;
         deposit.cancelledAt = new Date();
         deposit.cancelledBy = req.user.walletId || req.user.fullName;
         await deposit.save();
 
-        logSuccess(tag, 'Deposit cancelled', { depositId: deposit.depositId });
-
-        try {
-            await notifyAdmin(
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
 `🚫 <b>Deposit Cancelled by Admin</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
 `👤 <b>Name:</b> ${deposit.userId.fullName}\n` +
@@ -2190,9 +1966,10 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
 `📝 <b>Reason:</b> ${cancelReason}\n` +
 `✍️ <b>By:</b> ${req.user.fullName}\n\n` +
 `ℹ️ User can now create a new deposit.`
-            );
+        );
 
-            if (deposit.userId.telegramId && BOT_TOKEN) {
+        if (deposit.userId.telegramId && BOT_TOKEN) {
+            try {
                 await sendTelegramMessage(deposit.userId.telegramId,
 `🚫 <b>Deposit Cancelled</b>\n\n` +
 `⏰ <b>Time:</b> ${dateTime}\n` +
@@ -2201,19 +1978,13 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
 `📝 <b>Reason:</b> ${cancelReason}\n\n` +
 `💡 You can create a new deposit anytime.`
                 );
-            }
-        } catch (notifyErr) {
-            logError(tag, 'Notification error (continuing)', notifyErr);
+            } catch (e) {}
         }
 
-        return res.json({
-            success: true,
-            message: 'Deposit cancelled successfully.',
-            depositId: deposit.depositId
-        });
+        res.json({ success: true, message: 'Deposit cancelled.', depositId: deposit.depositId });
     } catch (error) {
         logError(tag, 'Failed', error);
-        return res.status(500).json({ success: false, message: 'Failed: ' + error.message });
+        res.status(500).json({ success: false, message: 'Failed: ' + error.message });
     }
 });
 
@@ -2223,52 +1994,29 @@ router.post('/cancel-deposit', verifyAdminToken, async (req, res) => {
 async function safeProcessReferral(user, depositAmount, dateTime) {
     const tag = 'SAFE_REFERRAL';
     try {
-        if (!user.referredBy) {
-            logInfo(tag, 'User not referred');
-            return { processed: false, reason: 'User not referred' };
-        }
-
-        logInfo(tag, 'Processing for user', { userId: user._id, referredBy: user.referredBy, amount: depositAmount });
+        if (!user.referredBy) return { processed: false, reason: 'User not referred' };
 
         const admin = await Admin.findOne({
-            role: 'super_admin',
-            isActive: true,
-            isBlocked: false
+            role: 'super_admin', isActive: true, isBlocked: false
         }).select('referralSettings').lean();
-
         const settings = (admin && admin.referralSettings) ? {
             enabled: admin.referralSettings.enabled !== false,
             bonusAmount: admin.referralSettings.bonusAmount || 10,
             minDepositAmount: admin.referralSettings.minDepositAmount || 50
-        } : {
-            enabled: true,
-            bonusAmount: 10,
-            minDepositAmount: 50
-        };
+        } : { enabled: true, bonusAmount: 10, minDepositAmount: 50 };
 
-        logInfo(tag, 'Settings loaded', settings);
-
-        if (!settings.enabled) {
-            logWarn(tag, 'Program disabled');
-            return { processed: false, reason: 'Program disabled' };
-        }
+        if (!settings.enabled) return { processed: false, reason: 'Program disabled' };
 
         const pendingReferral = await Referral.findOne({
             referrerId: user.referredBy,
             referredUserId: user._id,
             status: 'pending'
         });
-
-        if (!pendingReferral) {
-            logInfo(tag, 'No pending referral');
-            return { processed: false, reason: 'No pending referral' };
-        }
+        if (!pendingReferral) return { processed: false, reason: 'No pending referral' };
 
         const requiredDeposit = settings.minDepositAmount;
         const previousDeposit = pendingReferral.depositAmount || 0;
         const newTotalDeposit = previousDeposit + depositAmount;
-
-        logInfo(tag, 'Deposit progress', { previousDeposit, depositAmount, newTotalDeposit, requiredDeposit });
 
         pendingReferral.minDepositRequired = requiredDeposit;
         pendingReferral.depositAmount = newTotalDeposit;
@@ -2288,10 +2036,7 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
             await pendingReferral.save();
 
             const referrer = await User.findById(pendingReferral.referrerId);
-            if (!referrer) {
-                logWarn(tag, 'Referrer not found', { referrerId: pendingReferral.referrerId });
-                return { processed: false, reason: 'Referrer not found' };
-            }
+            if (!referrer) return { processed: false, reason: 'Referrer not found' };
 
             await User.updateOne(
                 { _id: referrer._id },
@@ -2300,16 +2045,11 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 
             const txnId = 'REF' + Math.random().toString(36).substring(2, 10).toUpperCase();
             await Transaction.create({
-                user_id: referrer._id,
-                sender_id: referrer._id,
-                receiver_id: referrer._id,
-                amount: bonusAmount,
-                type: 'gift',
-                status: 'success',
+                user_id: referrer._id, sender_id: referrer._id, receiver_id: referrer._id,
+                amount: bonusAmount, type: 'gift', status: 'success',
                 remark: `Referral bonus from ${user.fullName || 'user'}`,
-                description: `Friend's total deposit reached Rs ${newTotalDeposit}`,
-                tx_id: txnId + '-REF',
-                tx_time: now,
+                description: `Friend's total deposit reached ₹${newTotalDeposit}`,
+                tx_id: txnId + '-REF', tx_time: now,
                 metadata: {
                     transactionType: 'referral_bonus_received',
                     referredUserId: user._id,
@@ -2317,8 +2057,6 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
                     bonusType: 'referrer_only'
                 }
             });
-
-            logSuccess(tag, `Referral completed: Rs ${bonusAmount} to ${referrer.fullName}`);
 
             if (referrer.telegramId && BOT_TOKEN) {
                 try {
@@ -2330,7 +2068,7 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 `📊 <b>Reason:</b> Friend's deposit reached ₹${newTotalDeposit}\n\n` +
 `🎊 Keep inviting — keep earning! 🚀`
                     );
-                } catch (e) { logError(tag, 'Referrer notify failed', e); }
+                } catch (e) {}
             }
 
             if (user.telegramId && BOT_TOKEN) {
@@ -2343,27 +2081,14 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 `👥 Your friend just earned a reward!\n` +
 `💡 Keep depositing to unlock more! 🚀`
                     );
-                } catch (e) { logError(tag, 'User notify failed', e); }
+                } catch (e) {}
             }
 
-            return {
-                processed: true,
-                completed: true,
-                bonusAmount,
-                referrerName: referrer.fullName,
-                totalDeposit: newTotalDeposit
-            };
+            return { processed: true, completed: true, bonusAmount, referrerName: referrer.fullName, totalDeposit: newTotalDeposit };
         } else {
             await pendingReferral.save();
             const remaining = requiredDeposit - newTotalDeposit;
-            logInfo(tag, 'Progress saved', { totalDeposit: newTotalDeposit, remaining });
-            return {
-                processed: true,
-                completed: false,
-                totalDeposit: newTotalDeposit,
-                requiredDeposit,
-                remaining
-            };
+            return { processed: true, completed: false, totalDeposit: newTotalDeposit, requiredDeposit, remaining };
         }
     } catch (err) {
         logError(tag, 'Error', err);
@@ -2376,19 +2101,15 @@ async function safeProcessReferral(user, depositAmount, dateTime) {
 // ============================================
 router.get('/lifafas', verifyAdminToken, async (req, res) => {
     const tag = 'LIFAFAS_LIST';
-    logRequest(req, tag);
     try {
         const { search, page = 1, limit = 20 } = req.query;
         let query = {};
         if (search) query.$or = [{ title: { $regex: search, $options: 'i' } }];
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const lifafas = await Lifafa.find(query)
             .populate('userId', 'fullName mobile')
             .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
         const total = await Lifafa.countDocuments(query);
-
-        logSuccess(tag, `Fetched ${lifafas.length} lifafas`);
         res.json({
             success: true, lifafas,
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
@@ -2401,14 +2122,19 @@ router.get('/lifafas', verifyAdminToken, async (req, res) => {
 
 router.delete('/delete-lifafa/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DELETE_LIFAFA';
-    logRequest(req, tag);
     try {
         const lifafa = await Lifafa.findByIdAndDelete(req.params.id);
-        if (!lifafa) {
-            logWarn(tag, 'Not found');
-            return res.status(404).json({ success: false, message: 'Not found.' });
-        }
-        logSuccess(tag, 'Lifafa deleted', { id: req.params.id });
+        if (!lifafa) return res.status(404).json({ success: false, message: 'Not found.' });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🗑️ <b>Lifafa Deleted</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`📄 <b>ID:</b> ${req.params.id}\n` +
+`💰 <b>Amount:</b> ₹${lifafa.amount || 0}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: 'Deleted.' });
     } catch (error) {
         logError(tag, 'Failed', error);
@@ -2421,19 +2147,15 @@ router.delete('/delete-lifafa/:id', verifyAdminToken, async (req, res) => {
 // ============================================
 router.get('/gifts', verifyAdminToken, async (req, res) => {
     const tag = 'GIFTS_LIST';
-    logRequest(req, tag);
     try {
         const { search, page = 1, limit = 20 } = req.query;
         let query = {};
         if (search) query.code = { $regex: search, $options: 'i' };
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const gifts = await Gift.find(query)
             .populate('userId', 'fullName mobile')
             .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit));
         const total = await Gift.countDocuments(query);
-
-        logSuccess(tag, `Fetched ${gifts.length} gifts`);
         res.json({
             success: true, gifts,
             pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
@@ -2446,14 +2168,19 @@ router.get('/gifts', verifyAdminToken, async (req, res) => {
 
 router.delete('/delete-gift/:id', verifyAdminToken, async (req, res) => {
     const tag = 'DELETE_GIFT';
-    logRequest(req, tag);
     try {
         const gift = await Gift.findByIdAndDelete(req.params.id);
-        if (!gift) {
-            logWarn(tag, 'Not found');
-            return res.status(404).json({ success: false, message: 'Not found.' });
-        }
-        logSuccess(tag, 'Gift deleted', { code: gift.code });
+        if (!gift) return res.status(404).json({ success: false, message: 'Not found.' });
+
+        const actor = await getActorAdmin(req);
+        await notifyAction(actor,
+`🗑️ <b>Gift Deleted</b>\n\n` +
+`⏰ <b>Time:</b> ${getCurrentDateTime()}\n` +
+`🎁 <b>Code:</b> ${gift.code}\n` +
+`💰 <b>Amount:</b> ₹${gift.amount || 0}\n` +
+`✍️ <b>By:</b> ${req.user.fullName}`
+        );
+
         res.json({ success: true, message: 'Deleted.' });
     } catch (error) {
         logError(tag, 'Failed', error);
