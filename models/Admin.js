@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const adminSchema = new mongoose.Schema({
-    adminId: { type: String, required: false, unique: true, trim: true, uppercase: true },
+    adminId: { type: String, required: true, unique: true, trim: true, uppercase: true },
     walletId: { type: String, unique: true, sparse: true, trim: true, uppercase: true },
     password: { type: String, required: true },
     fullName: { type: String, required: true, trim: true },
