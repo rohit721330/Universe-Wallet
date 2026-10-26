@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+
+    <!-- ============================================ -->
+    <!-- STEP 1: CSS FIRST (Design / Animation)      -->
+    <!-- ============================================ -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1f 60%, #000000 100%);
+            position: relative;
+        }
+
+        /* Twinkling starfield background */
+        .stars {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+                radial-gradient(2px 2px at 60% 70%, #ffddaa, transparent),
+                radial-gradient(1px 1px at 80% 20%, #fff, transparent),
+                radial-gradient(1px 1px at 40% 80%, #aaddff, transparent),
+                radial-gradient(2px 2px at 10% 60%, #fff, transparent),
+                radial-gradient(1px 1px at 90% 50%, #ffddaa, transparent),
+                radial-gradient(2px 2px at 50% 10%, #fff, transparent),
+                radial-gradient(1px 1px at 30% 90%, #aaddff, transparent);
+            animation: twinkle 4s ease-in-out infinite alternate;
+            opacity: 0.7;
+        }
+
+        @keyframes twinkle {
+            0%   { opacity: 0.4; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Glowing aura that follows the dragon */
+        .aura {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(255, 100, 0, 0.35) 0%,
+                rgba(255, 0, 150, 0.25) 30%,
+                rgba(0, 200, 255, 0.15) 60%,
+                transparent 75%);
+            filter: blur(40px);
+            pointer-events: none;
+            animation: auraFly 10s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes auraFly {
+            0%   { transform: translate(-300px, -300px) scale(0.8); }
+            25%  { transform: translate(80vw, -250px) scale(1.1); }
+            50%  { transform: translate(70vw, 70vh) scale(0.9); }
+            75%  { transform: translate(-250px, 75vh) scale(1.15); }
+            100% { transform: translate(-300px, -300px) scale(0.8); }
+        }
+
+        /* Dragon flies across the entire page */
+        .dragon-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .dragon-svg {
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            top: 0;
+            left: 0;
+            animation: flyAround 10s linear infinite;
+            filter: drop-shadow(0 0 18px #ff6600)
+                    drop-shadow(0 0 35px #ff00cc)
+                    drop-shadow(0 0 55px #00e5ff);
+        }
+
+        @keyframes flyAround {
+            0%   { transform: translate(-340px, -340px) rotate(20deg) scale(1); }
+            15%  { transform: translate(35vw, 5vh) rotate(60deg) scale(1.05); }
+            30%  { transform: translate(calc(100vw - 340px), 10vh) rotate(120deg) scale(0.95); }
+            45%  { transform: translate(calc(100vw - 300px), 60vh) rotate(200deg) scale(1.1); }
+            60%  { transform: translate(50vw, calc(100vh - 340px)) rotate(280deg) scale(1); }
+            75%  { transform: translate(5vw, 55vh) rotate(340deg) scale(1.05); }
+            90%  { transform: translate(20vw, 15vh) rotate(400deg) scale(0.9); }
+            100% { transform: translate(-340px, -340px) rotate(380deg) scale(1); }
+        }
+
+        /* Wing flap animation */
+        .wing {
+            transform-origin: center;
+            animation: flap 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes flap {
+            0%   { transform: scaleY(1) rotate(0deg); }
+            100% { transform: scaleY(0.75) rotate(-8deg); }
+        }
+
+        /* Tail sway */
+        .tail {
+            transform-origin: 60% 50%;
+            animation: sway 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sway {
+            0%   { transform: rotate(-12deg); }
+            100% { transform: rotate(12deg); }
+        }
+
+        /* Fire breath particles */
+        .fire-particle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffff00 0%, #ff8800 40%, #ff2200 70%, transparent 100%);
+            filter: blur(1px);
+            animation: fireTrail 2.5s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes fireTrail {
+            0%   { opacity: 0; transform: scale(0.3); }
+            20%  { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.2) translateY(-60px); }
+        }
+
+        /* Center overlay text */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ff6600, #ff00cc, #00e5ff, #aaff00, #ff6600);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShift 3s linear infinite;
+        }
+
+        @keyframes textShift {
+            0%   { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        .dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .progress {
+            margin-top: 22px;
+            width: 300px;
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 100, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #ff6600, #ff00cc, #00e5ff, #aaff00);
+            background-size: 300% 100%;
+            animation: fill 3s ease-in-out forwards, textShift 2s linear infinite;
+        }
+
+        @keyframes fill {
+            from { width: 0%; }
+            to   { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================ -->
+    <!-- STEP 2: HTML STRUCTURE (Dragon + Overlay)    -->
+    <!-- ============================================ -->
+
+    <div class="stars"></div>
+    <div class="aura"></div>
+
+    <div class="dragon-container">
+        <svg class="dragon-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff0066"/>
+                    <stop offset="50%" stop-color="#ff6600"/>
+                    <stop offset="100%" stop-color="#ffcc00"/>
+                </linearGradient>
+                <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00e5ff"/>
+                    <stop offset="50%" stop-color="#aaff00"/>
+                    <stop offset="100%" stop-color="#ff00cc"/>
+                </linearGradient>
+                <radialGradient id="eyeGlow">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="50%" stop-color="#ffff00"/>
+                    <stop offset="100%" stop-color="#ff2200"/>
+                </radialGradient>
+            </defs>
+
+            <path class="tail" d="M 70 240 Q 30 260 20 300 Q 40 290 55 280 Q 40 310 45 330 Q 70 300 90 270 Z"
+                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2"/>
+
+            <g class="wing" style="transform-origin: 200px 180px; animation-delay: 0.15s;">
+                <path d="M 190 170 Q 140 80 70 100 Q 120 140 130 180 Q 100 170 90 200 Q 150 200 190 190 Z"
+                      fill="url(#wingGrad)" opacity="0.85" stroke="#00e5ff" stroke-width="2"/>
+            </g>
+
+            <path d="M 120 250 Q 150 170 210 160 Q 280 155 310 200 Q 330 240 300 280 Q 260 310 200 310 Q 150 305 120 250 Z"
+                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2.5"/>
+
+            <path d="M 290 190 Q 330 150 350 110 Q 365 80 355 55 Q 345 40 325 50 Q 305 65 300 95 Q 295 130 275 165 Z"
+                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2"/>
+
+            <path d="M 355 55 Q 385 50 395 70 Q 400 90 380 95 Q 360 90 350 80 Z"
+                  fill="#ffcc00" stroke="#ff6600" stroke-width="2"/>
+
+            <path d="M 330 48 Q 320 15 300 5 Q 315 30 320 50 Z"
+                  fill="#00e5ff" stroke="#aaff00" stroke-width="1.5"/>
+
+            <path d="M 345 50 Q 345 20 335 5 Q 340 30 338 52 Z"
+                  fill="#aaff00" stroke="#00e5ff" stroke-width="1.5"/>
+
+            <circle cx="345" cy="70" r="7" fill="url(#eyeGlow)"/>
+            <circle cx="346" cy="69" r="3" fill="#000"/>
+
+            <g class="wing" style="transform-origin: 230px 190px;">
+                <path d="M 230 180 Q 180 60 90 70 Q 160 120 170 175 Q 130 155 110 200 Q 180 195 230 195 Z"
+                      fill="url(#wingGrad)" stroke="#ff00cc" stroke-width="2"/>
+                <path d="M 230 185 Q 180 130 110 90" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+                <path d="M 220 188 Q 175 145 130 150" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+            </g>
+
+            <path d="M 170 300 Q 165 330 150 340 Q 165 345 180 335 Q 185 315 185 300 Z"
+                  fill="#ff6600" stroke="#ff00cc" stroke-width="2"/>
+            <path d="M 250 305 Q 255 335 270 345 Q 285 340 275 320 Q 270 305 265 300 Z"
+                  fill="#ff6600" stroke="#ff00cc" stroke-width="2"/>
+
+            <path d="M 160 175 L 175 140 L 185 175 L 205 145 L 215 178 L 240 150 L 250 185 L 275 160 L 282 195"
+                  fill="none" stroke="#00e5ff" stroke-width="4" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <div class="fire-particle" style="left: 30%; top: 40%; animation-delay: 0s;"></div>
+    <div class="fire-particle" style="left: 45%; top: 30%; animation-delay: 0.4s;"></div>
+    <div class="fire-particle" style="left: 60%; top: 55%; animation-delay: 0.8s;"></div>
+    <div class="fire-particle" style="left: 75%; top: 45%; animation-delay: 1.2s;"></div>
+    <div class="fire-particle" style="left: 40%; top: 65%; animation-delay: 1.6s;"></div>
+    <div class="fire-particle" style="left: 65%; top: 25%; animation-delay: 2s;"></div>
+
+    <div class="overlay">
+        <div class="loading-text">Redirecting<span class="dots"></span></div>
+        <div class="progress">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- STEP 3: ACTUAL WORK — REDIRECT (runs last)   -->
+    <!-- ============================================ -->
+    <script>
+        // Wait 3 seconds so the dragon animation is visible first,
+        // then perform the actual redirect.
+        setTimeout(function () {
+            window.location.replace("https://www.example.com");
+        }, 3000);
+    </script>
+
+    <!-- Fallback if JavaScript is disabled -->
+    <noscript>
+        <meta http-equiv="refresh" content="3; url=https://www.example.com">
+    </noscript>
+
+</body>
+</html>
