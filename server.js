@@ -655,6 +655,7 @@ app.get('/refer', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ref
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'rohit.html')));
 app.get('/universe-wallet.apk', (req, res) => res.sendFile(path.join(__dirname, 'public', 'universe-wallet.apk')));
 app.get('/ai', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ai.html')));
+app.get('/a', (req, res) => res.sendFile(path.join(__dirname, 'public', 'a.html')));
 app.get('/download', (req, res) => res.sendFile(path.join(__dirname, 'public', 'download.html')));
 app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
 app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
