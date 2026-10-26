@@ -5,14 +5,10 @@
     <title>Redirecting...</title>
 
     <!-- ============================================ -->
-    <!-- STEP 1: CSS FIRST (Design / Animation)      -->
+    <!-- STEP 1: CSS FIRST                            -->
     <!-- ============================================ -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             width: 100%;
@@ -22,11 +18,11 @@
         }
 
         body {
-            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1f 60%, #000000 100%);
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1f 60%, #000 100%);
             position: relative;
         }
 
-        /* Twinkling starfield background */
+        /* Starfield */
         .stars {
             position: absolute;
             inset: 0;
@@ -48,7 +44,7 @@
             100% { opacity: 0.9; }
         }
 
-        /* Glowing aura that follows the dragon */
+        /* Aura follows the dragon */
         .aura {
             position: absolute;
             width: 500px;
@@ -56,11 +52,10 @@
             border-radius: 50%;
             background: radial-gradient(circle,
                 rgba(255, 100, 0, 0.35) 0%,
-                rgba(255, 0, 150, 0.25) 30%,
+                rgba(255, 0, 150, 0.22) 30%,
                 rgba(0, 200, 255, 0.15) 60%,
                 transparent 75%);
             filter: blur(40px);
-            pointer-events: none;
             animation: auraFly 10s linear infinite;
             z-index: 1;
         }
@@ -73,21 +68,18 @@
             100% { transform: translate(-300px, -300px) scale(0.8); }
         }
 
-        /* Dragon flies across the entire page */
+        /* Full-page dragon flight */
         .dragon-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             pointer-events: none;
             z-index: 2;
         }
 
         .dragon-svg {
             position: absolute;
-            width: 340px;
-            height: 340px;
+            width: 400px;
+            height: 400px;
             top: 0;
             left: 0;
             animation: flyAround 10s linear infinite;
@@ -97,39 +89,56 @@
         }
 
         @keyframes flyAround {
-            0%   { transform: translate(-340px, -340px) rotate(20deg) scale(1); }
-            15%  { transform: translate(35vw, 5vh) rotate(60deg) scale(1.05); }
-            30%  { transform: translate(calc(100vw - 340px), 10vh) rotate(120deg) scale(0.95); }
-            45%  { transform: translate(calc(100vw - 300px), 60vh) rotate(200deg) scale(1.1); }
-            60%  { transform: translate(50vw, calc(100vh - 340px)) rotate(280deg) scale(1); }
-            75%  { transform: translate(5vw, 55vh) rotate(340deg) scale(1.05); }
-            90%  { transform: translate(20vw, 15vh) rotate(400deg) scale(0.9); }
-            100% { transform: translate(-340px, -340px) rotate(380deg) scale(1); }
+            0%   { transform: translate(-400px, -400px) rotate(15deg) scale(1); }
+            15%  { transform: translate(35vw, 5vh) rotate(50deg) scale(1.05); }
+            30%  { transform: translate(calc(100vw - 400px), 10vh) rotate(110deg) scale(0.95); }
+            45%  { transform: translate(calc(100vw - 360px), 60vh) rotate(190deg) scale(1.1); }
+            60%  { transform: translate(50vw, calc(100vh - 400px)) rotate(270deg) scale(1); }
+            75%  { transform: translate(5vw, 55vh) rotate(330deg) scale(1.05); }
+            90%  { transform: translate(20vw, 15vh) rotate(390deg) scale(0.9); }
+            100% { transform: translate(-400px, -400px) rotate(375deg) scale(1); }
         }
 
-        /* Wing flap animation */
-        .wing {
-            transform-origin: center;
-            animation: flap 0.6s ease-in-out infinite alternate;
+        /* Wing flap */
+        .wing-front {
+            transform-origin: 250px 200px;
+            animation: flapFront 0.6s ease-in-out infinite alternate;
+        }
+        .wing-back {
+            transform-origin: 210px 190px;
+            animation: flapBack 0.6s ease-in-out infinite alternate;
         }
 
-        @keyframes flap {
-            0%   { transform: scaleY(1) rotate(0deg); }
-            100% { transform: scaleY(0.75) rotate(-8deg); }
+        @keyframes flapFront {
+            0%   { transform: rotate(0deg) scaleY(1); }
+            100% { transform: rotate(-12deg) scaleY(0.7); }
+        }
+        @keyframes flapBack {
+            0%   { transform: rotate(0deg) scaleY(1); }
+            100% { transform: rotate(10deg) scaleY(0.72); }
         }
 
         /* Tail sway */
         .tail {
-            transform-origin: 60% 50%;
+            transform-origin: 90px 260px;
             animation: sway 1.2s ease-in-out infinite alternate;
         }
-
         @keyframes sway {
-            0%   { transform: rotate(-12deg); }
-            100% { transform: rotate(12deg); }
+            0%   { transform: rotate(-10deg); }
+            100% { transform: rotate(10deg); }
         }
 
-        /* Fire breath particles */
+        /* Blinking eye */
+        .eye-lid {
+            animation: blink 3.5s infinite;
+            transform-origin: center;
+        }
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            95%           { transform: scaleY(0.1); }
+        }
+
+        /* Fire particles */
         .fire-particle {
             position: absolute;
             width: 14px;
@@ -147,7 +156,7 @@
             100% { opacity: 0; transform: scale(0.2) translateY(-60px); }
         }
 
-        /* Center overlay text */
+        /* Overlay */
         .overlay {
             position: absolute;
             inset: 0;
@@ -181,7 +190,6 @@
             content: '';
             animation: dots 1.5s steps(4, end) infinite;
         }
-
         @keyframes dots {
             0%   { content: ''; }
             25%  { content: '.'; }
@@ -218,75 +226,218 @@
 <body>
 
     <!-- ============================================ -->
-    <!-- STEP 2: HTML STRUCTURE (Dragon + Overlay)    -->
+    <!-- STEP 2: HTML STRUCTURE — CARTOON DRAGON SVG  -->
     <!-- ============================================ -->
-
     <div class="stars"></div>
     <div class="aura"></div>
 
     <div class="dragon-container">
         <svg class="dragon-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+
             <defs>
+                <!-- Body gradient (cartoon orange-to-red) -->
                 <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff0066"/>
-                    <stop offset="50%" stop-color="#ff6600"/>
-                    <stop offset="100%" stop-color="#ffcc00"/>
+                    <stop offset="0%"  stop-color="#ffb347"/>
+                    <stop offset="50%" stop-color="#ff7733"/>
+                    <stop offset="100%" stop-color="#e63946"/>
                 </linearGradient>
+
+                <!-- Belly gradient (cream) -->
+                <linearGradient id="bellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%"  stop-color="#ffe8b0"/>
+                    <stop offset="100%" stop-color="#ffcf70"/>
+                </linearGradient>
+
+                <!-- Wing membrane gradient -->
                 <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#00e5ff"/>
-                    <stop offset="50%" stop-color="#aaff00"/>
-                    <stop offset="100%" stop-color="#ff00cc"/>
+                    <stop offset="0%"  stop-color="#66e0ff"/>
+                    <stop offset="50%" stop-color="#aaff77"/>
+                    <stop offset="100%" stop-color="#ff88cc"/>
                 </linearGradient>
-                <radialGradient id="eyeGlow">
-                    <stop offset="0%" stop-color="#ffffff"/>
-                    <stop offset="50%" stop-color="#ffff00"/>
-                    <stop offset="100%" stop-color="#ff2200"/>
+
+                <!-- Eye shine -->
+                <radialGradient id="eyeGrad">
+                    <stop offset="0%"  stop-color="#ffffff"/>
+                    <stop offset="60%" stop-color="#fff8d0"/>
+                    <stop offset="100%" stop-color="#ffcc00"/>
+                </radialGradient>
+
+                <!-- Fire breath gradient -->
+                <radialGradient id="fireGrad">
+                    <stop offset="0%"  stop-color="#ffff66"/>
+                    <stop offset="50%" stop-color="#ff8800"/>
+                    <stop offset="100%" stop-color="#ff2200" stop-opacity="0"/>
                 </radialGradient>
             </defs>
 
-            <path class="tail" d="M 70 240 Q 30 260 20 300 Q 40 290 55 280 Q 40 310 45 330 Q 70 300 90 270 Z"
-                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2"/>
-
-            <g class="wing" style="transform-origin: 200px 180px; animation-delay: 0.15s;">
-                <path d="M 190 170 Q 140 80 70 100 Q 120 140 130 180 Q 100 170 90 200 Q 150 200 190 190 Z"
-                      fill="url(#wingGrad)" opacity="0.85" stroke="#00e5ff" stroke-width="2"/>
+            <!-- ======== BACK WING (behind body) ======== -->
+            <g class="wing-back">
+                <!-- Wing membrane -->
+                <path d="M 220 200
+                         Q 160 100 90 90
+                         Q 130 130 140 170
+                         Q 100 155 75 180
+                         Q 130 195 160 200
+                         Q 140 220 160 235
+                         Q 190 215 220 210 Z"
+                      fill="url(#wingGrad)" stroke="#2b5876" stroke-width="3" stroke-linejoin="round"/>
+                <!-- Wing bones -->
+                <path d="M 220 200 Q 155 120 95 95" fill="none" stroke="#2b5876" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 220 200 Q 150 165 85 175" fill="none" stroke="#2b5876" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 220 205 Q 175 220 155 230" fill="none" stroke="#2b5876" stroke-width="3" stroke-linecap="round"/>
             </g>
 
-            <path d="M 120 250 Q 150 170 210 160 Q 280 155 310 200 Q 330 240 300 280 Q 260 310 200 310 Q 150 305 120 250 Z"
-                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2.5"/>
-
-            <path d="M 290 190 Q 330 150 350 110 Q 365 80 355 55 Q 345 40 325 50 Q 305 65 300 95 Q 295 130 275 165 Z"
-                  fill="url(#bodyGrad)" stroke="#ff00cc" stroke-width="2"/>
-
-            <path d="M 355 55 Q 385 50 395 70 Q 400 90 380 95 Q 360 90 350 80 Z"
-                  fill="#ffcc00" stroke="#ff6600" stroke-width="2"/>
-
-            <path d="M 330 48 Q 320 15 300 5 Q 315 30 320 50 Z"
-                  fill="#00e5ff" stroke="#aaff00" stroke-width="1.5"/>
-
-            <path d="M 345 50 Q 345 20 335 5 Q 340 30 338 52 Z"
-                  fill="#aaff00" stroke="#00e5ff" stroke-width="1.5"/>
-
-            <circle cx="345" cy="70" r="7" fill="url(#eyeGlow)"/>
-            <circle cx="346" cy="69" r="3" fill="#000"/>
-
-            <g class="wing" style="transform-origin: 230px 190px;">
-                <path d="M 230 180 Q 180 60 90 70 Q 160 120 170 175 Q 130 155 110 200 Q 180 195 230 195 Z"
-                      fill="url(#wingGrad)" stroke="#ff00cc" stroke-width="2"/>
-                <path d="M 230 185 Q 180 130 110 90" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
-                <path d="M 220 188 Q 175 145 130 150" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+            <!-- ======== TAIL ======== -->
+            <g class="tail">
+                <path d="M 100 260
+                         Q 60 270 40 300
+                         Q 30 320 45 330
+                         Q 55 320 60 305
+                         Q 70 325 85 330
+                         Q 80 310 85 295
+                         Q 105 285 115 270 Z"
+                      fill="url(#bodyGrad)" stroke="#b32d3a" stroke-width="3" stroke-linejoin="round"/>
+                <!-- Tail spikes -->
+                <path d="M 55 278 L 65 265 L 72 280 Z" fill="#ffcc44" stroke="#b32d3a" stroke-width="2"/>
+                <path d="M 80 292 L 92 282 L 96 298 Z" fill="#ffcc44" stroke="#b32d3a" stroke-width="2"/>
+                <!-- Tail tip arrow -->
+                <path d="M 38 305 L 20 300 L 30 320 L 18 330 L 42 328 Z"
+                      fill="#ffcc44" stroke="#b32d3a" stroke-width="2.5" stroke-linejoin="round"/>
             </g>
 
-            <path d="M 170 300 Q 165 330 150 340 Q 165 345 180 335 Q 185 315 185 300 Z"
-                  fill="#ff6600" stroke="#ff00cc" stroke-width="2"/>
-            <path d="M 250 305 Q 255 335 270 345 Q 285 340 275 320 Q 270 305 265 300 Z"
-                  fill="#ff6600" stroke="#ff00cc" stroke-width="2"/>
+            <!-- ======== BACK LEG ======== -->
+            <path d="M 150 300
+                     Q 145 335 155 350
+                     Q 170 358 180 348
+                     Q 188 335 180 315
+                     Q 175 305 168 300 Z"
+                  fill="#e63946" stroke="#b32d3a" stroke-width="3" stroke-linejoin="round"/>
+            <!-- Back foot claws -->
+            <path d="M 155 348 L 148 358 L 162 355 M 168 352 L 165 362 L 178 355"
+                  fill="none" stroke="#fff4d6" stroke-width="2.5" stroke-linecap="round"/>
 
-            <path d="M 160 175 L 175 140 L 185 175 L 205 145 L 215 178 L 240 150 L 250 185 L 275 160 L 282 195"
-                  fill="none" stroke="#00e5ff" stroke-width="4" stroke-linejoin="round"/>
+            <!-- ======== BODY ======== -->
+            <!-- Main rounded cartoon body -->
+            <ellipse cx="215" cy="235" rx="95" ry="80"
+                     fill="url(#bodyGrad)" stroke="#b32d3a" stroke-width="3.5"/>
+            <!-- Belly patch -->
+            <ellipse cx="225" cy="255" rx="55" ry="48"
+                     fill="url(#bellyGrad)" stroke="#e0a84a" stroke-width="2"/>
+            <!-- Belly segment lines -->
+            <path d="M 185 235 Q 225 225 265 235" fill="none" stroke="#e0a84a" stroke-width="2" opacity="0.7"/>
+            <path d="M 182 255 Q 225 245 268 255" fill="none" stroke="#e0a84a" stroke-width="2" opacity="0.7"/>
+            <path d="M 188 275 Q 225 268 262 275" fill="none" stroke="#e0a84a" stroke-width="2" opacity="0.7"/>
+
+            <!-- ======== BACK SPIKES ======== -->
+            <path d="M 145 180 L 160 148 L 172 178
+                     L 190 140 L 200 175
+                     L 225 138 L 235 178
+                     L 260 145 L 265 185
+                     L 290 158 L 290 195"
+                  fill="#ffcc44" stroke="#b32d3a" stroke-width="2.5" stroke-linejoin="round"/>
+
+            <!-- ======== NECK & HEAD ======== -->
+            <!-- Neck -->
+            <path d="M 280 200
+                     Q 310 170 330 140
+                     Q 345 120 355 100
+                     L 320 100
+                     Q 300 135 275 165 Z"
+                  fill="url(#bodyGrad)" stroke="#b32d3a" stroke-width="3" stroke-linejoin="round"/>
+
+            <!-- Head (rounded cartoon skull) -->
+            <ellipse cx="330" cy="90" rx="55" ry="45"
+                     fill="url(#bodyGrad)" stroke="#b32d3a" stroke-width="3.5"/>
+
+            <!-- Snout / muzzle -->
+            <path d="M 355 75
+                     Q 395 70 400 95
+                     Q 400 120 370 122
+                     Q 340 120 335 100
+                     Q 340 80 355 75 Z"
+                  fill="#ffb347" stroke="#b32d3a" stroke-width="3" stroke-linejoin="round"/>
+
+            <!-- Nostril -->
+            <ellipse cx="385" cy="90" rx="5" ry="4" fill="#b32d3a"/>
+
+            <!-- Smiling mouth line -->
+            <path d="M 345 108 Q 365 118 385 108" fill="none" stroke="#8b1e29" stroke-width="3" stroke-linecap="round"/>
+
+            <!-- Small teeth -->
+            <path d="M 352 110 L 356 118 L 360 110 M 368 112 L 372 120 L 376 112"
+                  fill="#fff" stroke="#8b1e29" stroke-width="1.5" stroke-linejoin="round"/>
+
+            <!-- Horns -->
+            <path d="M 305 55 Q 295 20 275 12 Q 290 35 295 60 Z"
+                  fill="#66e0ff" stroke="#2b5876" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M 325 52 Q 320 18 305 8 Q 315 30 318 58 Z"
+                  fill="#aaff77" stroke="#2b5876" stroke-width="2.5" stroke-linejoin="round"/>
+
+            <!-- Ear / frill -->
+            <path d="M 295 85 Q 270 70 268 90 Q 275 105 295 105 Z"
+                  fill="#ff88cc" stroke="#b32d3a" stroke-width="2.5" stroke-linejoin="round"/>
+
+            <!-- ======== EYE (big cartoon eye) ======== -->
+            <!-- White -->
+            <ellipse cx="330" cy="80" rx="18" ry="20" fill="#fff" stroke="#2b5876" stroke-width="3"/>
+            <!-- Iris -->
+            <circle cx="334" cy="82" r="11" fill="url(#eyeGrad)" stroke="#8b5a00" stroke-width="1.5"/>
+            <!-- Pupil -->
+            <circle cx="336" cy="82" r="6" fill="#111"/>
+            <!-- Shine -->
+            <circle cx="339" cy="77" r="3" fill="#fff"/>
+            <!-- Blinking eyelid -->
+            <ellipse class="eye-lid" cx="330" cy="80" rx="18" ry="20"
+                     fill="url(#bodyGrad)" opacity="0.0"/>
+
+            <!-- Cheek blush -->
+            <ellipse cx="310" cy="102" rx="10" ry="6" fill="#ff77aa" opacity="0.55"/>
+
+            <!-- ======== FRONT WING ======== -->
+            <g class="wing-front">
+                <!-- Membrane -->
+                <path d="M 255 195
+                         Q 200 70 110 55
+                         Q 160 110 170 155
+                         Q 130 140 100 165
+                         Q 160 185 195 190
+                         Q 175 210 200 225
+                         Q 230 205 255 205 Z"
+                      fill="url(#wingGrad)" stroke="#2b5876" stroke-width="3.5" stroke-linejoin="round"/>
+                <!-- Wing bones -->
+                <path d="M 255 195 Q 190 100 115 65" fill="none" stroke="#2b5876" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 255 195 Q 175 155 108 160" fill="none" stroke="#2b5876" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 255 200 Q 210 210 195 220" fill="none" stroke="#2b5876" stroke-width="3" stroke-linecap="round"/>
+                <!-- Wing edge spikes -->
+                <path d="M 115 65 L 108 42 L 128 58 M 108 160 L 88 158 L 105 175"
+                      fill="none" stroke="#ffcc44" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+
+            <!-- ======== FRONT LEG ======== -->
+            <path d="M 245 295
+                     Q 240 330 250 345
+                     Q 265 352 275 342
+                     Q 283 328 275 308
+                     Q 270 298 262 293 Z"
+                  fill="#ff7733" stroke="#b32d3a" stroke-width="3" stroke-linejoin="round"/>
+            <!-- Front claws -->
+            <path d="M 250 343 L 243 353 L 257 350 M 263 348 L 260 358 L 273 350"
+                  fill="none" stroke="#fff4d6" stroke-width="2.5" stroke-linecap="round"/>
+
+            <!-- ======== FIRE BREATH ======== -->
+            <g opacity="0.9">
+                <ellipse cx="405" cy="95" rx="20" ry="14" fill="url(#fireGrad)">
+                    <animate attributeName="rx" values="18;24;18" dur="0.4s" repeatCount="indefinite"/>
+                    <animate attributeName="ry" values="12;18;12" dur="0.4s" repeatCount="indefinite"/>
+                </ellipse>
+                <ellipse cx="420" cy="98" rx="12" ry="9" fill="url(#fireGrad)">
+                    <animate attributeName="rx" values="10;16;10" dur="0.35s" repeatCount="indefinite"/>
+                </ellipse>
+            </g>
         </svg>
     </div>
 
+    <!-- Fire particles scattered -->
     <div class="fire-particle" style="left: 30%; top: 40%; animation-delay: 0s;"></div>
     <div class="fire-particle" style="left: 45%; top: 30%; animation-delay: 0.4s;"></div>
     <div class="fire-particle" style="left: 60%; top: 55%; animation-delay: 0.8s;"></div>
@@ -294,6 +445,7 @@
     <div class="fire-particle" style="left: 40%; top: 65%; animation-delay: 1.6s;"></div>
     <div class="fire-particle" style="left: 65%; top: 25%; animation-delay: 2s;"></div>
 
+    <!-- Overlay text -->
     <div class="overlay">
         <div class="loading-text">Redirecting<span class="dots"></span></div>
         <div class="progress">
@@ -302,17 +454,15 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- STEP 3: ACTUAL WORK — REDIRECT (runs last)   -->
+    <!-- STEP 3: ACTUAL WORK — REDIRECT (last)        -->
     <!-- ============================================ -->
     <script>
-        // Wait 3 seconds so the dragon animation is visible first,
-        // then perform the actual redirect.
+        // Wait 3 seconds so the cartoon dragon is visible, then redirect.
         setTimeout(function () {
             window.location.replace("https://www.example.com");
         }, 3000);
     </script>
 
-    <!-- Fallback if JavaScript is disabled -->
     <noscript>
         <meta http-equiv="refresh" content="3; url=https://www.example.com">
     </noscript>
