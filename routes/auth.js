@@ -735,8 +735,8 @@ router.post('/register', async (req, res) => {
             return res.status(200).json({ success: false, message: `Missing Fields: ${missing.join(', ')}` });
         }
 
-        if (!/^[987][0-9]{9}$/.test(mobile)) {
-            return res.status(200).json({ success: false, message: 'Invalid mobile number. Mobile must start with 9, 8, or 7.' });
+        if (!/^[9876][0-9]{9}$/.test(mobile)) {
+            return res.status(200).json({ success: false, message: 'Invalid mobile number. Mobile must start with 9, 8, or 7 or 6.' });
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
